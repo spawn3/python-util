@@ -4,7 +4,13 @@
 
 def dict_append(d, k, v):
     if k not in d:
-        d[k] = [v]
-    else:
-        d[k].append(v)
+        d[k] = []
+    d[k].append(v)
+    return d
+
+
+def dict_inc(d, k, v):
+    if k not in d:
+        d[k] = 0
+    d[k] += v
     return d
