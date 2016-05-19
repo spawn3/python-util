@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 
 def parts(l, n):
     n = max(1, n)

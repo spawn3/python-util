@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import types
 import math
 import pprint
 
@@ -61,3 +62,12 @@ class C(object):
     def __init__(self, number):
         # super(C, self).__init__()
         C.number = number
+
+
+def test_metaclass():
+    class Foo(object):
+        bar = True
+
+    type('Foo', (), {'bar': True})
+
+

@@ -10,18 +10,28 @@ class DataObject(object):
     object cahced by app
     '''
     
-    def __init__(self, key, data_source, expire):
+    def __init__(self, key, data_source, expire=600):
         self.key = key
         self.expire = expire
         self.data_source = data_source
         self.last_visit_atime = time.time()
-        self.value = None
+        self._value = None
 
     def is_expired(self):
         return time.time() - self.last_visit_atime > self.expire
 
     def update_visit_time(self):
         self.last_visit_atime = time.time()
+
+    @property
+    def value(self):
+        if self._value is None or self.is_expired():
+            self._value = self.data_source()
+            self.update_visit_time()
+        return self._value
+
+    def __repr__(self):
+        return '<key: %s, value: %s, expire: %d, fn: %s>' % (self.key, self.value, self.expire, self.data_source)
 
 
 class ObjectCache(object):
@@ -33,7 +43,7 @@ class ObjectCache(object):
     _data = {}
 
     @staticmethod
-    def create(data_source, name=None, expire=600):
+    def add(data_source, name=None, expire=600):
         """
         args:
             data_source: load data, a callable object
@@ -58,25 +68,39 @@ class ObjectCache(object):
         else:
             obj_key = uuid.uuid4()
 
-        obj_data = DataObject(obj_key, data_source, expire)
-        ObjectCache._data[obj_key] = obj_data
-
+        ObjectCache._data[obj_key] = DataObject(obj_key, data_source, expire)
         return obj_key
 
     @staticmethod
-    def get(obj_key, *args, **kwargs):
+    def delete(obj_key):
+        try:
+            del ObjectCache._data[obj_key]
+        except:
+            pass
+
+    @staticmethod
+    def get(obj_key):
         if obj_key not in ObjectCache._data:
             raise Exception("%s is invalid key" % obj_key)
 
-        obj_data = ObjectCache._data[obj_key]
-
-        if obj_data.value is None or obj_data.is_expired():
-            obj_data.value = obj_data.data_source(*args, **kwargs)
-            obj_data.update_visit_time()
-
-        return obj_data.value
+        obj_data = ObjectCache._data.get(obj_key)
+        if isinstance(obj_data, DataObject):
+            return obj_data.value
+        return None
 
     @staticmethod
-    def remove(obj_key):
-        if obj_key in ObjectCache._data:
-            ObjectCache._data[obj_key].value = None
+    def scan():
+        for k, v in ObjectCache._data.iteritems():
+            print k, v
+
+
+if __name__ == '__main__':
+    def data_source():
+        return [1, 2, 3]
+
+    ObjectCache.add(data_source, 'name1')
+    print ObjectCache.get('name1')
+    ObjectCache.scan()
+    ObjectCache.delete('name1')
+    ObjectCache.delete('name2')
+    ObjectCache.scan()

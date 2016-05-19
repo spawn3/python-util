@@ -14,3 +14,5 @@ def dict_inc(d, k, v):
         d[k] = 0
     d[k] += v
     return d
+
+dict()
