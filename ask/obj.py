@@ -3,12 +3,14 @@
 
 import types
 import math
-import pprint
+from pprint import pprint
+
+# All Python objects have the folling three characteristics: an identity, a type and a value.
 
 
 def test_1():
     o = object()
-    pprint.pprint(dir(o))
+    pprint(dir(o))
     # [
     # '__doc__',
     # '__class__',
@@ -71,3 +73,4 @@ def test_metaclass():
     type('Foo', (), {'bar': True})
 
 
+pprint(globals())

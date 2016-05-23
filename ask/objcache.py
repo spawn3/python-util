@@ -89,6 +89,10 @@ class ObjectCache(object):
         return None
 
     @staticmethod
+    def exists(name):
+        return name and name in ObjectCache._data
+
+    @staticmethod
     def scan():
         for k, v in ObjectCache._data.iteritems():
             print k, v
