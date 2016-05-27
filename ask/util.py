@@ -1,21 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import datetime
 import sys
-from pprint import pprint
+from json import JSONEncoder
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-import pdb
-import profile
-import pyclbr
-
-import importlib
 
 # relative import
-from . import mc
-import obj
 
 
 def parts(l, n):
@@ -38,3 +32,11 @@ class A(object):
 
 globals()['z'] = 7
 print 'z =', z
+
+
+class MongoEncoder(JSONEncoder):
+    def default(self, obj, **kwargs):
+        if isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        else:
+            return JSONEncoder.default(obj, **kwargs)

@@ -1,0 +1,5 @@
+#!/usr/local/bin/ipython --profile=pysh
+
+
+status = 'status'
+!echo "{status}"

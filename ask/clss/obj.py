@@ -25,9 +25,9 @@ def test_1():
 
 
 class A(object):
-    def __new__(cls, *args, **kwargs):
-        print args
-        print kwargs
+    #def __new__(cls, *args, **kwargs):
+    #    print args
+    #    print kwargs
 
     def __init__(self, radius):
         self.radius = radius
@@ -73,4 +73,9 @@ def test_metaclass():
     type('Foo', (), {'bar': True})
 
 
-pprint(globals())
+# pprint(globals())
+
+if __name__ == '__main__':
+    a = A(1)
+    print a.area
+

@@ -7,6 +7,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.httpclient
 import tornado.gen
+from tornado.httpserver import HTTPServer
 
 
 class BaseHandler(tornado.web.RequestHandler):

@@ -1,4 +1,8 @@
-print '...import package right'
+# from .. import util
 
+from b import (BA)
+from exceptions import (AError, BError)
 
-from .. import util
+__all__ = ['BA', 'AError', 'BError']
+
+print '...import package %s' % __name__

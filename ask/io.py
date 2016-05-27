@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-import socket
+import redis
 
 
 def test_file():
