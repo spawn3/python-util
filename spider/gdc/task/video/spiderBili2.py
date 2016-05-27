@@ -4,22 +4,23 @@ import os, re, copy
 from pymongo import MongoClient
 from datetime import timedelta
 from datetime import datetime
-from webcrawl.request import requGet
-from webcrawl.request import requPost
-from webcrawl.request import getHtmlNodeContent
-from webcrawl.request import getXmlNodeContent
-from webcrawl.task import retry
-from webcrawl.task import index
-from webcrawl.task import initflow
-from webcrawl.request import getJsonNodeContent
-from webcrawl.task import store
-from webcrawl.task import timelimit
-from webcrawl.task import next
-from webcrawl.request import ensureurl
-from webcrawl.request import parturl
-from model.setting import withData, datacfg
+from webcrawl.handleRequest import requGet
+from webcrawl.handleRequest import requPost
+from webcrawl.handleRequest import getHtmlNodeContent
+from webcrawl.handleRequest import getXmlNodeContent
+from webcrawl.work import retry
+from webcrawl.work import index
+from webcrawl.work import initflow
+from webcrawl.handleRequest import getJsonNodeContent
+from webcrawl.work import store
+from webcrawl.work import timelimit
+from webcrawl.work import next
+from webcrawl.handleRequest import ensureurl
+from webcrawl.handleRequest import parturl
 from videospider import Data
 from videospider import TIMEOUT
+from videospider import withDB
+from videospider import DBCONN, RDB, WDB, initDB
 from videospider import SpiderVideoOrigin
 
 try:
@@ -28,8 +29,7 @@ try:
     # conn = MongoClient(host='localhost', port=27019)
     conn = MongoClient('localhost')
 except:
-    # conn = MongoClient('localhost')
-    pass
+    conn = MongoClient('localhost')
 #_print, logger = logprint(modulename(__file__), modulepath(__file__))
 
 bili_re = re.compile('duration: *\'.*\'')
@@ -48,8 +48,10 @@ class SpiderBilibili(SpiderVideoOrigin):
     """
 
     def __init__(self, worknum=6, queuetype='P', worktype='COROUTINE', timeout=-1, tid=0):
-        super(SpiderBilibili, self).__init__(worknum=worknum, queuetype=queuetype, worktype=worktype, timeout=timeout, tid=tid)
+        super(SpiderBilibili, self).__init__(worknum=worknum, queuetype=queuetype, worktype=worktype, timeout=timeout)
+        self.tid = tid
         self.clsname = self.__class__.__name__
+        initDB()
         self.headers = {"Accept":"application/json, text/javascript, */*; q=0.01",
             "Accept-Encoding":"gzip, deflate, sdch",
             "Accept-Language":"en-US,en;q=0.8",
@@ -61,18 +63,13 @@ class SpiderBilibili(SpiderVideoOrigin):
         self.end = datetime.now()
         self.begin = self.end - timedelta(days=7)
 
-#    @store(withData(datacfg.W), Data.insert, update=True, method='MANY')
+    @store(withDB(WDB, conn), Data.insert, update=True, method='MANY')
     @timelimit(3)
     def fetchDetail(self, url, additions={}, timeout=TIMEOUT, implementor=None):
         cat = additions['cat']
 
-        if 'mobile' in url:
-            outid = url[url.rindex('/')+1:url.rindex('.')].replace('av', '')
-        else:
-            outid = url.strip('/').split('/')[-1].replace('av', '')
-            url = 'http://www.bilibili.com/mobile/video/av%s.html' % outid
-
-        page_result = requGet('http://app.bilibili.com/bangumi/avseason/%s.ver' % outid, dirtys=[('seasonJsonCallback({', '{'), ('});', '}')], timeout=TIMEOUT, format='JSON')
+        outid = url[url.rindex('/')+1:url.rindex('.')].replace('av', '')
+        page_result = requGet('http://app.bilibili.com/bangumi/avseason/%s.ver' % outid, timeout=TIMEOUT, format='JSON')
         # if not page_result['code'] == '0':
         #     www_result = requGet(url[:url.rindex('.')].replace('/mobile', '') + '/', timeout=TIMEOUT, format='HTML')
 
@@ -125,39 +122,17 @@ class SpiderBilibili(SpiderVideoOrigin):
             page_id=page_id, parent_page_id=parent_page_id,
             atime=atime, tid=self.tid)
 
-        pages = wap_result.findall('.//div[@id="part_list"]//li')
-        if pages:
-            first = getHtmlNodeContent(pages[0], {'ATTR':'page'})
-            parent_page_id = hash('http://www.bilibili.com/mobile/video/av%s.html#page=%s' % (outid, first))
-            for one in pages:
-                pagenum = getHtmlNodeContent(one, {'ATTR':'page'})
-                data_result = requGet('http://www.bilibili.com/m/html5?aid=%s&page=%s' % (outid, pagenum), headers=headers, timeout=TIMEOUT, format='JSON')
-                page_data = copy.deepcopy(data)
-                page_data['name'] = getHtmlNodeContent(one.find('.//a'), 'TEXT')
-                try:
-                    page_data['url'] = data_result['src']
-                except:
-                    page_data['url'] = ''
-                page_data['page_url'] = 'http://www.bilibili.com/mobile/video/av%s.html#page=%s' % (outid, pagenum)
-                page_data['page_id'] = hash(page_data['page_url'])
-                page_data['parent_page_id'] = parent_page_id
-                page_data['snum'] = int(pagenum)
-                page_data['cover'] = data_result.get('img')
-                yield page_data
-        elif page_result['code'] == 0:
+        if page_result['code'] == 0:
             first = page_result['result']['episodes'][-1]['av_id']
             first = page_result['result']['episodes'][-1]['danmaku'] if first == outid else first
             parent_page_id = hash('http://www.bilibili.com/mobile/video/av%s.html' % first)
             for one in page_result['result']['episodes']:
                 aid = one['danmaku'] if one['av_id'] == outid else one['av_id']
-                data_result = requGet('http://www.bilibili.com/m/html5?aid=%s&page=%s' % (one['av_id'], one['page']), headers=headers, timeout=TIMEOUT, format='JSON')
+                data_result = requGet('http://www.bilibili.com/m/html5?aid=%s' % one['av_id'], headers=headers, timeout=TIMEOUT, format='JSON')
                 page_data = copy.deepcopy(data)
-                try:
-                    page_data['url'] = data_result['src']
-                except:
-                    page_data['url'] = ''
-                page_data['page_url'] = 'http://www.bilibili.com/mobile/video/av%s.html#page=%s' % (one['av_id'], one['page'])
-                page_data['page_id'] = hash('http://www.bilibili.com/mobile/video/av%s.html' % aid)
+                page_data['url'] = data_result['src']
+                page_data['page_url'] = 'http://www.bilibili.com/mobile/video/av%s.html' % aid
+                page_data['page_id'] = hash(page_data['page_url'])
                 page_data['parent_page_id'] = parent_page_id
                 if page_data['page_id'] == page_data['parent_page_id']:
                     page_data['desc'] = page_result['result']['evaluate']
@@ -167,12 +142,11 @@ class SpiderBilibili(SpiderVideoOrigin):
                     page_data['snum'] = int(one['index'])
                 except:
                     page_data['snum'] = len(page_result['result']['episodes'])
-                page_data['name'] = one.get('index_title') or additions.get('name')
+                page_data['name'] = one.get('index_title')
                 page_data['atime'] = datetime.strptime(one['update_time'][:one['update_time'].rindex('.')], '%Y-%m-%d %H:%M:%S')
                 page_data['cover'] = one['cover']
                 yield page_data
-        else:
-            yield data
+
 
     @next(fetchDetail)
     @timelimit(20)
@@ -210,7 +184,7 @@ class SpiderBilibili(SpiderVideoOrigin):
 if __name__ == '__main__':
 
     print 'start'
-    spider = SpiderBilibili(worknum=6, queuetype='P', worktype='THREAD')
-    spider.fetchDatas('www', 0, 'http://www.bilibili.com/html/js/types.json')
+    spider = SpiderBilibili(worknum=6, queuetype='P', worktype='COROUTINE')
+    spider.fetchDatas('www', 'http://www.bilibili.com/html/js/types.json')
     spider.statistic()
     print 'end'

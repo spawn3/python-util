@@ -42,7 +42,7 @@ class SpiderMoe(SpiderAudioOrigin):
         self.clsname = self.__class__.__name__
         self.api_key = '3e304078c769743445311c894eb221d90566aa33b'
 
-#    @store(withData(datacfg.W), Data.insert, update=True, method='MANY')
+    @store(withData(datacfg.W), Data.insert, update=True, method='MANY')
     @timelimit(3)
     def fetchDetail(self, url, additions={}, timeout=TIMEOUT, implementor=None):
         result = requGet(url, timeout=timeout, format='JSON')
@@ -81,7 +81,6 @@ class SpiderMoe(SpiderAudioOrigin):
                         src=src, host=host, page_url=page_url,
                         page_id=page_id, parent_page_id=parent_page_id,
                         atime=atime, tid=self.tid)
-                    print data
                     yield data
 
     @next(fetchDetail)

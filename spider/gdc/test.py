@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # coding=utf-8
 from task.audio.spiderMengfou import SpiderMoe
+from task.audio.spiderWangyi import Spider163
+
+from task.comic.spiderManjia import SpiderDmzj
+
+from task.video.spiderAcfun import SpiderAcfun
+from task.video.spiderAiqiyi import SpiderIqiyi
+from task.video.spiderBili import SpiderBilibili
+from task.video.spiderYouku import SpiderYouku
 
 if __name__ == '__main__':
 
@@ -27,7 +35,7 @@ if __name__ == '__main__':
     # spider = SpiderBilibili(worknum=2, queuetype='R', worktype='THREAD')
     # spider.fetchDatas('www', 0, 'http://www.bilibili.com/html/js/types.json')
     # spider.statistic()
-
+    
     # spider = SpiderYouku(worknum=2, queuetype='R', worktype='THREAD')
     # spider.fetchDatas('www', 0)
     # spider.statistic()
