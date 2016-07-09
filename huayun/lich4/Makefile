@@ -6,3 +6,7 @@ centos_deps:
 	dnf install -y expect
 	dnf install -y redhat-lsb
 	dnf install -y gperftools
+
+docker:
+	dnf install -y docker
+	systemctl start docker
