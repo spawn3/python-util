@@ -1,8 +1,8 @@
 centos_deps:
-	yum install -y libtool automake autoconf
-	yum install -y flex bison
-	yum install -y openssl-devel sqlite-devel libuuid-devel libaio-devel
-	yum install -y python-paramiko
-	yum install -y expect
-	yum install -y redhat-lsb
-	yum install -y gperftools
+	dnf install -y libtool automake autoconf
+	dnf install -y flex bison
+	dnf install -y openssl-devel sqlite-devel libuuid-devel libaio-devel
+	dnf install -y python-paramiko
+	dnf install -y expect
+	dnf install -y redhat-lsb
+	dnf install -y gperftools
