@@ -237,3 +237,4 @@ add_library(lich4 SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/iscsi/src/debug.c
     ${CMAKE_CURRENT_SOURCE_DIR}/iscsi/src/cmds.c
     )
+target_link_libraries(lich4 aoi)
