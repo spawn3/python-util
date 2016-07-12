@@ -1,10 +1,15 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8)
 
+set(CMAKE_INSTALL_PREFIX "/opt/fusionstack")
 project (lich4)
+
 set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_C_FLAGS "-O3 -g -Wall -W -Werror -Werror=return-type -rdynamic -D_GNU_SOURCE -D_REENTRANT")
+set(CMAKE_CXX_FLAGS "-O3 -g -Wall -W -Werror -Werror=return-type -rdynamic -D_GNU_SOURCE -D_REENTRANT")
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/build
     ${CMAKE_CURRENT_SOURCE_DIR}/config/include
     ${CMAKE_CURRENT_SOURCE_DIR}/ylib/include
     ${CMAKE_CURRENT_SOURCE_DIR}/ynet/include
@@ -16,8 +21,8 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/sheepdog/include
     )
 add_library(lich4 SHARED
-    ${CMAKE_CURRENT_SOURCE_DIR}/config/lib/confl.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/config/lib/confy.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/build/confl.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/build/confy.c
     ${CMAKE_CURRENT_SOURCE_DIR}/config/lib/configure.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/schedule/schedule.c
@@ -237,4 +242,11 @@ add_library(lich4 SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/iscsi/src/debug.c
     ${CMAKE_CURRENT_SOURCE_DIR}/iscsi/src/cmds.c
     )
-target_link_libraries(lich4 aoi)
+target_link_libraries(lich4 aio)
+
+add_executable(lichd ${CMAKE_CURRENT_SOURCE_DIR}/lichd/src/main.c)
+target_link_libraries(lichd pthread aio crypt crypto uuid ssl rt sqlite3 m lich4)
+
+
+install(TARGETS lich4 LIBRARY DESTINATION lich/lib)
+install(TARGETS lichd RUNTIME DESTINATION lich/sbin)
