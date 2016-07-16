@@ -1,0 +1,26 @@
+---
+- name: deploy test
+  hosts: test
+  vars:
+  tasks:
+  - name: install deps
+    become: yes
+    become_method: sudo
+    dnf: name={{item}}
+    with_items:
+      - libtool
+      - automake
+      - autoconf
+      - flex
+      - bison
+      - openssl-devel
+      - libuuid-devel
+      - libaio-devel
+      - sqlite-devel
+      - lua-devel
+      - redhat-lsb
+      - expect
+      - python-paramiko
+      - gperftools
+      - vim
+      - tree
