@@ -7,7 +7,7 @@
 int main(int argc, char **argv) {
     lua_State *L;
     L = luaL_newstate();
-    luaL_openlibs(L);
+    luaL_openlib(L);
     if (luaL_dofile(L, "counter_test.lua")) {
         printf("Could not load file: %s\n", lua_tostring(L, -1));
         lua_close(L);
