@@ -1,1 +1,2 @@
-localhost
+[test]
+localhost ansible_ssh_user=gj

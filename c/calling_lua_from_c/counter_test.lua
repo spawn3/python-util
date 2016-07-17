@@ -1,3 +1,5 @@
+#!/usr/bin/env lua
+
 cmod = require("counter")
 
 c = cmod(0)

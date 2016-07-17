@@ -1,0 +1,7 @@
+---
+- name: deploy test
+  hosts: test
+  remote_user: gj
+  vars:
+  roles:
+    - {role: base}
