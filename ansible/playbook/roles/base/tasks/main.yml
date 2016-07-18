@@ -17,6 +17,11 @@
     - redhat-lsb
     - expect
     - python-paramiko
-    - gperftools
+    - java-1.8.0-openjdk
+    - gcc-c++
+    - cmake
     - vim
     - tree
+    - gperftools
+    - nmon
+    - ksnapshot
