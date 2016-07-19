@@ -142,6 +142,15 @@ remote_copy_policy.yml
         - volume01
         - volume02
 
+进程结构：
+
+- lich.rc
+  - 发起RC
+  - 查询RC状态
+  - 异步回收快照
+- lich.rcd
+  - 接收数据，重建VOLUME
+
 ### 预备工作
 
 - 创建快照时，捕获快照元数据
@@ -159,7 +168,10 @@ remote_copy_policy.yml
             s2 = create_snapshot()
             for chunk in s2.chunk_list():
 	        sync_chunk_data(s1, s2, chunk)
+            # 同步元数据
             s2.sync_metadata()
+            # 发送完成消息
+            send_ack()
 
     def sync_chunk_data(s1, s2, chunk):
         need_sync = False
@@ -214,6 +226,7 @@ remote_copy_policy.yml
 ### 容错
 
 #### 禁止master volume接收备份数据
+#### 存储层和应用层的数据一致性
 
 ## 评估
 
