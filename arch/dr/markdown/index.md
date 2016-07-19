@@ -58,6 +58,7 @@
 ## clone出的卷，能否打快照？
 
 Q: 虚机系统盘，都是从镜像里clone而出，如何备份到备用系统里？
+
 A: 先flat clone出来的卷，然后进行备份。
 
 ## 一致性卷组(Consistent Group)
