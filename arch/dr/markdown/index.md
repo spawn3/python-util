@@ -5,8 +5,6 @@
 1. [技术方案](#技术方案)
 1. [参考产品](#参考系统)
 
------
-
 # 提出问题
 
 分析在各种场景下，系统行为如何，会导致什么严重问题，如何应对？
@@ -69,7 +67,7 @@ A: 先flat clone出来的卷，然后进行备份。
 <img src='../images/multi_tier.png' style='width:640px;height=480px'>
 -->
 
------
+![可用性指数图][1]
 
 # 架构设计
 
@@ -115,8 +113,6 @@ A: 先flat clone出来的卷，然后进行备份。
 - 消重
 - 压缩
 - 加密
-
------
 
 # 技术方案
 
@@ -248,8 +244,6 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
 
 ## 评估
 
------
-
 # 参考系统
 
 - HP 3PAR Remote Copy
@@ -257,3 +251,6 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
 - VMWare VSAN
 - CEPH
 - 飞康
+
+
+  [1]: ./images/availability.jpeg "availability.jpeg"
