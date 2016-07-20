@@ -8,6 +8,7 @@
 # 提出问题
 
 分析在各种场景下，系统行为如何，会导致什么严重问题，如何应对？
+   
 
 ## 基本的备份/恢复过程
 
@@ -66,7 +67,6 @@ A: 先flat clone出来的卷，然后进行备份。
 <img src='../images/availability.jpeg' style='width:640px;height=480px'>
 <img src='../images/multi_tier.png' style='width:640px;height=480px'>
 -->
-
 
 # 架构设计
 
@@ -151,12 +151,12 @@ policy:
 
 进程结构：
 
-- lich.rc
- * 发起RC
- * 查询RC状态
- * 异步回收快照
-- lich.rcd
- * 接收数据，重建VOLUME
+ - lich.rc
+   - 发起RC
+   - 查询RC状态
+   - 异步回收快照
+ - lich.rcd
+   - 接收数据，重建VOLUME
 
 reload配置文件
 
@@ -252,4 +252,4 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
 - 飞康
 
 
-  [1]: ./images/availability.jpeg "availability.jpeg"
+  [1]: ./images/availability.jpeg
