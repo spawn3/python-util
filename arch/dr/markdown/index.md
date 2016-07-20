@@ -9,18 +9,6 @@
 
 分析在各种场景下，系统行为如何，会导致什么严重问题，如何应对？
 
-## CDP和多层数据保护和灾难恢复
-
-灾备涉及到多个层面，包括存储层，应用层等，为了保障业务连续性，需要进行综合考虑。
-
-<!--
-![多层数据保护](../images/multi_tier.png)
-![可用性指数图](../images/availability.jpeg)
-
-<img src='../images/availability.jpeg' style='width:640px;height=480px'>
-<img src='../images/multi_tier.png' style='width:640px;height=480px'>
--->
-
 ## 基本的备份/恢复过程
 
 ### 备份/恢复的基本过程
@@ -64,6 +52,18 @@ A: 先flat clone出来的卷，然后进行备份。
 ## 支持复杂的系统架构
 
 - 两地三中心
+
+## CDP和多层数据保护和灾难恢复
+
+灾备涉及到多个层面，包括存储层，应用层等，为了保障业务连续性，需要进行综合考虑。
+
+<!--
+![多层数据保护](../images/multi_tier.png)
+![可用性指数图](../images/availability.jpeg)
+
+<img src='../images/availability.jpeg' style='width:640px;height=480px'>
+<img src='../images/multi_tier.png' style='width:640px;height=480px'>
+-->
 
 # 架构设计
 
