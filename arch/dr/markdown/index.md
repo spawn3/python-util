@@ -67,7 +67,6 @@ A: 先flat clone出来的卷，然后进行备份。
 <img src='../images/multi_tier.png' style='width:640px;height=480px'>
 -->
 
-![可用性指数图][1]
 
 # 架构设计
 
