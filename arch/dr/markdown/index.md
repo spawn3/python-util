@@ -2,6 +2,7 @@
 
 分析在各种场景下，系统行为如何，会导致什么严重问题，如何应对？
    
+   ![enter description here][1]
 
 ## 基本的备份/恢复过程
 
@@ -245,4 +246,4 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
 - 飞康
 
 
-  [1]: ./images/availability.jpeg
+  [1]: http://mikemclin.net/mmwp/wp-content/uploads/2013/03/markdown-syntax-laguage.png
