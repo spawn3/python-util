@@ -1,8 +1,6 @@
 # 提出问题
 
-分析在各种场景下，系统行为如何，会导致什么严重问题，如何应对？
-   
-   ![enter description here][1]
+分析在各种场景下，系统行为如何，会导致什么严重问题，如何应对？要多关注各种边界异常情况的处理。
    
 ## 基本的备份/恢复过程
 
@@ -244,6 +242,3 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
 - VMWare VSAN
 - CEPH
 - 飞康
-
-
-  [1]: http://mikemclin.net/mmwp/wp-content/uploads/2013/03/markdown-syntax-laguage.png
