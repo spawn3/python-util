@@ -171,6 +171,7 @@ reload配置文件
 
 ### 源站：远程复制快照
 
+```python
     def sync_volume():
         """
         prev_snap: previous snapshot
@@ -205,6 +206,7 @@ reload配置文件
         if need_sync:
             data = found ? read_chunk_from_snapshot(): read_chunk_from_temp()
             sync_data((found?1:0, data))
+```
 
 ### 网络传输
 
