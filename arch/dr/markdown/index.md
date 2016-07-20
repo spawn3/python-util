@@ -144,13 +144,15 @@ A: 先flat clone出来的卷，然后进行备份。
 
 remote_copy_policy.yml
 
-    policy:
-      pools:
-        - pool01
-        - pool02
-      volumes:
-        - volume01
-        - volume02
+```yml
+policy:
+  pools:
+    - pool01
+    - pool02
+  volumes:
+    - volume01
+    - volume02
+```
 
 进程结构：
 
