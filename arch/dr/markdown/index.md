@@ -174,40 +174,40 @@ reload配置文件
 ### 源站：远程复制快照
 
 ```python
-    def sync_volume():
-        """
-        prev_snap: previous snapshot
-        curr_snap: current snapshot
-        """
-        while True:
-            curr_snap = create_snapshot()
-            for chunk in curr_snap.chunk_list():
-	        sync_chunk_data(prev_snap, curr_snap, chunk)
-            # 同步元数据
-            curr_snap.sync_metadata()
-            # 发送完成消息
-            send_ack()
+def sync_volume():
+    """
+    prev_snap: previous snapshot
+    curr_snap: current snapshot
+    """
+    while True:
+        curr_snap = create_snapshot()
+        for chunk in curr_snap.chunk_list():
+	    sync_chunk_data(prev_snap, curr_snap, chunk)
+        # 同步元数据
+        curr_snap.sync_metadata()
+        # 发送完成消息
+        send_ack()
 
-    def sync_chunk_data(prev_snap, curr_snap, chunk):
-        need_sync = False
-        found = False
-        with chunk.lock():
-	    found = curr_snap.find(chunk)
-            if found:
-                need_sync = True
-            else:
-                if prev_snap:
-	                if prev_snap.find(chunk):
-                        read_from_lun_to_temp()
-                        need_sync = True
-                    else:
-                        pass
-                else:
+def sync_chunk_data(prev_snap, curr_snap, chunk):
+    need_sync = False
+    found = False
+    with chunk.lock():
+	found = curr_snap.find(chunk)
+        if found:
+            need_sync = True
+        else:
+            if prev_snap:
+	        if prev_snap.find(chunk):
                     read_from_lun_to_temp()
                     need_sync = True
-        if need_sync:
-            data = found ? read_chunk_from_snapshot(): read_chunk_from_temp()
-            sync_data((found?1:0, data))
+                else:
+                    pass
+            else:
+                read_from_lun_to_temp()
+                need_sync = True
+    if need_sync:
+        data = found?read_chunk_from_snapshot():read_chunk_from_temp()
+        sync_data((found?1:0, data))
 ```
 
 ### 网络传输
