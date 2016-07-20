@@ -1,6 +1,6 @@
 # 目录
 
-1. [场景分析](#提出问题)
+1. [用例分析](#提出问题)
 2. [架构设计](#架构设计)
 3. [技术方案](#技术方案)
 4. [参考产品](#参考系统)
@@ -69,9 +69,9 @@ A: 先flat clone出来的卷，然后进行备份。
 
 设计原则:
 
+- 明确表述接口，提高可扩展性
 - 构建可持续演进的系统, 分阶段实施，满足RPO和RTO规格
 - 预料到不可预料的情况，任何情况下都不要损坏数据
-- 明确表述接口
 - 自动化是关键
 - 分离策略和机制
 
@@ -115,7 +115,7 @@ A: 先flat clone出来的卷，然后进行备份。
 
 > 根据远程复制策略，复制选择的快照到远程DR站点，做到*快照级别*的可恢复性和业务连续性。
 
-后期规划, 围绕RPO和RTO，优化各功能：
+后期规划, 以CDP为目标，围绕RPO和RTO，优化各功能：
 
 - 监控复制进度和状态
 - 自动化Failover过程
@@ -152,38 +152,40 @@ remote_copy_policy.yml
 - lich.rcd
   - 接收数据，重建VOLUME
 
+reload配置文件
+
 ### 预备工作
 
 - 创建快照时，捕获快照元数据
 - 对clone出来的卷，先flat后，才能创建snapshot
-- 删除一个卷快照的过程中，无法打快照，可以多试几次
+- 删除一个卷快照的过程中，无法打快照，加入错误处理逻辑
 
 ### 源站：远程复制快照
 
     def sync_volume():
         """
-        s1: previous snapshot
-        s2: current snapshot
+        prev_snap: previous snapshot
+        curr_snap: current snapshot
         """
         while True:
-            s2 = create_snapshot()
-            for chunk in s2.chunk_list():
-	        sync_chunk_data(s1, s2, chunk)
+            curr_snap = create_snapshot()
+            for chunk in curr_snap.chunk_list():
+	        sync_chunk_data(prev_snap, curr_snap, chunk)
             # 同步元数据
-            s2.sync_metadata()
+            curr_snap.sync_metadata()
             # 发送完成消息
             send_ack()
 
-    def sync_chunk_data(s1, s2, chunk):
+    def sync_chunk_data(prev_snap, curr_snap, chunk):
         need_sync = False
         found = False
         with chunk.lock():
-	    found = s2.find(chunk)
+	    found = curr_snap.find(chunk)
             if found:
                 need_sync = True
             else:
-                if s1:
-	                if s1.find(chunk):
+                if prev_snap:
+	                if prev_snap.find(chunk):
                         read_from_lun_to_temp()
                         need_sync = True
                     else:
@@ -212,13 +214,15 @@ remote_copy_policy.yml
 
 根据快照生产卷
 
-> 如果DR站点，只维护最新快照生成的VOLUME，此步就不必要了。
+> 可选方案：如果DR站点，只维护最新快照生成的VOLUME，此步就不必要了。
 
 ### 管理RC状态
 
+- RC可以组织成FSM的形式
 - 没有完成的RC，不可用
 - 发生故障，能及时发现并继续
-- 记录RC进度
+- 记录RC进度(状态变化历史)
+- 重启进程，可以继续没完成的RC任务
 
 ### 异步回收快照，保留最近N个
 
