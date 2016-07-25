@@ -169,7 +169,7 @@ def sync_volume():
     while True:
         curr_snap = create_snapshot()
         for chunk in curr_snap.chunk_list():
-	    sync_chunk_data(prev_snap, curr_snap, chunk)
+	        sync_chunk_data(prev_snap, curr_snap, chunk)
         # 同步元数据
         curr_snap.sync_metadata()
         # 发送完成消息
@@ -184,7 +184,7 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
             need_sync = True
         else:
             if prev_snap:
-	        if prev_snap.find(chunk):
+	            if prev_snap.find(chunk):
                     read_from_lun_to_temp()
                     need_sync = True
                 else:
@@ -214,7 +214,7 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
 
 根据快照生产卷
 
-> 可选方案：如果DR站点，只维护最新快照生成的VOLUME，此步就不必要了。
+> 可选方案：如果DR站点，只维护最新快照生成的VOLUME，此步就不必要了。(不可行，需要考虑同步用户创建的快照）
 
 ### 管理RC状态
 
