@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <assert.h>
 
+#define ASSERT_SIZEOF(type, len) do {                 \
+    printf("sizeof(" #type ") = %lu\n", sizeof(type)); \
+    assert(sizeof(type) == len);                      \
+} while(0)
+
 
 typedef struct __chkid_t {
     char c;
@@ -17,10 +22,10 @@ void test_sizeof() {
     // printf("sizeof(int) = %lu\n", sizeof(int));
     // printf("sizeof(long) = %lu\n", sizeof(long));
 
-    assert(sizeof(char) == 1);
-    assert(sizeof(short) == 2);
-    assert(sizeof(int) == 4);
-    assert(sizeof(long) == 8);
+    ASSERT_SIZEOF(char, 1);
+    ASSERT_SIZEOF(short, 2);
+    ASSERT_SIZEOF(int, 4);
+    ASSERT_SIZEOF(long, 8);
 
-    assert(sizeof(chkid_t) == 16);
+    ASSERT_SIZEOF(chkid_t, 16);
 }
