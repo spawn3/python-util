@@ -169,7 +169,7 @@ def sync_volume():
     while True:
         curr_snap = create_snapshot()
         for chunk in curr_snap.chunk_list():
-	        sync_chunk_data(prev_snap, curr_snap, chunk)
+	    sync_chunk_data(prev_snap, curr_snap, chunk)
         # 同步元数据
         curr_snap.sync_metadata()
         # 发送完成消息
@@ -184,7 +184,7 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
             need_sync = True
         else:
             if prev_snap:
-	            if prev_snap.find(chunk):
+	        if prev_snap.find(chunk):
                     read_from_lun_to_temp()
                     need_sync = True
                 else:
