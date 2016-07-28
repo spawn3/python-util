@@ -6,18 +6,22 @@ set(LICH_HOME "/root/huayun/lich4")
 set(CMAKE_C_FLAGS "-g -Wall -Werror -rdynamic -D_GUN_SOURCE -D_REENTRANT")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES
-    src/main.c
-    )
-
 include_directories(
     ${LICH_HOME}/include
     ${LICH_HOME}/config/include
     ${LICH_HOME}/ylib/include
+    ${LICH_HOME}/ynet/include
+    ${LICH_HOME}/cluster/include
+    include
     )
 
 link_directories(
     /opt/fusionstack/lich/lib
+    )
+
+set(SOURCE_FILES
+    src/main.c
+    src/utils.c
     )
 
 add_executable(learning_lich4 ${SOURCE_FILES})
