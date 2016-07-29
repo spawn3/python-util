@@ -30,8 +30,7 @@ set(LEARNING_LICH4_SOURCE_FILES
     src/main.c
     src/utils.c
     )
-add_executable(learning_lich4 ${LEARNING_LICH4_SOURCE_FILES})
-target_link_libraries(learning_lich4 ${LIBS})
+build_tool(learning_lich4 "${LEARNING_LICH4_SOURCE_FILES}" "${LIBS}")
 
 set(LICH_FS_SOURCE_FILES
     src/lich.fs.c
@@ -40,8 +39,7 @@ set(LICH_FS_SOURCE_FILES
     src/license.c
     src/utils.c
     )
-add_executable(lich.fs ${LICH_FS_SOURCE_FILES})
-target_link_libraries(lich.fs ${LIBS})
+build_tool(lich.fs "${LICH_FS_SOURCE_FILES}" "${LIBS}")
 
 set(LICH_INSPECT_SOURCE_FILES
     src/lich.inspect.c
@@ -50,8 +48,7 @@ set(LICH_INSPECT_SOURCE_FILES
     src/license.c
     src/hierarch.c
     )
-add_executable(lich.inspect ${LICH_INSPECT_SOURCE_FILES})
-target_link_libraries(lich.inspect ${LIBS})
+build_tool(lich.inspect "${LICH_INSPECT_SOURCE_FILES}" "${LIBS}")
 
 set(LICH_BD_SOURCE_FILES
     src/lichbd_utils.c
@@ -61,13 +58,11 @@ set(LICH_BD_SOURCE_FILES
     src/license.c
     src/utils.c
     )
-add_executable(lich.bd ${LICH_BD_SOURCE_FILES})
-target_link_libraries(lich.bd ${LIBS})
+build_tool(lich.bd "${LICH_BD_SOURCE_FILES}" "${LIBS}")
 
 set(LICH_SNAPSHOT_SOURCE_FILES
     src/lich.snapshot.c
     src/license.c
     src/utils.c
     )
-add_executable(lich.snapshot ${LICH_SNAPSHOT_SOURCE_FILES})
-target_link_libraries(lich.snapshot ${LIBS})
+build_tool(lich.snapshot "${LICH_SNAPSHOT_SOURCE_FILES}" "${LIBS}")
