@@ -38,6 +38,42 @@ void test_buffer() {
         mbuffer_free(&buf);
 }
 
+typedef struct {
+        struct list_head hook;
+        int i;
+} node_t;
+
+typedef struct {
+        struct list_head head;
+        int n;
+} root_t;
+
+void test_list() {
+        int ret, i;
+        root_t root;
+        node_t *node;
+        struct list_head *pos;
+
+        INIT_LIST_HEAD(&root.head);
+
+        for (i=0; i<10; i++) {
+                ret = ymalloc((void **)&node, sizeof(node_t));
+                if (ret)
+                        continue;
+                node->i = i;
+                list_add_tail(&node->hook, &root.head);
+                root.n += 1;
+        }
+
+
+        list_for_each(pos, &root.head) {
+                node = (node_t *)pos;
+                printf("i=%d\n", node->i);
+        }
+
+        (void)ret;
+}
+
 void test_lichbd() {
         int ret;
         ret = lichbd_init("");
@@ -59,6 +95,7 @@ int main() {
 
         printf("Hello, world\n");
         test_page_bound();
+        test_list();
 
         // mem_cache_init();
         // mem_hugepage_init();
