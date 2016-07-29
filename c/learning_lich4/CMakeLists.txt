@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(learning_lich4)
+project(learning_lich4 C)
 
 set(LICH_HOME "/root/huayun/lich4")
 
@@ -19,6 +19,11 @@ link_directories(
     /opt/fusionstack/lich/lib
     )
 
+function(build_tool name source_files libs)
+    add_executable(${name} ${source_files})
+    target_link_libraries(${name} ${libs})
+endfunction()
+
 set(LIBS lich4 sqlite3 uuid pthread aio crypt crypto ssl rt m)
 
 set(LEARNING_LICH4_SOURCE_FILES
@@ -28,7 +33,7 @@ set(LEARNING_LICH4_SOURCE_FILES
 add_executable(learning_lich4 ${LEARNING_LICH4_SOURCE_FILES})
 target_link_libraries(learning_lich4 ${LIBS})
 
-set(LICH_FS_SOURCE_FILES 
+set(LICH_FS_SOURCE_FILES
     src/lich.fs.c
     src/attr.c
     src/copy.c
@@ -38,7 +43,7 @@ set(LICH_FS_SOURCE_FILES
 add_executable(lich.fs ${LICH_FS_SOURCE_FILES})
 target_link_libraries(lich.fs ${LIBS})
 
-set(LICH_INSPECT_SOURCE_FILES 
+set(LICH_INSPECT_SOURCE_FILES
     src/lich.inspect.c
     src/recovery.c
     src/md5sum.c
@@ -48,7 +53,7 @@ set(LICH_INSPECT_SOURCE_FILES
 add_executable(lich.inspect ${LICH_INSPECT_SOURCE_FILES})
 target_link_libraries(lich.inspect ${LIBS})
 
-set(LICH_BD_SOURCE_FILES 
+set(LICH_BD_SOURCE_FILES
     src/lichbd_utils.c
     src/attr.c
     src/copy.c
@@ -59,7 +64,7 @@ set(LICH_BD_SOURCE_FILES
 add_executable(lich.bd ${LICH_BD_SOURCE_FILES})
 target_link_libraries(lich.bd ${LIBS})
 
-set(LICH_SNAPSHOT_SOURCE_FILES 
+set(LICH_SNAPSHOT_SOURCE_FILES
     src/lich.snapshot.c
     src/license.c
     src/utils.c
