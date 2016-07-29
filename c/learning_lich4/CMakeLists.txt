@@ -25,7 +25,6 @@ set(LEARNING_LICH4_SOURCE_FILES
     src/main.c
     src/utils.c
     )
-
 add_executable(learning_lich4 ${LEARNING_LICH4_SOURCE_FILES})
 target_link_libraries(learning_lich4 ${LIBS})
 
