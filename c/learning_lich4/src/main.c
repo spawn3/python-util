@@ -52,7 +52,7 @@ void test_list() {
         int ret, i;
         root_t root;
         node_t *node;
-        struct list_head *pos;
+        struct list_head *pos, *n;
 
         INIT_LIST_HEAD(&root.head);
 
@@ -65,13 +65,23 @@ void test_list() {
                 root.n += 1;
         }
 
+        (void)ret;
 
         list_for_each(pos, &root.head) {
                 node = (node_t *)pos;
-                printf("i=%d\n", node->i);
+                printf("before i=%d\n", node->i);
         }
 
-        (void)ret;
+        list_for_each_safe(pos, n, &root.head) {
+                node = (node_t *)pos;
+                list_del(pos);
+                yfree((void **)&node);
+        }
+
+        list_for_each(pos, &root.head) {
+                node = (node_t *)pos;
+                printf("after i=%d\n", node->i);
+        }
 }
 
 void test_lichbd() {
