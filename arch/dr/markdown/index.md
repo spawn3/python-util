@@ -194,7 +194,8 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
                 need_sync = True
     if need_sync:
         data = found?read_chunk_from_snapshot():read_chunk_from_temp()
-        sync_data((found?1:0, data))
+        # data_src = snapname | volume
+        sync_data((data_src, data))
 ```
 
 ### 网络传输
@@ -209,8 +210,7 @@ def sync_chunk_data(prev_snap, curr_snap, chunk):
 
 根据传过来的数据，重建volume和snapshot：
 
-- 0，data：数据在volume上
-- 1，data：数据在snapshot上
+- data_src，data：数据在volume上，或来自某快照
 
 根据快照生产卷
 
