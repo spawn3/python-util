@@ -1,0 +1,23 @@
+LICH-MIB DEFINITIONS ::= BEGIN       
+	IMPORTS ucdavis FROM UCD-SNMP-MIB; 
+
+trapevents OBJECT IDENTIFIER ::= { ucdavis 1 } 
+
+netSnmpExampleHeartbeatRate OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "A simple integer object, to act as a payload for the
+         netSnmpExampleHeartbeatNotification.  The value has
+         no real meaning, but is nominally the interval (in
+         seconds) between successive heartbeat notifications."
+    ::= { ucdavis 1 }
+
+trapEvent NOTIFICATION-TYPE         
+	OBJECTS { sysLocation }         
+	STATUS current         
+	DESCRIPTION "Just a test notification"         
+	::= { trapevents 1 } 
+
+END
