@@ -6,10 +6,12 @@
 
 # 快速过程
 
-1. 制作ZSTACK镜像(VirtualBox, KVM)
-1. 下载ZSTACK镜像，创建并启动VM01
+![BOOTSTRAP](images/bootstrap.png)
+
+1. 制作ZSTACK镜像(VirtualBox, KVM共用格式)
+1. 在主控节点上，下载ZSTACK镜像，创建并启动VM01
 1. 通过ZSTACK@VM01，部署并初始化S100存储系统
-1. 导入ZSTACK镜像到S100存储系统, 创建并启动VM02
+1. 利用工具managervm，导入ZSTACK镜像到S100存储系统, 创建并启动VM02
 1. 同步ZSTACK数据：从VM01到VM02
 1. 控制权切换到VM02
 
@@ -42,9 +44,13 @@
 1. 安装操作系统
 1. 配置网络
 
-目前，通过手工方式完成以上步骤，可以进一步简化以上过程：采取IPMI方式或PXE方式。
+目前，通过手工方式完成以上步骤，可以进一步简化：采取*IPMI*方式或*PXE*方式。
 
 ## 创建VM02
+
+相关工具： 
+
+- [https://github.com/zhangzz2/managervm/tree/develop](https://github.com/zhangzz2/managervm/tree/develop) 账户：zhangzz2，密码：zhang1910
 
 待S100存储集群启动后，导入第一步制作的ZSTACK镜像到S100存储系统，并创建VM02。
 
@@ -68,6 +74,8 @@
 - VM02无法启动
 
 ## 备份ZSTACK数据
+
+周期性备份ZSTACK数据库
 
  
 <!--
