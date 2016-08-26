@@ -1,60 +1,73 @@
+# RBAC
+
+permission:
+
+- id
+- res_type
+- res_id
+- op              (CRUD etc)
+- ctime
+
+role:
+
+- id
+- name
+- ctime
+
+user:
+
+- id
+- name
+- password
+- ctime
+
+role-permission relationship: (id, role_id, perm_id, status, ctime)
+
+user-role relationship: (id, user_id, role_id, ctime)
 
 # protection domain
 
-PD:
+node:
 
 - id
-- name
-
-Node:
-
-- id
-- pdid
 - hostname
 - ip
+- pdid
+- ctime
 
-User:
-
-- id
-- name
-- create time
-- rolelist
-
-Permission:
+pdomain:
 
 - id
 - name
+- ctime
 
-Role:
+# Logical Resources
 
-- id
-- name
-- permissionid
-
-Pool
+pool
 
 - id
 - name
+- ctime
 - uid
 - pdid
-- create time
 
-Volume
+volume
 
 - id
 - name
+- ctime
+- uid
 - pdid
 - poolid
-- create time
 - status
 - size
 
-Snapshot
+snapshot
 
 - id
 - name
+- ctime
 - type
 - volumeid
-- create time
 
 CLI会绕过书记，如何处理？

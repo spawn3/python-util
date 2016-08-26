@@ -1,6 +1,6 @@
-.PHONY: pdf
+.PHONY: pdf project
 
-all: pdf
+all: project
 
 html:
 	mkdir -p html
@@ -14,3 +14,6 @@ pdf:
 
 run: all
 	python -m SimpleHTTPServer
+
+project:
+	pandoc markdown/project.md -o pdf/hds_project_plan.pdf -t latex --latex-engine=xelatex --number-sections --smart --template=template/pm-template -V mainfont="Microsoft YaHei" --trace

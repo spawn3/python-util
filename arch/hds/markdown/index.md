@@ -6,13 +6,59 @@
 
 # 项目计划
 
+## 问题
+
+LICH相关:
+
+- list pool的扩展性问题
+- 一致性组的远程复制
+- 主机映射关系的实现可能有问题？
+- iSCSI CHAP认证
+
+管理平台：
+
+- CMDB的维护
+- Protection Domain
+- 多租户
+- 引入多租户后，系统依赖于CMDB，CLI是不是需要重写？
+- RESTFUL API (refer CEPH)
+- Openstack Cinder Driver
+- cinder与多租户有无交叉影响？
+
+QoS:
+
+- Pool
+- Volume
+- Host Mapping
+
+##
+
 物理资源：
 
+- 仪表盘（资源概览）
 - 引入保护域（存储池）
+- 主机管理
+- 磁盘管理
+- 事件管理
+- 报警管理
+- 注册管理
+- 系统设置
+- 自动快照策略
+- 一致性卷组
+- 异步远程复制
 
 逻辑资源：
 
 - 引入多租户（资源池，卷等虚拟资源隶属于租户, 一个租户下面可以有多个用户）
+- 资源池
+- 卷管理
+- 快照管理
+- 访问策略
+- QoS
+
+存储策略：
+
+- 副本数
 
 ISCSI：
 
@@ -24,10 +70,6 @@ OpenStack：
 
 - cinder driver
 
-存储策略：
-
-- 副本数
-
 SA:
 
 - 配置管理 （导出/导入）
@@ -35,29 +77,42 @@ SA:
 - 事件/告警/通知
 - 统计报表
 - 性能管理
-- 许可管理
 - 版本升级
 
 高级功能：
 
-- Access Control
-- QoS SPEC
 - 自动快照策略
 - 一致性卷组
 - 异步远程复制
 
-## 问题
+监控项：
 
-- 引入多租户后，系统依赖于CMDB，CLI是不是需要重写？
-- cinder与多租户有无交叉影响？
-- 主机映射关系的实现可能有问题？
-- list pool的扩展性问题
+- 系统级：
 
-QoS:
+- 节点级：
 
-- Pool
-- Volume
-- Host Mapping
+ - cpu
+ - memory
+ - disk
+ - network (ip, hostname)
+ - lichd
+ - disk/node down
+ - smart reallocate (扇区坏，不可逆过程）
+
+- 卷级：
+
+ - chunk unavailable
+ - IOPS
+
+- Port：
+
+ - 用于分析网络流量TCPDUMP, 用于诊断问题
+
+
+事件有几类：
+
+- syslog事件
+- 触发器事件
 
 
 # 功能
