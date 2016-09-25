@@ -50,15 +50,36 @@ def h(func):
         return res
     return wrapper
 
+
+CLIST = []
+
+
+def register(cls):
+    CLIST.append(cls)
+    return cls
+
+
+@register
+class A(object):
+    pass
+
+
+@register
+class B(object):
+    pass
+
+
 #g.a = 2
 
 #pprint(g.__dict__)
 
 
 if __name__ == '__main__':
+    for x in CLIST:
+        print x
     #f = decorator(f)
-    f()
-    print f
+    # f()
+    # print f
     #pprint(dir(f))
     #pprint(dir(g))
 
