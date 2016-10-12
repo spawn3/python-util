@@ -1,0 +1,25 @@
+cluster:
+  # num:
+  num: 3
+  # nic:
+  nic: bond0
+  # test
+  password: generaldata
+nodes:
+  - node1:
+      bond0: 192.168.1.11/24
+      eno1: 10.10.1.111/24
+  - node2:
+      bond0: 192.168.1.12/24
+      eno1: 10.10.1.112/24
+pools:
+  pool1:
+    type: ssd
+    luns:
+      ssd-volume-10g-01: 10G
+      ssd-volume-10g-02: 10G
+  pool2:
+    type: hdd
+    luns:
+      hdd-volume-10g-01: 10G
+      hdd-volume-10g-02: 10G
