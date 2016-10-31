@@ -51,12 +51,18 @@ class LichPool(LichBase):
         cmd = '%s lspools -p %s' % (self.lichbd, path.protocol)
         return cmd
 
-    @local_runner()
     def stat(self, path):
-        raise NotImplementedError
+        retcode, lines = self.list(path)
+        if retcode != 0:
+            raise NotImplementedError
+        for line in lines:
+            l = line.split(' ')
+            if l[len(l)-1] == path.pool_name:
+                return True
+        return False
 
     def exists(self, path):
-        raise NotImplementedError
+        return self.stat(path)
 
 
 class LichCreatePool(LichBase):

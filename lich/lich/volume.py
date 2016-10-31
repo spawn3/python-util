@@ -35,9 +35,9 @@ class LichVolume(LichBase):
         cmd = '%s info %s -p %s' % (self.lichbd, path.long_volume_name, path.protocol)
         return cmd
 
-    @local_runner()
     def exists(self, path):
-        raise NotImplementedError
+        retcode, msg = self.stat(path)
+        return retcode == 0
 
     @local_runner()
     def list(self, path):
