@@ -84,7 +84,7 @@ class TestBase(unittest.TestCase):
 
     def stat_pool(self, id_or_path, status_code=RET_OK):
         path = UmpPath(id_or_path)
-        return self.stat(self.lich_pool, id_or_path, status_code)
+        return self.stat(self.lich_pool, path, status_code)
 
     def _create_volume(self, vname, size, status_code=RET_OK):
         ret, resp = self.lich_volume.create(vname, size)
@@ -97,7 +97,7 @@ class TestBase(unittest.TestCase):
 
     def stat_volume(self, id_or_path, status_code=RET_OK):
         path = UmpPath(id_or_path)
-        return self.stat(self.lich_volume, id_or_path, status_code)
+        return self.stat(self.lich_volume, path, status_code)
 
     def _create_snapshot(self, snap_name, status_code=RET_OK):
         ret, resp = self.lich_snapshot.create(snap_name)
@@ -110,4 +110,4 @@ class TestBase(unittest.TestCase):
 
     def stat_snapshot(self, id_or_path, status_code=RET_OK):
         path = UmpPath(id_or_path)
-        return self.stat(self.lich_snapshot, id_or_path, status_code)
+        return self.stat(self.lich_snapshot, path, status_code)
