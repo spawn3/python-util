@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from .common import exception as exc
-
+import exc
 
 POOL = 'pool'
 VOLUME = 'volume'
@@ -13,12 +12,9 @@ SNAPSHOT = 'snapshot'
 class UmpPath(object):
 
     def __init__(self, path, protocol='iscsi', username='cinder'):
-        from Ump.objs.root import init_root
-        cluster = init_root().cluster
-
         self.protocol = protocol
         self.username = username
-        self.protocol_root = cluster.protocol_root(protocol)
+        self.protocol_root = protocol
         self.path = path
 
         self._parse()

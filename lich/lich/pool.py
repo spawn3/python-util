@@ -3,7 +3,7 @@
 
 
 from base import LichBase
-from runner import http_runner
+from runner import local_runner
 
 
 def _create_exc_handler(e, *args, **kw):
@@ -32,7 +32,7 @@ def _remove_attr_exc_handler(e, *args, **kw):
 
 
 class LichPoolParam(object):
-    def __init__(self, path, pro_domain=None, cluster_id=1, host_ip=None):
+    def __init__(self, path, pro_domain=None):
 
         self.path = path
         self.pro_domain = pro_domain
@@ -40,7 +40,7 @@ class LichPoolParam(object):
 
 class LichPool(LichBase):
 
-    @http_runner(exc_handler=_create_exc_handler)
+    @local_runner(exc_handler=_create_exc_handler)
     def create(self, param):
         path = param.path
         if not param.pro_domain:
@@ -49,35 +49,20 @@ class LichPool(LichBase):
             cmd = '%s mkpool %s -p %s -A %s' % (self.lichbd, path.long_pool_name, path.protocol, param.pro_domain)
         return cmd
 
-    @http_runner(exc_handler=_delete_exc_handler)
+    @local_runner(exc_handler=_delete_exc_handler)
     def delete(self, param):
         path = param.path
         cmd = '%s rmpool %s -p %s' % (self.lichbd, path.long_pool_name, path.protocol)
         return cmd
 
-    @http_runner()
+    @local_runner()
     def list(self, param):
         path = param.path
         cmd = '%s lspools -p %s' % (self.lichbd, path.protocol)
         return cmd
 
     def exists(self, param):
-        return False
-
-    @http_runner()
-    def set_attr(self, param, attr, value):
-        path = param.path
-        return "%s --attrset %s %s '%s'" % (self.lichfs, path.pool_path, attr, value)
-
-    @http_runner()
-    def get_attr(self, param, attr):
-        path = param.path
-        return "%s --attrget %s %s" % (self.lichfs, path.pool_path, attr)
-
-    @http_runner(exc_handler=_remove_attr_exc_handler)
-    def remove_attr(self, param, attr, ignoreNoKey=False):
-        path = param.path
-        return "%s --attrremove %s %s" % (self.lichfs, path.pool_path, attr)
+        raise NotImplementedError
 
 
 class LichCreatePool(LichBase):
@@ -93,10 +78,10 @@ class LichCreatePool(LichBase):
 
 
 if __name__ == '__main__':
-    from Ump.umptypes import UmpPath
+    from umptypes import UmpPath
 
     path = UmpPath('pool1')
-    param = LichPoolParam(path, host_ip='192.168.120.211')
+    param = LichPoolParam(path)
     vol = LichPool()
     # vol.create(param)
     print vol.list(param)

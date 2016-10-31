@@ -4,8 +4,8 @@
 
 import sys
 import datetime
+import json
 
-from ..jsonify import data2json
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -45,17 +45,6 @@ TIPS = {
 }
 
 
-class TipException(Exception):
-
-
-    def __init__(self, **kw):
-        code = kw.pop('code', 0)
-        name = TipDict.get(code, '无效错误码(%s)' % code)
-        if kw:
-            name = '%s: %s' % (name, data2json(kw))
-        super(TipException, self).__init__(name)
-
-
 class UmpException(Exception):
     def __init__(self, *args, **kw):
         cls_name = self.__class__.__name__
@@ -63,7 +52,7 @@ class UmpException(Exception):
         if args:
             name = '%s: %s' % (name, args[0])
         if kw:
-            name = '%s: %s' % (name, data2json(kw))
+            name = '%s: %s' % (name, json.dumps(kw))
         super(UmpException, self).__init__(name)
 
 
