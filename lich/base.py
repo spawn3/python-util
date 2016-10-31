@@ -58,16 +58,15 @@ class TestBase(unittest.TestCase):
         if find_id:
             self.assertEqual(found, True)
 
-    def stat(self, manager, id_or_path, status_code=RET_OK):
-        ret, resp = manager.stat(id_or_path)
+    def stat(self, manager, path, status_code=RET_OK):
+        ret, resp = manager.stat(path)
         self.assertEqual(resp.status_code, status_code)
         return ret, resp
 
     def exists(self, manager, path):
         return manager.exists(path)
 
-    def _delete(self, manager, id_or_path, status_code=RET_OK):
-        path = UmpPath(id_or_path)
+    def _delete(self, manager, path, status_code=RET_OK):
         if self.exists(manager, path):
             ret, resp = manager.delete(path)
             self.assertEqual(resp.status_code, status_code)
@@ -84,6 +83,7 @@ class TestBase(unittest.TestCase):
         return self._delete(self.lich_pool, path, status_code=status_code)
 
     def stat_pool(self, id_or_path, status_code=RET_OK):
+        path = UmpPath(id_or_path)
         return self.stat(self.lich_pool, id_or_path, status_code)
 
     def _create_volume(self, vname, size, status_code=RET_OK):
@@ -92,9 +92,11 @@ class TestBase(unittest.TestCase):
         return ret, resp
 
     def _del_volume(self, vname, status_code=RET_OK):
-        return self._delete(self.lich_volume, vname, status_code=status_code)
+        path = UmpPath(vname)
+        return self._delete(self.lich_volume, path, status_code=status_code)
 
     def stat_volume(self, id_or_path, status_code=RET_OK):
+        path = UmpPath(id_or_path)
         return self.stat(self.lich_volume, id_or_path, status_code)
 
     def _create_snapshot(self, snap_name, status_code=RET_OK):
@@ -103,7 +105,9 @@ class TestBase(unittest.TestCase):
         return ret, resp
 
     def _del_snapshot(self, snap_name, status_code=RET_OK):
-        return self._delete(self.lich_snapshot, snap_name, status_code)
+        path = UmpPath(snap_name)
+        return self._delete(self.lich_snapshot, path, status_code)
 
     def stat_snapshot(self, id_or_path, status_code=RET_OK):
+        path = UmpPath(id_or_path)
         return self.stat(self.lich_snapshot, id_or_path, status_code)
