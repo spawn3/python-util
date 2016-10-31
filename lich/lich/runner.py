@@ -11,6 +11,7 @@ import subprocess
 def _exec(cmd):
     if isinstance(cmd, list):
         cmd = ' '.join(cmd)
+    print '--- cmd', cmd
     return subprocess.call(cmd, shell=True)
 
 

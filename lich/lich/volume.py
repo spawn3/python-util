@@ -4,10 +4,10 @@
 
 import utils
 
-from Ump.umptypes import UmpPath
+from umptypes import UmpPath
 
-from base import LichBase, RemoteLocation
-from runner import http_runner
+from base import LichBase
+from runner import local_runner
 
 
 def _remove_attr_exc_handler(e, *args, **kw):
@@ -18,9 +18,8 @@ def _remove_attr_exc_handler(e, *args, **kw):
         raise Exception(e)
 
 
-class LichVolumeParam(RemoteLocation):
-    def __init__(self, path, size=None, protection_domain=None, cluster_id=1, host_ip=None):
-        super(LichVolumeParam, self).__init__(host_ip=host_ip, cluster_id=cluster_id)
+class LichVolumeParam(object):
+    def __init__(self, path, size=None, protection_domain=None):
 
         self.path = path
         self.size = size
@@ -29,58 +28,58 @@ class LichVolumeParam(RemoteLocation):
 
 class LichVolume(LichBase):
 
-    @http_runner()
+    @local_runner()
     def create(self, param):
         path = param.path
         cmd = '%s create %s --size %sB -p %s' % (self.lichbd, path.long_volume_name, param.size, path.protocol)
         return cmd
 
-    @http_runner()
+    @local_runner()
     def delete(self, param):
         path = param.path
         cmd = '%s rm %s -p %s' % (self.lichbd, path.long_volume_name, path.protocol)
         return cmd
 
-    @http_runner()
+    @local_runner()
     def info(self, param):
         path = param.path
         cmd = '%s info %s -p %s' % (self.lichbd, path.long_volume_name, path.protocol)
         return cmd
 
-    @http_runner()
+    @local_runner()
     def list(self, param):
         path = param.path
         cmd = '%s ls %s -p %s' % (self.lichbd, path.long_pool_name, path.protocol)
         return cmd
 
-    @http_runner()
+    @local_runner()
     def resize(self, param):
         path = param.path
         cmd = '%s resize %s --size %sB -p %s' % (self.lichbd, path.long_volume_name, param.size, path.protocol)
         return cmd
 
-    @http_runner()
+    @local_runner()
     def rename(self, param, new_name):
         path = param.path
         cmd = '%s rename %s %s/%s -p %s' % (self.lichbd, path.long_volume_name, path.long_pool_name, new_name, path.protocol)
         return cmd
 
-    @http_runner()
+    @local_runner()
     def set_attr(self, param, attr, value):
         path = param.path
         return "%s --attrset %s %s '%s'" % (self.lichfs, path.volume_path, attr, value)
 
-    @http_runner()
+    @local_runner()
     def get_attr(self, param, attr):
         path = param.path
         return "%s --attrget %s %s" % (self.lichfs, path.volume_path, attr)
 
-    @http_runner(exc_handler=_remove_attr_exc_handler)
+    @local_runner(exc_handler=_remove_attr_exc_handler)
     def remove_attr(self, param, attr, ignoreNoKey=False):
         path = param.path
         return "%s --attrremove %s %s" % (self.lichfs, path.volume_path, attr)
 
-    @http_runner()
+    @local_runner()
     def _iscsi_connection(self, param):
         path = param.path
         cmd = '%s --connection %s' % (self.lich_inspect, path.volume_path)
@@ -94,7 +93,7 @@ class LichVolume(LichBase):
         path = param.path
         raise NotImplementedError
 
-    @http_runner()
+    @local_runner()
     def flatten(self, param):
         path = param.path
         return "%s --flat %s" % (self.lich_snapshot, path)
