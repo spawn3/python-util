@@ -15,73 +15,68 @@ def _delete_exc_handler(e, *args, **kw):
         raise Exception(e)
 
 
-class LichSnapshotParam(object):
-    def __init__(self, path, cluster_id=1, host_ip=None):
-        self.path = path
-
-
 class LichSnapshot(LichBase):
 
     @local_runner()
-    def create(self, param):
-        path = param.path
+    def create(self, path):
         return "%s --create %s" % (self.lich_snapshot, path.snap_path)
 
     @local_runner(exc_handler=_delete_exc_handler)
-    def delete(self, param):
-        path = param.path
+    def delete(self, path):
         return "%s --remove %s" % (self.lich_snapshot, path.snap_path)
 
-    def remove(self, param):
-        return self.delete(param)
+    @local_runner()
+    def stat(self, path):
+        raise NotImplementedError
 
     @local_runner()
-    def rollback(self, param):
-        path = param.path
+    def exists(self, path):
+        raise NotImplementedError
+
+    def remove(self, path):
+        return self.delete(path)
+
+    @local_runner()
+    def rollback(self, path):
         return "%s --rollback %s" % (self.lich_snapshot, path.snap_path)
 
     @local_runner()
-    def clone(self, param, new_vol_path):
-        path = param.path
+    def clone(self, path, new_vol_path):
         return  "%s --clone %s %s" % (self.lich_snapshot, path.snap_path, new_vol_path)
 
     @local_runner()
-    def flat(self, param):
-        path = param.path
+    def flat(self, path):
         return "%s --flat %s" % (self.lich_snapshot, path)
 
     @local_runner()
-    def protect(self, param, on=True):
+    def protect(self, path, on=True):
         """ lich.snapshot --protect snap_path 0|1.
-        :param param:
-        :param on:
+        :path path:
+        :path on:
         :return:
         """
-        path = param.path
         cmd = 'protect'
         status = 1 if on else 0
         return "%s --%s %s %s" % (self.lich_snapshot, cmd, path.snap_path, status)
 
     # @local_runner()
-    def unprotect(self, param):
-        return self.protect(param, on=False)
+    def unprotect(self, path):
+        return self.protect(path, on=False)
 
     @local_runner()
-    def _list(self, param):
-        path = param.path
+    def _list(self, path):
         return "%s --list %s" % (self.lich_snapshot, path)
 
-    def list(self, param):
-        res = self._list(param)
+    def list(self, path):
+        res = self._list(path)
         return utils.split_lines(res)
 
 
 if __name__ == '__main__':
-    path = UmpPath('/pool1/vol11@snap01')
-    param = LichSnapshotParam(path)
+    path = UmpPath('pool1/vol11@snap01')
     snap = LichSnapshot()
-    snap.create(param)
-    snap.protect(param)
-    print snap.list(param)
-    snap.unprotect(param)
-    snap.remove(param)
+    snap.create(path)
+    snap.protect(path)
+    print snap.list(path)
+    snap.unprotect(path)
+    snap.remove(path)

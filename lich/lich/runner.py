@@ -3,16 +3,19 @@
 
 
 import functools
-import traceback
-
 import subprocess
 
 
 def _exec(cmd):
-    if isinstance(cmd, list):
-        cmd = ' '.join(cmd)
+    # if isinstance(cmd, list):
+    #     cmd = ' '.join(cmd)
     print '--- cmd', cmd
-    return subprocess.call(cmd, shell=True)
+    try:
+        out = subprocess.check_output(cmd)
+        res = 0, out.splitlines()
+    except subprocess.CalledProcessError as e:
+        res = e.returncode, e.message.splitlines()
+    return res
 
 
 def local_runner(exc_handler=None):
@@ -22,7 +25,6 @@ def local_runner(exc_handler=None):
             res = None
             try:
                 cmd = func(self, *args, **kw)
-                param = args[0]
                 res = _exec(cmd)
             except Exception, e:
                 # TODO

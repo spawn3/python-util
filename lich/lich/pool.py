@@ -31,44 +31,38 @@ def _remove_attr_exc_handler(e, *args, **kw):
         raise Exception(e)
 
 
-class LichPoolParam(object):
-    def __init__(self, path, pro_domain=None):
-
-        self.path = path
-        self.pro_domain = pro_domain
-
-
 class LichPool(LichBase):
 
     @local_runner(exc_handler=_create_exc_handler)
-    def create(self, param):
-        path = param.path
-        if not param.pro_domain:
+    def create(self, path, pdomain=None):
+        if not pdomain:
             cmd = '%s mkpool %s -p %s' % (self.lichbd, path.long_pool_name, path.protocol)
         else:
-            cmd = '%s mkpool %s -p %s -A %s' % (self.lichbd, path.long_pool_name, path.protocol, param.pro_domain)
+            cmd = '%s mkpool %s -p %s -A %s' % (self.lichbd, path.long_pool_name, path.protocol, pdomain)
         return cmd
 
     @local_runner(exc_handler=_delete_exc_handler)
-    def delete(self, param):
-        path = param.path
+    def delete(self, path):
         cmd = '%s rmpool %s -p %s' % (self.lichbd, path.long_pool_name, path.protocol)
         return cmd
 
     @local_runner()
-    def list(self, param):
-        path = param.path
+    def list(self, path):
         cmd = '%s lspools -p %s' % (self.lichbd, path.protocol)
         return cmd
 
-    def exists(self, param):
+    @local_runner()
+    def stat(self, path):
+        raise NotImplementedError
+
+    def exists(self, path):
         raise NotImplementedError
 
 
 class LichCreatePool(LichBase):
-    def __init__(self, param):
+    def __init__(self, path):
         super(LichCreatePool, self).__init__()
-        self.param = param
+        self.path = path
 
     def do(self):
         pass
@@ -81,9 +75,8 @@ if __name__ == '__main__':
     from umptypes import UmpPath
 
     path = UmpPath('pool1')
-    param = LichPoolParam(path)
     vol = LichPool()
-    vol.create(param)
-    print vol.list(param)
-    vol.delete(param)
-    print vol.list(param)
+    vol.create(path)
+    print vol.list(path)
+    vol.delete(path)
+    print vol.list(path)
