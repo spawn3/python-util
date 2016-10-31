@@ -63,12 +63,13 @@ class TestBase(unittest.TestCase):
         self.assertEqual(resp.status_code, status_code)
         return ret, resp
 
-    def exists(self, manager, id_or_path):
-        return manager.exists(id_or_path)
+    def exists(self, manager, path):
+        return manager.exists(path)
 
     def _delete(self, manager, id_or_path, status_code=RET_OK):
-        if self.exists(manager, id_or_path):
-            ret, resp = manager.delete(id_or_path)
+        path = UmpPath(id_or_path)
+        if self.exists(manager, path):
+            ret, resp = manager.delete(path)
             self.assertEqual(resp.status_code, status_code)
             return ret, resp
 
