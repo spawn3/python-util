@@ -15,6 +15,8 @@ def _exec(cmd):
         res = 0, out.splitlines()
     except subprocess.CalledProcessError as e:
         res = e.returncode, e.message.splitlines()
+    except OSError as e:
+        res = -1, str(e).splitlines()
     return res
 
 
