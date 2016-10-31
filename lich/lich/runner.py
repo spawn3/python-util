@@ -18,7 +18,8 @@ def _exec(cmd):
         res = e.returncode, e.message.splitlines()
     except OSError as e:
         res = -1, str(e).splitlines()
-        raise
+    except Exception as e:
+        raise e
     return res
 
 

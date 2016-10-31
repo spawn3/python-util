@@ -66,11 +66,9 @@ class LichPool(LichBase):
     def stat(self, path):
         ret, pools = self.list(path)
         if ret == 0:
-            pools.find()
-
-        for pool in pools:
-            if pool == path.long_pool_name:
-                return True
+            for pool in pools:
+                if pool == path.long_pool_name:
+                    return True
         return False
 
     def exists(self, path):
