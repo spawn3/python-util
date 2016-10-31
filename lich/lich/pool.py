@@ -8,10 +8,10 @@ from runner import local_runner
 
 def _create_exc_handler(e, *args, **kw):
     if str(e).find("File exists") != -1:
-        param = args[0]
+        path = args[0]
         is_with_volume = kw.get('is_with_volume', False)
         if not is_with_volume :
-            raise Exception("存储池%s已存在" % param.path)
+            raise Exception("存储池%s已存在" % path)
     else:
         raise Exception(e)
 
@@ -54,10 +54,10 @@ class LichPool(LichBase):
     def stat(self, path):
         retcode, lines = self.list(path)
         if retcode != 0:
-            raise NotImplementedError
+            return False
         for line in lines:
             l = line.split(' ')
-            if l[len(l)-1] == path.pool_name:
+            if l[len(l)-1] == path.long_pool_name:
                 return True
         return False
 

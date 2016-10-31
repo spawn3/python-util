@@ -58,25 +58,28 @@ class TestBase(unittest.TestCase):
         if find_id:
             self.assertEqual(found, True)
 
+    # utilities
+    def _delete(self, manager, path, status_code=RET_OK):
+        exists = self.exists(manager, path)
+        if exists:
+            ret, resp = manager.delete(path)
+            self.assertEqual(ret, status_code)
+            return ret, resp
+
     def stat(self, manager, path, status_code=RET_OK):
         ret, resp = manager.stat(path)
-        self.assertEqual(resp.status_code, status_code)
+        self.assertEqual(ret, status_code)
         return ret, resp
 
     def exists(self, manager, path):
         return manager.exists(path)
 
-    def _delete(self, manager, path, status_code=RET_OK):
-        if self.exists(manager, path):
-            ret, resp = manager.delete(path)
-            self.assertEqual(resp.status_code, status_code)
-            return ret, resp
-
+    # POOL CRUD
     def _create_pool(self, pname, pool_quota=None, status_code=RET_OK):
         path = UmpPath(pname)
-        retcode, resp = self.lich_pool.create(path)
-        self.assertEqual(retcode, status_code)
-        return retcode, resp
+        ret, resp = self.lich_pool.create(path)
+        self.assertEqual(ret, status_code)
+        return ret, resp
 
     def _del_pool(self, pname, status_code=RET_OK):
         path = UmpPath(pname)
@@ -86,9 +89,10 @@ class TestBase(unittest.TestCase):
         path = UmpPath(id_or_path)
         return self.stat(self.lich_pool, path, status_code)
 
+    # VOLUME CRUD
     def _create_volume(self, vname, size, status_code=RET_OK):
         ret, resp = self.lich_volume.create(vname, size)
-        self.assertEqual(resp.status_code, status_code)
+        self.assertEqual(ret, status_code)
         return ret, resp
 
     def _del_volume(self, vname, status_code=RET_OK):
@@ -99,9 +103,10 @@ class TestBase(unittest.TestCase):
         path = UmpPath(id_or_path)
         return self.stat(self.lich_volume, path, status_code)
 
+    # SNAPSHOT CRUD
     def _create_snapshot(self, snap_name, status_code=RET_OK):
         ret, resp = self.lich_snapshot.create(snap_name)
-        self.assertEqual(resp.status_code, status_code)
+        self.assertEqual(ret, status_code)
         return ret, resp
 
     def _del_snapshot(self, snap_name, status_code=RET_OK):

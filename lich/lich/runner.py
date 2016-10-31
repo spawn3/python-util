@@ -9,6 +9,7 @@ import subprocess
 def _exec(cmd):
     # if isinstance(cmd, list):
     #     cmd = ' '.join(cmd)
+    cmd = cmd.split(' ')
     print '--- cmd', cmd
     try:
         out = subprocess.check_output(cmd)
@@ -17,6 +18,7 @@ def _exec(cmd):
         res = e.returncode, e.message.splitlines()
     except OSError as e:
         res = -1, str(e).splitlines()
+        raise
     return res
 
 

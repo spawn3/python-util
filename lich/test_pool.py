@@ -21,12 +21,13 @@ class TestAll(TestBase):
 
     def tearDown(self):
         # self._del_volume(self.volume_name)
-        self._del_pool(self.pool_name)
+        # self._del_pool(self.pool_name)
+        pass
 
     @unittest.skipIf(False, 'skip this')
     def test_delete_pool_with_volume(self):
-        pass
-
+        self._create_pool(self.pool_name)
+        self._del_pool(self.pool_name)
 
 
 def suite():
