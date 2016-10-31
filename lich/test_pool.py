@@ -25,8 +25,17 @@ class TestAll(TestBase):
         pass
 
     @unittest.skipIf(False, 'skip this')
-    def test_delete_pool_with_volume(self):
+    def test_delete(self):
         self._create_pool(self.pool_name)
+        self._del_pool(self.pool_name)
+
+    def test_delete_if_volume(self):
+        self._create_pool(self.pool_name)
+
+        self._create_volume(self.volume_name, self.size)
+        self._del_pool(self.pool_name)
+        self._del_volume(self.volume_name, self.size)
+
         self._del_pool(self.pool_name)
 
 

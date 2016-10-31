@@ -47,17 +47,29 @@ class LichPool(LichBase):
         return cmd
 
     @local_runner()
-    def list(self, path):
+    def _list(self, path):
         cmd = '%s lspools -p %s' % (self.lichbd, path.protocol)
         return cmd
 
-    def stat(self, path):
-        retcode, lines = self.list(path)
-        if retcode != 0:
-            return False
+    def list(self, path):
+        ret, lines = self._list(path)
+        if ret != 0:
+            return ret, lines
+
+        pools = []
         for line in lines:
             l = line.split(' ')
-            if l[len(l)-1] == path.long_pool_name:
+            if l:
+                pools.append(l[len(l)-1])
+        return ret, pools
+
+    def stat(self, path):
+        ret, pools = self.list(path)
+        if ret == 0:
+            pools.find()
+
+        for pool in pools:
+            if pool == path.long_pool_name:
                 return True
         return False
 

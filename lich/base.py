@@ -38,8 +38,8 @@ class TestBase(unittest.TestCase):
             self._delete(manager, item['id'])
 
     def _test_list(self, manager, find_id=None, fields=[]):
-        _, resp = manager.list(skip=0, limit=100)
-        self.assertEqual(resp.status_code, RET_OK)
+        ret, resp = manager.list(skip=0, limit=100)
+        self.assertEqual(ret, RET_OK)
         found = False
         if resp.records:
             for item in resp.records:
