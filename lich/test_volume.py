@@ -32,6 +32,10 @@ class TestAll(TestBase):
 
     def test_delete(self):
         self.create_volume(self.volume_name, self.size)
+        self.del_volume(self.volume_name)
+
+    def test_stat(self):
+        self.create_volume(self.volume_name, self.size)
         self.stat_volume(self.volume_name)
         self.del_volume(self.volume_name)
 
