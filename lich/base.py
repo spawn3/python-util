@@ -89,9 +89,15 @@ class TestBase(unittest.TestCase):
         path = UmpPath(id_or_path)
         return self.stat(self.lich_pool, path, status_code)
 
+    def list_pools(self):
+        path = UmpPath('a/b@c')
+        rc, pools = self.lich_pool.list(path)
+        return pools
+
     # VOLUME CRUD
     def _create_volume(self, vname, size, status_code=RET_OK):
-        ret, resp = self.lich_volume.create(vname, size)
+        path = UmpPath(vname)
+        ret, resp = self.lich_volume.create(path, size)
         self.assertEqual(ret, status_code)
         return ret, resp
 

@@ -52,27 +52,28 @@ class LichPool(LichBase):
         return cmd
 
     def list(self, path):
-        ret, lines = self._list(path)
-        if ret != 0:
-            return ret, lines
+        rc, lines = self._list(path)
+        if rc != 0:
+            return rc, lines
 
         pools = []
         for line in lines:
             l = line.split(' ')
             if l:
                 pools.append(l[len(l)-1])
-        return ret, pools
+        return rc, pools
 
     def stat(self, path):
-        ret, pools = self.list(path)
-        if ret == 0:
+        rc, pools = self.list(path)
+        if rc == 0:
             for pool in pools:
                 if pool == path.long_pool_name:
-                    return True
-        return False
+                    return rc, True
+        return rc, False
 
     def exists(self, path):
-        return self.stat(path)
+        rc, res = self.stat(path)
+        return res
 
 
 class LichCreatePool(LichBase):

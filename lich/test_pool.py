@@ -33,10 +33,26 @@ class TestAll(TestBase):
         self._create_pool(self.pool_name)
 
         self._create_volume(self.volume_name, self.size)
-        self._del_pool(self.pool_name)
-        self._del_volume(self.volume_name, self.size)
+        # 2: No such file or directory
+        # 39: Directory not empty
+        self._del_pool(self.pool_name, status_code=39)
+        self._del_volume(self.volume_name)
 
         self._del_pool(self.pool_name)
+
+    def test_stat(self):
+        self._create_pool(self.pool_name)
+        self.stat_pool(self.pool_name)
+        self._del_pool(self.pool_name)
+        self.stat_pool(self.pool_name)
+
+    def test_list(self):
+        self._create_pool(self.pool_name)
+        pools = self.list_pools()
+        self.assertIn(self.pool_name, pools)
+        self._del_pool(self.pool_name)
+        pools = self.list_pools()
+        self.assertNotIn(self.pool_name, pools)
 
 
 def suite():
