@@ -50,9 +50,12 @@ class TestAll(TestBase):
 
     def test_list(self):
         self.create_pool(self.pool_path)
+
         pools = self.list_pools()
         self.assertIn(self.pool_path.long_pool_name, pools)
+
         self.del_pool(self.pool_path)
+
         pools = self.list_pools()
         self.assertNotIn(self.pool_path.long_pool_name, pools)
 

@@ -3,15 +3,10 @@
 
 
 import unittest
-
 from pprint import pprint
 
 
-from fusionstor import (
-    PoolManager,
-    VolumeManager,
-    SnapshotManager,
-)
+from lich.umptypes import UmpPath
 
 from base import TestBase
 
@@ -20,23 +15,25 @@ class TestAll(TestBase):
     def setUp(self):
         super(TestAll, self).setUp()
 
-        self.pool_name = 'volume.a'
-        self.volume_name = 'volume.a/b'
-        self.snap_name = 'volume.a/b@c'
+        self.pool_name = UmpPath('volume.a')
+        self.volume_name = UmpPath('volume.a/b')
         self.size = 1024*1024*1024
-        self.notfound_volume_name = 'volume.a/c'
 
-        self._del_snapshot(self.snap_name)
-        self._del_volume(self.volume_name)
-        self._del_pool(self.pool_name)
+        self.del_volume(self.volume_name)
+        self.del_pool(self.pool_name)
 
-        self._create_pool(self.pool_name)
-        self._create_volume(self.volume_name, self.size)
+        self.create_pool(self.pool_name)
+        # self.create_volume(self.volume_name, self.size)
 
     def tearDown(self):
-        self._del_snapshot(self.snap_name)
-        self._del_volume(self.volume_name)
-        self._del_pool(self.pool_name)
+        # self.del_volume(self.volume_name)
+        self.del_pool(self.pool_name)
+        pass
+
+    def test_delete(self):
+        self.create_volume(self.volume_name, self.size)
+        self.stat_volume(self.volume_name)
+        self.del_volume(self.volume_name)
 
 
 def suite():
