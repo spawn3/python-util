@@ -75,12 +75,12 @@ class TestBase(unittest.TestCase):
         return manager.exists(path)
 
     # POOL CRUD
-    def _create_pool(self, path, pool_quota=None, status_code=RET_OK):
+    def create_pool(self, path, pool_quota=None, status_code=RET_OK):
         ret, resp = self.lich_pool.create(path)
         self.assertEqual(ret, status_code)
         return ret, resp
 
-    def _del_pool(self, path, status_code=RET_OK):
+    def del_pool(self, path, status_code=RET_OK):
         return self._delete(self.lich_pool, path, status_code=status_code)
 
     def stat_pool(self, path, status_code=RET_OK):
@@ -92,24 +92,24 @@ class TestBase(unittest.TestCase):
         return pools
 
     # VOLUME CRUD
-    def _create_volume(self, path, size, status_code=RET_OK):
+    def create_volume(self, path, size, status_code=RET_OK):
         ret, resp = self.lich_volume.create(path, size)
         self.assertEqual(ret, status_code)
         return ret, resp
 
-    def _del_volume(self, path, status_code=RET_OK):
+    def del_volume(self, path, status_code=RET_OK):
         return self._delete(self.lich_volume, path, status_code=status_code)
 
     def stat_volume(self, path, status_code=RET_OK):
         return self.stat(self.lich_volume, path, status_code)
 
     # SNAPSHOT CRUD
-    def _create_snapshot(self, path, status_code=RET_OK):
+    def create_snapshot(self, path, status_code=RET_OK):
         ret, resp = self.lich_snapshot.create(path)
         self.assertEqual(ret, status_code)
         return ret, resp
 
-    def _del_snapshot(self, path, status_code=RET_OK):
+    def del_snapshot(self, path, status_code=RET_OK):
         return self._delete(self.lich_snapshot, path, status_code)
 
     def stat_snapshot(self, path, status_code=RET_OK):

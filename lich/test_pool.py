@@ -18,8 +18,8 @@ class TestAll(TestBase):
         self.volume_path = UmpPath('pool.a/b')
         self.size = utils.GB(1)
 
-        self._del_volume(self.volume_path)
-        self._del_pool(self.pool_path)
+        self.del_volume(self.volume_path)
+        self.del_pool(self.pool_path)
 
     def tearDown(self):
         # self._del_volume(self.volume_path)
@@ -28,31 +28,31 @@ class TestAll(TestBase):
 
     @unittest.skipIf(False, 'skip this')
     def test_delete(self):
-        self._create_pool(self.pool_path)
-        self._del_pool(self.pool_path)
+        self.create_pool(self.pool_path)
+        self.del_pool(self.pool_path)
 
     def test_delete_if_volume(self):
-        self._create_pool(self.pool_path)
+        self.create_pool(self.pool_path)
 
-        self._create_volume(self.volume_path, self.size)
+        self.create_volume(self.volume_path, self.size)
         # 2: No such file or directory
         # 39: Directory not empty
-        self._del_pool(self.pool_path, status_code=39)
-        self._del_volume(self.volume_path)
+        self.del_pool(self.pool_path, status_code=39)
+        self.del_volume(self.volume_path)
 
-        self._del_pool(self.pool_path)
+        self.del_pool(self.pool_path)
 
     def test_stat(self):
-        self._create_pool(self.pool_path)
+        self.create_pool(self.pool_path)
         self.stat_pool(self.pool_path)
-        self._del_pool(self.pool_path)
+        self.del_pool(self.pool_path)
         self.stat_pool(self.pool_path)
 
     def test_list(self):
-        self._create_pool(self.pool_path)
+        self.create_pool(self.pool_path)
         pools = self.list_pools()
         self.assertIn(self.pool_path.long_pool_name, pools)
-        self._del_pool(self.pool_path)
+        self.del_pool(self.pool_path)
         pools = self.list_pools()
         self.assertNotIn(self.pool_path.long_pool_name, pools)
 
