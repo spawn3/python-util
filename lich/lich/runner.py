@@ -4,13 +4,22 @@
 
 import functools
 import subprocess
+import time
+
+
+def timethis(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        r = func(*args, **kwargs)
+        end = time.time()
+        print('{}: {}.{} {} {}'.format(end - start, func.__module__, func.__name__, args, kwargs))
+        return r
+    return wrapper
 
 
 def _exec(cmd):
-    # if isinstance(cmd, list):
-    #     cmd = ' '.join(cmd)
     cmd = cmd.split(' ')
-    print '--- cmd', cmd
     try:
         out = subprocess.check_output(cmd)
         res = 0, out.splitlines()
@@ -23,6 +32,7 @@ def _exec(cmd):
     return res
 
 
+@timethis
 def local_runner(exc_handler=None):
     def decorator(func):
         @functools.wraps(func)

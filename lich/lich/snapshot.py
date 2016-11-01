@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
+import json
+
 import utils
 from umptypes import UmpPath
 
@@ -25,6 +27,19 @@ class LichSnapshot(LichBase):
     def delete(self, path):
         return "%s --remove %s" % (self.lich_snapshot, path.snap_path)
 
+    def remove(self, path):
+        return self.delete(path)
+
+    @local_runner()
+    def _list(self, path):
+        return "%s --list %s -n" % (self.lich_snapshot, path.volume_path)
+
+    def list(self, path):
+        rc, res = self._list(path)
+        if rc == 0 and res:
+            res = json.loads(res[0])
+        return rc, res
+
     @local_runner()
     def stat(self, path):
         raise NotImplementedError
@@ -32,9 +47,6 @@ class LichSnapshot(LichBase):
     @local_runner()
     def exists(self, path):
         raise NotImplementedError
-
-    def remove(self, path):
-        return self.delete(path)
 
     @local_runner()
     def rollback(self, path):
@@ -63,20 +75,13 @@ class LichSnapshot(LichBase):
     def unprotect(self, path):
         return self.protect(path, on=False)
 
-    @local_runner()
-    def _list(self, path):
-        return "%s --list %s" % (self.lich_snapshot, path)
-
-    def list(self, path):
-        res = self._list(path)
-        return utils.split_lines(res)
-
 
 if __name__ == '__main__':
-    path = UmpPath('pool1/vol11@snap01')
+    path = UmpPath('pool1/volume1@snap01')
     snap = LichSnapshot()
-    snap.create(path)
-    snap.protect(path)
     print snap.list(path)
-    snap.unprotect(path)
-    snap.remove(path)
+
+    # snap.create(path)
+    # snap.protect(path)
+    # snap.unprotect(path)
+    # snap.remove(path)
