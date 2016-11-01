@@ -38,17 +38,24 @@ class LichSnapshot(LichBase):
         rc, res = self._list(path)
         if rc == 0 and res:
             res = json.loads(res[0])
+        else:
+            res = {}
         return rc, res
 
-    @local_runner()
     def stat(self, path):
         rc, snaptree = self.list(path)
-        for k, v in snaptree.iteritems():
-            if k['snapname'] == path.snap_name:
-                return rc, v
-        return rc, None
+        snaptree = snaptree.get('snapshot', {})
+        return rc, self._find_snap(snaptree, path.snap_name)
 
-    @local_runner()
+    def _find_snap(self, snaptree, snap):
+        for k, v in snaptree.iteritems():
+            if k == snap:
+                return snap
+            elif 'child' in v:
+                if self._find_snap(v['child'], snap)
+                    return snap
+        return None
+
     def exists(self, path):
         rc, info = self.stat(path)
         return rc == 0 and info
