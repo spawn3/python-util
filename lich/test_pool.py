@@ -51,10 +51,10 @@ class TestAll(TestBase):
     def test_list(self):
         self._create_pool(self.pool_path)
         pools = self.list_pools()
-        self.assertIn(self.pool_path, pools)
+        self.assertIn(self.pool_path.long_pool_name, pools)
         self._del_pool(self.pool_path)
         pools = self.list_pools()
-        self.assertNotIn(self.pool_path, pools)
+        self.assertNotIn(self.pool_path.long_pool_name, pools)
 
 
 def suite():
