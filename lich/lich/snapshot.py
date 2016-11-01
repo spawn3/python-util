@@ -42,11 +42,16 @@ class LichSnapshot(LichBase):
 
     @local_runner()
     def stat(self, path):
-        raise NotImplementedError
+        rc, snaptree = self.list(path)
+        for k, v in snaptree.iteritems():
+            if k['snapname'] == path.snap_name:
+                return rc, v
+        return rc, None
 
     @local_runner()
     def exists(self, path):
-        raise NotImplementedError
+        rc, info = self.stat(path)
+        return rc == 0 and info
 
     @local_runner()
     def rollback(self, path):

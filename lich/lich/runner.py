@@ -13,11 +13,12 @@ def timethis(func):
         start = time.time()
         r = func(*args, **kwargs)
         end = time.time()
-        print('{}: {}.{} {} {}'.format(end - start, func.__module__, func.__name__, args, kwargs))
+        print('[{}]: {}.{} {} {} {}'.format(end - start, func.__module__, func.__name__, args, kwargs, r))
         return r
     return wrapper
 
 
+@timethis
 def _exec(cmd):
     cmd = cmd.split(' ')
     try:
@@ -32,7 +33,6 @@ def _exec(cmd):
     return res
 
 
-@timethis
 def local_runner(exc_handler=None):
     def decorator(func):
         @functools.wraps(func)
