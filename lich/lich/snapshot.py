@@ -47,13 +47,20 @@ class LichSnapshot(LichBase):
         snaptree = snaptree.get('snapshot', {})
         return rc, self._find_snap(snaptree, path.snap_name)
 
+    def children(self, path):
+        rc, info = self.stat(path)
+        if info and 'child' in info:
+            return info.get('child', {}).keys()
+        return []
+
     def _find_snap(self, snaptree, snap):
         for k, v in snaptree.iteritems():
             if k == snap:
-                return snap
+                return v
             elif 'child' in v:
-                if self._find_snap(v['child'], snap)
-                    return snap
+                info = self._find_snap(v['child'], snap)
+                if info:
+                    return info
         return None
 
     def exists(self, path):

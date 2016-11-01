@@ -4,14 +4,9 @@
 
 import unittest
 
-import test_read
-
 import test_pool
 import test_volume
 import test_snapshot
-
-import test_user
-import test_qos
 
 
 class TestPool(unittest.TestCase):
@@ -30,12 +25,6 @@ class TestPool(unittest.TestCase):
 
 if __name__ == '__main__':
     t = unittest.TextTestRunner()
-
-    t.run(test_read.suite())
-
-    t.run(test_user.suite())
-
-    t.run(test_qos.suite())
 
     t.run(test_pool.suite())
     t.run(test_volume.suite())

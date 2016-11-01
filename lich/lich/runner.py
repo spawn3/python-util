@@ -13,7 +13,9 @@ def timethis(func):
         start = time.time()
         r = func(*args, **kwargs)
         end = time.time()
-        print('[{}]: {}.{} {} {} {}'.format(end - start, func.__module__, func.__name__, args, kwargs, r))
+        print('[{}]: {}.{} {} {}'.format(end - start, func.__module__, func.__name__, args, kwargs))
+        print('\t{}'.format(r))
+        print
         return r
     return wrapper
 

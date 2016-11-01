@@ -8,3 +8,12 @@ def GB(n):
 
 def timeit():
     pass
+
+
+def list_is_equal(l1, l2):
+    if len(l1) != len(l2):
+        return False
+    for x in l1:
+        if x not in l2:
+            return False
+    return True
