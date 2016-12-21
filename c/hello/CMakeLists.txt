@@ -15,7 +15,10 @@ endmacro()
 set(MyFoo "MyFoo's value")
 debugValue(MyFoo)
 
-include_directories(include)
+include_directories(include
+	/usr/local/include/hiredis-vip
+	)
+link_directories(/usr/local/lib)
 
 function(build_exe name source_files)
     add_executable(${name} ${source_files})
@@ -26,3 +29,9 @@ set(SOURCE_FILES
     src/test1.c
     )
 build_exe(hello "${SOURCE_FILES}")
+
+
+set(REDIS_SOURCE_FILES
+	src/redis.c)
+build_exe(redis "${REDIS_SOURCE_FILES}")
+target_link_libraries(redis hiredis_vip)

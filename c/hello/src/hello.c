@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "hello.h"
 
@@ -26,11 +27,55 @@ int f2(int a, int b) {
 }
 
 
+int normalize_path(const char *path, char *path2) {
+	int i, len, begin, off;
+
+	len = strlen(path);
+
+	off = 0;
+	begin = -1;
+	for(i = 0; i < len; ++i) {
+		if (path[i] == '/') {
+			if (begin == -1) {
+				continue;
+			} 
+
+			path2[off++] = '/';
+			strncpy(path2 + off, path + begin, i - begin);
+			off += i - begin;
+			// stop a segment
+			begin = -1;
+		} else {
+			if (begin == -1) {
+				// start a new segment
+				begin = i;
+			}
+		}
+	}
+
+	if (begin != -1 && begin < i) {
+		path2[off++] = '/';
+		strncpy(path2 + off, path + begin, i - begin);
+		off += i - begin;
+	}
+
+	path2[off] = '\0';
+	printf("path %s\n", path2);
+	return 0;
+}
+
+
 int main(int argc, char **argv) {
 	printf("argc %d\n", argc);
 	for (int i=0; i < argc; ++i) {
 		printf("argv[%d] %s\n", i, argv[i]);
 	}
+
+	char path[256];
+	normalize_path("//aa", path);
+	normalize_path("//aa//bb//cc", path);
+	normalize_path("//aa//bb//////cccc//", path);
+
 	printf("Hello, world\n");
 	test_sizeof();
 
