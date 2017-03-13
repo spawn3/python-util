@@ -99,7 +99,6 @@ err_ret:
         (void)0;
 }
 
-
 int main() {
         int ret;
 
@@ -116,6 +115,7 @@ int main() {
 
         printf("-------------------------------------\n");
         test_buffer();
+	__make_sure_disk_forv3("v4");
 
         return 0;
 err_ret:

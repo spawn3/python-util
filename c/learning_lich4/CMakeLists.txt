@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(learning_lich4 C)
 
-set(LICH_HOME "/root/huayun/lich4")
+set(LICH_HOME "/home/gj/huayun/lich4")
 
 set(CMAKE_C_FLAGS "-g -W -Wall -Werror -rdynamic -D_GUN_SOURCE -D_REENTRANT")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")

@@ -65,11 +65,32 @@ int normalize_path(const char *path, char *path2) {
 }
 
 
+static int __make_sure_disk_forv3(char *disk)
+{
+	char newdisk[64];
+	char split = '/';
+	char *pos;
+
+	pos = strchr(disk, split);
+	if (pos) {
+	} else {
+		snprintf(newdisk, 64, "%s/0", disk);
+		strcpy(disk, newdisk);
+	}
+
+	return 0;
+}
+
+
 int main(int argc, char **argv) {
 	printf("argc %d\n", argc);
 	for (int i=0; i < argc; ++i) {
 		printf("argv[%d] %s\n", i, argv[i]);
 	}
+
+	char disk[64] = "v4";
+	__make_sure_disk_forv3(disk);
+	printf("disk = %s\n", disk);
 
 	char path[256];
 	normalize_path("//aa", path);
