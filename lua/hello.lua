@@ -1,3 +1,5 @@
+#!/usr/bin/env lua
+
 -- defines a factorial function
 function fact(n)
 	if n == 0 then
