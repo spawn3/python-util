@@ -6,6 +6,7 @@ int poll(struct pollfd *fds, unsigned long nfds, int timeout);
 ]]
 
 print('ffi.os ' .. ffi.os)
+print('ffi.arch ' .. ffi.arch)
 
 local sleep
 if ffi.os == "Windows" then
