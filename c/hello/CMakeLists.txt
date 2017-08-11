@@ -45,8 +45,10 @@ set(VALGRIND_SOURCE_FILES
     )
 build_exe(val "${VALGRIND_SOURCE_FILES}")
 
-set(HASH_SOURCE_FILES
-    src/hash.c
-    )
+set(HASH_SOURCE_FILES src/hash.c)
 build_exe(hash "${HASH_SOURCE_FILES}")
 target_link_libraries(hash gdsl)
+
+set(RBTREE_SOURCE_FILES src/rbtree.c)
+build_exe(rbtree "${RBTREE_SOURCE_FILES}")
+target_link_libraries(rbtree gdsl)
