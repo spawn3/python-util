@@ -16,6 +16,8 @@
 
 \usepackage{mathtools}
 
+\usepackage{listings}
+
 \title {LICH架构文档}
 \author{董冠军}
 \date{\today}
@@ -263,10 +265,42 @@ GC recovery过程可以理解为：从gc bitmap重建内存状态。
 所有的log，分为两部分：old storage和bitmap。bitmap相当于journalling。进入check queue的logctrl，先登记到bitmap。
 在提交时，即从heap移入old storage时，清除/注销相应的bitmap项。
 
-
 \subsubsection{Wbuf Recovery}
 
 谁充当了日志的角色？在wbuf模块很明确，有专门的WAL。写入阶段登记，commit阶段回收。
+
+\subsection{LSV测试}
+
+LSV基于Lich原生卷，实现了日志结构的卷格式，支持快照的各种操作。
+
+LSV测试，主要分为功能，正确性和性能几个方面，\textcolor{red}{正确性和性能按标准测试用例}执行即可。下面列出一期测试计划。
+
+\subsubsection{特性}
+
+\begin{lstlisting}[language=bash,frame=single]
+# 创建LSV卷：
+lichbd vol create p1/v1 --size 100Gi -F lsv -p iscsi
+
+# 快照功能，与原来一样，部分命令示例：
+lichbd snap create p1/v1@snap1 -p iscsi
+lichbd snap create p1/v1@snap2 -p iscsi
+lichbd snap ls p1/v1 -p iscsi
+
+# 暂不支持flatten操作
+
+\end{lstlisting}
+
+\subsubsection{性能/正确性测试清单}
+
+\begin{itemize}
+    \item 与lich原生卷全面的性能对比
+    \item 资源利用率(包括磁盘，内存)
+    \item 系统启动时间
+    \item 重启系统的恢复过程
+    \item 存储分层
+    \item 扩展到多卷
+\end{itemize}
+
 
 \section{FAQ}
 
