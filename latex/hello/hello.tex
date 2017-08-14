@@ -14,11 +14,15 @@
 \usepackage{makeidx}
 \makeindex
 
+\usepackage{amsmath}
 \usepackage{mathtools}
 
 \usepackage{listings}
+\usepackage{multicol}
+\usepackage{fancybox}
+\usepackage{tcolorbox}
 
-\title {LICH架构文档}
+\title{LICH架构文档}
 \author{董冠军}
 \date{\today}
 
@@ -250,10 +254,12 @@ tail标记了可见空间，可见空间=已分配+可分配（free list）。fr
 为了支持批量malloc和free接口，引入dirty page bitmap，类似于GC中提到的卡表，可以实现\textcolor{red}{多次更新，一次提交}的设计模式。
 
 主要操作：
+\begin{tcolorbox}
 \begin{itemize}
     \item malloc操作：依次从C，D，U里取可用chunk。
     \item free操作：把释放的chunk放入C，如果C满，则转化为D。
 \end{itemize}
+\end{tcolorbox}
 
 这里的提交操作可以理解为：C转化为D的过程，并没有记录检查点。
 所以恢复操作，要全扫描bitmap，从bitmap重建C和D。
@@ -271,12 +277,35 @@ GC recovery过程可以理解为：从gc bitmap重建内存状态。
 
 \subsection{LSV测试}
 
-LSV基于Lich原生卷，实现了日志结构的卷格式，支持快照的各种操作。
+LSV(\textcolor{red}{Log Structured Volume})基于Lich原生卷，实现了日志结构的卷格式，支持快照的各种操作。
+
+相对于Lich原生卷，LSV有几点优势：
+\begin{tcolorbox}
+    \begin{itemize}
+        \item 转化随机IO为顺序IO，混合存储情况下有更高性能
+        \item 实现为ROW快照，zero-copy快照，\textcolor{red}{支持快照树}
+    \end{itemize}
+\end{tcolorbox}
+
+LSV的关键过程：
+\begin{tcolorbox}
+    \begin{itemize}
+        \item 写
+        \item 读
+        \item GC（垃圾回收）
+        \item 重启
+    \end{itemize}
+\end{tcolorbox}
 
 LSV测试，主要分为功能，正确性和性能几个方面，\textcolor{red}{正确性和性能按标准测试用例}执行即可。下面列出一期测试计划。
 
+\subsubsection{GIT分支}
+
+lsv\_pipeline
+
 \subsubsection{特性}
 
+%\begin{tcolorbox}
 \begin{lstlisting}[language=bash,frame=single]
 # 创建LSV卷：
 lichbd vol create p1/v1 --size 100Gi -F lsv -p iscsi
@@ -286,9 +315,10 @@ lichbd snap create p1/v1@snap1 -p iscsi
 lichbd snap create p1/v1@snap2 -p iscsi
 lichbd snap ls p1/v1 -p iscsi
 
-# 暂不支持flatten操作
+# 暂不支持flat操作
 
 \end{lstlisting}
+%\end{tcolorbox}
 
 \subsubsection{性能/正确性测试清单}
 
@@ -299,6 +329,12 @@ lichbd snap ls p1/v1 -p iscsi
     \item 重启系统的恢复过程
     \item 存储分层
     \item 扩展到多卷
+\end{itemize}
+
+\subsubsection{注意事项}
+
+\begin{itemize}
+    \item /opt/fusionstack/log/lich.log (echo 5 > /dev/shm/lich4/msgctl/level)
 \end{itemize}
 
 
