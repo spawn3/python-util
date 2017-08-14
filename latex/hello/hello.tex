@@ -21,6 +21,7 @@
 \usepackage{multicol}
 \usepackage{fancybox}
 \usepackage{tcolorbox}
+\usepackage{enumitem}
 
 \title{LICH架构文档}
 \author{董冠军}
@@ -175,10 +176,12 @@ lsv-lich raw-disk的chunk空间存在两级映射关系，会影响到读写性�
 
 底层空间宜按固定大小的段来组织。每个段空间管理的开销是固定的。
 目前支持两级存储分级：
+\begin{tcolorbox}
 \begin{itemize}
     \item 0：ssd
     \item 1：hdd
 \end{itemize}
+\end{tcolorbox}
 
 \subsection{Bitmap}
 
@@ -289,13 +292,14 @@ LSV(\textcolor{red}{Log Structured Volume})基于Lich原生卷，实现了日志
 
 LSV的关键过程：
 \begin{tcolorbox}
-    \begin{itemize}
-        \item 写
-        \item 读
-        \item GC（垃圾回收）
-        \item 重启
-    \end{itemize}
+    \begin{description}[style=nextline]
+        \item [写] 写入wal和wbuf后，即可返回。wbuf积聚到1M时，提交log+bitmap后台异步任务。
+        \item [读] 从wbuf读取最新数据，如果没有命中，则依次从rcache，bitmap+log读取。
+        \item [GC] 垃圾回收，后台异步任务，按一定策略，回收无效页。
+        \item [重启] 分两种情况，正常和异常情况。正常情况下会刷新内存状态，重启时直接加载即可；异常情况下，进入recovery过程。
+    \end{description}
 \end{tcolorbox}
+
 
 LSV测试，主要分为功能，正确性和性能几个方面，\textcolor{red}{正确性和性能按标准测试用例}执行即可。下面列出一期测试计划。
 
