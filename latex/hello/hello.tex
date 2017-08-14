@@ -238,8 +238,8 @@ log功能单一化，gc模块独立出来。gc要解决的问题有二：
     \item Volume
 \end{itemize}
 
-\begin{tcolorbox}
 提出几个问题：
+\begin{tcolorbox}
 \begin{enumerate}
     \item 正常关机时，需要flush什么信息？
     \item 恢复过程，从X恢复出Y，X是什么？Y是什么？(X是日志，Y是最新状态)
@@ -342,7 +342,7 @@ lichbd snap ls p1/v1 -p iscsi
 \subsubsection{注意事项}
 
 \begin{itemize}
-    \item /opt/fusionstack/log/lich.log (echo 5 > /dev/shm/lich4/msgctl/level)
+    \item 日志满：/opt/fusionstack/log/lich.log (echo 5 > /dev/shm/lich4/msgctl/level)
 \end{itemize}
 
 
