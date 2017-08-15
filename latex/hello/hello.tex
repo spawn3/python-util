@@ -40,10 +40,10 @@
 \subsection{关键特性和过程}
 
 \begin{enumerate}
-    \item 存储分层
-    \item 保护模式
     \item flush and load
     \item recovery
+    \item 保护模式 safe mode
+    \item 存储分层
 \end{enumerate}
 
 \subsection{快照}
@@ -55,23 +55,39 @@
 
 \subsection{一致性/正确性}
 
+\begin{tcolorbox}
 \begin{enumerate}
     \item 内置质量，各模块添加自校验机制，方便诊断数据正确性问题(assert + log + test)
     \item 加强断言：pre和post条件，变量变化规则，不变式，基本假设等
     \item 日志用tag/keywork和timeline，以便于跟踪一个对象的变化历史，用一个或多个维度贯穿起来，用于辅助诊断
     \item 增加CHUNK\_HISTORY，以时间线方式，跟踪记录CHUNK变化的生命周期
 \end{enumerate}
+\end{tcolorbox}
 
 \subsection{性能}
 
+\begin{tcolorbox}
 \begin{enumerate}
     \item \textcolor{red}{rcache 顺序IO随机化问题}
+    \item 创建卷时，rcache分配了4096M的SSD cache，可以延迟分配
     \item wbuf 顺序IO随机化问题
     \item 系统启动时间
-    \item GC策略和算法
     \item 预填充lich chunk
+    \item GC策略和算法
     \item 统计基础操作的开销，作为性能分析的基础
 \end{enumerate}
+\end{tcolorbox}
+
+\subsection{负载和资源}
+
+\begin{tcolorbox}
+\begin{enumerate}
+    \item 内存使用量过大
+    \item 内存泄漏
+    \item 磁盘利用率不足
+    \item 网络带宽：瓶颈或利用率不足
+\end{enumerate}
+\end{tcolorbox}
 
 \subsection{兼容性}
 
@@ -150,6 +166,11 @@ pool, volume, snapshot等基本概念。
     \item mbuffer
 \end{itemize}
 
+\subsection{Safe Mode}
+
+\subsection{Coroutine使用规则}
+
+
 \section{硬件架构}
 
 NVMe
@@ -187,18 +208,23 @@ lsv-lich raw-disk的chunk空间存在两级映射关系，会影响到读写性�
 
 \subsection{Bitmap}
 
-Bitmap负责元数据管理，有两层：L1和L2，按类似页表的方式组织。和Log层数据一起，构成三层。
+Bitmap更合适的叫法是页表，与操作系统里的页表类似，负责虚拟地址到物理地址的映射关系。Bitmap有两层：L1和L2，
+按类似页表的方式组织。和Log层数据一起，构成三层。
 
 L1是Bitmap的头部，大小固定，属于卷或快照私有。L2按需分配，在快照之间共享。在Clone的情况下，会涉及跨卷读。
 
-通过Bitmap层，支持快照的全部特性，多个快照构成快照树。
+通过Bitmap层，支持快照的全部特性，多个快照构成快照树。快照树分两种方式展示：树状或列表。
 
-\subsection{Log}
+\subsection{Log/Chunk}
+
+底层物理空间，划分为固定大小为1M的数据块，进行统一管理：分配/释放。
 
 在Volume模块之上做了简单封装，表示卷的数据，Bitmap表示卷的元数据。在覆盖更新的情况下，Bitmap指向新的数据页，
 导致原来的数据页失效，可以回收。在有快照的情况下，会变得较为复杂。
 
 Log模块无需要持久化的信息。
+
+在Lich卷空间映射到磁盘的时候，目前实现为一个随机过程。\textcolor{red}{磁盘的1M随机和顺序，差别较大}。
 
 \subsection{WBuf}
 
