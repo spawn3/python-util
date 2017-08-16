@@ -37,13 +37,38 @@
 
 \section{当前任务清单}
 
+\subsection{原生卷}
+
+\begin{enumerate}
+    \item Allocate的性能
+    \item 精简配置，快照对性能的影响
+\end{enumerate}
+
 \subsection{关键特性和过程}
 
 \begin{enumerate}
-    \item flush and load
-    \item recovery
+    \item flush, load and recovery
     \item 保护模式 safe mode
     \item 存储分层
+    \item 命令行工具，扩展卷和快照相关操作到LSV
+\end{enumerate}
+
+\subsection{兼容性}
+
+\begin{enumerate}
+    \item 版本演进
+\end{enumerate}
+
+\subsection{Pool}
+
+\begin{enumerate}
+    \item Resource Pool
+\end{enumerate}
+
+\subsection{Volume}
+
+\begin{enumerate}
+    \item vol resize?
 \end{enumerate}
 
 \subsection{快照}
@@ -51,12 +76,15 @@
 \begin{enumerate}
     \item 支持60000+快照
     \item consistency group
+    \item 每个snap的大小等信息
+    \item snap大小对GC策略的影响
 \end{enumerate}
 
 \subsection{一致性/正确性}
 
 \begin{tcolorbox}
 \begin{enumerate}
+    \item 底层数据检验工具(chunk0, volume, log/gc, bitmap, wal, rcache)
     \item 内置质量，各模块添加自校验机制，方便诊断数据正确性问题(assert + log + test)
     \item 加强断言：pre和post条件，变量变化规则，不变式，基本假设等
     \item 日志用tag/keywork和timeline，以便于跟踪一个对象的变化历史，用一个或多个维度贯穿起来，用于辅助诊断
@@ -66,19 +94,32 @@
 
 \subsection{性能}
 
+性能是负载和资源的函数, $P=F(W, R)$。
+
 \begin{tcolorbox}
 \begin{enumerate}
-    \item \textcolor{red}{rcache 顺序IO随机化问题}
     \item 创建卷时，rcache分配了4096M的SSD cache，可以延迟分配
+    \item \textcolor{red}{rcache 顺序IO随机化问题}
     \item wbuf 顺序IO随机化问题
     \item 系统启动时间
     \item 预填充lich chunk
     \item GC策略和算法
     \item 统计基础操作的开销，作为性能分析的基础
+    \item 恢复性能
 \end{enumerate}
 \end{tcolorbox}
 
-\subsection{负载和资源}
+\subsection{负载}
+
+\begin{tcolorbox}
+\begin{enumerate}
+    \item IO队列深度
+    \item IO平均大小
+    \item IO读写大小
+\end{enumerate}
+\end{tcolorbox}
+
+\subsection{资源}
 
 \begin{tcolorbox}
 \begin{enumerate}
@@ -86,25 +127,32 @@
     \item 内存泄漏
     \item 磁盘利用率不足
     \item 网络带宽：瓶颈或利用率不足
+    \item 中断
+    \item soft lock up?
 \end{enumerate}
 \end{tcolorbox}
 
-\subsection{兼容性}
-
-\begin{enumerate}
-    \item 版本演进
-\end{enumerate}
-
 \subsection{Misc}
 
+\begin{tcolorbox}
 \begin{enumerate}
-    \item VAAI [+xcopy]
     \item FC
     \item Remote copy
     \item SSD cache
     \item EC
+    \item 有效容量的比例
+    \item 热插拔
+    \item 磁盘漫游
+    \item 在线扩容
+    \item 滚动升级
 \end{enumerate}
+\end{tcolorbox}
 
+\subsection{DONE}
+
+\begin{enumerate}
+    \item VAAI [+xcopy]
+\end{enumerate}
 
 \section{基础理论}
 
@@ -167,6 +215,16 @@ pool, volume, snapshot等基本概念。
 \end{itemize}
 
 \subsection{Safe Mode}
+
+卷级进行检查，处在保护模式的卷，不允许iscsi连接，返回错误码。
+
+加载时间较长的模块，用half sync/half async模式来处理。分为两阶段：同步+异步。
+
+一个卷，加载成功，依赖于几个条件：
+\begin{itemize}
+    \item raw/lsv
+    \item module load
+\end{itemize}
 
 \subsection{Coroutine使用规则}
 
@@ -371,9 +429,12 @@ lichbd snap ls p1/v1 -p iscsi
     \item 日志满：/opt/fusionstack/log/lich.log (echo 5 > /dev/shm/lich4/msgctl/level)
 \end{itemize}
 
-
 \section{FAQ}
 
-\subsection{IOMeter测试，256K，Lich顺序和随机IO性能差别大}
+P1: IOMeter测试，256K，Lich顺序和随机IO性能差别大
+
+P2: lsv\_gc\_check断言失败
+
+P3: Error Handling
 
 \end{document}
