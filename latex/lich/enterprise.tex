@@ -55,10 +55,65 @@ IO粒度和数据项粒度的关系，如果IO粒度大于数据项粒度
 
 \subsection{快照树}
 
-\section{Security}
-\section{QOS}
-\section{Quota}
-\section{Multipath}
-\section{DR}
-\section{CDP}
+一颗树的节点，可以分为三类：
+\begin{itemize}
+    \item 根节点
+    \item 中间节点（有无分支）
+    \item 叶子节点
+\end{itemize}
 
+\subsection{创建快照}
+
+原有写入点变成只读，创建新的写入点，并复制L1元数据。
+
+\subsection{删除快照}
+
+快照树上不同的节点，需要不同的删除过程。对于叶子节点，直接删除即可，\textcolor{red}{需要回收数据吗}？
+
+\subsection{列出快照树}
+
+\subsection{写}
+
+写是ROW的重定向过程，可能发生复制第二层元数据的过程。
+
+\subsection{读}
+
+如果不复制元数据，ROW实现的读过程需要回溯快照树，性能不佳。
+如果复制元数据，则每一快照点都具有完整的索引结构，可以做到一次即可定位。
+
+复制元数据，快照和数据具有多对多的引用关系，相当于共享数据块。
+
+\subsection{回滚}
+
+回滚并不会重用回滚到的快照点，而是相当于把写入点切换到目标快照。
+写入点本身是一个独立的快照结构。
+
+回滚后的写入过程
+
+\subsection{Clone}
+
+clone后，会用到跨卷读快照，类似于ROW过程，所以，创建和clone过程具有相似性。
+
+cat, protect, unprotect, flatten
+
+\section{Security}
+
+iscsi CHAP认证
+
+\section{QOS}
+
+token bucket
+
+距离函数
+
+\section{Quota}
+
+\section{Multipath}
+
+\section{DR}
+
+snapshot
+
+io journalling
+
+\section{CDP}
