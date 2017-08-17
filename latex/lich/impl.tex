@@ -1,0 +1,25 @@
+\chapter{实现相关}
+
+\begin{itemize}
+    \item polling
+    \item coroutine and scheduler
+    \item kernel bypass
+    \item mbuffer
+\end{itemize}
+
+\section{Safe Mode}
+
+卷级进行检查，处在保护模式的卷，不允许iscsi连接，返回错误码。
+
+加载时间较长的模块，用half sync/half async模式来处理。分为两阶段：同步+异步。
+
+一个卷，加载成功，依赖于几个条件：
+\begin{itemize}
+    \item raw/lsv
+    \item module load
+\end{itemize}
+
+\section{Coroutine使用规则}
+
+
+

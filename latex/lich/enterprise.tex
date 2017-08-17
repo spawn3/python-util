@@ -1,0 +1,64 @@
+\chapter{企业级特性}
+
+\section{Snapshot}
+
+\begin{tcolorbox}
+需要支持的快照操作：
+    \begin{itemize}
+        \item create
+        \item rm
+        \item list
+        \item rollback
+        \item clone
+        \item cat
+        \item flatten
+        \item protect/unprotect
+    \end{itemize}
+\end{tcolorbox}
+
+采用COW，ROW或两者的组合形式，各有优缺点。
+
+COW方式的快照，卷有完整的索引结构。别的快照点，只有增量的索引结构和发生更新的数据。
+每个快照，存储的是创建之后，到下一个快照点之间发生更新的所有数据块。所以需要尽量降低发生copy的开销。
+适用于频繁且具有局部性的热点负载场景，固定时间段内，每次copy的开销以及\textcolor{red}{复制集的大小}。
+
+ROW方式下，如果meta不发生COW，新的快照点并无完整的索引结构，读过程需要沿着快照链向上回溯。
+并且，rm，rollback等操作需要合并快照点。
+
+如果发生了COW，索引项和数据项引用关系不再是1:1，而是多对多，需要专门的GC机制。
+但rm，rollback等操作实现起来变得简单。
+
+数据项的粒度，定长或变长，不同的负载，读写性能有不同的影响。
+发生COW的粒度，索引结构管理的粒度决定了数据项的粒度。
+
+IO粒度和数据项粒度的关系，如果IO粒度大于数据项粒度
+
+如果IO粒度小于数据项粒度
+
+这条规则是否永远成立：\textcolor{red}{快照树的任一路径，都需要具有完整的索引结构和数据项集，可以有冗余和共享}。
+
+\begin{tcolorbox}
+
+假设有新旧两个快照点S1, S2，每个快照点包括meta和data，提炼出的几个引导性问题：
+
+\begin{enumerate}
+    \item 数据块的粒度，page，chunk，extent？
+    \item 哪一个是写入点？
+    \item 每个快照点是否有完整的索引结构？
+    \item meta是否发生COW？
+    \item data是否发生COW？
+    \item 卷（写入点）是否有完整的索引结构？
+    \item 快照操作(create, rm, rollback, clone, flatten, ls, cat, protect/unprotect)的复杂度？
+\end{enumerate}
+
+\end{tcolorbox}
+
+\subsection{快照树}
+
+\section{Security}
+\section{QOS}
+\section{Quota}
+\section{Multipath}
+\section{DR}
+\section{CDP}
+

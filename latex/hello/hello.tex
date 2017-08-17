@@ -163,13 +163,6 @@
     \item VAAI [+xcopy]
 \end{enumerate}
 
-\section{基础理论}
-
-Lich涉及许多底层理论和系统，包括并行计算和分布式系统，操作系统，文件系统，数据库系统，网络，还包括相应的底层硬件架构。
-需要对数据结构和算法，有良好基础。所以，对基本问题和理论，要有清晰和深入的掌握，才能“运用之妙，存乎一心”。
-
-按道法术器组织结构，写成大文章。
-
 \section{对象模型}
 
 pool, volume, snapshot等基本概念。
@@ -178,6 +171,15 @@ pool, volume, snapshot等基本概念。
 \subsection{Volume}
 \subsection{Snapshot}
 \subsection{Volume Group}
+
+\section{硬件架构}
+
+NVMe
+
+RDMA/DPDK/SPDK
+
+AFA
+
 
 \section{数据管理}
 
@@ -209,6 +211,20 @@ pool, volume, snapshot等基本概念。
 
 \subsection{Snapshot}
 
+\begin{tcolorbox}
+需要支持的快照操作：
+    \begin{itemize}
+        \item create
+        \item rm
+        \item list
+        \item rollback
+        \item clone
+        \item cat
+        \item flatten
+        \item protect/unprotect
+    \end{itemize}
+\end{tcolorbox}
+
 采用COW，ROW或两者的组合形式，各有优缺点。
 
 COW方式的快照，卷有完整的索引结构。别的快照点，只有增量的索引结构和发生更新的数据。
@@ -223,6 +239,10 @@ ROW方式下，如果meta不发生COW，新的快照点并无完整的索引结�
 
 数据项的粒度，定长或变长，不同的负载，读写性能有不同的影响。
 发生COW的粒度，索引结构管理的粒度决定了数据项的粒度。
+
+IO粒度和数据项粒度的关系，如果IO粒度大于数据项粒度
+
+如果IO粒度小于数据项粒度
 
 这条规则是否永远成立：\textcolor{red}{快照树的任一路径，都需要具有完整的索引结构和数据项集，可以有冗余和共享}。
 
@@ -242,45 +262,14 @@ ROW方式下，如果meta不发生COW，新的快照点并无完整的索引结�
 
 \end{tcolorbox}
 
+\subsubsection{快照树}
+
 \subsection{Security}
 \subsection{QOS}
 \subsection{Quota}
 \subsection{Multipath}
 \subsection{DR}
 \subsection{CDP}
-
-\section{实现相关}
-
-\begin{itemize}
-    \item polling
-    \item coroutine and scheduler
-    \item kernel bypass
-    \item mbuffer
-\end{itemize}
-
-\subsection{Safe Mode}
-
-卷级进行检查，处在保护模式的卷，不允许iscsi连接，返回错误码。
-
-加载时间较长的模块，用half sync/half async模式来处理。分为两阶段：同步+异步。
-
-一个卷，加载成功，依赖于几个条件：
-\begin{itemize}
-    \item raw/lsv
-    \item module load
-\end{itemize}
-
-\subsection{Coroutine使用规则}
-
-
-\section{硬件架构}
-
-NVMe
-
-RDMA/DPDK/SPDK
-
-AFA
-
 
 \section{LSV}
 
@@ -476,6 +465,37 @@ lichbd snap ls p1/v1 -p iscsi
 \begin{itemize}
     \item 日志满：/opt/fusionstack/log/lich.log (echo 5 > /dev/shm/lich4/msgctl/level)
 \end{itemize}
+
+\section{实现相关}
+
+\begin{itemize}
+    \item polling
+    \item coroutine and scheduler
+    \item kernel bypass
+    \item mbuffer
+\end{itemize}
+
+\subsection{Safe Mode}
+
+卷级进行检查，处在保护模式的卷，不允许iscsi连接，返回错误码。
+
+加载时间较长的模块，用half sync/half async模式来处理。分为两阶段：同步+异步。
+
+一个卷，加载成功，依赖于几个条件：
+\begin{itemize}
+    \item raw/lsv
+    \item module load
+\end{itemize}
+
+\subsection{Coroutine使用规则}
+
+
+\section{基础理论}
+
+Lich涉及许多底层理论和系统，包括并行计算和分布式系统，操作系统，文件系统，数据库系统，网络，还包括相应的底层硬件架构。
+需要对数据结构和算法，有良好基础。所以，对基本问题和理论，要有清晰和深入的掌握，才能“运用之妙，存乎一心”。
+
+按道法术器组织结构，写成大文章。
 
 \section{FAQ}
 

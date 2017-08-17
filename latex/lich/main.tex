@@ -1,0 +1,59 @@
+% -*- coding: UTF-8 -*-
+% hello.tex
+
+\documentclass[UTF8]{book}
+
+\usepackage{xeCJK}
+
+
+\usepackage{hyperref}
+\hypersetup{pdftex,colorlinks=true,allcolors=blue}
+\usepackage{hypcap}
+
+\usepackage{color}
+\usepackage[usenames, dvipsnames, svgnames, table]{xcolor}
+% \pagecolor{gray}
+
+\usepackage{makeidx}
+\makeindex
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{fancybox}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+
+\title{LICH架构文档}
+\author{董冠军}
+\date{\today}
+
+% \bibliographystyle{plain}
+% \bibliography{math}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\part{任务清单}
+
+\include{todo}
+
+\part{FusionStorage}
+
+\include{model}
+\include{hardware}
+\include{optimize}
+\include{enterprise}
+\include{lsv}
+\include{impl}
+\include{faq}
+
+\part{基础理论}
+
+\include{theory}
+
+\end{document}
