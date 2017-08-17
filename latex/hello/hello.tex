@@ -39,10 +39,20 @@
 
 \subsection{原生卷}
 
+\begin{tcolorbox}
 \begin{enumerate}
     \item Allocate的性能
     \item 精简配置，快照对性能的影响
+    \item 快照树
+    \item 单卷快照的数量
+    \item 恢复性能
+    \item VAAI
+    \item FC (+VAAI)
+    \item 异步远程复制
+    \item SSD Cache
+    \item 资源池
 \end{enumerate}
+\end{tcolorbox}
 
 \subsection{关键特性和过程}
 
@@ -105,7 +115,6 @@
     \item 预填充lich chunk
     \item GC策略和算法
     \item 统计基础操作的开销，作为性能分析的基础
-    \item 恢复性能
 \end{enumerate}
 \end{tcolorbox}
 
@@ -197,6 +206,41 @@ pool, volume, snapshot等基本概念。
 \end{itemize}
 
 \section{企业级特性}
+
+\subsection{Snapshot}
+
+采用COW，ROW或两者的组合形式，各有优缺点。
+
+COW方式的快照，卷有完整的索引结构。别的快照点，只有增量的索引结构和发生更新的数据。
+每个快照，存储的是创建之后，到下一个快照点之间发生更新的所有数据块。所以需要尽量降低发生copy的开销。
+适用于频繁且具有局部性的热点负载场景，固定时间段内，每次copy的开销以及\textcolor{red}{复制集的大小}。
+
+ROW方式下，如果meta不发生COW，新的快照点并无完整的索引结构，读过程需要沿着快照链向上回溯。
+并且，rm，rollback等操作需要合并快照点。
+
+如果发生了COW，索引项和数据项引用关系不再是1:1，而是多对多，需要专门的GC机制。
+但rm，rollback等操作实现起来变得简单。
+
+数据项的粒度，定长或变长，不同的负载，读写性能有不同的影响。
+发生COW的粒度，索引结构管理的粒度决定了数据项的粒度。
+
+这条规则是否永远成立：\textcolor{red}{快照树的任一路径，都需要具有完整的索引结构和数据项集，可以有冗余和共享}。
+
+\begin{tcolorbox}
+
+假设有新旧两个快照点S1, S2，每个快照点包括meta和data，提炼出的几个引导性问题：
+
+\begin{enumerate}
+    \item 数据块的粒度，page，chunk，extent？
+    \item 哪一个是写入点？
+    \item 每个快照点是否有完整的索引结构？
+    \item meta是否发生COW？
+    \item data是否发生COW？
+    \item 卷（写入点）是否有完整的索引结构？
+    \item 快照操作(create, rm, rollback, clone, flatten, ls, cat, protect/unprotect)的复杂度？
+\end{enumerate}
+
+\end{tcolorbox}
 
 \subsection{Security}
 \subsection{QOS}
@@ -307,6 +351,10 @@ log功能单一化，gc模块独立出来。gc要解决的问题有二：
 
 目前的实现，是局域的解，而不是全局最优解，是bottom-up的分代垃圾回收器。可增量并行执行，与前台赋值器需要同步机制。
 回收器和赋值器需要读写barrier。
+
+优化GC Check过程：每一页的信息，只会出现在部分的bitmap记录里，与快照树的拓扑结构有关。
+在创建快照时，分配snap id。 snap id组织成单调递增的序列。如果中间没有删除或rollback操作，
+很容易定位到某页所属的快照点。经过rm或rollback之后，情况有所不同，但依然有迹可循。
 
 \subsection{Recovery}
 
