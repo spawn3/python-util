@@ -5,3 +5,5 @@
 *.log
 *.aux
 *.toc
+*.idx
+*.out
