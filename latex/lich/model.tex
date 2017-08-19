@@ -10,7 +10,80 @@ pool, volume, snapshot等基本概念。
 \chapter{数据管理}
 
 \section{分配和回收}
+
+\subsection{分配一个chunk的过程}
+
+
+
 \section{分布}
+
 \section{平衡}
+
 \section{恢复}
 
+\subsection{需求}
+
+恢复性能和Qos机制。
+
+控制系统后台数据恢复进程所占用的带宽和 IO 处理资源，提供多种数据恢复的优先级策略。
+
+至少提供优先前端应用或优先数据修复这两种优先级策略。在优先前端应用的策略中，数据
+修复仅在资源较空闲时进行；在优先数据修复策略中，后台恢复以最快速度完成，
+但卷仍然在线保持可用，仅性能有所降低。
+
+作为作业管理，展示恢复进度，关键参数和资源消耗情况。
+
+\subsection{设计}
+
+目标，偏离，反馈，调节，达到控制的目的。分析上下限，临界情况，执两用中。
+
+串行恢复一个chunk的性能，并发情况下的加速比(串行是基准)。
+
+在不受限制的情况下，先优化到最大性能，能否达到硬件瓶颈？
+
+需要有约束的机制和策略。控制并发度和等待时间。
+
+在每个节点上运行恢复线程，分两个阶段：
+\begin{itemize}
+    \item 扫描，确定需要恢复的chunk
+    \item 恢复，多线程执行
+\end{itemize}
+
+每个节点只处理属于本节点的数据，即主副本位于本地节点。从sqlite扫描chkid，逐个检查其repnum，
+是否与fileinfo一致，如果不一致，追加到一临时文件
+\begin{itemize}
+    \item chkinfo.repnum是实际副本数（需要进一步查看各副本的真实状态）
+    \item fileinfo.repnum是目标副本数
+\end{itemize}
+
+控制参数：
+\begin{itemize}
+    \item 线程数
+    \item 线程处理完一个chunk后的sleep时间
+    \item 数据恢复的最大带宽
+\end{itemize}
+
+\subsection{实现}
+
+配置目录：/dev/shm/lich4/nodectl/recovery
+
+\begin{itemize}
+    \item immediately       功能开关
+    \item interval          恢复任务的时间间隔
+    \item thread            工作线程数
+    \item suspend
+    \item qos\_maxbandwidth 设置最大带宽
+    \item qos\_sleep        设置sleep多少豪秒
+    \item qos\_cycle        设置计算带宽的时间间隔
+    \item info              输出结果
+\end{itemize}
+
+\subsection{测试}
+
+\subsection{运行}
+
+\begin{tcolorbox}
+    自动触发：Recover 每10分钟执行
+
+    手动触发：echo 1 > /dev/shm/lich4/nodectl/recovery/immediately
+\end{tcolorbox}

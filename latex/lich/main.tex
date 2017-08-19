@@ -36,12 +36,28 @@
 
 \arrayrulecolor[HTML]{DB5800}
 
+\usepackage{tikz,mathpazo}
+\usetikzlibrary{shapes, arrows, chains, trees, arrows.meta}
+
 \title{LICH架构文档}
 \author{董冠军}
 \date{\today}
 
 % \bibliographystyle{plain}
 % \bibliography{math}
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
 
 \begin{document}
 
@@ -66,5 +82,6 @@
 \part{基础理论}
 
 \include{theory}
+\include{flow}
 
 \end{document}
