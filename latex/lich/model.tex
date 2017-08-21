@@ -1,4 +1,4 @@
-\chapter{对象模型}
+\chapter{领域模型}
 
 集群
 
@@ -54,6 +54,13 @@ CRC协作类：
 在初次分配，再平衡和恢复等过程中，都需遵循这些规则。
 
 \section{Pool}
+
 \section{Volume}
+
 \section{Snapshot}
+
+snapshot隶属于卷，无卷则无快照，一个卷可以有一个快照树，其中有且只有一个快照是可写快照，即卷的写入点。
+
 \section{Volume Group}
+
+与pool有什么同和异。

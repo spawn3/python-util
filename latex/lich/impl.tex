@@ -3,8 +3,8 @@
 \begin{itemize}
     \item polling
     \item coroutine and scheduler
-    \item kernel bypass
     \item mbuffer
+    \item kernel bypass
 \end{itemize}
 
 \section{Safe Mode}
@@ -19,7 +19,54 @@
     \item module load
 \end{itemize}
 
-\section{Coroutine使用规则}
+\section{Coroutine}
 
+使用规则：
+\begin{itemize}
+    \item \verb|schedule_task_get|和\verb|schedule_yield|要匹配
+    \item task有数量上的限制：1024，超出后容易引起死锁
+\end{itemize}
 
+\section{Memory Management}
 
+\subsection{ymalloc}
+
+\subsection{mbuffer}
+
+\subsection{huge page}
+
+2M
+
+\section{AIO}
+
+生产者-消费者模型。
+
+\section{sqlite3}
+
+异步sqlite3。
+
+\begin{itemize}
+    \item 共10个db，每个一个线程，每个线程管理一个队列
+    \item 所有sqlite3操作，泛化为统一的结构，放入线程队列
+    \item 消费者线程批量处理队列中的任务
+    \item 生产者线程和消费者线程通过sem进行通信
+    \item 采用协程机制(yield/resume)同步任务执行顺序
+\end{itemize}
+
+消费者线程wait在sem上，生产者线程有消息的时候，调用\verb|sem_post|。
+
+\section{RPC}
+
+\begin{itemize}
+    \item minirpc
+    \item rpc
+    \item corerpc
+\end{itemize}
+
+\section{Algorithm}
+
+\begin{itemize}
+    \item paxos/raft 选举admin和meta节点
+    \item vector clock 副本一致性
+    \item lease controller的唯一性
+\end{itemize}
