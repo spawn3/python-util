@@ -1,89 +1,59 @@
 \chapter{对象模型}
 
+集群
+
+节点，存储介质
+
+资源池，保护域，故障域
+
 pool, volume, snapshot等基本概念。
+
+\section{Resource Pool}
+
+不应该出现在IQN里面。
+
+保护域是物理节点的划分，资源池是存储介质的划分。每块盘只能出现在一个资源池里。
+
+不同资源池之间，卷的copy和migration。
+
+卷和资源池的关系，资源池的CRUD。
+
+diskmap
+
+chunkid到磁盘物理位置有两级映射：chunk的副本节点列表，节点内chunkid到物理地址的映射。
+
+在为卷分配chunk的时候，需要确定各个副本的物理存储位置。当前实现是返回不同副本的节点列表。
+如果指定了资源池，就需要在资源池所在的节点范围内进行分配。
+
+资源池内，要满足故障域规则(\ref{rule:faultset})
+都需遵循这些规则。
+
+CRC协作类：
+\begin{itemize}
+    \item node and disk
+    \item volume
+    \item pool
+    \item protection domain
+    \item fault set
+\end{itemize}
+
+资源池是disk的集合，与节点无关。但disk所在的节点构成资源池的节点列表，故障域如果定义在节点级。
+
+资源池下，可以创建pool和volume。
+
+资源池和pool是什么关系？一对一，一对多，多对多。
+
+资源池和保护域什么关系？
+
+资源池包含故障域。
+
+\section{Fault Set}
+
+资源池内，要满足故障域规则：一个chunk的不同副本，分布在不同的故障域内。\label{rule:faultset}
+
+在初次分配，再平衡和恢复等过程中，都需遵循这些规则。
 
 \section{Pool}
 \section{Volume}
 \section{Snapshot}
 \section{Volume Group}
-
-\chapter{数据管理}
-
-\section{分配和回收}
-
-\subsection{分配一个chunk的过程}
-
-
-
-\section{分布}
-
-\section{平衡}
-
-\section{恢复}
-
-\subsection{需求}
-
-恢复性能和Qos机制。
-
-控制系统后台数据恢复进程所占用的带宽和 IO 处理资源，提供多种数据恢复的优先级策略。
-
-至少提供优先前端应用或优先数据修复这两种优先级策略。在优先前端应用的策略中，数据
-修复仅在资源较空闲时进行；在优先数据修复策略中，后台恢复以最快速度完成，
-但卷仍然在线保持可用，仅性能有所降低。
-
-作为作业管理，展示恢复进度，关键参数和资源消耗情况。
-
-\subsection{设计}
-
-目标，偏离，反馈，调节，达到控制的目的。分析上下限，临界情况，执两用中。
-
-串行恢复一个chunk的性能，并发情况下的加速比(串行是基准)。
-
-在不受限制的情况下，先优化到最大性能，能否达到硬件瓶颈？
-
-需要有约束的机制和策略。控制并发度和等待时间。
-
-在每个节点上运行恢复线程，分两个阶段：
-\begin{itemize}
-    \item 扫描，确定需要恢复的chunk
-    \item 恢复，多线程执行
-\end{itemize}
-
-每个节点只处理属于本节点的数据，即主副本位于本地节点。从sqlite扫描chkid，逐个检查其repnum，
-是否与fileinfo一致，如果不一致，追加到一临时文件
-\begin{itemize}
-    \item chkinfo.repnum是实际副本数（需要进一步查看各副本的真实状态）
-    \item fileinfo.repnum是目标副本数
-\end{itemize}
-
-控制参数：
-\begin{itemize}
-    \item 线程数
-    \item 线程处理完一个chunk后的sleep时间
-    \item 数据恢复的最大带宽
-\end{itemize}
-
-\subsection{实现}
-
-配置目录：/dev/shm/lich4/nodectl/recovery
-
-\begin{itemize}
-    \item immediately       功能开关
-    \item interval          恢复任务的时间间隔
-    \item thread            工作线程数
-    \item suspend
-    \item qos\_maxbandwidth 设置最大带宽
-    \item qos\_sleep        设置sleep多少豪秒
-    \item qos\_cycle        设置计算带宽的时间间隔
-    \item info              输出结果
-\end{itemize}
-
-\subsection{测试}
-
-\subsection{运行}
-
-\begin{tcolorbox}
-    自动触发：Recover 每10分钟执行
-
-    手动触发：echo 1 > /dev/shm/lich4/nodectl/recovery/immediately
-\end{tcolorbox}

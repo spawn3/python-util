@@ -1,0 +1,74 @@
+\chapter{数据管理}
+
+\section{元数据}
+
+作为存储系统，主要考虑是元数据组织和IO，恢复等关键过程。
+
+\section{分布，平衡}
+
+数据分布首先要满足规则要求，其次则需做到均衡和局部性。
+规则是强制的，极端条件下可能退化。均衡和局部性则影响系统性能。
+
+数据分布规则有：
+\begin{itemize}
+\item 保护域规则
+\item 存储池规则
+\item 故障域规则(\ref{rule:faultset})
+\end{itemize}
+
+负载均衡和本地化两方面考虑，平衡包括数据平衡和任务平衡。
+
+chunk在节点上的分布，节点内chunk在磁盘上的分布（包括分层）
+
+controller在节点上的分布，controller在core上的分布
+
+进一步，需要考虑保护域，故障域，资源池各自的作用和特性。
+
+\section{分配和回收}
+
+\subsection{分配一个chunk的过程}
+
+函数：
+\begin{itemize}
+    \item \verb|__table2_chunk_create|
+    \item \verb|replica_srv_create|
+    \item \verb|disk_create|
+\end{itemize}
+
+与admin交互，返回节点列表，即各副本所在节点。
+
+需要持久化的信息：
+\begin{itemize}
+    \item table2 meta，记录chunk info（副本位置）
+    \item sqlite3，记录chkid（副本）到物理地址的映射关系
+    \item disk bitmap，记录磁盘上每个chunk的分配状态
+    \item 填充chunk内容为全0？
+\end{itemize}
+
+分配chunk的过程，会影响到若干特性，如精简配置，恢复，再平衡，写入等，都产生新chunk。
+
+\subsection{磁盘管理}
+
+每块磁盘对应一个bitmap，用于该盘的空间管理。
+
+磁盘有分层属性，通常0表示SSD，1表示HDD。有三种分层策略：tier==0，表示写入SSD，tier==1表示写入HDD，
+tier==-1表示自动分层，先写入SSD，通过异步后台线程flush不活跃的数据到HDD。
+
+在分配每一个chunk的时候，可以指定tier。没有指定的情况下，默认为卷的priority设定。
+
+chunk\_id到磁盘物理地址的映射，是一随机过程，定位到空闲的bitmap上。
+
+如何确定磁盘的分层？
+
+RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据。
+
+\section{IO过程}
+
+写过程，可能内在地包含了分配chunk的过程，缺页分配。当在末尾写入时，还可能扩展了卷的大小。
+
+大范围内的随机写入，造成很多的缺页分配，分配过程会成为性能瓶颈。
+
+\section{复制}
+\section{本地化}
+\section{分层}
+\section{SSD缓存}
