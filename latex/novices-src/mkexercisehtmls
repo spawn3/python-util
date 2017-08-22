@@ -1,0 +1,272 @@
+#!/usr/bin/perl -w
+
+# Generates HTML files associated with exercises
+#
+# syntax: mkexercisehtmls <aux file> <exercise dir> <css>
+
+use strict;
+
+unless ($#ARGV == 2)
+{
+   die "Syntax: $0 <hloe file> <dir> <book name>\n";
+}
+
+my $hloe = $ARGV[0];
+my $dir = $ARGV[1];
+my $booktitle = $ARGV[2];
+
+my $CSS = "dickimaw.css";
+my $REL = "../../../..";
+
+open HLOE, $hloe or die "Can't open '$hloe' $!\n";
+
+my @exercises = ();
+
+while (<HLOE>)
+{
+   if (/\\htmlexerciseitem{(.+)}{ex:([^}]+)}{(?:ex:)?([^}]+)}{(\d+)}/)
+   {
+       my $title   = $1;
+       my $base    = $2;
+       my $backref = $3;
+       my $num     = $4;
+
+       # tidy title a little
+
+       $title=~s/\\protect\s*//g;
+       $title=~s/\\ldots\s*/.../g;
+       $title=~s/\\cmdname\s*{([^}]+)}/\\$1/g;
+       $title=~s/\\textbackslash\s*/\\/g;
+       $title=~s/\\texorpdfstring\s*{([^}]+)}{([^}]+)}/$2/;
+       $title=~s/\\latexhtml\s*{([^}]+)}{([^}]+)}/$2/;
+
+       $title=~s/\\[a-zA-Z]+\s*\{([^\}]*)\}/$1/g;
+
+      my %exercise = 
+      (
+         'Base'=>$base,
+         'Title'=>$title,
+         'BackRef'=>$backref,
+         'Number'=>$num
+      );
+
+      push @exercises, \%exercise;
+   }
+}
+
+close HLOE;
+
+foreach my $exercise (@exercises)
+{
+   &process_exercise($dir, $exercise);
+}
+
+my $title = "Solutions to Exercises";
+
+open INDEX, ">$dir/index.html" or die "Can't open '$dir/index.html' $!\n";
+
+&print_head($title, \*INDEX);
+
+print INDEX "<a href=\"../../index.html\">$booktitle</a>";
+
+&print_start_main(\*INDEX);
+
+print INDEX "<h1>$title</h1>";
+
+print INDEX <<_END_IMAGELIST;
+<p>
+Some of the exercises require the following image files:
+<ul>
+<li><a href="shapes.pdf">shapes.pdf</a>
+<li><a href="rectangle.pdf">rectangle.pdf</a>
+<li><a href="circle.pdf">circle.pdf</a>
+</ul>
+
+_END_IMAGELIST
+
+print INDEX "<dl class=\"exerciselist\">\n";
+
+foreach my $exercise (@exercises)
+{
+   my $alt = '';
+
+   if (-e "$dir/".$exercise->{'Base'}."-alt.tex")
+   {
+      $alt = join('', 
+               " Alternative solution: ",
+               "<a href=\"", $exercise->{Base}, "-alt.html\">View</a> or ",
+               "<a href=\"", $exercise->{Base}, "-alt.tex\">Download</a> solution.");
+   }
+
+   print INDEX "<dt>", $exercise->{Number}, ". ", $exercise->{Title}, "</dt>\n";
+   print INDEX "<dd>", 
+    "<a href=\"", $exercise->{Base}, ".html\">View</a> or ",
+    "<a href=\"", $exercise->{Base}, ".tex\">Download</a> solution.",
+    $alt,
+    "</dd>\n";
+}
+
+print INDEX "</dl>\n";
+
+&print_end_body(\*INDEX);
+
+close INDEX;
+
+sub process_exercise{
+   my ($dir, $exercise) = @_;
+
+   my $base  = $exercise->{Base};
+   my $tex = "$dir/$base.tex";
+   my $html = "$dir/$base.html";
+
+   &print_exercise($dir, $tex, $html, $base, $exercise);
+
+   $tex = "$dir/$base-alt.tex";
+
+   if (-e $tex)
+   {
+      &print_exercise($dir, $tex, "$dir/$base-alt.html", $base, $exercise);
+   }
+}
+
+sub print_exercise{
+   my ($dir, $tex, $html, $base, $exercise) = @_;
+
+   my $title = $exercise->{Title};
+   my $backref = $exercise->{BackRef};
+   my $num   = $exercise->{Number};
+
+   $title = "Exercise $num: $title (Solution)";
+
+   open TEX, $tex or die "Can't open '$tex' $!\n";
+
+   open HTML, ">$html" or die "Can't open '$html' $!\n";
+
+   &print_head($title, \*HTML);
+
+   print HTML "<a href=\"index.html\">Exercises</a>";
+   print HTML "<ol>";
+
+   foreach my $ex (@exercises)
+   {
+      if ($ex eq $exercise)
+      {
+         print HTML "<li>", $ex->{Title}, "\n";
+      }
+      else
+      {
+         print HTML "<li><a href=\"",
+           $ex->{Base}, ".html\">",
+           $ex->{Title},
+           "</a>\n";
+      }
+   }
+
+   print HTML "</ol>";
+
+   &print_start_main(\*HTML);
+
+   print HTML "<h1>$title</h1>";
+
+   if ($tex=~/-alt\.tex$/)
+   {
+      print HTML
+         "This is an alternative solution to <a href=\"../$backref.html#ex:$base\">Exercise $num</a>.\n",
+         "See <a href=\"$base.html\">other solution</a>.";
+   }
+   else
+   {
+      print HTML "This is the solution to <a href=\"../$backref.html#ex:$base\">Exercise $num</a>.";
+
+      if (-e "$dir/$base-alt.tex")
+      {
+         print HTML "<P>There is also an <a href=\"$base-alt.html\">alternative solution</a> to this exercise.\n";
+      }
+   }
+
+   print HTML "<pre>\n";
+
+   while (<TEX>)
+   {
+      s/&/\&amp;/g;
+      print HTML;
+   }
+
+   print HTML "</pre>\n";
+
+   &print_end_body(\*HTML);
+
+   close HTML;
+
+   close TEX;
+}
+
+sub print_head{
+   my ($title, $html) = @_;
+
+   print $html <<_ENDHTMLHEAD;
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;
+charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <link rel="stylesheet" href="$REL/$CSS">
+
+    <title>$title</title>
+
+  </head>
+  <body>
+    <div id="banner">Dickimaw Books</div>
+    <div id="toolbar">
+      <div class="tool">
+      About
+      </div>
+      <div class="tool">
+      <a href="$REL/latexresources.html">LaTeX</a>
+      </div>
+      <div class="tool">
+      <a href="$REL/software.html">Free Software</a>
+      </div>
+      <div class="tool">
+      <a href="$REL/books.html">Books</a>
+      </div>
+      <div class="tool">
+      <a href="$REL/consultancy.html">Consultancy</a>
+      </div>
+      <div class="tool">
+      <a href="$REL/contact.html">Contact</a>
+      </div>
+    </div>
+    <div id="sidebar">
+_ENDHTMLHEAD
+
+}
+
+sub print_start_main{
+   my ($html) = @_;
+
+   print $html <<_ENDSTARTMAIN;
+    </div>
+    <div id="main">
+_ENDSTARTMAIN
+}
+
+sub print_end_body{
+   my ($html) = @_;
+
+   print $html <<_ENDHTMLBODY;
+    </div>
+    <div id="boilerplate">
+    &copy; 2012 Dickimaw Books.
+    "Dickimaw", "Dickimaw Books" and the Dickimaw parrot logo are
+    trademarks. The logo was derived from a painting by Magdalene
+Pritchett.
+    </div>
+  </body>
+</html>
+
+_ENDHTMLBODY
+}
+
+1;

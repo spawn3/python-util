@@ -1,0 +1,575 @@
+\setnode{supplemental}
+\chapter{Supplementary Material}
+\label{ch:supp}
+
+This appendix chapter contains three sections from earlier versions of this
+book. The information here is a little dated, but is provided in
+case it's still of any use.
+
+%%%%%%%%%%%%%%%%%%% Terminal + Text Editor %%%%%%%%%%%%%%%%%%%
+
+\setnode{editorandterminal}
+\section{Text Editor and Terminal Approach}
+\label{sec:editorandterminal}
+
+Creating a \LaTeX\ document using a text editor and a terminal
+is an approach often favoured by UNIX-type users. If you have never
+used a terminal (i.e.\ you have only ever used point-and-click menu
+driven applications) then you will be better off using a
+front-end, in which case I suggest you
+\begin{latexonly}%
+turn to Sections~\ref{sec:TeXnicCenter} and~\ref{sec:winedt} which 
+describe \appname{TeXnicCenter} and \appname{WinEdt}, respectively.
+\end{latexonly}
+\begin{htmlonly}
+look at the \htmlref{\appname{TeXnicCenter}}{sec:TeXnicCenter} and 
+\htmlref{\appname{WinEdt}}{sec:winedt} sections instead.
+\end{htmlonly}
+\par
+To begin, you will first need a text editor\faq{TeX-friendly editors
+and shells}{editors}. There are a number available that are suited 
+to using with \LaTeX, some people advocate
+\iappnamelink{Emacs}{http://www.gnu.org/software/emacs/emacs.html},
+others advocate \iappnamelink{vim}{http://vim.sourceforge.net/}, and
+there are various others such as
+\iappnamelink{NEdit}{http://www.nedit.org/}.  I prefer to use
+\iappname{vim}---I'm not overly keen on using the mouse, and I prefer
+being able to issue all commands via the keyboard (although 
+there is a GUI version of \iappname{vim}). As with some other
+editors, it comes with syntax highlighting, regular expression search
+and replace, auto-insertion, and a brace matching mechanism which I
+find useful. If you are using version~7 of \iappname{vim}, there is an
+integrated spell checker, otherwise there is a spell checker plug-in
+called
+\htmladdnormallink{vimspell}{http://www.vim.org/scripts/script.php?script_id=465},
+so you can check your spelling as you type.  If there is already a
+text editor that you are comfortable with, then stick with that,
+otherwise try out available editors, and decide which one you prefer.
+
+When using the terminal and text editor approach, most people usually
+have at least two terminals open: one to run the editor, the other to
+run \LaTeX. This means that you don't have to keep quitting the
+editor every time you want to \htmlref{\LaTeX\ your
+document}{itm:step2}. Some editors allow you to run commands, but
+personally I don't like to use this approach. If your editor has a
+GUI interface, then you'll probably only need one terminal open.
+
+Let's get started: start up your text editor. This is usually done by
+entering the name of the editor at the command prompt in your
+terminal. With most editors you can also specify the filename as
+well. If the file doesn't exist, a new one will be created when you
+save your document. \figureref{fig:startvim} shows my terminal.  The
+command prompt looks like \verb|[nlct@nlctltpc examples]$|.  It will
+be different for your system. I have typed \texttt{vim sample1.tex}
+at the command prompt. This will start \iappname{vim} with a new file
+called \texttt{sample1.tex}.  (In this section, I will be using
+\iappname{vim} as the text editor, if you are not using
+\iappname{vim}, then substitute the editor of your choice.)
+
+\begin{figure}[htbp]
+\figconts[alt=Image of a terminal]
+ {pictures/terminal1}
+ {\caption{Starting vim from a terminal}}
+ {fig:startvim}
+\end{figure}
+
+Once I have pressed the return key, my terminal looks like
+\figureref{fig:terminal2}. Normally \iappname{vim} starts in visual
+command mode, which means that when you start typing text, it will be
+interpreted as part of a command. In order to type text into your
+file, you will need to enter input mode. There are a number of ways
+of doing this, but pressing \texttt{i} will do for now\footnote{For a
+complete set of available commands, see the \appname{vim} manual at
+\url{http://vimdoc.sourceforge.net/}}. \figureref{fig:terminal3}
+shows how my terminal looks when I am in input mode. I can now go
+ahead and type in my text (\figureref{fig:terminal4}). To go back to
+the visual command mode, press the escape key (Esc). Now that you are
+back in the visual command mode, you can save your document, either
+using the command \texttt{:w} if you have already given your file a
+name, or \texttt{:w }\meta{filename} (e.g.\ \texttt{:w sample1.tex})
+if you started \iappname{vim} without specifying a file, see
+\figureref{fig:terminal5}. When you want to quit \iappname{vim} you
+can do \texttt{:wq} to save and quit or \texttt{:q!} to quit without
+saving, but I suggest you don't do this just yet if you have another
+terminal available.
+
+\begin{figure}[htbp]
+ \figconts[alt=Image of a terminal with vim running]
+ {pictures/terminal2}
+ {\caption{Starting a new file in vim}}
+ {fig:terminal2}
+\end{figure}
+
+\begin{figure}[htbp]
+  \figconts[alt=Image of a terminal with vim running in input mode]
+  {pictures/terminal3}
+  {\caption{Input mode in vim}}
+  {fig:terminal3}
+\end{figure}
+
+\begin{figure}[htbp]
+  \figconts[alt=Image of a terminal with LaTeX code typed in vim]
+  {pictures/terminal4}
+  {\caption{Creating a sample document in vim}}
+  {fig:terminal4}
+\end{figure}
+
+\begin{figure}[htbp]
+  \figconts[alt=Image of new file being saved in vim]
+  {pictures/terminal5}
+  {\caption{Saving your document in vim (the file name should be 
+    omitted if the file already has a name)}}
+  {fig:terminal5}
+\end{figure}
+
+\objectref{Step}{itm:step1} is now complete, and you are now ready to
+move on to \objectref{Step}{itm:step2}: using \LaTeX. Go to your
+other terminal (or quit your editor if you only have access to one
+terminal) and make sure that you are in the same directory as the
+file you just created.  Typing \texttt{ls} at the command prompt will
+list the contents of your current directory. If you do this, you
+should see the file that you have just created (see
+\figureref{fig:terminal6}).  At the command prompt type\faq{Makefiles
+for LaTeX documents}{make}:
+\refstepcounter{object}\label{obj:termlatex}
+\begin{verbatim}
+latex sample1.tex
+\end{verbatim}
+as shown in \figureref{fig:terminal7}. You can omit the \texttt{.tex}
+extension if you like, \LaTeX\ will automatically add this if
+it has been omitted. If you prefer to use \iPDFLaTeX, type
+\begin{verbatim}
+pdflatex sample1.tex
+\end{verbatim}
+instead (again the \texttt{.tex} extension may be omitted.)
+You should now see something like \figureref{fig:terminal8}.
+
+\begin{figure}[htbp]
+  \figconts[alt=Image of directory listing in a terminal]
+  {pictures/terminal6}
+  {\caption{Listing the contents of the current directory}}
+  {fig:terminal6}
+\end{figure}
+
+\begin{figure}[htbp]
+  \figconts[alt=Image of a terminal where user has typed the command
+   to run LaTeX]
+  {pictures/terminal7}
+  {\caption{Running \LaTeX}}
+  {fig:terminal7}
+\end{figure}
+
+\begin{figure}[htbp]
+  \figconts[alt=Image of a terminal showing normal LaTeX messages]
+  {pictures/terminal8}
+  {\caption{Running \LaTeX}}
+  {fig:terminal8}
+\end{figure}
+
+\refstepcounter{object}\label{obj:transcript}
+Numbers appearing in square brackets, e.g.\ \texttt{[1]}, indicate
+which page \LaTeX\ is currently processing.  In this case, there is
+only one page.  The last line to appear on screen
+indicates that information about this \LaTeX\ run has been written
+to the log file \texttt{sample1.log}, which you can look at using 
+your text editor.
+
+The most important thing to note is the penultimate line\footnote{if
+you are using \PDFLaTeX, it will have \texttt{sample1.pdf} instead of
+\texttt{sample1.dvi}}:
+\begin{verbatim}
+Output written on sample1.dvi (1 page, 248 bytes).
+\end{verbatim}
+This means that the document has been successfully created, and
+is one page long.
+
+If you have made a mistake in your \htmlref{source code}{sec:source},
+for example suppose you have missed the starting backslash in
+\cmdname{documentclass}, then the output will look something like:
+\begin{verbatim}
+! LaTeX Error: Missing \begin{document}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...
+
+l.1 d
+     ocumentclass[a4paper]{article}
+?
+\end{verbatim}
+There are several things you can do at this point, but the easiest
+thing to do is to exit \LaTeX\ by typing \texttt{X} followed by the
+return key. Go back to your editor, fix the mistake, save the
+document, and then try again. (If you do get an error message, check
+\chapterref{ch:errors}.) Note that it is important to always save your
+document before running \LaTeX.
+
+\refstepcounter{object}\label{obj:xdvi}
+You can view the typeset output by loading the file\indexDVI\  
+\texttt{sample1.dvi} into a DVI viewer, such as \iappname{xdvi}
+or \iappname{kdvi}. To do this type
+\begin{verbatim}
+xdvi sample1.dvi
+\end{verbatim}
+or
+\begin{verbatim}
+kdvi sample1.dvi
+\end{verbatim}
+at the command prompt (see
+\figureref{fig:terminal9}). You will then see the final output,
+as shown in \figureref{fig:terminal10}.
+
+\begin{figure}[htbp]
+ \figconts[alt=Image of a terminal where user has typed command to
+  load DVI file into kdvi]
+  {pictures/terminal9}
+  {\caption{Load a DVI file into a DVI viewer}}
+  {fig:terminal9}
+\end{figure}
+
+\begin{figure}[htbp]
+  \figconts[alt=Image of DVI file being viewed using kdvi]
+  {pictures/terminal10}
+  {\caption{Viewing a DVI file in kdvi}}
+  {fig:terminal10}
+\end{figure}
+
+If you have used \iPDFLaTeX\ instead of \LaTeX, you should have a
+file called \texttt{sample1.pdf} instead of \texttt{sample1.dvi}.
+You can view this using a PDF viewer, such as \iappname{acroread}
+or \iappname{kpdf}.
+
+Some viewers, such as \iappname{kdvi} and \iappname{kpdf} will
+automatically reload the file whenever it is modified, in which case
+you may like to keep the viewer open, and as you keep editing and
+\LaTeX{}ing your document, the viewer will automatically reload the
+new versions. Some viewers, such as \iappname{xpdf} don't
+automatically reload, but have a reload facility, which you can use
+whenever you \htmlref{\LaTeX\ your document}{itm:step2}.
+
+\refstepcounter{object}\label{obj:dvips}
+If you like, you can convert your DVI file\indexDVI\ to PostScript 
+using \iappname{dvips}. To do this, type the following at the command
+prompt in your terminal:
+\begin{verbatim}
+dvips -o sample1.ps sample1.dvi
+\end{verbatim}
+(The \texttt{.dvi} extension may be omitted.)
+You can then view the PostScript file using \iappname{ghostscript}
+or one of its associated applications, such as \iappname{ghostview}
+or \iappname{GSview}. I have \iappname{kghostview} installed on
+my laptop, so to view the PostScript file, \texttt{sample1.ps},
+I would need to type:
+\begin{verbatim}
+kghostview sample1.ps
+\end{verbatim}
+(See \figureref{fig:terminal11}.)
+
+\begin{figure}[htbp]
+  \figconts[alt=Image of terminal where user has typed command to
+   load PostScript file into kghostview]
+   {pictures/terminal11}
+  {\caption{Loading a PostScript file}}
+  {fig:terminal11}
+\end{figure}
+
+%%%%%%%%%%%%%%%%% TeXnicCenter %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setnode{TeXnicCenter}
+\section{TeXnicCenter}
+\label{sec:TeXnicCenter}
+
+\iappname{TeXnicCenter} is an application that enables you to edit
+\LaTeX\ source code, and simply click on a button to pass the source
+code to \LaTeX, and then click on another button to view the
+resulting typeset document.  Many people prefer this approach to the
+\latexhtml{text editor and terminal approach described in the
+previous section}{\htmlref{text editor and terminal}{sec:editorandterminal}
+approach}. This section gives a brief overview of 
+\appname{TeXnicCenter}, however it has been several years since
+I last used it\footnote{I used to use TeXnicCenter and
+MiKTeX when I was teaching \LaTeX, but that was my limit of using
+\TeX\ under Windows}, so this information may be dated.
+
+\appname{TeXnicCenter} is free and can be downloaded from \gls{ctan} in the
+\htmladdnormallink{\texttt{systems/win32/TeXnicCenter/}}{http://www.tex.ac.uk/tex-archive/systems/win32/TeXnicCenter/}
+directory or from \url{http://www.toolscenter.org/}.  Note that you
+must have a \htmlref{\TeX/\LaTeX\ distribution}{obj:MiKTeX} installed
+before you install \appname{TeXnicCenter}. If you installed
+\itexdistrolink{proTeXt}{http://www.tug.org/protext}, you should
+already have \appname{TeXnicCenter} installed. If you have any
+problems with installing or running \appname{TeXnicCenter}, go to
+their \latexhtml{help page at
+\url{http://www.texniccenter.org/help.html}}{\htmladdnormallink{help
+page}{http://www.texniccenter.org/help.html}}.
+
+Once the installation is complete, you can then run
+\appname{TeXnicCenter} from the Start Menu: \startmenu{TeXnicCenter
+\menuto\ TeXnicCenter} Firstly you should see the tip of the day
+window (\figureref{fig:TXCtip}.)
+
+\begin{figure}[hbtp]
+  \figconts[alt=Image of TeXnicCenter's tip of the day window]
+  {pictures/texniccenter/tip}
+  {\caption{TeXnicCenter Tip of the Day Window}}
+  {fig:TXCtip}
+\end{figure}
+
+You can close this window, and then, if this is the first time you
+are using \appname{TeXnicCenter} you will have to use the
+configuration wizard to set up \appname{TeXnicCenter} correctly.  I
+would recommend that you choose the default settings. (Select
+\menu{\underline{N}ext}, \menu{\underline{N}ext} and then
+\menu{Finish}.)
+
+\begin{figure}[hbtp]
+  \figconts[alt=Image of TeXnicCenter's configuration wizard: welcome
+   screen]
+  {pictures/texniccenter/setup01}
+  {\caption{TeXnicCenter Configuration Wizard}}
+  {fig:TXCsetup1}
+\end{figure}
+
+\begin{figure}[hbtp]
+  \figconts[alt=Image of TeXnicCenter's configuration wizard: use
+MiKTeX option selected]
+  {pictures/texniccenter/setup02}
+  {\caption{TeXnicCenter Configuration Wizard}}
+  {fig:TXCsetup2}
+\end{figure}
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of TeXnicCenter's configuration wizard: finish
+configuration]
+  {pictures/texniccenter/setup03}
+  {\caption{TeXnicCenter Configuration Wizard}}
+  {fig:TXCsetup3}
+\end{figure}
+
+Now you are ready to use \appname{TeXnicCenter}.  It should look like
+\figureref{fig:TXCuse1}.
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of TeXnicCenter: no files loaded]
+  {pictures/texniccenter/use01}
+  {\caption{TeXnicCenter}}
+  {fig:TXCuse1}
+\end{figure}
+
+\mbox{}\refstepcounter{object}\label{TXCnewproject}%
+To start a new project select \menu{File \menuto\ New Project}.
+This will open the window shown in \figureref{fig:TXCuse2}.
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of TeXnicCenter's New Project dialog box]
+  {pictures/texniccenter/use02}
+  {\caption{New Project Dialog Box}}
+  {fig:TXCuse2}
+\end{figure}
+
+Enter a name for your project, and specify the directory where you
+want to save your work.  For example, I shall call my project
+\dq{example} and I want to save it in 
+\verb|c:\My Documents\Nicky\example| (see \figureref{fig:TXCuse3}.)
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of TeXnicCenter's New Project dialog box:
+project name has been entered]
+  {pictures/texniccenter/use03}
+  {\caption{New Project Dialog Box}}
+  {fig:TXCuse3}
+\end{figure}
+
+Select the \dq{Empty Project} icon, and click on \dq{Okay}.  You
+should now see something like \figureref{fig:TXCuse4}.
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of TeXnicCenter: new project on view]
+  {pictures/texniccenter/use04}
+  {\caption{TeXnicCenter --- New Project Started}}
+  {fig:TXCuse4}
+\end{figure}
+
+You can now start typing the source code (we'll cover this
+\htmlref{later}{ch:simpledoc}).  See \figureref{fig:TXCuse5}.
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of TeXnicCenter: user has typed source code in
+the edit panel]
+  {pictures/texniccenter/use05}
+  {\caption{TeXnicCenter --- Typing in Source Code}}
+  {fig:TXCuse5}
+\end{figure}
+
+Save it by either clicking on the save icon 
+\incGraphics[alt=Image of save icon]{pictures/texniccenter/saveicon} or 
+select \menu{File \menuto\ Save}
+
+Now select what type of output you want (DVI, PDF or
+\Index{PostScript}\refstepcounter{object}\label{obj:txcdvips}) see
+\figureref{fig:TXCuse6}.  If this box is blank, then it's possible
+that you didn't complete all the steps in the configuration wizard
+described above.
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of TeXnicCenter: drop-down menu showing]
+  {pictures/texniccenter/use06}
+  {\caption{TeXnicCenter --- Selecting Output Type}}
+  {fig:TXCuse6}
+\end{figure}
+
+\refstepcounter{object}\label{TXC:latex}
+Now click on the build output icon 
+\incGraphics[alt=Image of build icon]{pictures/texniccenter/build} or 
+select \menu{Build \menuto\ Build Output}.  The transcript will be
+written in the window at the bottom (see \xfigureref{fig:TXCuse7})
+This transcript should be the same as described \latexhtml{on
+page~\pageref{obj:transcript}
+onwards}{\htmlref{earlier}{obj:transcript}}.  If you have selected
+\verb|LaTeX => PDF|, then \appname{TeXnicCenter} will use \iPDFLaTeX\
+instead of \LaTeX.  If you have selected \verb|LaTeX => PS|, then
+\appname{TeXnicCenter} will use \LaTeX\ followed by \iappname{dvips}
+(as in \xfigureref{fig:TXCuse7}).  The \appname{dvips} messages will
+follow on from the \LaTeX\ messages.  (If you selected the BibTeX or
+MakeIndex features when you initialised the project,
+\figureref{fig:TXCuse3}, then \iappname{TeXnicCenter} will also use
+the \iBiBTeX\ and \appname{MakeIndex} applications.)
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of TeXnicCenter: messages have been printed on
+the build panel]
+  {pictures/texniccenter/use07}
+  {\caption[TeXnicCenter (using LaTeX and dvips)]{TeXnicCenter (using \LaTeX\ and \appname{dvips})}}
+  {fig:TXCuse7}
+\end{figure}
+
+\refstepcounter{object}\label{TXC:yap}
+To view the document, click the View Output button 
+\incGraphics[alt=Image of view icon]{pictures/texniccenter/view}.
+(Note that if you have selected \verb|LaTeX => PDF| or
+\verb|LaTeX => PS| you will need \iappname{Adobe Reader}
+or \iappname{GSview}, respectively, to view the output file.)
+
+\refstepcounter{object}\label{TXCerrors}
+If there are any errors, you can select \menu{Build \menuto\ Next
+Error} and it will show you where the error has occured (See
+\figureref{fig:TXCuse8}).  If you do have any errors, check
+\chapterref{ch:errors}.
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of TeXnicCenter: error message displayed in
+build panel. A red arrow points to line containing the error in the
+edit panel.]
+  {pictures/texniccenter/use08}
+  {\caption{TeXnicCenter --- Showing Error}}
+  {fig:TXCuse8}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% WinEdt %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setnode{winedt}
+\section{WinEdt}
+\label{sec:winedt}
+
+\iappname{WinEdt} (not to be confused with \appname{WinEdit} which is
+a completely different application) is an application that enables
+you to edit \LaTeX\ source code, and simply click on a button to pass
+the source code to \LaTeX, and then click on another button to view
+the resulting typeset document.  This section gives a brief overview
+of \iappname{WinEdt}, however it has been several years since I
+last used it, so this information may be dated.
+
+\iappname{WinEdt} is shareware: it can be downloaded from \gls{ctan} in the
+\htmladdnormallink{\texttt{systems/win32/winedt}}{http://www.tex.ac.uk/tex-archive/systems/win32/winedt/}
+directory or from \url{http://www.winedt.com/} and evaluated for a
+trial period of 31 days, after which, if you want to continue to use
+it, you must pay the registration fee.  Details of prices and types
+of licence available can be found at \url{http://www.winedt.com/}.
+Note that members of the \gls{uktug} can benefit from their 
+\iappname{WinEdt} licence
+scheme (see \url{http://uk.tug.org/membership} for further details).
+
+Again, you must have a \htmlref{\TeX/\LaTeX\
+distribution}{obj:MiKTeX} installed before you start.
+\appname{WinEdt} is fairly easy to install.  First unpack all the
+files, and then run the \appname{setup.exe} application.  I recommend
+that you use the default settings.  If you have any problems
+installing or using \appname{WinEdt}, go to
+\url{http://www.winedt.com/support.html}.
+
+To run \iappname{WinEdt}, select \appname{WinEdt} from the start menu:
+\startmenu{WinEdt \menuto\ WinEdt}
+It should look like \figureref{fig:winedt1}.
+
+\begin{figure}[hbtp]
+\figconts[alt=Image of WinEdt: no files loaded]
+  {pictures/winedt/01}%
+  {\caption{WinEdt}}
+  {fig:winedt1}
+\end{figure}
+
+Click on the \dq{New Document} button or select \menu{File \menuto\
+New}.  You can now start typing your \htmlref{source
+code}{sec:source} into the \appname{WinEdt} window, as shown in
+\figureref{fig:winedt3}.
+
+\begin{figure}[htbp]
+\figconts[alt=Image of WinEdt: user has typed source code]
+  {pictures/winedt/03}
+  {\caption{WinEdt}}
+  {fig:winedt3}
+\end{figure}
+
+You can now save your document using the \menu{File \menuto\ Save as}
+menu.  Select the file type to be \texttt{TeX}, and type in the name
+of your file, e.g.\ \texttt{sample1.tex}.  See
+\figureref{fig:winedt4}.
+
+\begin{figure}[htbp]
+  \figconts[alt=Image save file dialog]
+  {pictures/winedt/04}
+  {\caption{WinEdt --- Saving the File}}
+  {fig:winedt4}
+\end{figure}
+
+\refstepcounter{object}\label{winedt:latex}
+To \LaTeX\ your document, simply click on the \LaTeX\ button
+\incGraphics[alt=Image of LaTeX icon]{pictures/winedt/latex}.
+The output will appear in an MSDOS Prompt window (see
+\figureref{fig:winedt5}).
+
+\begin{figure}[htbp]
+\figconts[alt=Image of MSDOS prompt showing standard LaTeX messages]
+  {pictures/winedt/05}%
+  {\caption[WinEdt --- LaTeX Output]{WinEdt --- \LaTeX\ Output}}
+  {fig:winedt5}
+\end{figure}
+
+\refstepcounter{object}\label{winedt:yap}
+To view your typeset document, click on the \dq{view DVI}\indexDVI\ 
+button \incGraphics[alt=Image of previewer icon]{pictures/winedt/yap}.
+
+\refstepcounter{object}\label{obj:winedtdvips}
+You can convert your DVI file\indexDVI\ to \Index{PostScript} by clicking 
+the \incGraphics[alt=Image of dvips icon]{pictures/winedt/dvips} button.  
+If you have \iappname{GSview} installed, you can then view
+the PostScript file by clicking on the 
+\incGraphics[alt=Image of GSView icon]{pictures/winedt/gsview2} button.  
+
+Depending on which version of \iappname{WinEdt} you have installed,
+there may also be a \iPDFLaTeX\ button which you can click on to
+create a Portable Document Format (\texttt{.pdf}) document.  If not,
+you can click on the 
+\incGraphics[alt=Image of MSDOS icon]{pictures/winedt/msdos} button to 
+open up an MS-DOS Prompt window, and type \texttt{pdflatex} followed by 
+the filename. For example:
+\begin{verbatim}
+pdflatex sample1.tex
+\end{verbatim}
+Note that if the filename contains a
+space, you will need to use double quotes:
+\begin{verbatim}
+pdflatex "my file.tex"
+\end{verbatim}
+

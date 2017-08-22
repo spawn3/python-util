@@ -1,0 +1,129 @@
+\newkeyword[\glstockey={Source Code}]{source}{source code}
+
+\newkeyword[\glstockey={Output File}]{output}{output file}
+
+\newkeyword
+ [firstplural={\protect\emph{DVI (DeVice Independent) files}},
+  \glstockey={DVI File}]
+{dvi}{DVI file}
+
+\newkeyword
+ [\glsindexkey={auxiliary file (.aux)@auxiliary file (\texttt{.aux})},
+  \glsextrakey={\extraindexaux},
+  name={Auxiliary Files},\glstockey={Auxiliary Files}]
+ {auxiliary}{auxiliary file}
+
+\newkeyword
+ [name={Terminal or Command Prompt},%
+  \glsextrakey={\extraindexterminal},
+  \glstockey={Terminal or Command Prompt}
+ ]
+{terminal}{terminal}
+
+\newkeyword
+ [name={Commands},\glstockey={Commands}]
+ {command}{command}
+
+\newkeyword
+ [name={Grouping (or Scope)},%
+  \glsextrakey={\extraindexgroup},
+  \glstockey={Grouping (or Scope)}
+ ]
+ {group}{group}%
+
+\newkeyword
+ [name={Arguments (also called \dq{Parameters})},%
+  \glsextrakey={\extraindexarg},
+  \glstockey={Arguments}
+ ]
+{argument}{argument}%
+
+\newkeyword
+ [parent=argument,
+  \glsindexkey={argument!mandatory},
+  \glsextrakey={\extraindexmandatory},
+  first={mandatory (or compulsory) argument},
+  firstplural={mandatory (or compulsory) arguments},
+  name={Mandatory Arguments},
+  \glstockey={Mandatory Arguments}
+ ]
+{mandatory}{mandatory argument}
+
+\newkeyword
+ [parent=argument,
+  \glsindexkey={argument!optional},
+  \glsextrakey={\extraindexoptional},
+  name={Optional Arguments},
+  \glstockey={Optional Arguments}
+]
+{optional}{optional argument}
+
+
+\newkeyword
+ [\glsextrakey={\extraindexfragile},
+  \glsindexkey={command!fragile},
+  \glstockey={Moving Arguments and Fragile Commands},
+   name={Moving Arguments and Fragile Commands}
+ ]
+{fragile}{fragile command}
+
+\newkeyword
+ [name={Robust Commands},
+  \glstockey={Robust Commands},
+  \glsindexkey={command!robust},
+  \glsextrakey={\extraindexrobust}
+ ]
+{robust}{robust command}%
+
+\newkeyword
+ [name={Short and Long Commands},
+  \glstockey={Short and Long Commands},
+  \glsindexkey={command!short},
+  \glsextrakey={\extraindexshortlong}]
+{short}{short command}%
+
+
+\newkeyword
+[name={Declarations},\glstockey={Declarations}]
+{declaration}{declaration}
+
+
+\newkeyword
+[name={Inter-Sentence Spacing},
+ \glstockey={Inter-Sentence Spacing},
+ \glsindexkey={spacing!inter-sentence},
+ \glsextrakey={\extraindexsentencespacing}
+]
+{intersentencespacing}{inter-sentence spacing}%
+
+\newkeyword
+ [\glsingkey={hyphenating},
+  \glsdkey={hyphenated},
+  \glstockey={Hyphenation}]
+ {hyphenation}{hyphenation}
+
+\newkeyword
+[name={Environments},
+ \glstockey={Environments}]
+{environment}{environment}%
+
+\newkeyword
+[name={The Preamble},
+ \glstockey={The Preamble}]
+{preamble}{preamble}%
+
+
+\newkeyword
+[name={Lengths},\glstockey={Lengths}]
+{length}{length}
+
+\newkeyword[\glstockey={Class File}]{cls}{class file}%
+
+\newkeyword
+[\glsindexkey={TeX@\protect\TeX},\glstockey={\texorpdfstring{\protect\TeX}{TeX}}]
+{tex}{\TeX}
+
+\newkeyword{perl}{Perl}
+
+\glsaddall[types=keywords]
+\glsunsetall[keywords]

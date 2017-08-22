@@ -1,0 +1,5157 @@
+\renewcommand{\summarypreamble}{%
+Commands or environments defined in the \LaTeX\ kernel are always
+available.%
+}
+
+\defgactivechar
+ {backslashchar}
+ {\backslashsym}
+ {}
+ {\LaTeX\ Kernel}
+ {Escape character (indicates a command).}
+ {}
+
+\defgactivechar
+ {dbbackslashchar}
+ {\dbbackslashsym}
+ {\oarg{\meta{height}}}
+ {\LaTeX\ Kernel}
+ {\nopostdesc}
+ {%
+   \BeginArgList
+    \csentryargitem{height} Extra vertical space.
+   \EndArgList
+ }
+
+\defgchildactivechar
+ {newline.dbbackslashchar}
+ {dbbackslashchar}
+ {\dbbackslashsym}
+ {Breaks a line without justification (\protect\htmlref{starred form}{itm:starredcommand}
+   forbids a page break)}
+
+\defgchildactivechar
+ {tab.dbbackslashchar}
+ {dbbackslashchar}
+ {\dbbackslashsym}
+ {Starts a new row in tabular-style environments}
+
+\defgcs{tabularnewline}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Behaves like \nxglsi{tab.dbbackslashchar} in a
+   \nxglsni{env-tabular}-like environment but helps to disambiguate a
+    \nxglslink{newline.dbbackslashchar}{line break} in a paragraph
+    cell from a \nxglslink{tab.dbbackslashchar}{row separator}.}%
+ {}
+
+\defgidxactivechar
+ {leftbracechar}
+ {\leftbracesym}
+ {}
+ {\LaTeX\ Kernel}
+ {Marks the beginning of a \nxglsi{group}.}
+ {}
+
+\defgidxactivechar
+ {rightbracechar}
+ {\rightbracesym}
+ {}
+ {\LaTeX\ Kernel}
+ {Marks the end of a \nxglsi{group}.}
+ {}
+
+\defgidxactivecharcs
+ {leftbrace}
+ {\leftbracesym}
+ {}
+ {\LaTeX\ Kernel}
+ {Left brace \{ character. In math mode may be used as a delimiter.}
+ {}
+
+\defgidxactivecharcs
+ {rightbrace}
+ {\rightbracesym}
+ {}
+ {\LaTeX\ Kernel}
+ {Right brace \{ character. In math mode may be used as a delimiter.}
+ {}
+
+\defgidxactivechar
+ {emdash}%
+ {\emDashcs}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Em-dash \textemdash\ symbol. (Normally used to
+  indicate omissions or interruptions or to highlight a parenthetical element.)
+  See also \nxglsni{textemdash}.}%
+ {}
+
+\defgidxactivechar
+ {endash}%
+ {\enDashcs}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {En-dash \textendash\ symbol.  (Normally used for number ranges.)
+  See also \nxglsni{textendash}.}%
+ {}
+
+\defgidxactivechar
+ {questiondown}%
+ {\questiondowncs}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Upside-down question mark \textquestiondown\ symbol. See also \nxglsni{textquestiondown}.}%
+ {}
+
+\defgidxactivechar
+ [!Y]
+ {exclamdown}%
+ {\exclamdowncs}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Upside-down exclamation mark \textexclamdown\ symbol. See also \nxglsni{textexclamdown}.}%
+ {}
+
+\defgchar
+ {quoteleft}%
+ {\quoteleftcs}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Open quote \textquoteleft\ symbol. See also \nxglsni{textquoteleft}.}%
+ {}
+
+\defgchar
+ {quotedblleft}%
+ {\quotedblleftcs}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Open double quote \textquotedblleft\ symbol. See also \nxglsni{textquotedblleft}.}%
+ {}
+
+\defgchar
+ {quoteright}%
+ {\quoterightcs}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Closing quote or apostrophe \textquoteright\ symbol in text mode 
+  or prime symbol \ensuremath{'} in math mode. See also \nxglsni{textquoteright}.}%
+ {}
+
+\defgchar
+ {quotedblright}%
+ {\quotedblrightcs}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Closing double quote \textquotedblright\ symbol in text mode
+  or double prime \ensuremath{''} in math mode. See also \nxglsni{textquotedblright}.}%
+ {}
+
+\defgchar
+ {dash}%
+ {\dashcs}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Hyphen - in text mode or minus sign $-$ in math mode.}%
+ {}
+
+\defgidxactivecharcs
+ {exclam}
+ {\exclamsym}
+ {}
+ {\LaTeX\ Kernel (Math Mode)}
+ {Negative thin space.}
+ {}
+
+\defgidxactivechar
+ {exclamchar}
+ {\exclamsym}
+ {}
+ {}
+ {\nopostdesc}
+ {}
+
+\defgchildidxactivechar
+ {sentence.exclamchar}
+ {exclamchar}
+ {\exclamsym}
+ {Exclamation symbol (end of sentence marker)}
+ 
+
+\defgchildidxactivechar
+ {makeindex.exclamchar}
+ {exclamchar}
+ {\exclamsym}
+ {\nxiappname{makeindex} sublevel special character}
+
+\defgchildidxactivechar
+ {resizebox.exclamchar}
+ {exclamchar}
+ {\exclamsym}
+ {Used in \nxglsi{resizebox} to maintain aspect ratio}
+
+\defgidxactivecharcs
+ {csbar}
+ {\vbarsym}
+ {}
+ {\LaTeX\ Kernel (Math Mode)}
+ {Double vertical bar \doublebar{} delimiter}
+ {}
+
+\defgidxactivechar
+ {barchar}
+ {\vbarsym}
+ {}
+ {\LaTeX\ Kernel}
+ {\nopostdesc}
+ {}
+
+\defgchildidxactivechar
+ {delim.barchar}
+ {barchar}
+ {\vbarsym}
+ {Delimiter. (Math mode only. Use \nxglsni{textbar} in text mode.)}
+
+\defgchildidxactivechar
+ {array.barchar}
+ {barchar}
+ {\vbarsym}
+ {Vertical rule specifier (\nxglsi{env-tabular} or
+   \nxglsi{env-array})}
+
+\defgchar
+ {slashchar}
+ {\slashsym}
+ {}
+ {}
+ {\nopostdesc}
+ {}
+
+\defgchildchar
+ {text.slash}
+ {slashchar}
+ {\slashsym}
+ {Forward slash symbol (see also \nxglsi{slash})}
+
+\defgxchildchar
+ {dir.slash}
+ {slashchar}
+ {\slashsym}
+ {Directory divider}
+ {directory divider}
+
+\defgchildchar
+ {delim.slash}
+ {slashchar}
+ {\slashsym}
+ {Forward slash delimiter (math mode)}
+
+\defgidxactivechar
+ [!Z]
+ {visiblespace}
+ {\textvisiblespace}
+ {}
+ {}
+ {A visual indication of a space in the code. When you type up 
+   the code, replace all instances of this symbol with a space via the space bar on your 
+   keyboard.}
+ {}
+
+\defgidxactivecharcs
+ {at}
+ {\atsym}
+ {}
+ {\LaTeX\ Kernel}
+ {Used when a sentence ends with a capital letter.
+   This command should be placed after the letter and before the
+   punctuation mark.}
+ {}
+
+\defgidxactivechar
+ {atchar}
+ {\atsym}
+ {\marg{\meta{text}}}
+ {\LaTeX\ Kernel}
+ {%
+   Used in the argument of \nxglsi{env-tabular} or 
+   \nxglsi{env-array} like environments to specify text to insert between columns.%
+ }
+ {%
+     \BeginArgList
+      \csentryargitem{text} Text to insert between columns
+     \EndArgList
+ }
+  
+\defgidxactivechar
+ {questionchar}
+ {\questionsym}
+ {}
+ {}
+ {Question mark (end of sentence marker).}
+ {}
+
+\defgchar
+ {ltchar}
+ {\lesssym}
+ {}
+ {\LaTeX\ Kernel (Math Mode)}
+ {Less than symbol. (Use \nxglsni{textless} in text mode.)}
+ {}
+
+\defgchar
+ {gtchar}
+ {\greatersym}
+ {}
+ {\LaTeX\ Kernel (Math Mode)}
+ {Greater than symbol. (Use \nxglsni{textgreater} in text mode.)}
+ {}
+
+\defgchar
+ {gtcol}
+ {\greatersym}
+ {\marg{\meta{decl}}}
+ {\nxisty{array} package}
+ {%
+   Used in \nxglsi{env-tabular} or \nxglsi{env-array} column specifiers before
+   \texttt{l}, \texttt{r}, \texttt{c}, \texttt{p}, \texttt{m} or
+   \texttt{b} to insert \meta{decl} directly in front of the entry
+   for that column.%
+ }
+ {%
+     \BeginArgList
+       \csentryargitem{decl} The code to insert at the start of the
+         column.
+     \EndArgList
+ }
+
+\defgchar
+ {ltcol}
+ {\lesssym}
+ {\marg{\meta{decl}}}
+ {\nxisty{array} package}
+ {%
+   Used in \nxglsi{env-tabular} or \nxglsi{env-array} column specifiers after
+   \texttt{l}, \texttt{r}, \texttt{c}, \texttt{p}, \texttt{m} or
+   \texttt{b} to insert \meta{decl} directly after the entry
+   for that column.%
+ }
+ {%
+     \BeginArgList
+       \csentryargitem{decl} The code to insert at the end of the
+         column.
+     \EndArgList
+ }
+
+\defgcs{begin}%
+ {\marg{\meta{env-name}}\oarg{\meta{env-option}}\marg{\meta{env-arg-1}}\ldots\marg{\meta{env-arg-n}}}%
+ {\LaTeX\ Kernel}%
+ {%
+   Starts an environment. (Must have a matching \nxglsi{end}.)
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{env-name} The name of the environment. (\emph{No
+      backslash.})
+    \csentryargitem{env-option} An optional argument that may be 
+      passed to the environment. Not all environments have optional
+      arguments.
+    \csentryargitem{env-arg-1}\ldots\meta{env-arg-n} Any mandatory
+      arguments required by the environment. Not all environments
+      require arguments.
+   \EndArgList
+ }
+
+\defgcs{end}%
+  {\marg{\meta{env-name}}}%
+  {\LaTeX\ Kernel}%
+  {Ends an environment. (Must have a matching \nxglsi{begin}.)}
+  {%
+    \BeginArgList
+      \csentryargitem{env-name} The name of the environment.
+    \EndArgList
+  }
+
+\defgcs{documentclass}%
+ {\oarg{\meta{option-list}}\marg{\meta{class-name}}}%
+ {\LaTeX\ Kernel}%
+ {%
+   Loads the document class file, which sets up the type of document
+   you wish to write.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{option-list} A comma-separated list of options to
+     pass to the class file or any packages that will later be
+     loaded.
+    \csentryargitem{class-name} The name of the document class. This
+    corresponds to a file called \meta{class-name}\texttt{.cls},
+    which must be installed. 
+   \EndArgList
+ }
+
+\defgcs{usepackage}%
+ {\oarg{\meta{option-list}}\marg{\meta{package-list}}}%
+ {\LaTeX\ Kernel}%
+ {%
+   Loads the named packages.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{option-list} A comma-separated list of options to
+     pass to the package.
+    \csentryargitem{package-list} A comma-separated list of package
+     names (without the \texttt{.sty} extension).
+   \EndArgList
+ }
+
+\defgcs{footnote}%
+ {\oarg{\meta{number}}\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Inserts a footnote.}%
+ {%
+  \BeginArgList
+    \csentryargitem{number} Overrides the default footnote number with
+    the specified \meta{number}.
+    \csentryargitem{text} The footnote text.
+  \EndArgList
+ }%
+
+\defgcs{textbackslash}%
+ {}%
+ {\LaTeX\ Kernel (Text Mode)}%
+ {Backlash \textbackslash\ symbol. (Use
+  \nxglsi{backslash} for math mode.)}%
+ {}
+
+\defgcs{backslash}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Backslash \protect\ensuremath{\protect\backslash} symbol, which may be used
+  as a delimiter. (Use
+ \nxglsi{textbackslash} for text mode.)}%
+ {}
+
+\defgactivecharcs
+ [\underscoresym]
+ {underscore}
+ {\textunderscore}
+ {}
+ {\LaTeX\ Kernel}
+ {Underscore \_ symbol (see also \nxglsni{textunderscore}).}
+ {}
+
+\defgcs{textunderscore}
+ {}
+ {\LaTeX\ Kernel}
+ {Underscore \textunderscore\ symbol (see also \nxglsni{textunderscore}).}
+ {}
+
+\defgactivechar
+ [\underscoresym]
+ {underscorechar}
+ {\_}
+ {\marg{\meta{maths}}}
+ {\LaTeX\ Kernel (Math Mode)}
+ {Displays its argument as a subscript.}
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The subscript.
+   \EndArgList
+ }
+
+\defgcs{textgreater}%
+ {}%
+ {\LaTeX\ Kernel (Text Mode)}%
+ {Greater than \textgreater\ symbol. (Just use \texttt{\textgreater} in math mode.)}%
+ {}
+
+\defgcs{textless}%
+ {}%
+ {\LaTeX\ Kernel (Text Mode)}%
+ {Less than \textless\ symbol. (Just use \texttt{\textless} in math mode.)}%
+ {}
+
+\defgcs{textasciicircum}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Circumflex \textasciicircum\ symbol.}%
+ {}%
+
+\defgcs[][cshyphenation]{hyphenation}
+ {\marg{\meta{word}}}
+ {\LaTeX\ Kernel}
+ {Specifies hyphenation points.}
+ {%
+   \BeginArgList
+    \csentryargitem{word} Word with hyphen points indicated with a
+     dash (\texttt{-}).
+   \EndArgList
+ }
+
+\defgsymcs[hyphen]{\dashcs}
+ {}
+ {\LaTeX\ Kernel}
+ {Insert discretionary hyphen.}
+ {}
+
+\defgactivecharcs
+ {dollar}
+ {\dollarsym}
+ {}
+ {\LaTeX\ Kernel}
+ {Dollar \$ symbol.}
+ {}
+
+\defgactivechar
+ {dollarchar}
+ {\dollarsym}
+ {}
+ {\LaTeX\ Kernel}
+ {Switches in and out of in-line math mode.}
+ {}
+
+\defgcs{textasciitilde}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Tilde \textasciitilde\ symbol. (If you are typing an
+  URL, use the \nxisty{url} package, which provides \nxglsi{url}\marg{\meta{address}}
+  that allows you to directly type \textasciitilde\ in the address.)}%
+ {}%
+
+\defgcs{url}%
+ {\marg{\meta{address}}}%
+ {\nxisty{url} package}%
+ {Typesets an URL in a typewriter font and allows you to use
+  characters such as \textasciitilde.}%
+ {%
+   \BeginArgList
+    \csentryargitem{address} The web address.
+   \EndArgList
+ }%
+
+\defgcs{dag}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Dagger \dag\ symbol.}%
+ {}
+
+\defgcs{ddag}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Double-dagger \ddag\ symbol.}%
+ {}
+
+\defgcs{textregistered}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Registered \textregistered\ symbol.}%
+ {}
+
+\defgcs{texttrademark}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Trademark \texttrademark\ symbol.}%
+ {}
+
+\defgcs{copyright}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Copyright \copyright\ symbol.}%
+ {}
+
+\defgcs{textquoteright}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Closing single quote (or apostrophe) \textquoteright\ symbol.}%
+ {}
+
+\defgcs{textquoteleft}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Opening single quote \textquoteleft\ symbol.}%
+ {}
+
+\defgcs{textquotedblright}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Closing double quote \textquotedblright\ symbol.}%
+ {}
+
+\defgcs{textquotedblleft}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Opening double quote \textquotedblleft\ symbol.}%
+ {}
+
+\defgcs{textbullet}%
+ {}%
+ {\LaTeX\ Kernel (Text Mode)}%
+ {Bullet \textbullet\ symbol.}%
+ {}
+
+\defgcs{textquestiondown}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Upside-down question mark \textquestiondown\ symbol.}%
+ {}
+
+\defgcs{textexclamdown}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Upside-down exclamation mark \textexclamdown\ symbol.}%
+ {}
+
+\defgcs{textendash}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {En-dash \textendash\ symbol. (Normally used for number ranges.)
+  See also \nxglsni{endash}.}%
+ {}
+
+\defgcs{textemdash}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Em-dash \textemdash\ symbol. (Normally used to
+  indicate omissions or interruptions or to highlight a parenthetical element.)
+  See also \nxglsni{emdash}.}%
+ {}
+
+\defgcs{textperiodcentered}%
+ {}%
+ {\LaTeX\ Kernel (Text Mode)}%
+ {Centred period \textperiodcentered\ symbol.}%
+ {}
+
+\defgcs{i}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Dotless i character: \i.}%
+ {}
+
+\defgcs{j}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Dotless j character: \dotlessj.}%
+ {}
+
+\defgactivecharcs
+ {hash}
+ {\hashsym}
+ {}
+ {\LaTeX\ Kernel}
+ {Hash \# symbol.}
+ {}
+
+\defgactivechar
+ {hashchar}
+ {\hashsym}
+ {\meta{digit}}
+ {\LaTeX\ Kernel}
+ {Replacement text for argument \meta{digit}.}
+ {}
+
+\defgactivecharcs
+ {percent}
+ {\percentsym}
+ {}
+ {\LaTeX\ Kernel}
+ {Percent \% symbol}
+ {}
+
+\defgactivechar
+ {percentchar}
+ {\percentsym}
+ {}
+ {\LaTeX\ Kernel}
+ {Comment character used to ignore everything up to and including
+  the newline character in the \nxgls{source}.}
+ {}
+
+\defgactivecharcs
+ {amp}
+ {\ampsym}
+ {}
+ {\LaTeX\ Kernel}
+ {Ampersand \& symbol}
+ {}
+
+\defgactivechar
+ {ampchar}
+ {\ampsym}
+ {}
+ {\LaTeX\ Kernel}
+ {Alignment tab.}
+ {}
+
+\defgcs{S}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Sectional \S\ symbol.}%
+ {}
+
+\defgcs{P}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Paragraph \P\ symbol.}%
+ {}
+
+\defgcs{slash}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Forward slash \slash\ symbol.}%
+ {}
+
+\defgcs{AE}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {\protect\AE\ ligature.}%
+ {}
+
+\defgcs{ae}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {\protect\ae\ ligature.}%
+ {}
+
+\defgcs{OE}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {\protect\OE\ ligature.}%
+ {}
+
+\defgcs{oe}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {\protect\oe\ ligature.}%
+ {}
+
+\defgcs{AA}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Upper case A-ring \AA\ character.}%
+ {}
+
+\defgcs{aa}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Lower case a-ring \aa\ character.}%
+ {}
+
+\defgcs{L}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Upper case L-bar \L\ character.}%
+ {}
+
+\defgcs{l}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Lower case l-bar \l\ character.}%
+ {}
+
+\defgcs{O}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Upper case slashed-O \O\ character.}%
+ {}
+
+\defgcs{o}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Lower case slashed-o \o\ character.}%
+ {}
+
+\defgcs{ss}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Eszett \ss\ character.}%
+ {}
+
+\defgcs{SS}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {SS (upper case \ss).}%
+ {}
+
+\defgcs{left}
+ {\meta{delimiter}}
+ {\LaTeX\ Kernel (Math Mode)}
+ {Indicates a left stretchable delimiter. Must have a matching
+  \nxglsi{right}.}
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{openparen}, or a delimiter command, such as \nxglsni{langle}.
+   \EndArgList
+ }
+
+\defgcs{right}
+ {\meta{delimiter}}
+ {\LaTeX\ Kernel (Math Mode)}
+ {Indicates a right stretchable delimiter. Must have a matching
+  \nxglsi{left}.}
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{closeparen}, or a delimiter command, such as \nxglsni{rangle}.
+   \EndArgList
+ }
+
+\defgcs{bigl}%
+ {\meta{delimiter}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Left delimiter sizing.}%
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{openparen}, or a delimiter command, such as \nxglsni{langle}.
+   \EndArgList
+ }
+
+\defgcs{bigr}%
+ {\meta{delimiter}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Right delimiter sizing.}%
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{closeparen}, or a delimiter command, such as \nxglsni{rangle}.
+   \EndArgList
+ }
+
+\defgcs{Bigl}%
+ {\meta{delimiter}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Left delimiter sizing.}%
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{openparen}, or a delimiter command, such as \nxglsni{langle}.
+   \EndArgList
+ }
+
+\defgcs{Bigr}%
+ {\meta{delimiter}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Right delimiter sizing.}%
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{closeparen}, or a delimiter command, such as \nxglsni{rangle}.
+   \EndArgList
+ }
+
+\defgcs{biggl}%
+ {\meta{delimiter}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Left delimiter sizing.}%
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{openparen}, or a delimiter command, such as \nxglsni{langle}.
+   \EndArgList
+ }
+
+\defgcs{biggr}%
+ {\meta{delimiter}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Right delimiter sizing.}%
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{closeparen}, or a delimiter command, such as \nxglsni{rangle}.
+   \EndArgList
+ }
+
+\defgcs{Biggl}%
+ {\meta{delimiter}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Left delimiter sizing.}%
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{openparen}, or a delimiter command, such as \nxglsni{langle}.
+   \EndArgList
+ }
+
+\defgcs{Biggr}%
+ {\meta{delimiter}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Right delimiter sizing.}%
+ {%
+   \BeginArgList
+    \csentryargitem{delimiter} A delimiter symbol, such as
+    \nxglsni{closeparen}, or a delimiter command, such as \nxglsni{rangle}.
+   \EndArgList
+ }
+
+\defgcs{pounds}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Pound \pounds\ symbol.}%
+ {}%
+
+
+\defgcs{v}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Caron diacritic over \meta{c}. Example: 
+  \cmdname{v}\marg{o} produces \ocaron.}%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires the caron
+      diacritic.
+   \EndArgList
+ }
+
+\defgcs{u}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Breve diacritic over \meta{c}. Example: 
+  \cmdname{u}\marg{o} produces \obreve.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires the breve
+      diacritic.
+   \EndArgList
+ }
+
+\defgcs{H}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Double acute diacritic over \meta{c}. Example: 
+  \cmdname{H}\marg{o} produces \odoubleacute.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires the double
+      acute diacritic.
+   \EndArgList
+ }
+
+\defgcs{t}%
+ {\marg{\meta{characters}}}%
+ {\LaTeX\ Kernel}%
+ {Tie over \meta{characters}. Example: 
+  \cmdname{t}\marg{xy} produces \xytie.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{characters} The characters that require the tie.
+   \EndArgList
+ }
+
+\defgcs{c}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Cedilla under \meta{c}. Example: 
+  \cmdname{c}\marg{o} produces \ocedilla.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires the cedilla.
+   \EndArgList
+ }
+
+\defgcs{d}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Dot under \meta{c}. Example: 
+  \cmdname{d}\marg{o} produces \odotunder.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires the dot
+     under it.
+   \EndArgList
+ }
+
+\defgcs{b}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Bar under \meta{c}. Example: 
+  \cmdname{b}\marg{r} produces \rbarunder.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires the bar
+     under it.
+   \EndArgList
+ }
+
+\defgcs{r}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Ring over \meta{c}. Example: 
+  \cmdname{r}\marg{u} produces \uring.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires the ring
+      over it.
+   \EndArgList
+ }
+
+\defgsymcs[acute]{\quoterightcs}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Acute accent over \meta{c}. Example:
+   \cmdname{'}\marg{o} produces \protect\'{o}.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires an acute
+     accent over it.
+   \EndArgList
+ }
+
+\defgsymcs[grave]{\quoteleftcs}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Grave accent over \meta{c}. Example:
+   \cmdname{`}\marg{o} produces \protect\`{o}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires a grave
+     accent over it.
+   \EndArgList
+ }
+
+\defgsymcs[period]{\periodsym}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Dot over \meta{c}. Example:
+   \cmdname{.}\marg{o} produces \odotover.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires a dot
+     over it.
+   \EndArgList
+ }
+
+\defgchar
+ {periodchar}
+ {\periodsym}
+ {}
+ {\LaTeX\ Kernel}
+ {\nopostdesc}
+ {}
+
+\defgchildchar
+ {sentence.periodchar}
+ {periodchar}
+ {\periodsym}
+ {period (full stop) or decimal point}
+
+\defgchildchar
+ {delimiter.periodchar}
+ {periodchar}
+ {\periodsym}
+ {invisible delimiter}
+
+\defgsymcs[macron]{\equalsym}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel}%
+ {Macron accent over \meta{c}. Example:
+   \cmdname{=}\marg{o} produces \omacron.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires a macron
+     accent over it.
+   \EndArgList
+ }
+
+\defgactivecharcs
+ [\circumsym\space]
+ {circum}
+ {\textasciicircum}
+ {\marg{\meta{c}}}
+ {\LaTeX\ Kernel}
+ {%
+   Circumflex accent over \meta{c}. Example:
+   \cmdname{\textasciicircum}\marg{o} produces \ocircum.%
+ }
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires a
+     circumflex accent over it.
+   \EndArgList
+ }
+
+\defgactivechar
+ [\circumsym]
+ {circumchar}
+ {\textasciicircum}
+ {\marg{\meta{maths}}}
+ {\LaTeX\ Kernel (Math Mode)}
+ {Displays its argument as a superscript.}
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The superscript.
+   \EndArgList
+ }
+
+\defgactivecharcs
+ [\tildesym\space]
+ {tilde}
+ {\textasciitilde}
+ {\marg{\meta{c}}}
+ {\LaTeX\ Kernel}
+ {%
+   Tilde accent over \meta{c}. Example:
+   \cmdname{\textasciitilde}\marg{o} produces \otilde.%
+ }
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires a
+     tilde accent over it.
+   \EndArgList
+ }
+
+\defgactivechar
+ [\tildesym]
+ {tildechar}
+ {\textasciitilde}
+ {}
+ {\LaTeX\ Kernel}
+ {Unbreakable space.}
+ {}
+
+\defgidxactivecharcs
+ {doublequote}
+ {\doublequotesym}
+ {\marg{\meta{c}}}
+ {\LaTeX\ Kernel}%
+ {%
+   Umlaut over \meta{c}. Example:
+   \quotecs\marg{o} produces \oumlaut.%
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character that requires an umlaut
+     over it.
+   \EndArgList
+ }
+
+\defgcs{item}%
+ {\oarg{\meta{marker}}}%
+ {\LaTeX\ Kernel}%
+ {Specifies the start of an item in a list. (Only allowed inside one of
+  the list making environments.)}%
+ {%
+   \BeginArgList
+    \csentryargitem{marker} If specified, the default item marker is
+     replaced with \meta{marker}.
+   \EndArgList
+ }
+
+\defgsymcs[itcorr]{\slashsym}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Italic correction.}%
+ {}
+
+\defgcs{textrm}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} in the predefined serif font. (Defaults to
+  Computer Modern Roman.)}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{textsf}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} in the predefined sans-serif font. (Defaults to
+  Computer Modern Sans.)}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{texttt}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} in the predefined monospaced font. (Defaults to
+  Computer Modern Typewriter.)}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{textmd}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} with a medium weight in the current font
+  family.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{textbf}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} with a bold weight in the current font family, if it exists.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{textup}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} with the upright form of the current font family.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{textit}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} with the italic form of the current font family, if it exists.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{textsl}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} with the slanted form of the current font family, if it exists.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{textsc}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} with the small-caps form of the current font family, if it exists.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{emph}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Toggles the upright and italic\slash slanted rendering of \meta{text}.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{textnormal}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Renders \meta{text} in the default font style.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{ttdefault}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {The name of the default typewriter family as used by \nxglsni{ttfamily}. 
+  Defaults to \texttt{cmtt} (Computer Modern Typewriter).}%
+ {}
+
+\defgcs{rmdefault}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {The name of the default serif family as used by \nxglsni{rmfamily}. 
+  Defaults to \texttt{cmr} (Computer Modern Roman).}%
+ {}
+
+\defgcs{sfdefault}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {The name of the default sans-serif family as used by \nxglsni{sffamily}. 
+  Defaults to \texttt{cmss} (Computer Modern Sans-serif).}%
+ {}
+
+\defgcs{familydefault}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Specifies the default font family. Defaults to
+   \nxglsi{rmdefault} but may be redefined by certain classes.}%
+ {}
+
+\defgcs{rmfamily}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the predefined serif font. (Defaults to
+  Computer Modern Roman.)}%
+ {}
+
+\defgcs{sffamily}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the predefined sans-serif font. (Defaults to
+  Computer Modern Sans.)}%
+ {}
+
+\defgcs{ttfamily}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the predefined monospaced font. (Defaults to
+  Computer Modern Typewriter.)}%
+ {}
+
+\defgcs{mdseries}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the medium weight in the current font
+  family.}%
+ {}
+
+\defgcs{bfseries}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the bold weight in the current font
+  family.}%
+ {}
+
+
+\defgcs{upshape}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the upright form of the current font family.}%
+ {}
+
+\defgcs{itshape}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the italic form of the current font family, if it exists.}%
+ {}
+
+\defgcs{slshape}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the slanted form of the current font family, if it exists.}%
+ {}
+
+\defgcs{scshape}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the small-caps form of the current font family, if it exists.}%
+ {}
+
+\defgcs{em}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Toggles the upright and italic\slash slanted form of the current font family.}%
+ {}
+
+\defgcs{normalfont}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to the default font style.}%
+ {}
+
+\defgcs{tiny}%
+ {}%
+ {Most document classes}%
+ {Switches to tiny sized text.}%
+ {}
+
+\defgcs{scriptsize}%
+ {}%
+ {Most document classes}%
+ {Switches to sub- or superscript sized text.}%
+ {}
+
+\defgcs{footnotesize}%
+ {}%
+ {Most document classes}%
+ {Switches to footnote sized text.}%
+ {}
+
+\defgcs{small}%
+ {}%
+ {Most document classes}%
+ {Switches to small sized text.}%
+ {}
+
+\defgcs{normalsize}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches to normal sized text.}%
+ {%
+ }
+
+\defgcs{large}%
+ {}%
+ {Most document classes}%
+ {Switches to large sized text.}%
+ {%
+ }
+
+\defgcs{Large}%
+ {}%
+ {Most document classes}%
+ {Switches to extra-large sized text.}%
+ {%
+ }
+
+\defgcs{LARGE}%
+ {}%
+ {Most document classes}%
+ {Switches to extra-extra-large sized text.}%
+ {%
+ }
+
+\defgcs{huge}%
+ {}%
+ {Most document classes}%
+ {Switches to huge sized text.}%
+ {%
+ }
+
+\defgcs{Huge}%
+ {}%
+ {Most document classes}%
+ {Switches to extra-huge sized text.}%
+ {%
+ }
+
+\defgcs{multicolumn}%
+ {\marg{\meta{cols spanned}}\marg{\meta{col specifier}}\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Spans multiple columns in a tabular-style environment.}%
+ {%
+   \BeginArgList
+    \csentryargitem{cols spanned} The number of columns to span.
+    \csentryargitem{col specifier} The alignment of this column-spanning entry.
+    \csentryargitem{text} The contents of this column-spanning entry.
+   \EndArgList
+ }
+
+\defgcs{toprule}%
+ {\oarg{\meta{wd}}}%
+ {\nxisty{booktabs} package}%
+ {Horizontal rule for the top of a \nxglsi{env-tabular} environment.}%
+ {%
+   \BeginArgList
+    \csentryargitem{wd} Thickness of the rule (dimension).
+   \EndArgList
+ }
+
+\defgcs{bottomrule}%
+ {\oarg{\meta{wd}}}%
+ {\nxisty{booktabs} package}%
+ {Horizontal rule for the bottom of a \nxglsi{env-tabular} environment.}%
+ {%
+   \BeginArgList
+    \csentryargitem{wd} Thickness of the rule (dimension).
+   \EndArgList
+ }
+
+\defgcs{midrule}%
+ {\oarg{\meta{wd}}}%
+ {\nxisty{booktabs} package}%
+ {Horizontal rule to go below headings row of a \nxglsi{env-tabular} environment.}%
+ {%
+   \BeginArgList
+    \csentryargitem{wd} Thickness of the rule (dimension).
+   \EndArgList
+ }
+
+\defgcs{cmidrule}%
+ {\oarg{\meta{wd}}\parg{\meta{trim}}\marg{\meta{n}-\meta{m}}}%
+ {\nxisty{booktabs} package}%
+ {Like \nxglsi{midrule} but only spans column \meta{n} to column
+  \meta{m}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{wd} Thickness of the rule (dimension).
+    \csentryargitem{trim} Trimming commands. Specifications:
+     \texttt{r}, \texttt{r}\marg{\meta{wd}}, \texttt{l} and
+      \texttt{l}\marg{\meta{wd}}
+    \csentryargitem{n} Index of start column.
+    \csentryargitem{m} Index of end column.
+   \EndArgList
+ }
+
+\defgcs{heavyrulewidth}%
+ {}%
+ {\nxisty{booktabs} package}%
+ {\nxGls{length} register specifying the thickness of \nxglsi{toprule} and
+ \nxglsi{bottomrule}.}%
+ {}
+
+\defgcs{lightrulewidth}%
+ {}%
+ {\nxisty{booktabs} package}%
+ {\nxGls{length} register specifying the thickness of \nxglsi{midrule}.}%
+ {}
+
+\defgcs{addlinespace}%
+ {\oarg{\meta{wd}}}%
+ {\nxisty{booktabs} package}%
+ {Adds extra vertical space (\meta{wd} if specified, otherwise
+  \nxglsi{defaultaddspace}) in a row of 
+  a \nxglsi{env-tabular} environment. (Must be inserted after
+  \nxglsi{dbbackslashchar} marker.)}%
+ {%
+   \BeginArgList
+    \csentryargitem{wd} Height of space (dimension). Default is
+     \nxglsi{defaultaddspace}.
+   \EndArgList
+ }
+
+\defgcs{defaultaddspace}%
+ {}%
+ {\nxisty{booktabs} package}%
+ {Default extra space before or after an adjacent rule.}%
+ {}
+
+\defgcs{parbox}%
+ {\oarg{\meta{pos}}\oarg{\meta{height}}\marg{\meta{width}}\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Makes a box with line-wrapped contents. (More restrictive than
+  \nxglsi{env-minipage}.)}%
+ {%
+   \BeginArgList
+    \csentryargitem{pos} The vertical alignment of the box relative to
+     the surrounding text. (Centred if omitted.)
+    \csentryargitem{height} The height of the box. (If omitted the
+     height is the natural height of the contents of the box.)
+    \csentryargitem{width} The width of the box.
+    \csentryargitem{text} The contents of the box.
+   \EndArgList
+ }
+
+\defgcs{author}%
+ {\marg{\meta{name}}}%
+ {Most classes that have the concept of a title page}%
+ {Specifies the document author (or authors). This command doesn't
+  display any text so may be used in the preamble, but if it's not
+  in the preamble it must be placed before \nxglsi{maketitle}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{name} The name (or names) of the document author
+     (or authors).
+   \EndArgList
+   Note that some classes, such as those supplied by journals or
+   conference proceedings, may also define an optional argument
+   that can be used to specify an abbreviated author list for the
+   page headers.
+ }
+
+\defgcs{title}%
+ {\marg{\meta{text}}}%
+ {Most classes that have the concept of a title page}%
+ {Specifies the document title. This command doesn't
+  display any text so may be used in the preamble, but if it's not
+  in the preamble it must be placed before \nxglsi{maketitle}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{text} The title of the document.
+   \EndArgList
+   Note that some classes, such as those supplied by journals or
+   conference proceedings, may also define an optional argument
+   that can be used to specify an abbreviated title for the page
+   headers.
+ }
+
+\defgcs{date}%
+ {\marg{\meta{text}}}%
+ {Most classes that have the concept of a title page}%
+ {Specifies the document date. This command doesn't
+  display any text so may be used in the preamble, but if it's not
+  in the preamble it must be placed before \nxglsi{maketitle}. If omitted, most
+  classes assume the current date (as provided by \nxglsi{today}).}%
+ {%
+   \BeginArgList
+    \csentryargitem{text} The document date.
+   \EndArgList
+ }
+
+\defgcs{titlehead}%
+ {\marg{\meta{text}}}%
+ {\nxicls{scrartcl}, \nxicls{scrreprt}, \nxicls{scrbook} classes}%
+ {Specifies the title header (typeset at the top of the title page).}%
+ {%
+   \BeginArgList
+    \csentryargitem{text} The title header text.
+   \EndArgList
+ }
+
+\defgcs{subtitle}%
+ {\marg{\meta{text}}}%
+ {\nxicls{scrartcl}, \nxicls{scrreprt}, \nxicls{scrbook} classes}%
+ {Specifies the subtitle (typeset just below the title).}%
+ {%
+   \BeginArgList
+    \csentryargitem{text} The subtitle text.
+   \EndArgList
+ }
+
+\defgcs{subject}%
+ {\marg{\meta{text}}}%
+ {\nxicls{scrartcl}, \nxicls{scrreprt}, \nxicls{scrbook} classes}%
+ {Specifies the subject (typeset just above the title).}%
+ {%
+   \BeginArgList
+    \csentryargitem{text} The subject.
+   \EndArgList
+ }
+
+\defgcs{publishers}%
+ {\marg{\meta{text}}}%
+ {\nxicls{scrartcl}, \nxicls{scrreprt}, \nxicls{scrbook} classes}%
+ {Specifies the publisher (typeset after all the other titling
+   information).}%
+ {%
+   \BeginArgList
+    \csentryargitem{text} The publisher text.
+   \EndArgList
+ }
+
+\defgcs{maketitle}%
+ {}%
+ {Most classes that have the concept of a title page}%
+ {Generates the title page (or title block). This command is usually
+  placed at the beginning of the document environment.}%
+ {}
+
+\defgcs{thanks}%
+ {\marg{\meta{text}}}%
+ {Most classes that have the concept of a title page}%
+ {Inserts a special type of footnote in one of the titling fields,
+  such as \nxglsi{author} or \nxglsni{title}. Usually used for some form of
+  acknowledgement or affiliation.}%
+ {}
+
+\defgcs{today}%
+ {}%
+ {Most of the commonly-used classes}%
+ {Inserts into the output file the date when the \LaTeX\ 
+  application created it from the source code.}%
+ {}
+
+\defgcs{part}%
+ {\oarg{\meta{short title}}\marg{\meta{title}}}%
+ {Most classes that have the concept of document structure}%
+ {Inserts a part sectional unit. \textbf{This command has a \htmlref{moving
+  argument}{sec:fragile}.}}%
+ {%
+   \BeginArgList
+     \csentryargitem{short title} An abbreviated form of the title to
+       go in the table of contents or the page header.
+     \csentryargitem{title} The title.
+   \EndArgList
+   The starred form of this command doesn't have an optional
+   argument and doesn't increment or display the part counter.
+ }
+
+\defgcs{chapter}%
+ {\oarg{\meta{short title}}\marg{\meta{title}}}%
+ {Book-style classes (such as \nxicls{scrbook} or \nxicls{scrreprt}) that have 
+  the concept of chapters}%
+ {Inserts a chapter heading. \textbf{This command has a \htmlref{moving
+  argument}{sec:fragile}.}}%
+ {%
+   \BeginArgList
+     \csentryargitem{short title} An abbreviated form of the title to
+       go in the table of contents or the page header.
+     \csentryargitem{title} The title.
+   \EndArgList
+   The starred form of this command doesn't have an optional
+   argument and doesn't increment or display the chapter counter.
+ }
+
+\defgcs{section}%
+ {\oarg{\meta{short title}}\marg{\meta{title}}}%
+ {Most classes that have the concept of document structure}%
+ {Inserts a section header. \textbf{This command has a \htmlref{moving
+  argument}{sec:fragile}.}}%
+ {%
+   \BeginArgList
+     \csentryargitem{short title} An abbreviated form of the title to
+       go in the table of contents or the page header.
+     \csentryargitem{title} The title.
+   \EndArgList
+   The starred form of this command doesn't have an optional
+   argument and doesn't increment or display the section counter.
+ }
+
+\defgcs{subsection}%
+ {\oarg{\meta{short title}}\marg{\meta{title}}}%
+ {Most classes that have the concept of document structure}%
+ {Inserts a subsection header. \textbf{This command has a \htmlref{moving
+  argument}{sec:fragile}.}}%
+ {%
+   \BeginArgList
+     \csentryargitem{short title} An abbreviated form of the title to
+       go in the table of contents or the page header.
+     \csentryargitem{title} The title.
+   \EndArgList
+   The starred form of this command doesn't have an optional
+   argument and doesn't increment or display the subsection counter.
+ }
+
+\defgcs{subsubsection}%
+ {\oarg{\meta{short title}}\marg{\meta{title}}}%
+ {Most classes that have the concept of document structure}%
+ {Inserts a subsubsection header. \textbf{This command has a \htmlref{moving
+  argument}{sec:fragile}.}}%
+ {%
+   \BeginArgList
+     \csentryargitem{short title} An abbreviated form of the title to
+       go in the table of contents or the page header.
+     \csentryargitem{title} The title.
+   \EndArgList
+   The starred form of this command doesn't have an optional
+   argument and doesn't increment or display the subsubsection counter.
+ }
+
+\defgcs{paragraph}%
+ {\oarg{\meta{short title}}\marg{\meta{title}}}%
+ {Most classes that have the concept of document structure}%
+ {Inserts a subsubsubsection header. Most classes default to an 
+  unnumbered running header for
+  this sectional unit. \textbf{This command has a \htmlref{moving
+  argument}{sec:fragile}.}}%
+ {%
+   \BeginArgList
+     \csentryargitem{short title} An abbreviated form of the title to
+       go in the table of contents or the page header.
+     \csentryargitem{title} The title.
+   \EndArgList
+   The starred form of this command doesn't have an optional
+   argument and doesn't increment or display the associated counter.
+ }
+
+\defgcs{subparagraph}%
+ {\oarg{\meta{short title}}\marg{\meta{title}}}%
+ {Most classes that have the concept of document structure}%
+ {Inserts a subsubsubsubsection header. Most classes default 
+  to an unnumbered running header for
+  this sectional unit. \textbf{This command has a \htmlref{moving
+  argument}{sec:fragile}.}}%
+ {%
+   \BeginArgList
+     \csentryargitem{short title} An abbreviated form of the title to
+       go in the table of contents or the page header.
+     \csentryargitem{title} The title.
+   \EndArgList
+   The starred form of this command doesn't have an optional
+   argument and doesn't increment or display the associated counter.
+ }
+
+\defgcs{minisec}%
+ {\marg{\meta{heading}}}%
+ {\nxicls{scrartcl}, \nxicls{scrreprt} and
+  \nxicls{scrbook} classes}%
+ {An unnumbered heading not associated with any structuring level.}%
+ {%
+   \BeginArgList
+    \csentryargitem{heading} The heading text.
+   \EndArgList
+ }
+
+\defgcs{addtokomafont}%
+ {\marg{\meta{element name}}\marg{\meta{commands}}}%
+ {\nxicls{scrartcl}, \nxicls{scrreprt} and
+  \nxicls{scrbook} classes}%
+ {Sets the font characteristics for the given \koma\ element.}%
+ {%
+   \BeginArgList
+     \csentryargitem{element name} The element's name, for example
+      \texttt{chapter}. See the \koma\ manual for a full list
+      of defined elements.
+     \csentryargitem{commands} The font changing commands to apply
+      to that element.
+   \EndArgList
+ }
+
+\defgcs{appendix}%
+ {}%
+ {Most classes that have the concept of document structure}%
+ {Indicates (but doesn't print anything) that the document is
+  switching to the appendices. If chapters exist, the chapter
+  numbering is reset and switched to a different format
+  (usually upper case letters) otherwise the section numbering
+  is reset and switched to a different format.}%
+ {}
+
+\defgcs{tableofcontents}
+ {}%
+ {Most classes that have the concept of document structure}%
+ {Inserts the table of contents. A second (possibly third) run
+  is required to ensure the page numbering is correct.}%
+ {}
+
+\defgcs{addcontentsline}%
+ {\marg{\meta{toc}}\marg{\meta{section unit}}\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Adds a sectional unit header to the contents list.}%
+ {%
+   \BeginArgList
+    \csentryargitem{toc} The extension of the required external file
+    without the dot (for example, \texttt{toc} for the table of
+     contents or \texttt{lof} for the list of figures).
+    \csentryargitem{section unit} The name of the sectional unit (for
+     example, \texttt{chapter}).
+    \csentryargitem{text} The text to be added to the contents list.
+   \EndArgList
+ }
+
+\defgcs{label}%
+ {\marg{\meta{string}}}%
+ {\LaTeX\ Kernel}%
+ {Assigns a unique textual label linked to the most recently
+  incremented cross-referencing counter in the current \nxglslink{group}{scope} (see
+  also \nxglsi{ref}).}%
+ {%
+   \BeginArgList
+    \csentryargitem{string} A unique label that can be referenced
+     elsewhere in the document with \nxglsi{ref}. (It's best to 
+     just use alphanumerics and non-active punctuation characters in
+     the label.)
+   \EndArgList
+ }
+
+\defgcs{ref}%
+ {\marg{\meta{string}}}%
+ {\LaTeX\ Kernel}%
+ {References the value of the counter linked to the given label.
+  A second (possibly third) run of \LaTeX\ is required to ensure the cross-references
+  are up-to-date.
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{string} The required label that was used in the
+     corresponding \nxglsi{label}.
+   \EndArgList
+ }
+
+\defgcs{pageref}%
+ {\marg{\meta{string}}}%
+ {\LaTeX\ Kernel}%
+ {Similar to \nxglsi{ref} but inserts the page number where the given
+  label was defined.
+  A second (possibly third) run of \LaTeX\ is required to ensure the cross-references
+  are up-to-date.
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{string} The required label that was used in the
+     corresponding \nxglsi{label}.
+   \EndArgList
+ }
+
+\defgcs{vref}%
+ {\marg{\meta{string}}}%
+ {\nxisty{varioref} package}%
+ {Like \nxglsi{ref} but also adds information about the location, such
+  as \dq{on page~\meta{n}} or \dq{on the following page}.
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{string} The required label that was used in the
+     corresponding \nxglsi{label}.
+   \EndArgList
+ }
+
+\defgcs{bibitem}%
+ {\oarg{\meta{tag}}\marg{\meta{key}}}%
+ {\LaTeX\ Kernel}%
+ {Indicates the start of a new reference in the bibliography. May
+  only be used inside the contents of \nxglsi{env-thebibliography} environment}%
+ {%
+   \BeginArgList
+    \csentryargitem{tag} If present, overrides the marker at the
+    start of the reference.
+    \csentryargitem{key} A unique key that identifies this reference so
+    it can be cited elsewhere in the document using \nxglsi{cite}.
+   \EndArgList
+ }
+
+\defgcs{cite}%
+ {\oarg{\meta{text}}\marg{\meta{key list}}}%
+ {\LaTeX\ Kernel}%
+ {Inserts the citation markers of each reference identified in the
+  key list. A second run is required to ensure the reference is
+  correct.}%
+ {%
+    \BeginArgList
+      \csentryargitem{text} Additional text to insert into the citation
+       (such as the chapter number, or a particular page or
+       page range within the citation).
+      \csentryargitem{key list} A comma-separated list of keys used in
+      the corresponding \nxglsi{cite}.
+    \EndArgList
+ }
+
+\defgcs{pagenumbering}%
+ {\marg{\meta{style}}}%
+ {\LaTeX\ Kernel}%
+ {Sets the style of the page numbers.}%
+ {%
+   \BeginArgList
+     \csentryargitem{style} The page numbering style (e.g.\
+      \texttt{roman} for lower case Roman numerals).
+   \EndArgList
+ }
+
+\defgcs{pagestyle}%
+ {\marg{\meta{style}}}%
+ {\LaTeX\ Kernel}%
+ {Sets the style of the headers and footers.}%
+ {%
+   \BeginArgList
+     \csentryargitem{style} The name of the page style. The \LaTeX\
+     kernel defines only two styles: \nxipagestyle{empty} and
+     \nxipagestyle{plain}. Most of the standard classes also provide
+     the \nxipagestyle{headings} style.
+   \EndArgList
+ }
+
+\defgcs{thispagestyle}%
+ {\marg{\meta{style}}}%
+ {\LaTeX\ Kernel}%
+ {Like \nxglsi{pagestyle} but only affects the current page.}%
+ {%
+   \BeginArgList
+     \csentryargitem{style} The name of the page style.
+   \EndArgList
+ }
+
+\defgcs{markboth}%
+ {\marg{\meta{left head}}\marg{\meta{right head}}}%
+ {\LaTeX\ Kernel}%
+ {Specifies information for the left and right page headers. Not all
+   page styles use this information, in which case the arguments are
+   ignored.}%
+ {%
+   \BeginArgList
+     \csentryargitem{left head} Text for the left (even) page header,
+     if the document has been identified as a double-sided document
+     (usually with the \nxclsopt{twoside} class option).
+
+     \csentryargitem{right head} Text for the right page header,
+     if the \nxclsopt{twoside} option has been used. Otherwise used
+     for both odd and even page headers.
+   \EndArgList
+ }
+
+\defgcs{markright}%
+ {\marg{\meta{right head}}}%
+ {\LaTeX\ Kernel}%
+ {Specifies information for the right (odd) page header. Not all
+  page styles use this information, in which case the argument is
+  ignored.}%
+ {%
+   \BeginArgList
+     \csentryargitem{right head} Text for the right page header,
+     if the \nxclsopt{twoside} option has been used. Otherwise used
+     for both odd and even page headers.
+   \EndArgList
+ }
+
+\defgcs{includegraphics}%
+ {\oarg{\meta{key vals}}\marg{\meta{filename}}}%
+ {\nxisty{graphicx} package}%
+ {Inserts a graphics file into the document.}%
+ {%
+   \BeginArgList
+     \csentryargitem{key vals} Comma-separated list of options that can
+      be used to change the way the image is displayed.
+   \EndArgList
+ }
+
+\defgcs{DeclareGraphicsExtensions}%
+ {\marg{\meta{ext-list}}}%
+ {\nxisty{graphicx} package}%
+ {Specify the file extensions to look for if no extension is used in
+ \nxglsi{includegraphics}}%
+ {%
+   \BeginArgList
+     \csentryargitem{ext-list} A comma-separated list of extensions.
+   \EndArgList
+ }
+
+\defgcs{selectlanguage}
+ {\marg{\meta{language name}}}%
+ {\nxisty{babel} package}%
+ {Switches to the named language. Predefined textual elements, such
+  as the date given by \nxglsi{today} or prefixes like \dq{Chapter},
+  are redefined to those supplied by the given language.}%
+ {%
+   \BeginArgList
+    \csentryargitem{language} The language identifier.
+   \EndArgList
+ }
+
+\defgcs{foreignlanguage}%
+ {\marg{\meta{language name}}\marg{\meta{text}}}%
+ {\nxisty{babel} package}%
+ {Typesets the given text using any predefined names or date formats supplied by the
+  given language.
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{language} The language identifier.
+    \csentryargitem{text} The foreign text.
+   \EndArgList
+ }
+
+\defgcs{iflanguage}%
+ {\marg{\meta{language name}}\marg{\meta{true text}}\marg{\meta{false
+text}}}%
+ {\nxisty{babel} package}%
+ {Tests the current language.}%
+ {%
+   \BeginArgList
+    \csentryargitem{language} The language identifier.
+    \csentryargitem{true text} The text to typeset if true.
+    \csentryargitem{false text} The text to typeset if not true.
+   \EndArgList
+ }
+
+\defgcs{caption}%
+ {\oarg{\meta{short caption}}\marg{\meta{caption text}}}%
+ {\LaTeX\ Kernel}%
+ {Inserts the caption for a float such as a figure or table. 
+  \textbf{This command has a \htmlref{moving argument}{sec:fragile}.}}%
+ {%
+   \BeginArgList
+    \csentryargitem{short caption} If provided, an abbreviated caption
+      to go in the list of figures\slash tables etc.
+    \csentryargitem{caption text} The caption contents.
+   \EndArgList
+ }
+
+\defgcs{listoffigures}%
+ {}%
+ {Most classes that have the concept of document structure}%
+ {Inserts the list of figures. A second (possibly third) run
+  is required to ensure the page numbering is correct.}%
+ {}
+
+\defgcs{listoftables}%
+ {}%
+ {Most classes that have the concept of document structure}%
+ {Inserts the list of tables. A second (possibly third) run
+  is required to ensure the page numbering is correct.}%
+ {}
+
+\defgcs{hspace}%
+ {\marg{\meta{length}}}%
+ {\LaTeX\ Kernel}%
+ {Inserts a horizontal gap of the given width.}%
+ {%
+   \BeginArgList
+    \csentryargitem{length} The width of the horizontal gap.
+   \EndArgList
+ }
+
+\defgcs{vspace}%
+ {\marg{\meta{length}}}%
+ {\LaTeX\ Kernel}%
+ {Inserts a vertical gap of the given height.}%
+ {%
+   \BeginArgList
+    \csentryargitem{length} The \protect\htmlref{height}{sec:length} of the vertical gap.
+   \EndArgList
+ }
+
+\defgcs{baselineskip}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {A \nxglsi{length} register that stores the current interline spacing.
+  This is recalculated whenever the font changes.}%
+ {}
+
+\defgcs{parskip}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {A \nxglsi{length} register that stores the spacing between paragraphs.
+  (If you're using one of the \koma\ classes, use the \nxscrclsopt{parskip} 
+   option to set it to full or half line height.)}%
+ {}
+
+\defgcs{twocolumn}%
+ {\oarg{\meta{header text}}}%
+ {\LaTeX\ Kernel}%
+ {Starts a new page and switches to two column mode.}%
+ {%
+   \BeginArgList
+    \csentryargitem{header text} If present, this header text will be
+    placed at the top of the page spanning both columns. (For
+    example, as used by \nxglsi{maketitle} in two column articles.)
+   \EndArgList
+ }
+
+\defgcs{onecolumn}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Starts a new page and switches to one column mode.}%
+ {}
+
+\defgcs{TeX}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Typesets the \TeX\ logo.}%
+ {}
+
+\defgcs{LaTeX}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Typesets the \makeimg{LaTeX}{\LaTeX}\ logo.}%
+ {}
+
+\defgcs{LaTeXe}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Typesets the \makeimg{LaTeX2e}{\LaTeXe}\ logo.}%
+ {}
+
+\defgcs{framebox}%
+ {\oarg{\meta{width}}\oarg{\meta{align}}\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Puts a frame around its contents, prohibiting a line break in the
+  contents.}%
+ {%
+   \BeginArgList
+     \csentryargitem{width} The width of the box. (If omitted, this value is
+      the natural width of the box contents.)
+     \csentryargitem{align} Horizontal alignment of box contents
+      (\texttt{c} if omitted).
+     \csentryargitem{text} The contents of the box.
+   \EndArgList
+ }
+
+\defgcs{fbox}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Puts a frame around its contents, prohibiting a line break in the
+  contents.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The contents of the box.
+   \EndArgList
+ }
+
+\defgcs{shadowbox}%
+ {\marg{\meta{text}}}%
+ {\nxisty{fancybox} package}%
+ {Puts a shadow frame around its contents, prohibiting a line break in the
+  contents.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The contents of the box.
+   \EndArgList
+ }
+
+\defgcs{doublebox}%
+ {\marg{\meta{text}}}%
+ {\nxisty{fancybox} package}%
+ {Puts a double-lined frame around its contents, prohibiting a line break in the
+  contents.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The contents of the box.
+   \EndArgList
+ }
+
+\defgcs{ovalbox}%
+ {\marg{\meta{text}}}%
+ {\nxisty{fancybox} package}%
+ {Puts a thin-lined oval frame around its contents, prohibiting a line break in the
+  contents.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The contents of the box.
+   \EndArgList
+ }
+
+\defgcs{Ovalbox}%
+ {\marg{\meta{text}}}%
+ {\nxisty{fancybox} package}%
+ {Puts a thick-lined oval frame around its contents, prohibiting a line break in the
+  contents.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The contents of the box.
+   \EndArgList
+ }
+
+\defgcs{protect}%
+ {\meta{command}}%
+ {\LaTeX\ Kernel}%
+ {Used in a moving argument to prevent a fragile command from expanding.}%
+ {%
+   \BeginArgList
+    \csentryargitem{command} The fragile command that needs protecting.
+   \EndArgList
+ }
+
+\defgcs{par}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Insert a paragraph break.}%
+ {}
+
+\defgcs{linewidth}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {A length containing the desired current line width. This is
+  usually the width of the typeblock, but inside a \nxglsi{env-minipage}
+  or \nxglsi{parbox} it will be the width the box. Note that
+  the actual contents of the line may fall short of the line width
+  (underfull hbox) or extend beyond it (overfull hbox).}%
+ {}
+
+\defgcs{textwidth}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {A length containing the width of the typeblock. Note that
+  the actual contents of the line may fall short of the line width
+  (underfull hbox) or extend beyond it (overfull hbox). This width
+  does not include the area for marginal notes.}%
+ {}
+
+\defgcs{textheight}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {A length containing the height of the typeblock. Note that
+  the actual contents of the page may fall short of the text height
+  (underfull vbox) or extend beyond it (overfull vbox). This
+  measurement does not include the header and footer areas.}%
+ {}
+
+\defgcs{and}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Used to separate authors in \nxglsi{author}}%
+ {}
+
+\defgcs{clearpage}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Inserts a page break and processes any unprocessed floats}%
+ {}
+
+\defgcs{rotatebox}%
+ {\oarg{\meta{option list}}\marg{\meta{angle}}\marg{\meta{text}}}%
+ {\nxisty{graphicx} package}%
+ {Rotates the given contents by the given angle.}%
+ {%
+   \BeginArgList
+     \csentryargitem{option list} A comma-separated list of options:
+      \protect\begin{itemize}
+       \protect\item \nxikeyvalopt{rotatebox}{origin}=\meta{label}
+       \protect\item \nxikeyvalopt{rotatebox}{x}=\meta{dimen}
+       \protect\item \nxikeyvalopt{rotatebox}{y}=\meta{dimen}
+       \protect\item \nxikeyvalopt{rotatebox}{units}=\meta{number}
+      \protect\end{itemize}
+
+     \csentryargitem{angle} The angle of rotation.
+
+     \csentryargitem{text} The text to be rotated.
+   \EndArgList
+ }
+
+\defgcs{scalebox}%
+ {\marg{\meta{h scale}}\oarg{\meta{v scale}}\marg{\meta{text}}}%
+ {\nxisty{graphicx} package}%
+ {Scales the specified contents.}%
+ {%
+    \BeginArgList
+      \csentryargitem{h scale} The horizontal scale factor.
+      \csentryargitem{v scale} The vertical scale factor. If omitted,
+       the same as \meta{h scale}.
+      \csentryargitem{text} The text to be scaled.
+    \EndArgList
+ }
+
+\defgcs{reflectbox}%
+ {\marg{\meta{text}}}%
+ {\nxisty{graphicx} package}%
+ {Reflects the specified contents in the \makeimg{y}{\ensuremath{y}}-axis.)}%
+ {%
+    \BeginArgList
+      \csentryargitem{text} The text to be reflected.
+    \EndArgList
+ }
+
+\defgcs{resizebox}%
+ {\marg{\meta{h length}}\marg{\meta{v length}}\marg{\meta{text}}}%
+ {\nxisty{graphicx} package}%
+ {Scales the specified contents to the given dimensions.}%
+ {%
+   \BeginArgList
+      \csentryargitem{h length} The required width or \texttt{!} to keep
+      the aspect ratio.
+      \csentryargitem{v length} The required height or \texttt{!} to keep
+      the aspect ratio.
+      \csentryargitem{text} The text to be scaled.
+   \EndArgList
+ }
+
+\defgcs{centering}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switches the paragraph alignment to centred.}%
+ {}
+
+\defgcs{newcommand}%
+ {\marg{\meta{cmd}}\oarg{\meta{n-args}}\oarg{\meta{default}}\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Defines a new command.}%
+ {%
+   \BeginArgList
+    \csentryargitem{cmd} The new command name (including initial backslash).
+    \csentryargitem{n-args} The number of arguments this new command
+     should have.
+    \csentryargitem{default} If the first argument should be optional,
+     the default value if omitted.
+    \csentryargitem{text} What actions the command should perform.
+   \EndArgList
+ }
+
+\defgcs{renewcommand}%
+ {\marg{\meta{cmd}}\oarg{\meta{n-args}}\oarg{\meta{default}}\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Redefines an existing command.}%
+ {%
+   \BeginArgList
+    \csentryargitem{cmd} The command name (including initial backslash).
+    \csentryargitem{n-args} The number of arguments this command
+     should have.
+    \csentryargitem{default} If the first argument should be optional,
+     the default value if omitted.
+    \csentryargitem{text} What actions the command should perform.
+   \EndArgList
+ }
+
+\defgcs{newenvironment}%
+ {\marg{\meta{env-name}}\oarg{\meta{n-args}}\oarg{\meta{default}}\marg{\meta{begin-code}}\marg{\meta{end-code}}}%
+ {\LaTeX\ Kernel}%
+ {Defines a new environment.}%
+ {%
+   \BeginArgList
+    \csentryargitem{env-name} The new environment name (\emph{no} backslash).
+    \csentryargitem{n-args} The number of arguments this new
+     environment should have.
+    \csentryargitem{default} If the first argument should be optional,
+     the default value if omitted.
+    \csentryargitem{begin-code} Actions to perform at the start of the
+      environment.
+    \csentryargitem{end-code} Actions to perform at the end of the
+      environment.
+   \EndArgList
+ }
+
+\defgcs{renewenvironment}%
+ {\marg{\meta{env-name}}\oarg{\meta{n-args}}\oarg{\meta{default}}\marg{\meta{begin-code}}\marg{end-code}}%
+ {\LaTeX\ Kernel}%
+ {Redefines an existing environment.}%
+ {%
+   \BeginArgList
+    \csentryargitem{env-name} The environment name (\emph{no} backslash).
+    \csentryargitem{n-args} The number of arguments this new
+     environment should have.
+    \csentryargitem{default} If the first argument should be optional,
+     the default value if omitted.
+    \csentryargitem{begin-code} Actions to perform at the start of the
+      environment.
+    \csentryargitem{end-code} Actions to perform at the end of the
+      environment.
+   \EndArgList
+ }
+
+\defgcs{labelitemi}%
+ {}%
+ {Classes that define the \nxglsni{env-itemize} environment}%
+ {The default label for the first level \nxglsni{env-itemize}.}%
+ {}
+
+\defgcs{labelitemii}%
+ {}%
+ {Classes that define the \nxglsni{env-itemize} environment}%
+ {The default label for the second level \nxglsni{env-itemize}.}%
+ {}
+
+\defgcs{labelitemiii}%
+ {}%
+ {Classes that define the \nxglsni{env-itemize} environment}%
+ {The default label for the third level \nxglsni{env-itemize}.}%
+ {}
+
+\defgcs{labelitemiv}%
+ {}%
+ {Classes that define the \nxglsni{env-itemize} environment}%
+ {The default label for the fourth level \nxglsni{env-itemize}.}%
+ {}
+
+\defgcs{mbox}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Ensures that the given text doesn't contain a line break.}%
+ {}
+
+\defgcs{text}%
+ {\marg{\meta{text}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Displays its argument in the normal text font (as opposed to the
+  current maths font).}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text to be displayed in the normal text font.
+   \EndArgList
+ }
+
+\defgcs{intertext}%
+ {\marg{\meta{text}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Used for a short interjection in the middle of a multi-line
+  displayed maths, such as in an \nxglsi{env-align} environment.
+  May only appear right after \nxglsi{dbbackslashchar}.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The interjection text.
+   \EndArgList
+ }
+
+\defgcs{overleftarrow}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Puts an extendible left arrow over \meta{maths}}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The maths over which to put the arrow.
+   \EndArgList
+ }
+
+\defgcs{overrightarrow}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Puts an extendible right arrow over \meta{maths}}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The maths over which to put the arrow.
+   \EndArgList
+ }
+
+\defgcs{overleftrightarrow}%
+ {\marg{\meta{maths}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Puts an extendible left-right arrow over \meta{maths}}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The maths over which to put the arrow.
+   \EndArgList
+ }
+
+\defgcs{underleftarrow}%
+ {\marg{\meta{maths}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Puts an extendible left arrow under \meta{maths}}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The maths under which to put the arrow.
+   \EndArgList
+ }
+
+\defgcs{underrightarrow}%
+ {\marg{\meta{maths}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Puts an extendible right arrow under \meta{maths}}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The maths under which to put the arrow.
+   \EndArgList
+ }
+
+\defgcs{underleftrightarrow}%
+ {\marg{\meta{maths}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Puts an extendible left-right arrow under \meta{maths}}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The maths under which to put the arrow.
+   \EndArgList
+ }
+
+\defgcs{xrightarrow}%
+ {\oarg{\meta{subscript}}\marg{\meta{superscript}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {An extendible right arrow with a superscript and optionally a
+  subscript.}%
+ {%
+   \BeginArgList
+     \csentryargitem{subscript} The subscript to go under the arrow.
+     \csentryargitem{superscript} The superscript to go over the arrow.
+   \EndArgList
+ }
+
+\defgcs{xleftarrow}%
+ {\oarg{\meta{subscript}}\marg{\meta{superscript}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {An extendible left arrow with a superscript and optionally a
+  subscript.}%
+ {%
+   \BeginArgList
+     \csentryargitem{subscript} The subscript to go under the arrow.
+     \csentryargitem{superscript} The superscript to go over the arrow.
+   \EndArgList
+ }
+
+\defgcs{rightarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Right arrow \ensuremath{\rightarrow}.}%
+ {}
+
+\defgcs{to}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Right arrow \ensuremath{\to}.}%
+ {}
+
+\defgcs{Rightarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Double-lined right arrow \ensuremath{\Rightarrow}.}%
+ {}
+
+\defgcs{leftarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Left arrow \ensuremath{\leftarrow}.}%
+ {}
+
+\defgcs{gets}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Left arrow \ensuremath{\gets}.}%
+ {}
+
+\defgcs{Leftarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Double-lined left arrow \ensuremath{\Leftarrow}.}%
+ {}
+
+\defgcs{downarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Down arrow \ensuremath{\downarrow}. (May be used as a delimiter.)}%
+ {}
+
+\defgcs{Downarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Double-lined down arrow \ensuremath{\Downarrow}. (May be used as a delimiter.)}%
+ {}
+
+\defgcs{uparrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Up arrow \ensuremath{\uparrow}. (May be used as a delimiter.)}%
+ {}
+
+\defgcs{Uparrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Double-lined up arrow \ensuremath{\Uparrow}. (May be used as a delimiter.)}%
+ {}
+
+\defgcs{updownarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Double-ended vertical arrow \ensuremath{\updownarrow}. (May be used as a delimiter.)}%
+ {}
+
+\defgcs{Updownarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Double-ended double-lined vertical arrow \ensuremath{\Updownarrow}. (May be used as a delimiter.)}%
+ {}
+
+\defgcs{hookrightarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Hooked right arrow \ensuremath{\hookrightarrow}.}%
+ {}
+
+\defgcs{hookleftarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Hooked left arrow \ensuremath{\hookleftarrow}.}%
+ {}
+
+\defgcs{leftharpoondown}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Left down harpoon \ensuremath{\leftharpoondown}.}%
+ {}
+
+\defgcs{leftharpoonup}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Left up harpoon \ensuremath{\leftharpoonup}.}%
+ {}
+
+\defgcs{rightharpoondown}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Right down harpoon \ensuremath{\rightharpoondown}.}%
+ {}
+
+\defgcs{rightharpoonup}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Right up harpoon \ensuremath{\rightharpoonup}.}%
+ {}
+
+\defgcs{rightleftharpoons}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Right-left harpoons \ensuremath{\rightleftharpoons}.}%
+ {}
+
+\defgcs{leftrightarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Double-ended horizontal arrow \ensuremath{\leftrightarrow}.}%
+ {}
+
+\defgcs{Leftrightarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Double-ended double-lined horizontal arrow \ensuremath{\Leftrightarrow}.}%
+ {}
+
+\defgcs{longrightarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Long right arrow \ensuremath{\longrightarrow}.}%
+ {}
+
+\defgcs{longleftarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Long left arrow \ensuremath{\longleftarrow}.}%
+ {}
+
+\defgcs{longleftrightarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Long double-ended horizontal arrow \ensuremath{\longleftrightarrow}.}%
+ {}
+
+\defgcs{Longrightarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Long double-lined right arrow \ensuremath{\Longrightarrow}.}%
+ {}
+
+\defgcs{Longleftarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Long double-lined left arrow \ensuremath{\Longleftarrow}.}%
+ {}
+
+\defgcs{Longleftrightarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Long double-lined double-ended horizontal arrow \ensuremath{\Longleftrightarrow}.}%
+ {}
+
+\defgcs{longmapsto}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Long mapping arrow \ensuremath{\longmapsto}.}%
+ {}
+
+\defgcs{mapsto}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Mapping arrow \ensuremath{\mapsto}.}%
+ {}
+
+\defgcs{nearrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {North-East arrow \ensuremath{\nearrow}.}%
+ {}
+
+\defgcs{nwarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {North-West arrow \ensuremath{\nwarrow}.}%
+ {}
+
+\defgcs{searrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {South-East arrow \ensuremath{\searrow}.}%
+ {}
+
+\defgcs{swarrow}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {South-West arrow \ensuremath{\swarrow}.}%
+ {}
+
+\defgcs{makeindex}%
+ {}%
+ {\LaTeX\ Kernel (Preamble Only)}%
+ {Enables \nxglsi{index}.}%
+ {}
+
+\defgcs{index}%
+ {\marg{\meta{text}}}%
+ {\LaTeX\ Kernel}%
+ {Adds indexing information to an external index file. The command
+   \nxglsi{makeindex} must be used in the preamble to enable
+   this command. The external index file must be post-processed with
+   an indexing application, such as \nxiappname{makeindex}.}%
+ {%
+   \BeginArgList
+     \csentryargitem{text} The text to go in the index.
+   \EndArgList
+ }
+
+\defgcs{printindex}%
+ {}%
+ {\nxisty{makeidx} package}%
+ {Prints the index. Must be used with \nxglsi{makeindex} and \nxglsi{index}.
+ (The external index file must first be processed by an indexing application.)}%
+ {}
+
+\defgcs{alpha}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case alpha \ensuremath{\alpha}.}%
+ {}
+
+\defgcs{beta}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case beta \ensuremath{\beta}.}%
+ {}
+
+\defgcs{gamma}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case gamma \ensuremath{\gamma}.}%
+ {}
+
+\defgcs{delta}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case delta \ensuremath{\delta}.}%
+ {}
+
+\defgcs{epsilon}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case epsilon \ensuremath{\epsilon}.}%
+ {}
+
+\defgcs{varepsilon}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Variant Greek lower case alpha \ensuremath{\varepsilon}.}%
+ {}
+
+\defgcs{zeta}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case zeta \ensuremath{\zeta}.}%
+ {}
+
+\defgcs{eta}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case eta \ensuremath{\eta}.}%
+ {}
+
+\defgcs{theta}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case theta \ensuremath{\theta}.}%
+ {}
+
+\defgcs{vartheta}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {A variant Greek lower case theta \ensuremath{\vartheta}.}%
+ {}
+
+\defgcs{iota}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case iota \ensuremath{\iota}.}%
+ {}
+
+\defgcs{kappa}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case kappa \ensuremath{\kappa}.}%
+ {}
+
+\defgcs{lambda}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case lambda \ensuremath{\lambda}.}%
+ {}
+
+\defgcs{mu}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case mu \ensuremath{\mu}.}%
+ {}
+
+\defgcs{nu}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case nu \ensuremath{\nu}.}%
+ {}
+
+\defgcs{xi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case xi \ensuremath{\xi}.}%
+ {}
+
+\defgcs{pi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case pi \ensuremath{\pi}.}%
+ {}
+
+\defgcs{varpi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Variant Greek lower case pi \ensuremath{\varpi}.}%
+ {}
+
+\defgcs{rho}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case rho \ensuremath{\rho}.}%
+ {}
+
+\defgcs{varrho}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Variant Greek lower case rho \ensuremath{\varrho}.}%
+ {}
+
+\defgcs{sigma}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case sigma \ensuremath{\sigma}.}%
+ {}
+
+\defgcs{varsigma}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Variant Greek lower case sigma \ensuremath{\varsigma}.}%
+ {}
+
+\defgcs{tau}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case tau \ensuremath{\tau}.}%
+ {}
+
+\defgcs{upsilon}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case upsilon \ensuremath{\upsilon}.}%
+ {}
+
+\defgcs{phi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case phi \ensuremath{\phi}.}%
+ {}
+
+\defgcs{varphi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Variant Greek lower case phi \ensuremath{\varphi}.}%
+ {}
+
+\defgcs{chi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case chi \ensuremath{\chi}.}%
+ {}
+
+\defgcs{psi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case psi \ensuremath{\psi}.}%
+ {}
+
+\defgcs{omega}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek lower case omega \ensuremath{\omega}.}%
+ {}
+
+\defgcs{Gamma}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case gamma \ensuremath{\Gamma}.}%
+ {}
+
+\defgcs{Delta}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case delta \ensuremath{\Delta}.}%
+ {}
+
+\defgcs{Theta}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case theta \ensuremath{\Theta}.}%
+ {}
+
+\defgcs{Lambda}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case lambda \ensuremath{\Lambda}.}%
+ {}
+
+\defgcs{Xi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case xi \ensuremath{\Xi}.}%
+ {}
+
+\defgcs{Pi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case pi \ensuremath{\Pi}.}%
+ {}
+
+\defgcs{Sigma}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case sigma \ensuremath{\Sigma}.}%
+ {}
+
+\defgcs{Upsilon}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case upsilon \ensuremath{\Upsilon}.}%
+ {}
+
+\defgcs{Phi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case phi \ensuremath{\Phi}.}%
+ {}
+
+\defgcs{Psi}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case psi \ensuremath{\Psi}.}%
+ {}
+
+\defgcs{Omega}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Greek upper case omega \ensuremath{\Omega}.}%
+ {}
+
+\defgcs{sb}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Displays its argument as a subscript.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The subscript.
+   \EndArgList
+ }
+
+\defgcs{sp}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Displays its argument as a superscript.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The superscript.
+   \EndArgList
+ }
+
+\defgcs{pmod}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Modulo operator with parentheses.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The modulo (placed in parentheses).
+   \EndArgList
+ }
+
+\defgcs{mod}%
+ {\marg{\meta{maths}}}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Modulo operator without parentheses.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The modulo (placed in parentheses).
+   \EndArgList
+ }
+
+\defgcs{pod}%
+ {\marg{\meta{maths}}}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Modulo operator with parentheses but no \dq{mod}.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The modulo (placed in parentheses).
+   \EndArgList
+ }
+
+\defgcs{bmod}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Modulo operator.}%
+ {}
+
+\defgcs{arccos}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\arccos} function name.}%
+ {}
+
+\defgcs{arcsin}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\arcsin} function name.}%
+ {}
+
+\defgcs{arctan}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\arctan} function name.}%
+ {}
+
+\defgcs{arg}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\arg} function name.}%
+ {}
+
+\defgcs{cos}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\cos} function name.}%
+ {}
+
+\defgcs{cosh}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\cosh} function name.}%
+ {}
+
+\defgcs{cot}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\cot} function name.}%
+ {}
+
+\defgcs{coth}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\coth} function name.}%
+ {}
+
+\defgcs{csc}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\csc} function name.}%
+ {}
+
+\defgcs{deg}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\deg} function name.}%
+ {}
+
+\defgcs{det}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\det} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{dim}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\dim} function name.}%
+ {}
+
+\defgcs{exp}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\exp} function name.}%
+ {}
+
+\defgcs{gcd}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\gcd} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{hom}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\hom} function name.}%
+ {}
+
+\defgcs{inf}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\inf} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{injlim}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Typesets \ensuremath{\injlim} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{projlim}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Typesets \ensuremath{\projlim} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{varlimsup}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Typesets \ensuremath{\varlimsup} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{varliminf}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Typesets \ensuremath{\varliminf} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{varinjlim}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Typesets \ensuremath{\varinjlim} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{varprojlim}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Typesets \ensuremath{\varprojlim} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{ker}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\ker} function name.}%
+ {}
+
+\defgcs{lg}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\lg} function name.}%
+ {}
+
+\defgcs{lim}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\lim} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{liminf}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\liminf} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{limsup}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\limsup} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{ln}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\ln} function name.}%
+ {}
+
+\defgcs{log}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\log} function name.}%
+ {}
+
+\defgcs{max}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\max} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{min}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\min} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{Pr}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\Pr} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{sec}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\sec} function name.}%
+ {}
+
+\defgcs{sin}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\sin} function name.}%
+ {}
+
+\defgcs{sinh}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\sinh} function name.}%
+ {}
+
+\defgcs{sup}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\sup} function name (may have limits via \nxglsi{underscorechar} or \nxglsi{circumchar}).}%
+ {}
+
+\defgcs{tan}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\tan} function name.}%
+ {}
+
+\defgcs{tanh}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets \ensuremath{\tanh} function name.}%
+ {}
+
+\defgcs{infty}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Infinity \ensuremath{\infty} symbol.}%
+ {}
+
+\defgcs{partial}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Partial \ensuremath{\partial} symbol.}%
+ {}
+
+\defgcs{subset}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Subset \ensuremath{\subset} symbol.}%
+ {}
+
+\defgcs{approx}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\approx} symbol.}%
+ {}
+
+\defgcs{asymp}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\asymp} symbol.}%
+ {}
+
+\defgcs{bowtie}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\bowtie} symbol.}%
+ {}
+
+\defgcs{cong}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\cong} symbol.}%
+ {}
+
+\defgcs{dashv}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\dashv} symbol.}%
+ {}
+
+\defgcs{doteq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{equals symbol with dot on top}{\ensuremath{\doteq}} symbol.}%
+ {}
+
+\defgcs{equiv}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{equivalent}{\ensuremath{\equiv}} symbol.}%
+ {}
+
+\defgcs{frown}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\frown} symbol.}%
+ {}
+
+\defgcs{ge}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{greater than or equal to}{\ensuremath{\ge}} symbol.}%
+ {}
+
+\defgcs{geq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{greater than or equal to}{\ensuremath{\geq}} symbol.}%
+ {}
+
+\defgcs{gg}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{much greater than}{\ensuremath{\gg}} symbol.}%
+ {}
+
+\defgcs{in}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\in} symbol.}%
+ {}
+
+\defgcs{le}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{less than or equal to}{\ensuremath{\le}} symbol.}%
+ {}
+
+\defgcs{leq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{less than or equal to}{\ensuremath{\leq}} symbol.}%
+ {}
+
+\defgcs{ll}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{much less than}{\ensuremath{\ll}} symbol.}%
+ {}
+
+\defgcs{mid}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\mid} symbol.}%
+ {}
+
+\defgcs{models}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\models} symbol.}%
+ {}
+
+\defgcs{neq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{not equal to}{\ensuremath{\neq}} symbol.}%
+ {}
+
+\defgcs{ni}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{contains element}{\ensuremath{\ni}} symbol.}%
+ {}
+
+\defgcs{notin}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{not element of}{\ensuremath{\notin}} symbol.}%
+ {}
+
+\defgcs{parallel}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\parallel} symbol.}%
+ {}
+
+\defgcs{prec}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\prec} symbol.}%
+ {}
+
+\defgcs{preceq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\preceq} symbol.}%
+ {}
+
+\defgcs{perp}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{perpendicular to}{\ensuremath{\perp}} symbol.}%
+ {}
+
+\defgcs{propto}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \makeimg{proportional to}{\ensuremath{\propto}} symbol.}%
+ {}
+
+\defgcs{sim}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\sim} symbol.}%
+ {}
+
+\defgcs{simeq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\simeq} symbol.}%
+ {}
+
+\defgcs{smile}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\smile} symbol.}%
+ {}
+
+\defgcs{sqsubseteq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\sqsubseteq} symbol.}%
+ {}
+
+\defgcs{sqsupseteq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\sqsupseteq} symbol.}%
+ {}
+
+\defgcs{subseteq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\subseteq} symbol.}%
+ {}
+
+\defgcs{succ}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\succ} symbol.}%
+ {}
+
+\defgcs{succeq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\succeq} symbol.}%
+ {}
+
+\defgcs{supset}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\supset} symbol.}%
+ {}
+
+\defgcs{supseteq}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\supseteq} symbol.}%
+ {}
+
+\defgcs{vdash}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Relational \ensuremath{\vdash} symbol.}%
+ {}
+
+\defgcs{amalg}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\amalg} symbol.}%
+ {}
+
+\defgcs{ast}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \makeimg{asterisk}{\ensuremath{\ast}} symbol.}%
+ {}
+
+\defgcs{bullet}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \makeimg{bullet point}{\ensuremath{\bullet}} symbol.}%
+ {}
+
+\defgcs{bigcirc}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\bigcirc} symbol.}%
+ {}
+
+\defgcs{bigtriangledown}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\bigtriangledown} symbol.}%
+ {}
+
+\defgcs{bigtriangleup}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\bigtriangleup} symbol.}%
+ {}
+
+\defgcs{cap}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\cap} symbol.}%
+ {}
+
+\defgcs{cdot}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Centred dot \ensuremath{\cdot} symbol.}%
+ {}
+
+\defgcs{circ}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Circle \ensuremath{\circ} symbol.}%
+ {}
+
+\defgcs{cup}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\cup} symbol.}%
+ {}
+
+\defgcs{dagger}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\dagger} symbol.}%
+ {}
+
+\defgcs{ddagger}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\ddagger} symbol.}%
+ {}
+
+\defgcs{diamond}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\diamond} symbol.}%
+ {}
+
+\defgcs{div}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Division operator \ensuremath{\div} symbol.}%
+ {}
+
+\defgcs{mp}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Minus or plus operator \makeimg{minus or plus}{\ensuremath{\mp}} symbol.}%
+ {}
+
+\defgcs{odot}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\odot} symbol.}%
+ {}
+
+\defgcs{ominus}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\ominus} symbol.}%
+ {}
+
+\defgcs{oplus}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\oplus} symbol.}%
+ {}
+
+\defgcs{oslash}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\oslash} symbol.}%
+ {}
+
+\defgcs{otimes}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\otimes} symbol.}%
+ {}
+
+\defgcs{pm}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \makeimg{plus or minus}{\ensuremath{\pm}} symbol.}%
+ {}
+
+\defgcs{setminus}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\setminus} symbol.}%
+ {}
+
+\defgcs{sqcap}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\sqcap} symbol.}%
+ {}
+
+\defgcs{sqcup}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\sqcup} symbol.}%
+ {}
+
+\defgcs{star}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\star} symbol.}%
+ {}
+
+\defgcs{times}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\times} symbol.}%
+ {}
+
+\defgcs{triangleleft}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\triangleleft} symbol.}%
+ {}
+
+\defgcs{triangleright}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Binary operator \ensuremath{\triangleright} symbol.}%
+ {}
+
+\defgcs{uplus}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\uplus} symbol.}%
+ {}
+
+\defgcs{vee}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\vee} symbol.}%
+ {}
+
+\defgcs{wedge}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\wedge} symbol.}%
+ {}
+
+\defgcs{wr}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Operator \ensuremath{\wr} symbol.}%
+ {}
+
+\defgcs{sum}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Summation \ensuremath{\sum} symbol (may take limits).}%
+ {}
+
+\defgcs{int}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Integral \ensuremath{\int} symbol (may take limits).}%
+ {}
+
+\defgcs{oint}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Closed path integral \ensuremath{\oint} symbol (may take limits).}%
+ {}
+
+\defgcs{prod}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Product \ensuremath{\prod} symbol (may take limits).}%
+ {}
+
+\defgcs{coprod}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Co-product \ensuremath{\coprod} symbol (may take limits).}%
+ {}
+
+\defgcs{bigcap}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Collection intersection \ensuremath{\bigcap} symbol (may take limits).}%
+ {}
+
+\defgcs{bigcup}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Collection union \ensuremath{\bigcup} symbol (may take limits).}%
+ {}
+
+\defgcs{bigsqcup}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Big operator \ensuremath{\bigsqcup} (may take limits).}%
+ {}
+
+\defgcs{bigvee}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Big operator \ensuremath{\bigvee} (may take limits).}%
+ {}
+
+\defgcs{bigwedge}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Big operator \ensuremath{\bigwedge} (may take limits).}%
+ {}
+
+\defgcs{bigodot}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Big operator \ensuremath{\bigodot} (may take limits).}%
+ {}
+
+\defgcs{bigotimes}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Big operator \ensuremath{\bigotimes} (may take limits).}%
+ {}
+
+\defgcs{bigoplus}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Big operator \ensuremath{\bigoplus} (may take limits).}%
+ {}
+
+\defgcs{biguplus}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Big operator \ensuremath{\biguplus} (may take limits).}%
+ {}
+
+\defgcs{not}%
+ {\meta{symbol command}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Negates the following symbol. Example: \cmdname{not}\nxglsi{subset} produces
+   \ensuremath{\not\subset}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{symbol command} The symbol to be negated.
+   \EndArgList
+ }
+
+\defgcs{ldots}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Ellipses \ldots\ symbol.}%
+ {}
+
+\defgcs{cdots}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Centred ellipses \ensuremath{\cdots} symbol.}%
+ {}
+
+\defgcs{vdots}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Vertical ellipses \ensuremath{\vdots} symbol.}%
+ {}
+
+\defgcs{ddots}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Diagonal ellipses \ensuremath{\ddots} symbol.}%
+ {}
+
+\defgcs{dotsc}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Ellipses \ensuremath{\dotsc} for dots with commas.}%
+ {}
+
+\defgcs{dotsb}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Ellipses \ensuremath{\dotsb} for dots with binary
+  operators\slash relations.}%
+ {}
+
+\defgcs{dotsm}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Ellipses \ensuremath{\dotsm} for dots with multiplications.}%
+ {}
+
+\defgcs{dotsi}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Ellipses \ensuremath{\dotsi} for dots with integrals.}%
+ {}
+
+\defgcs{dotso}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Ellipses \ensuremath{\dotso} for general dots.}%
+ {}
+
+\defgcs{langle}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Left-angled \ensuremath{\langle} delimiter.}%
+ {}
+
+\defgcs{rangle}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Right-angled \ensuremath{\rangle} delimiter.}%
+ {}
+
+\defgcs{lfloor}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Left floor \ensuremath{\lfloor} delimiter.}%
+ {}
+
+\defgcs{rfloor}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Right floor \ensuremath{\rfloor} delimiter.}%
+ {}
+
+\defgcs{lceil}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Left ceil \ensuremath{\lceil} delimiter.}%
+ {}
+
+\defgcs{rceil}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Right ceil \ensuremath{\rceil} delimiter.}%
+ {}
+
+\defgcs{lvert}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Left vertical bar \ensuremath{\lvert} delimiter.}%
+ {}
+
+\defgcs{rvert}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Right vertical bar \ensuremath{\rvert} delimiter.}%
+ {}
+
+\defgcs{lVert}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Left double vertical bar \ensuremath{\lVert} delimiter.}%
+ {}
+
+\defgcs{rVert}%
+ {}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Right double vertical bar \ensuremath{\rVert} delimiter.}%
+ {}
+
+\defgcs{vec}%
+ {\marg{\meta{c}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets its argument as a vector (defaults to a right arrow
+   accent).}%
+ {%
+   \BeginArgList
+    \csentryargitem{c} The character or symbol that represents a vector.
+   \EndArgList
+ }
+
+\defgcs{forall}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {\dq{For all} \ensuremath{\forall} symbol.}%
+ {}
+
+
+\defgcs{noindent}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Suppress the indentation that would usually occur at the start of
+  the next paragraph.}%
+ {}
+
+\defgcs{refstepcounter}%
+ {\marg{\meta{counter}}}%
+ {\LaTeX\ Kernel}%
+ {Increments the value of the given counter by one and allows the
+  counter to be cross-referenced using \nxglsni{ref} and \nxglsi{label}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{counter} The name of the counter that needs
+     incrementing.
+   \EndArgList
+ }
+
+\defgcs{stepcounter}%
+ {\marg{\meta{counter}}}%
+ {\LaTeX\ Kernel}%
+ {Increments the value of the given counter by one.}%
+ {%
+   \BeginArgList
+    \csentryargitem{counter} The name of the counter that needs
+     incrementing.
+   \EndArgList
+ }
+
+\defgcs{setcounter}%
+ {\marg{\meta{counter}}\marg{\meta{number}}}%
+ {\LaTeX\ Kernel}%
+ {Sets the value of a counter.}%
+ {%
+   \BeginArgList
+    \csentryargitem{counter} The name of the counter that needs
+     changing.
+    \csentryargitem{number} The new value. (Must be an integer.)
+   \EndArgList
+ }
+
+\defgcs{addtocounter}%
+ {\marg{\meta{counter}}\marg{\meta{increment}}}%
+ {\LaTeX\ Kernel}%
+ {Increments the value of a counter by the given amount.}%
+ {%
+   \BeginArgList
+    \csentryargitem{counter} The name of the counter that needs
+     changing.
+    \csentryargitem{number} The amount by which to increment the counter. (Must be an integer.)
+   \EndArgList
+ }
+
+\defgcs{newcounter}%
+ {\marg{\meta{counter}}\oarg{\meta{outer counter}}}%
+ {\LaTeX\ Kernel}%
+ {Defines a new counter.}%
+ {%
+   \BeginArgList
+    \csentryargitem{counter} The name of the new counter.
+    \csentryargitem{outer counter} The name of the parent counter.
+   \EndArgList
+ }
+
+
+\defgcs{value}%
+ {\marg{\meta{counter}}}%
+ {\LaTeX\ Kernel}%
+ {References the value of the given counter where a number rather
+   than a counter name is required.}%
+ {%
+   \BeginArgList
+    \csentryargitem{counter} The name of the counter.
+   \EndArgList
+ }
+
+\defgcs{parindent}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {A \nxglsi{length} register that stores the indentation at the start of paragraphs.}%
+ {}
+
+
+\defgcs{setlength}%
+ {\marg{\meta{register}}\marg{\meta{dimension}}}%
+ {\LaTeX\ Kernel}%
+ {Sets the value of a length register.}%
+ {%
+   \BeginArgList
+     \csentryargitem{register} The name of the length register (for
+       example \nxglsi{parindent}).
+     \csentryargitem{dimension} The new dimension.
+   \EndArgList
+ }
+
+\defgcs{addtolength}%
+ {\marg{\meta{register}}\marg{\meta{dimension}}}%
+ {\LaTeX\ Kernel}%
+ {Adds \meta{dimension} to the value of the given length register.}%
+ {%
+   \BeginArgList
+     \csentryargitem{register} The name of the length register (for
+       example \nxglsi{parindent}).
+     \csentryargitem{dimension} The dimension to add to the length.
+   \EndArgList
+ }
+
+\defgcs{currenttime}%
+ {}%
+ {\nxisty{datetime} package}%
+ {Inserts into the output file the time when the \LaTeX\ 
+  application created it from the source code.}%
+ {}
+
+\defgcs{ddmmyyyydate}%
+ {}%
+ {\nxisty{datetime} package}%
+ {Changes the format of \nxglsi{today} so that it displays the date in
+  the form {\ddmmyyyydate\today} (day\slash month\slash year in digits).}%
+ {}
+
+\defgcs{subref}%
+ {\marg{\meta{label}}}%
+ {\nxisty{subcaption} package}%
+ {Analogous to \nxglsi{ref} but only references the subfigure
+  or subtable caption.}%
+ {%
+   \BeginArgList
+    \csentryargitem{label} The required label that was used in the
+     corresponding \nxglsi{label}.
+   \EndArgList
+ }
+
+\defgcs{eqref}%
+ {\marg{\meta{label}}}%
+ {\nxisty{amsmath} package}%
+ {Short cut for \texttt{(\nxglsi{ref}\marg{\meta{label}})} for
+  referencing equations.}%
+ {%
+   \BeginArgList
+    \csentryargitem{label} The required label that was used in the
+     corresponding \nxglsi{label}.
+   \EndArgList
+ }
+
+\defgcs{frenchspacing}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switch to French spacing.}%
+ {}
+
+\defgcs{nonfrenchspacing}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Switch to English spacing.}%
+ {}
+
+\defgcs{newline}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Forces a line break.}%
+ {}
+
+\defgcs{linebreak}%
+ {\oarg{\meta{n}}}%
+ {\LaTeX\ Kernel}%
+ {Requests a line break, ensuring the paragraph remains justified.
+  This may cause excess white space in the paragraph.}%
+ {%
+   \BeginArgList
+    \csentryargitem{n} An integer from~0 to~4 indicating how strongly
+    you want a line break to occur. The higher the number, the
+    stronger the request to break the line.
+   \EndArgList
+ }
+
+\defgcs{displaybreak}%
+ {\oarg{\meta{n}}}%
+ {\nxisty{amsmath} package}%
+ {Allows a page break in multi-lined maths environments, such as
+  \nxglsi{env-align}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{n} An integer from~0 to~4 indicating how strongly
+    you want a page break to occur. The higher the number, the
+    stronger the request.
+   \EndArgList
+ }
+
+\defgsymcs[beginmath]{\openparensym}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Equivalent to \nxglsni{begin}\marg{math}.}%
+ {}
+
+\defgsymcs[endmath]{\closeparensym}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Equivalent to \nxglsni{end}\marg{math}.}%
+ {}
+
+\defgchar
+ {openparen}
+ {\openparensym}
+ {}
+ {\LaTeX\ Kernel}
+ {%
+   Opening parenthesis in text mode or left round bracket
+   delimiter in math mode.%
+ }
+ {}
+
+\defgchar
+ {closeparen}
+ {\closeparensym}
+ {}
+ {\LaTeX\ Kernel}
+ {%
+   Closing parenthesis in text mode or right round bracket
+   delimiter in math mode.%
+ }
+ {}
+
+\defgsymcs[begindispmath]{\opensqsym}%
+ {}%
+ {\LaTeX\ Kernel (inconsistency corrected in \nxisty{amsmath})}%
+ {Starts an unnumbered single-line of displayed maths.}%
+ {}
+
+\defgsymcs[enddispmath]{\closesqsym}%
+ {}%
+ {\LaTeX\ Kernel (inconsistency corrected in \nxisty{amsmath})}%
+ {Ends an unnumbered single-line of displayed maths.}%
+ {}
+
+\defgchar
+ {opensq}
+ {\opensqsym}
+ {}
+ {\LaTeX\ Kernel}
+ {\nopostdesc}
+ {}
+
+\defgchildchar
+ {opt.opensq}
+ {opensq}
+ {\opensqsym}
+ {Open delimiter of an \nxglsi{optional}}
+
+\defgchildchar
+ {text.opensq}
+ {opensq}
+ {\opensqsym}
+ {Open square bracket in text mode}
+
+\defgchildchar
+ {delimiter.opensq}
+ {opensq}
+ {\opensqsym}
+ {Left square bracket delimiter in math mode}
+
+\defgchar
+ {closesq}
+ {\closesqsym}
+ {}
+ {\LaTeX\ Kernel}
+ {\nopostdesc}
+ {}
+
+\defgchildchar
+ {opt.closesq}
+ {closesq}
+ {\closesqsym}
+ {Closing delimiter of an \nxglsi{optional}}
+
+\defgchildchar
+ {text.closesq}
+ {closesq}
+ {\closesqsym}
+ {Closing square bracket in text mode}
+
+\defgchildchar
+ {delimiter.closesq}
+ {closesq}
+ {\closesqsym}
+ {Right square bracket delimiter in math mode}
+
+\defgsymcs[comma]{\commasym}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Thin space.}%
+ {}
+
+\defgcs{thinspace}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Thin space.}%
+ {}
+
+\defgsymcs[colon]{\colonsym}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Medium space.}%
+ {}
+
+\defgcs{medspace}%
+ {}%
+ {\nxisty{amsmath} package}%
+ {Medium space.}%
+ {}
+
+\defgsymcs[semicolon]{\semicolonsym}%
+ {}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Thick space.}%
+ {}
+
+\defgcs{thickspace}%
+ {}%
+ {\nxisty{amsmath} package}%
+ {Thick space.}%
+ {}
+
+\defgcs{qquad}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Horizontal spacing command (twice as wide as \nxglsni{quad}).}%
+ {}
+
+\defgsymcs[spacesym]{\textvisiblespace}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {(Backslash followed by space character.) Horizontal spacing command.}%
+ {}
+
+\defgcs{enspace}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Horizontal spacing command (half as wide as \nxglsi{quad}).}%
+ {}
+
+\defgcs{quad}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Horizontal spacing command equal to the current font's \protect\htmlref{em}{sec:length} value.}%
+ {}
+
+\defgcs{negthinspace}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Negative thin space.}%
+ {}
+
+\defgcs{negmedspace}%
+ {}%
+ {\nxisty{amsmath} package}%
+ {Negative medium space.}%
+ {}
+
+\defgcs{negthickspace}%
+ {}%
+ {\nxisty{amsmath} package}%
+ {Negative thick space.}%
+ {}
+
+\defgcs{contentsname}%
+ {}%
+ {Classes or packages that define a table of contents}%
+ {Text used for table of contents heading.}%
+ {}
+
+\defgcs{listfigurename}%
+ {}%
+ {Classes or packages that define a list of figures}%
+ {Text used for list of figures heading.}%
+ {}
+
+\defgcs{listtablename}%
+ {}%
+ {Classes or packages that define a list of tables}%
+ {Text used for list of tables heading.}%
+ {}
+
+\defgcs{bibname}%
+ {}%
+ {Report or book style classes that define a bibliography chapter}%
+ {Text used for bibliography chapter heading. (See also
+  \nxglsi{refname}.)}%
+ {}
+
+\defgcs{refname}%
+ {}%
+ {Article style classes that define a bibliography section}%
+ {Text used for bibliography section heading. (See also
+   \nxglsi{bibname}.)}%
+ {}
+
+\defgcs{indexname}%
+ {}%
+ {Classes or packages that define an index section}%
+ {Text used for index heading.}%
+ {}
+
+\defgcs{figurename}%
+ {}%
+ {Classes or packages that define figures}%
+ {Number prefix used in figure captions.}%
+ {}
+
+\defgcs{tablename}%
+ {}%
+ {Classes or packages that define tables}%
+ {Number prefix used in table captions.}%
+ {}
+
+\defgcs{partname}%
+ {}%
+ {Classes or packages that define parts with a number prefix}%
+ {Number prefix used in part headings.}%
+ {}
+
+\defgcs{chaptername}%
+ {}%
+ {Classes or packages that define chapters}%
+ {Number prefix used in chapter headings.}%
+ {}
+
+\defgcs{appendixname}%
+ {}%
+ {Classes or packages that define chapters}%
+ {Number prefix used in appendix headings.}%
+ {}
+
+\defgcs{abstractname}%
+ {}%
+ {Classes or packages that define an \nxglsni{env-abstract}
+  environment}%
+ {Text used in abstract heading.}%
+ {}
+
+\defgcs{addto}%
+ {\marg{\meta{command}}\marg{\meta{code}}}
+ {\nxisty{babel} package}
+ {Adds \meta{code} to the definition of \meta{command}. (See also \nxglsni{appto}.)}
+ {%
+   \BeginArgList
+     \csentryargitem{command} The command that needs patching.
+     \csentryargitem{code} The additional code to add to the command
+definition.
+   \EndArgList
+ }
+
+\defgcs{appto}%
+ {\marg{\meta{command}}\marg{\meta{code}}}
+ {\nxisty{etoolbox} package}
+ {Adds \meta{code} to the definition of \meta{command}.}
+ {%
+   \BeginArgList
+     \csentryargitem{command} The command that needs patching.
+     \csentryargitem{code} The additional code to add to the command definition.
+   \EndArgList
+ }
+
+\defgcs{mathrm}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Renders \meta{maths} in the predefined maths serif font.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{mathsf}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Renders \meta{maths} in the predefined maths sans-serif font.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{mathtt}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Renders \meta{maths} in the predefined maths typewriter font.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{mathit}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Renders \meta{maths} in the predefined maths italic font.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{mathbf}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Renders \meta{maths} in the predefined maths bold font. (Doesn't
+  work with numbers and nonalphabetical symbols.) See also \nxglsi{boldsymbol}.}%
+ {%
+   \BeginArgList
+     \csentryargitem{maths} The text on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{boldsymbol}%
+ {\marg{\meta{symbol}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {Like \nxglsi{mathbf} but also works for numbers and
+   many nonalphabetical symbols. (See also \nxglsi{pmb}.)}%
+ {%
+   \BeginArgList
+     \csentryargitem{symbol} The character or symbol on which to apply the font change.
+   \EndArgList
+ }
+
+\defgcs{pmb}%
+ {\marg{\meta{symbol}}}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {\dq{Poor man's bold.} Overlays multiple copies of the symbol to
+   produce a bold effect for symbols that don't work with
+   \nxglsi{boldsymbol}.}%
+ {%
+   \BeginArgList
+     \csentryargitem{symbol} The symbol on which to apply the bold
+      effect.
+   \EndArgList
+ }
+
+\defgcs{mathcal}%
+ {\marg{\meta{maths}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Typesets its argument in the maths calligraphic font.
+  Example: \nxglsni{beginmath}\protect\cmdname{mathcal}\marg{S}\nxglsni{endmath} produces
+ \ensuremath{\mathcal{S}}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{maths} The maths to be displayed in a calligraphic
+      font.
+   \EndArgList
+ }
+
+\defgcs{mathbb}%
+ {\marg{\meta{maths}}}%
+ {\nxisty{amsfonts} package (Math Mode)}%
+ {Typesets its argument in the blackboard bold font.
+  Example: \nxglsni{beginmath}\protect\cmdname{mathbb}\marg{R}\nxglsni{endmath} produces
+  \ensuremath{\mathbb{R}}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{maths} The maths to be displayed in a blackboard
+      bold font.
+   \EndArgList
+ }
+
+\defgcs{mathfrak}%
+ {\marg{\meta{maths}}}%
+ {\nxisty{amsfonts} package (Math Mode)}%
+ {Typesets its argument in Euler Fraktur letters.
+  Example: \nxglsni{beginmath}\protect\cmdname{mathfrak}\marg{U}\nxglsni{endmath} produces
+  \ensuremath{\mathfrak{U}}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{maths} The maths to be displayed in Euler Fraktur
+      letters.
+   \EndArgList
+ }
+
+\defgcs{DeclareMathOperator}%
+ {\marg{\meta{cmd}}\marg{\meta{operator-name}}}%
+ {\nxisty{amsmath} package (Preamble Only)}%
+ {Defines a new maths operator. The starred version allows limits.}%
+ {%
+   \BeginArgList
+    \csentryargitem{cmd} The name of the new operator command (must
+      begin with a backslash).
+    \csentryargitem{operator name} The name of the maths operator.
+   \EndArgList
+ }
+
+\defgcs{frac}%
+ {\marg{\meta{numerator}}\marg{\meta{denominator}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Displays a fraction.}%
+ {%
+    \BeginArgList
+     \csentryargitem{numerator} The numerator (above the line).
+     \csentryargitem{denominator} The denominator (below the line).
+    \EndArgList
+ }
+
+\defgcs{cfrac}%
+ {\oarg{\meta{pos}}\marg{\meta{numerator}}\marg{\meta{denominator}}}%
+ {\nxisty{amsmath} (Math Mode)}%
+ {Displays a continued fraction.}%
+ {%
+    \BeginArgList
+     \csentryargitem{pos} May be \texttt{l} (left) or \texttt{r}
+      (right).
+     \csentryargitem{numerator} The numerator (above the line).
+     \csentryargitem{denominator} The denominator (below the line).
+    \EndArgList
+ }
+
+\defgcs{sqrt}%
+ {\oarg{\meta{order}}\marg{\meta{operand}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {Displays a root.}%
+ {%
+    \BeginArgList
+     \csentryargitem{order} The order of the root. (If omitted, a
+       square root).
+     \csentryargitem{operand} The operand.
+    \EndArgList
+ }
+
+\defgcs{arabic}%
+ {\marg{\meta{counter}}}%
+ {\LaTeX\ Kernel}%
+ {Displays counter value as an Arabic number. (1, 2, 3, \ldots)}%
+ {%
+    \BeginArgList
+     \csentryargitem{counter} The name of the counter.
+    \EndArgList
+ }
+
+\defgcs{roman}%
+ {\marg{\meta{counter}}}%
+ {\LaTeX\ Kernel}%
+ {Displays counter value as a lower case Roman number. (i, ii, iii, \ldots)}%
+ {%
+    \BeginArgList
+     \csentryargitem{counter} The name of the counter.
+    \EndArgList
+ }
+
+\defgcs{Roman}%
+ {\marg{\meta{counter}}}%
+ {\LaTeX\ Kernel}%
+ {Displays counter value as an upper case Roman number. (I, II, III, \ldots)}%
+ {%
+    \BeginArgList
+     \csentryargitem{counter} The name of the counter.
+    \EndArgList
+ }
+
+\defgcs{alph}%
+ {\marg{\meta{counter}}}%
+ {\LaTeX\ Kernel}%
+ {Displays counter value as a lower case letter. (a, b, c, \ldots, z)}%
+ {%
+    \BeginArgList
+     \csentryargitem{counter} The name of the counter.
+    \EndArgList
+ }
+
+\defgcs{Alph}%
+ {\marg{\meta{counter}}}%
+ {\LaTeX\ Kernel}%
+ {Displays counter value as an upper case letter. (A, B, C, \ldots, Z)}%
+ {%
+    \BeginArgList
+     \csentryargitem{counter} The name of the counter.
+    \EndArgList
+ }
+
+\defgcs{fnsymbol}%
+ {\marg{\meta{counter}}}%
+ {\LaTeX\ Kernel}%
+ {Displays counter value as footnote symbol. (\makeimg{asterisk
+  dagger double dagger section mark
+  paragraph mark double bar double asterisk two single daggers
+  two double daggers}{\footnotesymbols})}%
+ {%
+    \BeginArgList
+     \csentryargitem{counter} The name of the counter.
+    \EndArgList
+ }
+
+\defgenv{bfseries}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Typesets the environment contents in a bold font.}%
+ {}
+
+\defgenv{itshape}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Typesets the environment contents in an italic font.}%
+ {}
+
+\defgenv{em}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Typesets the environment contents in an emphasized font. (Switches
+  to italic\slash slanted if the surrounding font is upright, or switches to
+  upright if the surrounding font is italic\slash slanted.)}%
+ {}
+
+\defgenv{itemize}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Unordered list.}%
+ {}
+
+\defgenv{enumerate}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Ordered list.}%
+ {}
+
+\defgenv{description}%
+ {}%
+ {Most class files}%
+ {Labelled list.}%
+ {}
+
+\defgenv{document}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {The body of the document.}%
+ {}
+
+\defgenv{tabular}%
+ {\oarg{\meta{v-pos}}\marg{\meta{column specifiers}}}%
+ {\LaTeX\ Kernel (Text Mode)}%
+ {%
+   Environment for lining things up in rows and columns.
+   Use \nxglsi{env-array} for math mode.
+ }%
+ {%
+    \BeginArgList
+     \csentryargitem{v-pos} Vertical alignment of the entire
+      environment with respect to the surrounding baseline. May be
+      one of \texttt{t} (top), \texttt{b} (bottom) or \texttt{c}
+      (centered).
+     \csentryargitem{column specifiers} Indicates how to align the
+     columns.
+    \EndArgList
+ }
+
+\defgenv{array}%
+ {\oarg{\meta{v-pos}}\marg{\meta{column specifiers}}}%
+ {\LaTeX\ Kernel (Math Mode)}%
+ {%
+   Environment for lining things up in rows and columns.
+   Use \nxglsi{env-tabular} for text mode.
+ }%
+ {%
+    \BeginArgList
+     \csentryargitem{v-pos} Vertical alignment of the entire
+      environment with respect to the surrounding baseline. May be
+      one of \texttt{t} (top), \texttt{b} (bottom) or \texttt{c}
+      (centered).
+     \csentryargitem{column specifiers} Indicates how to align the
+     columns.
+    \EndArgList
+ }
+
+\defgenv{align}
+ {}
+ {\nxisty{amsmath} package}
+ {Used for numbered aligned equations.}
+ {}
+
+\defgenv{align*}
+ {}
+ {\nxisty{amsmath} package}
+ {Used for unnumbered aligned equations.}
+ {}
+
+\defgenv{minipage}%
+ {\oarg{\meta{pos}}\oarg{\meta{height}}\marg{\meta{width}}}%
+ {\LaTeX\ Kernel}%
+ {Makes a box with line-wrapped contents. (See also \nxglsi{parbox}.)}%
+ {%
+   \BeginArgList
+    \csentryargitem{pos} The vertical alignment of the box relative to
+     the surrounding text. (Centred if omitted.)
+    \csentryargitem{height} The height of the box. (If omitted the
+     height is the natural height of the contents of the box.)
+    \csentryargitem{width} The width of the box.
+   \EndArgList
+ }
+
+\defgenv{abstract}%
+ {}%
+ {Most article- or report-style classes, such as \nxicls{scrartcl} or
+  \nxicls{scrreprt}. Not usually defined in book-style classes, such
+  as \nxicls{scrbook}, but is defined in \nxicls{memoir}}%
+ {Displays its contents as an abstract.}%
+ {}
+
+\defgenv{thebibliography}%
+ {\marg{\meta{widest entry label}}}%
+ {Most classes that define sectioning commands}%
+ {Bibliographic list. (See also \nxglsi{bibitem} and
+  \nxglsi{cite}).}%
+ {%
+   \BeginArgList
+    \csentryargitem{widest entry label} The widest label in the
+     bibliography list.
+   \EndArgList
+ }
+
+\defgenv{otherlanguage}
+ {\marg{\meta{language name}}}%
+ {\nxisty{babel} package}%
+ {Within the environment contents, predefined textual elements, such
+  as the date given by \nxglsi{today} or prefixes like \dq{Chapter},
+  are set to those supplied by the given language.}%
+ {%
+   \BeginArgList
+    \csentryargitem{language} The language identifier.
+   \EndArgList
+ }
+
+\defgenv{figure}
+ {\oarg{\meta{placement}}}%
+ {Most classes that define sectioning commands}%
+ {%
+   Floats the contents to the nearest location according to the
+   preferred placement options, if possible. Within the environment,
+   \nxglsi{caption} may be used one or more times, as required.
+   The caption will usually include the prefix given by
+   \nxglsni{figurename}.
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{placement} The preferred placement.
+   \EndArgList
+ }
+
+\defgenv{sidewaysfigure}%
+ {}%
+ {\nxisty{rotating} package}%
+ {Like the \nxglsi{env-figure} environment but rotates the entire
+  figure (including caption) sideways.}%
+ {}
+
+\defgenv{table}
+ {\oarg{\meta{placement}}}%
+ {Most classes that define sectioning commands}%
+ {%
+   Floats the contents to the nearest location according to the
+   preferred placement options, if possible. Within the environment,
+   \nxglsi{caption} may be used one or more times, as required.
+   The caption will usually include the prefix given by
+   \nxglsni{tablename}.
+ }%
+ {%
+   \BeginArgList
+    \csentryargitem{placement} The preferred placement.
+   \EndArgList
+ }
+
+\defgenv{sidewaystable}%
+ {}%
+ {\nxisty{rotating} package}%
+ {Like the \nxglsi{env-table} environment but rotates the entire
+  table (including caption) sideways.}%
+ {}
+
+\defgenv{subfigure}%
+ {\oarg{\meta{pos}}\marg{\meta{width}}}%
+ {\nxisty{subcaption} package}%
+ {Used to form a subfigure within a \nxglsi{env-figure}
+  environment. The \nxglsi{caption} command may be used in this
+  environment to produce a subcaption.}%
+ {%
+   \BeginArgList
+    \csentryargitem{pos} The vertical alignment of the box relative to
+     the surrounding text. (Centred if omitted.)
+    \csentryargitem{width} The width of the box.
+   \EndArgList
+ }
+
+\defgenv{subtable}%
+ {\oarg{\meta{pos}}\marg{\meta{width}}}%
+ {\nxisty{subcaption} package}%
+ {Used to form a subtable within a \nxglsni{env-table}
+  environment. The \nxglsi{caption} command may be used in this
+  environment to produce a subcaption.}%
+ {%
+   \BeginArgList
+    \csentryargitem{pos} The vertical alignment of the box relative to
+     the surrounding text. (Centred if omitted.)
+    \csentryargitem{width} The width of the box.
+   \EndArgList
+ }
+
+\defgenv{equation}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Displays its contents as a single-lined numbered equation.}%
+ {}
+
+\defgenv{displaymath}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Displays its contents as a single-lined unnumbered equation.}%
+ {}
+
+\defgenv{math}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Sets its contents in in-line math mode.}%
+ {}
+
+\defgenv{cases}%
+ {}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {%
+   Like the \nxglsi{env-array} environment, but adds a left
+   brace start delimiter and an invisible end delimiter.
+ }%
+ {}
+
+\defgenv{matrix}%
+ {}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {%
+   Like the \nxglsi{env-array} environment, but doesn't have an
+   argument.
+ }%
+ {}
+
+\defgenv{pmatrix}%
+ {}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {%
+   Like the \nxglsi{env-array} environment, but doesn't have an
+   argument and adds round bracket delimiters.
+ }%
+ {}
+
+\defgenv{smallmatrix}%
+ {}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {%
+   Like the \nxglsi{env-array} environment but doesn't have an
+   argument and is designed for in-line maths.
+ }%
+ {}
+
+\defgenv{bmatrix}%
+ {}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {%
+   Like the \nxglsi{env-array} environment, but doesn't have an
+   argument and adds square bracket delimiters.
+ }%
+ {}
+
+\defgenv{Bmatrix}%
+ {}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {%
+   Like the \nxglsi{env-array} environment, but doesn't have an
+   argument and adds curly brace delimiters.
+ }%
+ {}
+
+\defgenv{vmatrix}%
+ {}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {%
+   Like the \nxglsi{env-array} environment, but doesn't have an
+   argument and adds single vertical bar delimiters.
+ }%
+ {}
+
+\defgenv{Vmatrix}%
+ {}%
+ {\nxisty{amsmath} package (Math Mode)}%
+ {%
+   Like the \nxglsi{env-array} environment, but doesn't have an
+   argument and adds double vertical bar delimiters.
+ }%
+ {}
+
+\defgcs{raggedright}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Ragged-right paragraph justification.}%
+ {}
+
+\defgcs{raggedleft}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Ragged-left paragraph justification.}%
+ {}
+
+\defgcs{frontmatter}
+ {}%
+ {Most book-style classes, such as \nxicls{scrbook}}%
+ {Switches to lower case Roman numeral page numbering. Also suppresses
+   chapter and section numbering, but still adds unstarred sectional
+   units to the table of contents. (See also \nxglsi{mainmatter}
+   and \nxglsi{backmatter}.)}%
+ {}
+
+\defgcs{mainmatter}
+ {}%
+ {Most book-style classes, such as \nxicls{scrbook}}%
+ {Switches to Arabic page numbering and enables
+   chapter and section numbering. (See also
+   \nxglsi{frontmatter} and \nxglsi{backmatter}.)}%
+ {}
+
+\defgcs{backmatter}
+ {}%
+ {Most book-style classes, such as \nxicls{scrbook}}%
+ {Suppresses chapter and section numbering, but still adds unstarred
+  sectional units to the table of contents. (See also \nxglsi{frontmatter}
+  and \nxglsi{mainmatter}.)}%
+ {}
+
+\defgenv{dinglist}
+ {\marg{\meta{number}}}
+ {\nxisty{pifont} package}
+ {A list where the item marker is given by character \meta{number}
+  in the Zapf Dingbats font.}
+ {%
+   \BeginArgList
+    \csentryargitem{number} The character code for the item marker.
+   \EndArgList
+ }
+
+\defgcs{notag}%
+ {}%
+ {\nxisty{amsmath} package}%
+ {Suppresses equation numbering for the current row in environments such as
+   \nxglsi{env-align}.}%
+ {}
+
+\defgcs{tag}%
+ {\marg{\meta{tag}}}%
+ {\nxisty{amsmath} package}%
+ {Overrides equation numbering for the current row in environments such as
+   \nxglsi{env-align}.}%
+ {%
+    \BeginArgList
+     \csentryargitem{tag} The replacement for the equation number.
+    \EndArgList
+ }
+
+\defgcs{ding}%
+ {\marg{\meta{n}}}%
+ {\nxisty{pifont} package}%
+ {Inserts PostScript ZapfDingbats character with code \meta{n},
+   which must be an integer.}%
+ {%
+   \BeginArgList
+    \csentryargitem{n} The decimal code of the required character.
+   \EndArgList
+ }
+
+\defgcs{color}%
+ {\oarg{\meta{model}}\marg{\meta{specs}}}%
+ {\nxisty{color} and \nxisty{xcolor} packages}%
+ {A declaration that switches the current foreground colour to the given specification.}%
+ {%
+    \BeginArgList
+      \csentryargitem{model} The colour model, for example
+      \texttt{rgb} or \texttt{named}.
+      \csentryargitem{specs} The colour specification for the
+      given model. For example, if the \texttt{rgb} model is chosen,
+      \meta{specs} must be a comma-separated list of three numbers
+      each between~0 and~1.
+    \EndArgList
+ }
+
+\defgcs{textcolor}%
+ {\oarg{\meta{model}}\marg{\meta{specs}}\marg{\meta{text}}}%
+ {\nxisty{color} and \nxisty{xcolor} packages}%
+ {Sets \meta{text} with the foreground colour according to the given \meta{specs}.}%
+ {%
+    \BeginArgList
+      \csentryargitem{\meta{model}} The colour model, for example
+      \texttt{rgb} or \texttt{named}.
+      \csentryargitem{\meta{specs}} The colour specification for the
+      given model. For example, if the \texttt{rgb} model is chosen,
+      \meta{specs} must be a comma-separated list of three numbers
+      each between~0 and~1.
+      \csentryargitem{\meta{text}} The text to be displayed in the
+      given colour.
+    \EndArgList
+ }
+
+\defgcs{tabcolsep}
+ {}%
+ {\LaTeX\ Kernel}%
+ {\nxGls{length} register specifying half the gap between
+   columns in a \nxglsni{env-tabular} environment.}%
+ {}
+
+\defgcs{arraycolsep}
+ {}%
+ {\LaTeX\ Kernel}%
+ {\nxGls{length} register specifying half the gap between
+   columns in an \nxglsni{env-array} environment.}%
+ {}
+
+
+\defgcs{labelformat}%
+ {\marg{\meta{ctr}}\marg{\meta{defn}}}%
+ {\nxisty{fncylab} package}%
+ {Defines how the label for the counter \meta{ctr} should be
+ formatted. The definition \meta{defn} should use \texttt{\nxglsi{hashchar}1} to
+ indicate the label value.}%
+ {%
+   \BeginArgList
+     \csentryargitem{ctr} The name of the counter.
+     \csentryargitem{defn} How to display the value of the counter.
+   \EndArgList
+ }
+
+\defgcs{thefootnote}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Displays the current value of the \nxicounter{footnote} counter}%
+ {}
+
+\defgcs{thechapter}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Displays the current value of the \nxicounter{chapter} counter}%
+ {}
+
+\defgcs{thesection}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Displays the current value of the \nxicounter{section} counter}%
+ {}
+
+\defgcs{thepage}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Displays the current value of the \nxicounter{page} counter}%
+ {}
+
+\defgcs{thefigure}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Displays the current value of the \nxicounter{figure} counter}%
+ {}
+
+\defgcs{thetable}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Displays the current value of the \nxicounter{table} counter}%
+ {}
+
+\defgcs{ignorespaces}
+ {}
+ {\LaTeX\ Kernel}
+ {Used in begin environment code to suppress any spaces occurring 
+  at the start of the environment (see also \nxglsni{ignorespacesafterend}).}
+ {}
+
+\defgcs{ignorespacesafterend}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Used in end environment code to suppress any spaces following the
+  end of the environment.}%
+ {}
+
+\defgcs{textbar}%
+ {}%
+ {\LaTeX\ Kernel}%
+ {Vertical bar \textbar\ symbol.}%
+ {}
+
+\defgcs{the}%
+ {\meta{register}}%
+ {\LaTeX\ Kernel}%
+ {Displays the value of the given register (such as a \nxglsi{length} register).
+  Not to be confused with \cmdname{the}\meta{ctr} commands, such as \nxglsni{thefigure}.}%
+ {%
+   \BeginArgList
+     \csentryargitem{register} The name of the register.
+   \EndArgList
+ }
+
+\defgcs{substack}%
+ {\marg{\meta{maths}}}%
+ {\nxisty{amsmath} package}%
+ {Can be used to produce a multiline subscript or superscript. Lines
+  are separated using \nxglsi{tab.dbbackslashchar}.}%
+ {%
+   \BeginArgList
+    \csentryargitem{maths} The subscript or superscript maths with rows
+      ended using \nxglsi{tab.dbbackslashchar}
+   \EndArgList
+ }
+
+\defgcs{DeclareCaptionLabelFormat}
+ {\marg{\meta{name}}\marg{\meta{code}}}
+ {\nxisty{caption}}
+ {Used to defined your own caption label formats.}
+ {%
+   \BeginArgList
+     \csentryargitem{name} The name used to identify this new format
+     \csentryargitem{code} The code that defines this format
+     (\nxglsi{hashchar}1 gets replaced with the name and \nxglsni{hashchar}2
+     gets replaced with the reference number.)
+   \EndArgList
+ }
+
+\defgcs{captionsetup}
+ {\oarg{\meta{float type}}\marg{\meta{options}}}
+ {\nxisty{caption} package}
+ {Used to set up the options affecting float captions.}
+ {%
+   \BeginArgList
+     \csentryargitem{float type} The float type.
+     \csentryargitem{options} A \meta{key}=\meta{value}
+     comma-separated list of options.
+   \EndArgList
+ }
+

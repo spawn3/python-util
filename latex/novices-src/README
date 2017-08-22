@@ -1,0 +1,32 @@
+The source code for ``LaTeX for Complete Novices''.
+
+I've only used it under Linux, I can't guarantee if it will work
+under other platforms.
+
+Files with the extension .jdr were created using JpgfDraw. The
+files book.jdr, screen.jdr and a4paper.jdr were used to create the files
+novices-book.sty, novices-screen.sty and novices-a4paper.sty which set up the
+text areas for the paperback, screen PDF and A4 PDF versions.
+
+The HTML version requires datetime.perl, fmtcount.perl,
+glossaries.perl and mfirstuc.perl. These are distributed with the
+datetime package, fmtcount package and glossaries package. (At least
+glossaries version 3.03 required.)
+
+Copyright (c) 2007 Nicola L. C. Talbot
+
+Permission is granted to copy, distribute and/or modify this
+document under the terms of the GNU Free Documentation License,
+Version 1.2 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and
+one Back-Cover Text: "Dickimaw Books asks for your support
+through buying the Dickimaw Books paperback edition to help keep the
+Dickimaw LaTeX resources available.". A copy of the license is included in the
+section entitled "GNU Free Documentation License". Alternatively,
+go to http://www.gnu.org/licenses/fdl.html
+
+Please acknowledge the source if you use this 
+material or derivatives of it.
+
+http://www.dickimaw-books.com/
+http://theoval.cmp.uea.ac.uk/~nlct

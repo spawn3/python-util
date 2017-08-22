@@ -1,0 +1,144 @@
+A \gls*{command} is used to tell \LaTeX\ to do a particular thing
+at that point in the document. These are the basic forms a command
+can take:
+
+\begin{enumerate}
+\item \label{itm:controlword}\textbf{A Control Word.}\index{command!control word|hyperpage}
+
+This is a backslash \gls{backslashchar} followed by letters (A,\ldots,Z,a,\ldots,z). \faq{Commands gobble following space}{xspace}There can be no
+non-alphabetical characters in the command, apart from the initial
+backslash, and the name is always \textbf{case-sensitive} so, for example, \glsni{gamma}
+and \glsni{Gamma} have different meanings. One command
+that often trips up new users is \gls{LaTeX}, which prints the
+LaTeX logo: \makeimg{LaTeX logo}{\LaTeX}. This command has three
+captial letters and two lower case letters. If you get the case
+of any of the letters incorrect, you will get an \dq{undefined
+control sequence} error.
+
+\strut\warning There must be no space between the backslash and the
+start of the command name. Some command names are made up of two
+or more names joined together, such as \glsni{tableofcontents}.
+\emph{Make sure you don't insert any spaces in the control word.} This will
+either lead to an error or an unexpected result.
+For example, 
+\begin{alltt}\correct
+\cmdname{appendixname}
+\end{alltt}
+displays \dq{\appendixname} but 
+\begin{alltt}\wrong
+\cmdname{appendix name}
+\end{alltt}
+switches to the appendices and then prints the word \dq{name}.
+
+Most \LaTeX\ commands have fairly self-explanatory names. 
+(For example, \booklinebreak\glsni{chapter} starts a new chapter and 
+\glsni{rightarrow} prints an arrow pointing to the right.)
+However, in most cases, you need to use U.S. spelling
+(for example, \glsni{color} rather than \cmdname{colour}).
+
+This is the most common form of command. Any spaces immediately
+following a command of this type are ignored, so for example
+\begin{codeS}
+\gls{TeX} nician
+\end{codeS}%
+  will produce
+\begin{resultS}[TeXnician (where the TeX logo is written with a dropped E)]
+\TeX nician
+\end{resultS}%
+  whereas
+\begin{codeS}
+\glsni{TeX}\marg{} nician
+\end{codeS}%
+  will produce
+\begin{resultS}[TeX nician (where the TeX logo is written with a dropped E)]
+\TeX{} nician
+\end{resultS}%
+\bookpagebreak
+  But the following will cause an \dq{undefined control sequence}
+  error:
+\begin{alltt}\wrong
+\cmdname{TeXnician}
+\end{alltt}
+
+There is one command that you must use in every document you create,
+and that is the \glsi{documentclass} command.  This command
+must be placed at the very start of your document, and indicates what
+type of document you are creating.  This command is described in more detail
+\latex{in }\chapterref[later]{ch:simpledoc}.
+
+\item \label{itm:starredcommand}\textbf{A Starred Command}\index{command!starred|hyperpage}
+
+Some commands have variants that are indicated by an asterisk at the
+end of the name. For example, \verb|\chapter| makes a numbered
+chapter whereas \verb|\chapter*| is makes an unnumbered chapter.
+A \keyword{starred command} is the version of the command with the
+asterisk. (On a UK keyboard the asterisk character is usually
+located on the same key as the digit~\texttt{8}.)
+
+This may seem like a different form to a control word, described
+above. After all, I've just said that a control word can only
+contain alphabetical characters. However a starred command is actually a control
+word (such as \glsi{chapter}) followed by an asterisk. The
+control word checks to see if the next character is
+an asterisk. If it is, it performs one action, otherwise it performs
+another action.
+
+This type should therefore just come under the previous category,
+but as you will often hear of \dq{starred commands} it seemed better
+to have a separate category. 
+
+\item \label{itm:controlsymbol}\textbf{A Control Symbol.}\index{command!control
+symbol|hyperpage}
+
+This is a backslash followed by a single non-alphabetical character.
+For example \glsi{percent} will print a percent symbol.
+Spaces are
+not ignored after this type of command, for example
+\begin{codeS}
+17.5\glsi{percent} VAT
+\end{codeS}%
+will produce
+\begin{resultS}[vat.html]
+17.5\% VAT
+\end{resultS}
+
+It's also possible to have starred forms of control symbols. For
+example \glsi{newline.dbbackslashchar} forces a line break. If it's
+not followed by an asterisk a page break is allowed at that line
+break, but if it is followed by an asterisk \verb|\\*| no page break is allowed
+at that line break. (If a page break is needed, it will be made at
+the end of the previous line instead.)
+
+\item \label{itm:charactersequence}\textbf{Character Sequence.}\index{command!character
+sequence|hyperpage}
+
+Some special sequences of characters combine to form an instruction. For example \texttt{ffi}
+is the command to produce the \makeimg{ffi}{ffi} ligature, and the sequence
+of symbols \iexclamdowncmd\ is the command to produce the upside
+down exclamation mark !`
+
+\item \textbf{An Internal Command.}\index{command!internal|hyperpage}
+
+This is like the first type, a control word, but the
+\texttt{@}\index{"@ in a command name@\texttt{"@} (in a command name)|hyperpage}
+character appears in the command name (for example
+\cmdname{c@section}) \emph{however} internal commands should only be
+used in \htmlref{class files}{sec:cls} or
+\htmlref{packages}{sec:packages}. The @ symbol takes on a special
+meaning when a file is included using \glsi{documentclass} (a
+class file) or \glsi{usepackage} (a package).
+
+For example, in a class file or package \cmdname{c@section} is an
+internal representation of the section
+\htmlref{counter}{ch:counters}, whereas in a \texttt{.tex} file
+\cmdname{c@section} is interpreted as the command \cmdname{c} (the
+cedilla \htmlref{accent command}{obj:accents}) that takes the
+character @ as its argument, followed by \texttt{section}, which
+produces the rather odd looking 
+\makeimg{@ with a cedilla section}{\c{@}section}\faq{\textbackslash @ and @ in macro
+names}{atsigns}.
+
+Don't be tempted to use internal commands until you have first
+grasped the basics. You have been warned!
+
+\end{enumerate}

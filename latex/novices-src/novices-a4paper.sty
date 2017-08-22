@@ -1,0 +1,59 @@
+% Created by Jpgfdraw version 0.5.7b
+% 07-Sep-2012 14:10:45
+% /home/ezn06edu/Documents/nonfiction/latex/novices/a4paper.jdr
+% This package is designed for use with normal font = 10.0pt
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{novices-a4paper}
+\DeclareOption{draft}{\PassOptionsToPackage{draft}{flowfram}}
+\DeclareOption{final}{\PassOptionsToPackage{final}{flowfram}}
+\DeclareOption{rotate}{\PassOptionsToPackage{rotate}{flowfram}}
+\DeclareOption{norotate}{\PassOptionsToPackage{norotate}{flowfram}}
+\DeclareOption{ttbtitle}{\PassOptionsToPackage{ttbtitle}{flowfram}}
+\DeclareOption{ttbnotitle}{\PassOptionsToPackage{ttbnotitle}{flowfram}}
+\DeclareOption{ttbnum}{\PassOptionsToPackage{ttbnum}{flowfram}}
+\DeclareOption{ttbnonum}{\PassOptionsToPackage{ttbnonum}{flowfram}}
+\DeclareOption{color}{\PassOptionsToPackage{color}{flowfram}}
+\DeclareOption{nocolor}{\PassOptionsToPackage{nocolor}{flowfram}}
+\ProcessOptions
+\RequirePackage{flowfram}
+\RequirePackage{pgf}
+\RequirePackage[a4paper,portrait]{geometry}
+\geometry{lmargin=72.0bp,rmargin=72.0bp,tmargin=72.0bp,bmargin=72.0bp}
+\newflowframe[none]{454.599976bp}{699.400024bp}{-0.5bp}{-1.008956bp}[title]
+
+\newflowframe[all]{411.496185bp}{699.400024bp}{-0.535362bp}{-1.008956bp}[main]
+
+\newdynamicframe[none]{87.388458bp}{699.400024bp}{424.311615bp}{-1.008956bp}[sidepanel]
+
+\setdynamicframe*{sidepanel}{valign=t}
+\newdynamicframe[all]{411.529968bp}{22.599998bp}{-0.561401bp}{711.79107bp}[header]
+
+\setdynamicframe*{header}{valign=t}
+\newdynamicframe[all]{411.529938bp}{22.600037bp}{-0.562958bp}{-37.008956bp}[footer]
+
+\setdynamicframe*{footer}{valign=t}
+\newflowframe[none]{194.866699bp}{699.400024bp}{-0.189491bp}{-1.008956bp}[left]
+
+\newflowframe[none]{194.863831bp}{699.400024bp}{215.810486bp}{-1.008956bp}[right]
+
+\newflowframe[none]{411.268066bp}{162.321106bp}{-0.430183bp}{535.4442bp}[header]
+
+\newflowframe[none]{194.866699bp}{522.889465bp}{-0.189491bp}{-1.157531bp}[leftshort]
+
+\newflowframe[none]{194.866699bp}{522.889465bp}{215.810516bp}{-1.157531bp}[rightshort]
+
+\renewcommand{\@dothehead}{}%
+\renewcommand{\@dodynamicthehead}{%
+\@dynamicframeid{header}%
+\expandafter
+\def\csname @dynamicframe@\romannumeral\ff@id\endcsname{%
+\vfill\@thehead\vfill}%
+}%
+\renewcommand{\@dothefoot}{}%
+\renewcommand{\@dodynamicthefoot}{%
+\@dynamicframeid{footer}%
+\expandafter
+\def\csname @dynamicframe@\romannumeral\ff@id\endcsname{%
+\vfill\@thefoot\vfill}%
+}%
+\endinput

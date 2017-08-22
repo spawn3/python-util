@@ -1,0 +1,32 @@
+ A segment of code may be \glsd[hyper=false]{group} by placing it
+ within \gls{leftbracechar} and \gls{rightbracechar} (curly braces).
+ Most \glspl{command} that occur within a group will be
+ local to that group.  For example, \glsi{bfseries} changes
+ the font weight to bold, so the following segment of code:
+\begin{code}
+Here is some text. \marg{This text \glsi{bfseries} is in a 
+group.} Here is some more text.
+\end{code}%
+will appear in the typeset document looking like:
+\begin{resultS}[grouping.html]
+Here is some text. {This text \bfseries is in a group.}
+Here is some more text.
+\end{resultS}
+
+As can be seen, the font change only stays in effect until it
+reaches the end of the group (signified by the closing curly brace
+\glsni{rightbracechar}.) For a command to be in the same
+\keywordfmt{scope} as another command, both commands must be within the same group.
+For example, in the following, \glsi{bfseries} and
+\glsi{itshape} are in the same scope:
+\begin{codeS}
+\marg{\glsi{bfseries} Some bold \glsi{itshape}
+and italic text}
+\end{codeS}
+But below, they are in different scopes:
+\begin{codeS}
+\marg{\glsni{bfseries} Some bold text}
+\marg{\glsni{itshape} and some italic text}
+\end{codeS}
+
+\Glsplural{environment} form an implicit scope.

@@ -1,0 +1,128 @@
+\label{ch:def}%
+
+As mentioned in \chapterref[the introduction]{ch:intro}, \LaTeX\ is a
+language, so you can't simply start typing and expect to see your
+document appear before your very eyes\faq{Why is TeX not a WYSIWYG system?}{notWYSIWYG}.  You need to know a few things
+before you can get started, so it's best to define a few terms first.
+Don't worry if there seems a lot to take in, there will be some
+practical examples later, which should hopefully make things a little
+clearer.
+
+\begin{latexonly}
+Throughout this book, \glstext{source} is
+illustrated in a typewriter font with the word
+\inputlabelformat{Input} placed in the margin, and the corresponding
+output (how it will appear in the PDF document) is typeset with the word \outputlabelformat{Output} in the
+margin.  
+
+\xminisec{Example:}
+A single line of code is displayed like this:
+\end{latexonly}
+\html{Throughout this document, \glstext{source} is
+illustrated in the form:}
+\begin{codeS}
+This is an \glsni{textbf}\marg{example}.
+\end{codeS}%
+The corresponding 
+\glslink{output}{output}\html{ (how it will appear in the PDF document)\footnote{This HTML version of the book uses bitmaps to illustrate the output, which doesn't look as good as the actual PDF version.}}\ is illustrated like this:
+\begin{resultS}[exampleoutput.html]
+This is an \textbf{example}.
+\end{resultS}%
+\begin{latexonly}%
+Segments of code that are longer than one line are bounded above and below, illustrated as follows:
+\begin{code}
+\begin{alltt}
+Line one\glsni{par}
+Line two\glsni{par}
+Line three.
+\end{alltt}
+\end{code}%
+with corresponding output:
+\begin{result}
+Line one\par
+Line two\par
+Line three.
+\end{result}%
+\end{latexonly}%
+Take care not to confuse a backslash~\glsni{backslashchar}
+with a forward slash~\gls{text.slash} as they have different meanings.
+\doifnotbook
+{%
+  (Commands typeset in blue, such as \glsni{par}, indicate a hyperlink to
+  the command definition in the \htmlref{summary}{ch:glossary}.)
+}
+
+\Glstext{command} definitions are shown in a typewriter font in the form:
+\begin{definition}
+\glsni{documentclass}\oarg{\meta{options}}\marg{\meta{class file}}
+\end{definition}%
+In this case the command being defined is called
+\cmdname{documentclass} and text typed \meta{like this} (such as
+\meta{options} and \meta{class file}) indicates the type of thing you
+need to substitute. (Don't type the angle brackets!) For example, if you want the \icls{scrartcl}
+\glstext{cls} you would substitute \meta{class file} with
+\texttt{scrartcl} and if you want the \clsopt{letterpaper} option you
+would substitute \meta{options} with \texttt{letterpaper}, like this:
+\begin{codeS}
+\glsnl{documentclass}\oarg*{letterpaper}\marg*{scrartcl}
+\end{codeS}
+But more on that later.
+
+\refstepcounter{object}\label{obj:visiblespace}%
+Sometimes it can be easy to miss a space character when you're
+reading this kind of \latexhtml{book}{document}. When it's important
+to indicate a space, the visible space symbol~\gls{visiblespace} is used. For
+example:
+\begin{codeS}
+A\glsni{visiblespace}sentence\glsni{visiblespace}consisting\glsni{visiblespace}of\glsni{visiblespace}six\glsni{visiblespace}words.
+\end{codeS}
+When you type up the code, replace any occurrence of
+\glsni{visiblespace} with a space.
+
+\refstepcounter{object}\label{obj:comment}
+One other thing to mention is the comment character~\gls{percentchar}
+(the percent symbol). Anything from the percent symbol up to, and
+including, the end of line character is ignored by \LaTeX. Thus
+\begin{code}
+A simple \glsni{percentchar} next comes a command to make some bold text\newline
+\glsni{textbf}\marg{example} 
+\end{code}%
+will produce the output
+\begin{resultS}[commentexample.html]
+A simple % next comes a command to make some bold text
+\textbf{example} 
+\end{resultS}%
+\refstepcounter{object}\label{obj:suppresseol}%
+The percent symbol is often used to suppress unwanted space 
+resulting from line breaks\footnote{\LaTeX\ treats the end-of-line
+character as a space.}\ in the \glstext{source}.
+For example, the following code
+\begin{code}
+Foo\glsni{percentchar}\newline
+Bar
+\end{code}%
+will produce the output:
+\begin{resultS}[FooBar (single word)]
+Foo%
+Bar
+\end{resultS}%
+as opposed to
+\begin{code}
+Foo\newline
+Bar
+\end{code}%
+which will produce the output:
+\begin{resultS}[Foo Bar (two words)]
+Foo\ Bar\relax% LaTeX2HTML is getting confused!
+\end{resultS}%
+On the other hand, spaces at the start of a line of input are
+ignored, so
+\begin{code}
+Foo\glsni{percentchar}\newline
+\strut~~Bar
+\end{code}
+still produces:
+\begin{resultS}[FooBar]
+Foo%
+  Bar
+\end{resultS}

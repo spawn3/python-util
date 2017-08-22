@@ -1,0 +1,53 @@
+When \LaTeX\ creates your \gls{output}, it not only creates a PDF
+file but also creates other associated files. The most common of these are
+the log file\indexLOG, which has the extension \texttt{.log}, and
+the \gls*{auxiliary}, which has the extension \texttt{.aux}.
+
+The log file contains a transcript of the most recent \LaTeX\ run.
+It lists all the files that have been loaded, including the \glsterm{cls} 
+and any \htmlref{packages}{sec:packages} that your document has used.
+There should also be the class or package version number and date,
+although this is dependent on the class or package author. If you
+ever want \htmlref{to ask for help}{ch:help}, you need to say what
+version you are using.
+
+For example, this book uses the \icls{scrbook}
+class, so the log file includes the lines:
+\begin{flushleft}\ttfamily
+\noindent
+(\slash usr\slash local\slash texlive\slash 2010\slash texmf-dist\slash tex\slash latex\slash koma-script\slash scrbook.cls\par
+\noindent
+Document Class:\ scrbook 2010\slash 06\slash 17 v3.06 KOMA-Script document class (book)\par
+\end{flushleft}
+(This is actually now out-of-date as the latest version at the time
+of writing this is version~3.11a dated 2012/07/05.)
+
+Error messages, warnings and general information messages are also
+written to the log file as well as the document statistics. You can
+delete this log file if you like. It will be created again the next
+time you run \LaTeX.
+
+The auxiliary file contains all the information needed for
+cross-referencing (covered in \sectionref{sec:crossref}). This is
+needed to ensure all your cross-references are up-to-date. You can
+delete this file, but you will need at least two \LaTeX\ runs to
+ensure your cross-references are correct the next time you create
+your \gls{output}.
+
+\htmlref{TeXWorks}{sec:texworks} also creates a file with the extension
+\texttt{.synctex.gz}\indexSYNCTEX. This file allows you to jump to
+and from the \gls{source} and the appropriate part of the
+\gls{output}. If you delete this file, you will have to run \LaTeX\
+again before you can use this function.
+
+Other files that may be created include the table of contents file
+(\texttt{.toc})\indexTOC, the list of figures file
+(\texttt{.lof})\indexLOF\ and the list of tables file (\texttt{.lot})\indexLOT.
+Some \glsunset{cls}\glspl{cls}\glsreset{cls} or \htmlref{packages}{sec:packages} create 
+additional files. If your operating system
+hides file extensions, you might want to switch off this behaviour,
+if possible, to make it easier to distinguish between all the
+various files.
+
+TeXWorks has a menu item \menu{File}\menuto\menu{Remove AUX Files}
+that will remove the auxiliary files.

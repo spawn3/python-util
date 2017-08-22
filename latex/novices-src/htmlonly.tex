@@ -1,0 +1,102 @@
+
+\newcommand*{\reportlinebreak}{}
+\newcommand*{\reportpagebreak}{}
+\newcommand*{\bookpagebreak}{}
+\newcommand*{\booklinebreak}{}
+\newcommand*{\screenpagebreak}{}
+\newcommand*{\screenlinebreak}{}
+
+\newcommand*{\dohtmlcolorbox}[2][0.8\linewidth]{%
+ \colorbox{white}{%
+   \begin{minipage}{#1}%
+   \setlength{\parindent}{1.5em}%
+    #2%
+   \end{minipage}
+ }%
+}
+
+\newcommand{\suppmaterial}[2][]{\htmlref{#2}{ch:supp}#1}
+\newcommand{\suppref}[3][]{\htmlref{#2}{sec:#3}#1}
+
+\providecommand{\dosidewaysfigure}[3]{}
+
+\newcommand{\mathorit}[1]{\textit{#1}}
+
+\newcommand{\objectref}[2]{\htmlref{#1~}{#2}\ref{#2}}
+\newcommand{\figureref}[1]{\objectref{Figure}{#1}}
+\newcommand{\xfigureref}[1]{\objectref{Figure}{#1}}
+\newcommand{\vfigureref}[1]{\objectref{Figure}{#1}}
+\newcommand{\xpageref}[2]{\htmlref{#1}{#2}}
+
+\providecommand*{\vref}[1]{\ref{#1}}
+
+\newcommand{\figuretop}[1]{}
+\newcommand{\makeimg}[2]{$\htmlimage{ALT=#1}{}\mbox{#2}$}
+
+\newcommand{\tableref}[1]{\objectref{Table}{#1}}
+
+\newcommand{\exerciseref}[1]{\objectref{Exercise}{#1}}
+
+\newcommand{\modification}[1]{\textbf{\texttt{#1}}}
+
+\newcommand{\comptexttex}{\htmladdnormallink{comp.text.tex}{http://groups.google.com/group/comp.text.tex}}
+\newcommand{\texhax}{\htmladdnormallink{texhax}{http://tug.org/pipermail/texhax/}}
+
+\newcommand{\latexthesis}{%
+   \htmladdnormallink{Using LaTeX to Write a PhD
+Thesis}{\baseurl/latex/thesis/index.html}%
+}
+
+\newcommand{\latexpdfdoc}{\htmladdnormallink{Creating
+a PDF Document using PDFLaTeX}{\baseurl/latex/pdfdoc/}}
+
+\newenvironment{resultS}[1][]{\begin{htmlresult}{#1}\begin{makeimage}}{\end{makeimage}\end{htmlresult}}
+
+\newenvironment{result}[1][]{\begin{htmlresult}{#1}\begin{makeimage}}{\end{makeimage}\end{htmlresult}}
+
+\newcounter{object}
+
+\newenvironment{inlinedef}{\begin{ttfamily}}{\end{ttfamily}}
+
+\newcommand{\casemedia}[4]{#4}
+
+\newcommand{\download}[1]{%
+ \htmladdnormallink{download}{\exerciseurl/#1.tex}%
+}
+
+\newcommand{\downloadorview}[1]{%
+ \htmladdnormallink{download}{\exerciseurl/#1.tex} or
+ \htmladdnormallink{view}{\exerciseurl/#1.html}%
+}
+
+\newcommand{\doifbook}[1]{}
+\newcommand{\doifnotbook}[1]{#1}
+\newcommand{\doifreport}[1]{}
+
+\newcommand{\doublebar}{\ensuremath{\|}}
+
+\newcommand{\istystart}[1]{%
+ \isty{#1}%
+}
+
+\newcommand{\istyend}[1]{%
+ \isty{#1}%
+}
+
+\newcommand{\idxpagestyle}[1]{\index{page style!#1}}
+
+\newcommand{\pagenumberingfmt}[1]{\texttt{#1}}
+
+\newcommand{\indexpagenumbering}[1]{%
+  \index{page numbering!#1}%
+}
+
+\newcommand{\ipagenumbering}[1]{%
+  \pagenumberingfmt{#1}\indexpagenumbering{#1}%
+}
+
+\newcommand{\iunit}[2]{%
+  \texttt{#1}\index{#1 (#2)@\texttt{#1} (#2)}%
+  \index{units!\texttt{#1} (#2)}%
+}
+

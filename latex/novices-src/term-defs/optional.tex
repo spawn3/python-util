@@ -1,0 +1,75 @@
+Some \glspl{command} may have one or more \glspl*{optional}. Unlike
+\glspl{mandatory}, optional arguments must always be enclosed in
+square brackets \gls{opt.opensq}~\gls{opt.closesq}.
+\xminisec{Example:}
+The command \gls{newline.dbbackslashchar} ends a line.
+So the following segment of code:
+\begin{codeS}
+Line one\glsni{newline.dbbackslashchar}Line two.
+\end{codeS}%
+will produce the following output:
+\begin{result}[Line one <newline> Line two]\setlength{\parindent}{1.5em}%
+Line one\\Line two.
+\end{result}%
+However the \glsni{newline.dbbackslashchar} command also
+has an optional
+argument that allows you to specify how big the gap between the two
+lines should be. So the following segment of code:
+\begin{codeS}
+Line one\glsni{newline.dbbackslashchar}\oarg{1cm}Line two.
+\end{codeS}%
+will produce the following output:
+\begin{result}[Line one <1cm vertical gap> Line two]\setlength{\parindent}{1.5em}%
+Line one\\[1cm]Line two.
+\end{result}
+Incidentally, note the
+difference between the previous example, and the following example:
+\begin{codeS}
+Line one\glsni{newline.dbbackslashchar}\marg{[1cm]} Line two.
+\end{codeS}\screenpagebreak
+\begin{result}[newlineargs.html]\setlength{\parindent}{1.5em}%
+Line one\\{[1cm]} Line two.
+\end{result}%
+\faq{Start of line goes awry}{newlineargs}In this example the \texttt{[1cm]} has been placed inside a group, so
+it is no longer considered to be an optional argument, and since the
+command \glsni{newline.dbbackslashchar} does not take a
+mandatory argument,
+the \texttt{[1cm]} is simply interpreted as ordinary text.
+
+\xminisec{Example:}
+The command \glsi{framebox} (which will be covered later in
+\sectionref{sec:fbox}) takes a
+\gls{mandatory} and two optional arguments.
+\glsni{framebox} puts a frame around the contents of its
+mandatory argument:
+\begin{codeS}
+\glsni{framebox}\marg{Some Text}
+\end{codeS}%
+\begin{resultS}[Image of the words 'Some Text' inside a rectangular
+box where there is a narrow gap between the edge of the text and the
+frame]
+\framebox{Some Text}
+\end{resultS}
+The first optional argument can be used to make the box a specified
+width:
+\begin{codeS}
+\glsni{framebox}\oarg{4cm}\marg{Some Text}
+\end{codeS}%
+\begin{resultS}[Image of the words 'Some Text' centred inside a
+rectangular box of width 4cm (plus a narrow gap)]
+\framebox[4cm]{Some Text}
+\end{resultS}
+The second optional argument specifies the
+justification of the text (\underline{l}eft, \underline{r}ight or
+\underline{c}entred) within the box:
+\begin{codeS}
+\glsni{framebox}\oarg{4cm}\oarg{r}\marg{Some Text}
+\end{codeS}%
+\begin{resultS}[Image of the words 'Some Text' right justified inside a
+rectangular box of width 4cm (plus a narrow gap)]
+\framebox[4cm][r]{Some Text}
+\end{resultS}
+\glspar
+In general, if a command has both optional and mandatory arguments,
+the optional arguments are usually specified first (although there
+are a few exceptions).

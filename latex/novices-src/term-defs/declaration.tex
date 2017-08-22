@@ -1,0 +1,84 @@
+The term \gls*{declaration} is used to refer to a \gls{command} that
+affects the document from that point onwards. The declaration itself
+does not produce any text and, in most cases, its effect can be
+localised by placing the declaration within a \gls{group}. For
+example, \glsi{bfseries} is a declaration that switches the
+current font weight to bold, so the following code
+\begin{code}
+\begin{alltt}
+Here is some normal text.
+\glsni{bfseries} Here is some bold text.
+\end{alltt}
+\end{code}%
+will appear in the typeset document looking like:
+\begin{resultS}[declaration.html]
+Here is some normal text. \bfseries Here is some bold text.
+\end{resultS}
+
+Some declarations don't immediately have a visible effect. For
+example, the declarations
+\begin{definition}
+\gls{raggedright}
+\gls{raggedleft}
+\gls{centering}
+\end{definition}
+only set the paragraph justification to ragged-right,
+ragged-left or centred, respectively, if the
+declaration is still in effect at the end of the paragraph.
+That is, if it is still in effect at the next \glsni{par} or blank line.
+
+\xminisec{Example:}
+\begin{code}
+This is an example paragraph illustrating the paragraph justification declarations. The default justification is fully justified.
+\glsni{raggedright} The paragraph justification can be switched to
+ragged-right or \glsni{raggedleft} ragged-left.
+\glsni{par}
+\end{code}
+\begin{result}[raggedleft.html]
+This is an example paragraph illustrating the paragraph justification declarations. The default justification is fully justified.
+\raggedright The paragraph justification can be switched to
+ragged-right or \raggedleft ragged-left.
+\par
+\end{result}
+Above, the justification at the paragraph break is ragged-left, so
+that's the justification used for the entire paragraph.
+Compare with:
+\begin{code}
+\marg{This is an example paragraph illustrating the paragraph justification declarations. The default justification is fully
+justified.
+\glsni{raggedright} The paragraph justification can be switched to
+ragged-right or \glsni{raggedleft} ragged-left.}
+\glsni{par}
+\end{code}
+\begin{result}[fullyjustified.html]
+\setlength{\parindent}{1.5em}% For the benefit of LaTeX2HTML
+{This is an example paragraph illustrating the paragraph justification declarations. The default justification is fully justified.
+\raggedright The paragraph justification can be switched to
+ragged-right or \raggedleft ragged-left.}\relax
+\par
+\end{result}
+Above, the justification at the paragraph break is fully-justified,
+since both the declarations \glsni{raggedright} and
+\glsni{raggedleft} are cancelled when their local scope (signified
+by the curly braces) ends.
+This type of mistake most often occurs when people try to centre
+text doing something like:
+\begin{alltt}
+\marg{\glsni{centering} Some text that is supposed to
+be centred.
+}
+\wrong
+Next paragraph.
+\end{alltt}
+The paragraph break (blank line) must go before the closing brace.
+\begin{alltt}
+\marg{\glsni{centering} Some text that is supposed to
+be centred.
+\correct
+}
+Next paragraph.
+\end{alltt}
+
+\warning While we're on the subject of centred text, don't be
+tempted to use \cmdname{centerline}. It's obsolete~\cite{l2tabu}.
+

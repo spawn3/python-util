@@ -1,0 +1,122 @@
+% Created by Jpgfdraw version 0.5.7b
+% 07-Oct-2012 14:25:58
+% /home/ezn06edu/Documents/nonfiction/latex/novices/book.jdr
+% This package is designed for use with normal font = 10.0pt
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{novices-book}
+\DeclareOption{draft}{\PassOptionsToPackage{draft}{flowfram}}
+\DeclareOption{final}{\PassOptionsToPackage{final}{flowfram}}
+\DeclareOption{rotate}{\PassOptionsToPackage{rotate}{flowfram}}
+\DeclareOption{norotate}{\PassOptionsToPackage{norotate}{flowfram}}
+\DeclareOption{ttbtitle}{\PassOptionsToPackage{ttbtitle}{flowfram}}
+\DeclareOption{ttbnotitle}{\PassOptionsToPackage{ttbnotitle}{flowfram}}
+\DeclareOption{ttbnum}{\PassOptionsToPackage{ttbnum}{flowfram}}
+\DeclareOption{ttbnonum}{\PassOptionsToPackage{ttbnonum}{flowfram}}
+\DeclareOption{color}{\PassOptionsToPackage{color}{flowfram}}
+\DeclareOption{nocolor}{\PassOptionsToPackage{nocolor}{flowfram}}
+\ProcessOptions
+\RequirePackage{flowfram}
+\RequirePackage{pgf}
+\RequirePackage[paperwidth=7.0in,paperheight=10.0in]{geometry}
+\geometry{lmargin=0.7in,rmargin=1.0in,tmargin=1.0in,bmargin=1.45in}
+\newflowframe[none]{5.313889in}{1.137177in}{-0.006944in}{6.418912in}[header]
+
+\newflowframe[none]{5.319455in}{8.8139in}{-0.012511in}{-0.631944in}[title]
+
+\newflowframe[all]{5.313889in}{7.563889in}{-0.006944in}{-0.006944in}[main]
+
+\newflowframe[none]{2.513889in}{7.563889in}{-0.006944in}{-0.006944in}[left]
+
+\newflowframe[none]{2.513889in}{7.563889in}{2.793056in}{-0.006944in}[right]
+
+\newflowframe[none]{2.513899in}{6.319466in}{-0.006955in}{-0.012521in}[leftshort]
+
+\newflowframe[none]{2.513889in}{6.313889in}{2.793056in}{-0.006944in}[rightshort]
+
+\newdynamicframe[all]{5.313889in}{0.388889in}{-0.006944in}{7.793056in}[header]
+
+\setdynamicframe*{header}{valign=t}
+\newdynamicframe[all]{5.313889in}{0.388889in}{-0.006944in}{-0.631944in}[footer]
+
+\setdynamicframe*{footer}{valign=t}
+\newdynamicframe[none]{0.269444in}{0.791475in}{5.8875in}{0.123056in}[indextab]
+
+%Border command for frame 'indextab'
+\expandafter\def\csname @flf@border@indextab\endcsname#1{%
+\begin{pgfpicture}{0in}{0in}{0.569444in}{0.951475in}
+\pgfputat{\pgfpoint{-0.15in}{-0.08in}}{%
+\begin{pgfscope}
+\pgfsetlinewidth{1.0bp}
+\pgfsetrectcap 
+\pgfsetmiterjoin \pgfsetmiterlimit{10.0}
+\pgfpathmoveto{\pgfpoint{0.5bp}{0.5bp}}
+\pgfpathlineto{\pgfpoint{0.5bp}{67.5bp}}
+\pgfpathlineto{\pgfpoint{40.5bp}{68.0bp}}
+\pgfpathlineto{\pgfpoint{40.5bp}{0.5bp}}
+\pgfpathlineto{\pgfpoint{0.5bp}{0.5bp}}
+\pgfclosepath
+\color[gray]{0.5}\pgfseteorule\pgfusepath{fill}
+\pgfpathmoveto{\pgfpoint{0.5bp}{0.5bp}}
+\pgfpathlineto{\pgfpoint{0.5bp}{67.5bp}}
+\pgfpathlineto{\pgfpoint{40.5bp}{68.0bp}}
+\pgfpathlineto{\pgfpoint{40.5bp}{0.5bp}}
+\pgfpathlineto{\pgfpoint{0.5bp}{0.5bp}}
+\pgfclosepath
+\color[gray]{0.5}
+\pgfusepath{stroke}
+\end{pgfscope}
+}
+\pgfputat{\pgfpoint{0bp}{0bp}}{\pgftext[left,bottom]{#1}}
+\end{pgfpicture}}
+\setdynamicframe*
+{indextab}{offset=0pt,border={@flf@border@indextab}}
+
+\setdynamicframe*{indextab}{valign=c}
+\newdynamicframe[none]{0.269444in}{1.173419in}{5.8875in}{1.053525in}[summarytab]
+
+%Border command for frame 'summarytab'
+\expandafter\def\csname @flf@border@summarytab\endcsname#1{%
+\begin{pgfpicture}{0in}{0in}{0.569444in}{1.333419in}
+\pgfputat{\pgfpoint{-0.15in}{-0.08in}}{%
+\begin{pgfscope}
+\pgfsetlinewidth{1.0bp}
+\pgfsetrectcap 
+\pgfsetmiterjoin \pgfsetmiterlimit{10.0}
+\pgfpathmoveto{\pgfpoint{0.5bp}{0.506165bp}}
+\pgfpathlineto{\pgfpoint{0.5bp}{95.506165bp}}
+\pgfpathlineto{\pgfpoint{40.5bp}{95.506165bp}}
+\pgfpathlineto{\pgfpoint{40.5bp}{1.006165bp}}
+\pgfpathlineto{\pgfpoint{0.5bp}{0.506165bp}}
+\pgfclosepath
+\color[gray]{0.5}\pgfseteorule\pgfusepath{fill}
+\pgfpathmoveto{\pgfpoint{0.5bp}{0.506165bp}}
+\pgfpathlineto{\pgfpoint{0.5bp}{95.506165bp}}
+\pgfpathlineto{\pgfpoint{40.5bp}{95.506165bp}}
+\pgfpathlineto{\pgfpoint{40.5bp}{1.006165bp}}
+\pgfpathlineto{\pgfpoint{0.5bp}{0.506165bp}}
+\pgfclosepath
+\color[gray]{0.5}
+\pgfusepath{stroke}
+\end{pgfscope}
+}
+\pgfputat{\pgfpoint{0bp}{0bp}}{\pgftext[left,bottom]{#1}}
+\end{pgfpicture}}
+\setdynamicframe*
+{summarytab}{offset=0pt,border={@flf@border@summarytab}}
+
+\setdynamicframe*{summarytab}{valign=c}
+\renewcommand{\@dothehead}{}%
+\renewcommand{\@dodynamicthehead}{%
+\@dynamicframeid{header}%
+\expandafter
+\def\csname @dynamicframe@\romannumeral\ff@id\endcsname{%
+\vfill\@thehead\vfill}%
+}%
+\renewcommand{\@dothefoot}{}%
+\renewcommand{\@dodynamicthefoot}{%
+\@dynamicframeid{footer}%
+\expandafter
+\def\csname @dynamicframe@\romannumeral\ff@id\endcsname{%
+\vfill\@thefoot\vfill}%
+}%
+\endinput

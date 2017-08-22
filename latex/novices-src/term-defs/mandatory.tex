@@ -1,0 +1,83 @@
+\Glspl*{mandatory} are arguments that \emph{have} to be
+specified.
+\glspar
+\xminisec{Examples:}
+\begin{enumerate}
+\item If you want a footnote, you need to use the
+\glsi{footnote} command, which has a mandatory argument that
+specifies the contents of the footnote. Like this:
+\begin{codeS}
+Here is a footnote.\glsni{footnote}\marg{This is the
+footnote
+text.}
+\end{codeS}
+\begin{latexonly}
+\begin{resultS}
+Here is a footnote.\footnotemark
+\end{resultS}
+\footnotetext{This is the footnote text.}%
+\doifnotbook{(By default you
+won't get a hyperlink. This book uses the \sty{hyperref} package,
+which generates the hyperlinks.)}
+\end{latexonly}
+
+\item If you want to start a new chapter, you need to use the
+\glsi{chapter} command, but you also need to tell \LaTeX\
+the
+title of this new chapter.  So the \glsi{chapter} command
+takes
+one mandatory argument that specifies the title.
+
+For example, the following code:
+\begin{codeS}
+\glsni{chapter}\marg{Some Definitions}
+\end{codeS}%
+was used to generate the heading for
+\latexhtml{the current chapter (at the top of
+page~\pageref{ch:def})}{\chapterref[the definitions chapter]{ch:def}
+of this document}.
+\item The command \glsi{textbf} typesets its argument in a
+bold
+font (as opposed to the
+\glsterm{declaration}
+\glsi{bfseries} which switches to a bold font.)
+
+For example, the following code:
+\begin{codeS}
+\glsni{textbf}\marg{Some bold text.}
+\end{codeS}%
+produces the output
+\begin{resultS}[Some bold text. (All the text is in bold.)]
+\textbf{Some bold text.}
+\end{resultS}
+\end{enumerate}
+
+\xminisec{Notes:}
+\begin{enumerate}
+\item\label{itm:argnogrp} \LaTeX\ takes the first non-space object
+following the command name as the argument, which is why in the
+above
+examples the arguments have to be \glsd{group}.
+
+Suppose the last example above didn't have a group, so instead the
+code was:
+\begin{codeS}
+\glsni{textbf} Some bold text.
+\end{codeS}%
+then only the \dq{S} would be the argument because it's the first
+object
+following the command, in which case the output would look like:
+\begin{resultS}[Some bold text. (Only the letter S is bold.)]
+\textbf Some bold text.
+\end{resultS}
+
+\item If you want the argument to be blank, use empty braces:
+\gls{leftbracechar}\gls{rightbracechar}.  For example, suppose you
+want to have a
+chapter without a title\protect\footnote{The numbers for chapters, sections
+etc are automatically inserted by \LaTeX, so this example would
+produce a numbered chapter without a title.}\ you would need to do:
+\begin{codeS}
+\glsnl{chapter}\marg{}
+\end{codeS}
+\end{enumerate}

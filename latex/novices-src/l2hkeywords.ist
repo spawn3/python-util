@@ -1,0 +1,25 @@
+actual '?'
+encap '|'
+level '!'
+quote '"'
+keyword "\\glossaryentry"
+preamble "\\input{term-defs/introduction}\n"
+postamble "\n"
+group_skip "\n"
+item_0 "\n"
+item_1 "\n"
+item_2 "\n"
+item_01 "\n"
+item_x1 "\n"
+item_12 "\n"
+item_x2 "\n"
+delim_0 "\{\\glossaryentrynumbers\{\\relax "
+delim_1 "\{\\glossaryentrynumbers\{\\relax "
+delim_2 "\{\\glossaryentrynumbers\{\\relax "
+delim_t "\}\}"
+headings_flag 0
+heading_prefix ""
+heading_suffix ""
+symhead_positive ""
+numhead_positive ""
+page_compositor "."

@@ -1,0 +1,59 @@
+% Created by Jpgfdraw version 0.5.7b
+% 07-Sep-2012 20:33:25
+% /home/ezn06edu/Documents/nonfiction/latex/novices/screen.jdr
+% This package is designed for use with normal font = 10.0pt
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{novices-screen}
+\DeclareOption{draft}{\PassOptionsToPackage{draft}{flowfram}}
+\DeclareOption{final}{\PassOptionsToPackage{final}{flowfram}}
+\DeclareOption{rotate}{\PassOptionsToPackage{rotate}{flowfram}}
+\DeclareOption{norotate}{\PassOptionsToPackage{norotate}{flowfram}}
+\DeclareOption{ttbtitle}{\PassOptionsToPackage{ttbtitle}{flowfram}}
+\DeclareOption{ttbnotitle}{\PassOptionsToPackage{ttbnotitle}{flowfram}}
+\DeclareOption{ttbnum}{\PassOptionsToPackage{ttbnum}{flowfram}}
+\DeclareOption{ttbnonum}{\PassOptionsToPackage{ttbnonum}{flowfram}}
+\DeclareOption{color}{\PassOptionsToPackage{color}{flowfram}}
+\DeclareOption{nocolor}{\PassOptionsToPackage{nocolor}{flowfram}}
+\ProcessOptions
+\RequirePackage{flowfram}
+\RequirePackage{pgf}
+\RequirePackage[paperwidth=12.8cm,paperheight=9.6cm]{geometry}
+\geometry{lmargin=1.0cm,rmargin=1.0cm,tmargin=1.0cm,bmargin=1.0cm}
+\newflowframe[1]{10.785278cm}{7.535278cm}{-0.017639cm}{0.082361cm}[title]
+
+\newflowframe[all]{9.535277cm}{7.535278cm}{-0.017639cm}{0.082361cm}[main]
+
+\newdynamicframe[none]{1.789611cm}{7.535278cm}{9.730194cm}{0.082361cm}[sidepanel]
+
+\setdynamicframe*{sidepanel}{valign=t}
+\newdynamicframe[all]{9.535277cm}{0.535278cm}{-0.017639cm}{7.832361cm}[header]
+
+\setdynamicframe*{header}{valign=c}
+\newdynamicframe[all]{9.535277cm}{0.535278cm}{-0.017639cm}{-0.667639cm}[footer]
+
+\setdynamicframe*{footer}{valign=c}
+\newflowframe[none]{4.520596cm}{7.535278cm}{-0.008906cm}{0.082361cm}[left]
+
+\newflowframe[none]{4.520596cm}{7.535278cm}{4.991094cm}{0.082361cm}[right]
+
+\newflowframe[none]{9.535277cm}{2.509403cm}{-0.017639cm}{5.093879cm}[header]
+
+\newflowframe[none]{4.520596cm}{4.800813cm}{-0.009331cm}{0.074258cm}[leftshort]
+
+\newflowframe[none]{4.520597cm}{4.800813cm}{4.990668cm}{0.074258cm}[rightshort]
+
+\renewcommand{\@dothehead}{}%
+\renewcommand{\@dodynamicthehead}{%
+\@dynamicframeid{header}%
+\expandafter
+\def\csname @dynamicframe@\romannumeral\ff@id\endcsname{%
+\vfill\@thehead\vfill}%
+}%
+\renewcommand{\@dothefoot}{}%
+\renewcommand{\@dodynamicthefoot}{%
+\@dynamicframeid{footer}%
+\expandafter
+\def\csname @dynamicframe@\romannumeral\ff@id\endcsname{%
+\vfill\@thefoot\vfill}%
+}%
+\endinput

@@ -1,0 +1,59 @@
+Sometimes you may find that you need to use a command-line
+application. This is an application that doesn't have a graphical
+user interface. This isn't specific to \glsterm{tex}, but the \TeX\
+distribution comes with a number of them. In fact, front-ends (such
+as TeXWorks) run some of these applications for you when click on
+the typeset or build button.
+
+Most operating systems provide a \gls*{terminal} or command prompt where
+you can type the command-line application name and any associated
+information. For example, \xfigureref{fig:terminal} shows a terminal
+running under Fedora on Linux.
+
+\begin{description}
+\item[Windows] To open the MSDOS Prompt, go to the Start menu, then
+\dq{All Programs}, then \dq{Accessories} and click on \dq{MSDOS
+Prompt}.
+
+\item[Mac OSX] To open the Mac Terminal, go to your
+\dq{Applications} folder, open \dq{Utilities} and double click on \dq{Terminal}.
+
+\item[Unix etc] The Terminal is usually located either in the \dq{Applications}
+menu or in the \dq{System Tools} subdirectory of the
+\dq{Applications} menu.
+\end{description}
+
+\begin{figure}[htbp]
+\figconts
+ {pictures/terminal}
+ {%
+   \caption{A Terminal}
+ }
+ {fig:terminal}
+\end{figure}
+
+\xminisec{Example:}
+
+One such command-line application you are likely to need is
+\iappname{texdoc}. This is mentioned in more detail in
+\sectionref{sec:texdoc}, but to use \iappname{texdoc} you need to
+open the terminal or command prompt as described above and type
+\texttt{texdoc} followed by a package or class name, for example:
+\begin{verbatim}
+texdoc scrbook
+\end{verbatim}
+(see \figureref{fig:terminal-texdoc})
+then press the Enter or Return \enter\ key.
+
+\begin{figure}[htbp]
+\figconts
+ {pictures/terminal-texdoc}
+ {%
+   \caption{Running texdoc From a Terminal}
+ }
+ {fig:terminal-texdoc}
+\end{figure}
+
+Other \glsterm{tex}-related command-line applications include
+\iappname{pdflatex}, \iappname{bibtex}, \iappname{makeindex},
+\iappname{xindy} and \iappname{kpsewhich}.

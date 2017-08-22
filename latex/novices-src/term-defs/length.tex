@@ -1,0 +1,104 @@
+A \gls{length} register stores dimensions (such as 1in, 5cm,
+8.25mm). Like \glslink{command}{control words}, length registers
+start with a backslash and only contain alphabetical characters in
+their name. These registers are used to determine page layouts etc.
+For example, the paragraph indentation is given by the length
+register \gls{parindent}. Acceptable units of measurement are listed
+in \tableref{tab:units}. The two relative units \dq{em} and \dq{ex} are 
+dependent on the current font. (The em-value used to be the
+width of an \dq{M} and the ex-value was the height of the letter
+\dq{x}, but these days the values are more
+arbitrary~\protect\cite{texbook}.) Use \texttt{em} for widths and
+\texttt{ex} for heights if you want to use relative values.
+
+\begin{table}[htbp]
+\caption{Units of Measurement}
+\label{tab:units}
+\centering
+\begin{tabular}{ll}
+\iunit{pt}{\protect\TeX\ point} & \TeX\ point: 72.27pt = 1in\\
+\iunit{in}{inch} & inch: 1in = 25.4mm\\
+\iunit{mm}{millimetre} & millimetre: 1mm=2.845pt\\
+\iunit{cm}{centimetre} & centimetre: 1cm = 10mm\\
+\iunit{ex}{relative unit} & the \dq{x-height} of the current font\\
+\iunit{em}{relative unit} & the width of a \dq{quad} in the current font\\
+\iunit{sp}{scaled point} & scaled point: 1sp = 65536pt\\
+\iunit{bp}{big point} & big point (or \Index{PostScript} point): 72bp = 1in\\
+\iunit{dd}{did\^ot point} & did\^ot point: 1dd=0.376mm\\
+\iunit{pc}{pica} & pica: 1pc=12pt\\
+\iunit{cc}{cicero} & cicero: 1cc=12dd\\
+\iunit{mu}{math unit} & math unit: 18mu = 1em
+\end{tabular}
+\par
+\end{table}
+
+To change a length you can use the command:
+\begin{definition}
+\gls{setlength}\marg{\meta{cmd}}\marg{\meta{length}}
+\end{definition}%
+where \meta{cmd} is the register (for example, \glsni{parindent})
+and \meta{length} is the new length. Alternatively, you can add a
+value to a length using:
+\begin{definition}
+\gls{addtolength}\marg{\meta{cmd}}\marg{\meta{length increment}}
+\end{definition}
+The value of a length register can be displayed in your document using
+\begin{definition}
+\gls{the}\meta{register}
+\end{definition}
+
+A \keyword{rubber length} is a length that has a certain amount of
+elasticity. This enables you to specify your desired length but
+allows \LaTeX\ to stretch or contract the space to get the body of
+text as flushed with the margins as possible.
+
+\faq{Zero paragraph indent}{parskip}For example, the paragraph gap \gls{parskip} is usually set to
+\texttt{0pt plus 1pt}.  This means that the preferred gap is
+0pt but \LaTeX\ can stretch it up to 1pt to help prevent the
+page from having a ragged bottom. For example:
+\begin{code}
+\begin{alltt}
+\glsni{setlength}\marg{\glsni{parindent}}\marg{0pt}
+\glsni{setlength}\marg{\glsni{parskip}}\marg{10pt plus 1pt minus 1pt}
+
+This is the first paragraph.
+
+This is the second paragraph.
+The paragraph indentation is \glsni{the}\glsni{parindent}.
+\end{alltt}
+\end{code}%
+This now produces:
+\begin{result}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt plus 1pt minus 1pt}
+
+This is the first paragraph.
+
+This is the second paragraph.
+The paragraph indentation is \the\parindent.
+\end{result}%
+In this example, the preferred paragraph gap is 10pt but
+it will allow for a deviation of up to plus or minus 1pt.
+
+\warning Note that it's generally best not to change \glsni{parskip}
+explicitly as it can cause unexpected complications. If you use one
+of the \koma\ classes, such as \icls{scrreprt}, you can use the
+\scrclsopt{parskip} class option that can take the following values:
+\texttt{parskip=full} (a full line height) \texttt{parskip=half}
+(half a line height).\footnote{There are also variants that have
+\texttt{+}, \texttt{-} or \texttt{*} as a suffix. See the 
+\koma\ documentation for further details.}
+
+\xminisec{Example:}
+\begin{codeS}
+\glsni{documentclass}\oarg{parskip=full}\marg{scrbook}
+\end{codeS}
+
+If you want to change any of the page layout lengths (such as
+\gls{textwidth}), the easiest way to do it is to use the
+\isty{geometry} \htmlref{package}{sec:packages}.  This package should have been installed
+when you installed your \TeX\ distribution. For example: suppose you want the total text
+area to be 6.5in wide and 8.75in high with a left margin of 0.4in, then you would do:
+\begin{codeS}
+\glsni{usepackage}\oarg{body=\marg{6.5in,8.75in}\comma left=0.4in}\marg{geometry}
+\end{codeS}

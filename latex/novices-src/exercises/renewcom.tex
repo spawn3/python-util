@@ -1,0 +1,138 @@
+\documentclass[12pt,captions=tableabove]{scrbook}
+
+\usepackage{graphicx}
+\usepackage{datetime}
+\usepackage{caption,subcaption}
+
+\pagestyle{headings}
+
+\renewcommand*{\figurename}{Fig}
+\renewcommand*{\tablename}{Tab}
+
+\begin{document}
+
+\title{A Simple Document}
+\author{Me}
+
+\maketitle
+
+\frontmatter
+\tableofcontents
+\listoffigures
+\listoftables
+
+\chapter{Summary}
+A brief document to
+illustrate how to use \LaTeX.
+
+\mainmatter
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{The First Section}
+
+This is a simple \LaTeX\ document.
+Here is the first paragraph.
+The next chapter is Chapter~\ref{ch:another}
+and is on page~\pageref{ch:another}.
+The next section is Section~\ref{sec:next}.
+
+\section{The Next Section}
+\label{sec:next}
+
+Here is the second paragraph\footnote{with a footnote}. 
+As you can see it's a rather short paragraph, but not 
+as short as the previous one. This document was 
+created on: \today\ at \currenttime.
+
+\chapter{Another Chapter}
+\label{ch:another}
+
+Here's another very interesting chapter.
+See Chapter~\ref{ch:intro} for an 
+introduction. Our picture has turned
+into \figurename~\ref{fig:shapes}.
+
+\begin{figure}[hbtp]
+\centering
+ \includegraphics{shapes}
+\caption{Some shapes}
+\label{fig:shapes}
+\end{figure}
+
+\begin{figure}[hbtp]
+ \begin{subfigure}[b]{0.5\linewidth}
+   \centering
+   \includegraphics{rectangle}
+   \caption{Rectangle}\label{fig:rectangle}
+ \end{subfigure}%
+ \begin{subfigure}[b]{0.5\linewidth}
+   \centering
+   \includegraphics{circle}
+   \caption{Circle}\label{fig:circle}
+ \end{subfigure}%
+\caption{Two Shapes: (\emph{a}) A Rectangle and
+(\emph{b}) A Circle}
+\label{fig:shapes2}
+\end{figure}
+
+\figurename~\ref{fig:shapes2} shows some more shapes.
+\figurename~\ref{fig:rectangle} is a rectangle and
+\figurename~\ref{fig:circle} shows a circle.
+
+\chapter{Recommended Reading}
+
+For a basic introduction to \LaTeX\ see Lamport~\cite{lamport94}.
+For more detailed information about \LaTeX\ and
+associated applications, consult Kopka and Daly~\cite{kopka95}
+or Goossens \emph{et al}~\cite{goossens94}.
+
+\chapter*{Acknowledgements}
+
+I would like to acknowledge all those
+very helpful people who have assisted
+me in my work.
+
+\appendix
+\chapter{Tables}
+
+Our tabular environment has now turned into \tablename~\ref{tab:example},
+and we also have added \tablename~\ref{tab:sample}.
+
+\begin{table}[hbtp]
+\caption{A Table}
+\label{tab:example}
+\centering
+\begin{tabular}{lrr}
+ & \multicolumn{2}{c}{\bfseries Expenditure}\\
+ & \multicolumn{1}{c}{Year1} & \multicolumn{1}{c}{Year2}\\
+\bfseries Travel & 100,000 & 110,000\\
+\bfseries Equipment & 50,000 & 60,000
+\end{tabular}
+\end{table}
+
+\begin{table}[hbt]
+\caption{A Sample Table}
+\label{tab:sample}
+\centering
+\begin{tabular}{lr}
+Item & Cost\\
+Video & 8.99\\
+CD    & 9.99\\
+DVD   & 15.00
+\end{tabular}
+\end{table}
+
+\begin{thebibliography}{1}
+\bibitem{goossens94} ``The \LaTeX\ Companion'', Michel Goossens, Frank Mittelbach and
+Alexander Samarin, Addison-Wesley, (1994).
+
+\bibitem{lamport94} ``\LaTeX\ : a document preparation system'', Leslie Lamport,
+2nd edition (updated for \LaTeX2e), Addison-Wesley (1994).
+
+\bibitem{kopka95} ``A Guide to \LaTeX2e: document preparation for beginners
+and advanced users'', Helmut Kopka and Patrick W. Daly, Addison-Wesley (1995).
+
+\end{thebibliography}
+\end{document}
+

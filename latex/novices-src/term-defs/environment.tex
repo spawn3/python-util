@@ -1,0 +1,51 @@
+An \gls*{environment} is a block of code contained within the
+\glspl{command}
+\begin{definition}
+\gls{begin}\marg{\meta{env-name}}
+\end{definition}%
+and
+\begin{definition}
+\gls{end}\marg{\meta{env-name}}
+\end{definition}%
+where \meta{env-name} is the
+name of the environment.  The block of code is then formatted in a
+method specific to that environment.  For example, the
+\gls{env-bfseries}\footnote{Note there is no backslash in
+the
+environment name.}\ environment will typeset the contents of the
+environment in a bold font. The following code:
+\begin{codeS}
+\glsni{begin}\marg{bfseries}Here is some bold text.\glsni{end}\marg{bfseries}
+\end{codeS}%
+will appear in the typeset document looking like:
+\begin{resultS}[Here is some bold text. (The entire sentence is in a
+bold font.)]
+\begin{bfseries}Here is some bold text.\end{bfseries}
+\end{resultS}
+
+Some environments also supply \glspl{command} that may only be used
+within that environment. 
+
+\xminisec{Example:}
+The \glsni{env-itemize} environment provides a command called
+\glsni{item} so that you can specify individual items within
+an unordered list:
+\begin{code}
+\begin{alltt}
+Shopping List:
+\glsni{begin}\marg{itemize}
+  \glsni{item} Cabbages
+  \glsni{item} Bananas
+  \glsni{item} Apples
+\glsni{end}\marg{itemize}
+\end{alltt}
+\end{code}%
+The above will produce the following output:
+\begin{result}[shoppinglist.html]
+Shopping List:
+\begin{itemize}
+\item Cabbages
+\item Bananas
+\item Apples
+\end{itemize}
+\end{result}

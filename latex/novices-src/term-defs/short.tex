@@ -1,0 +1,10 @@
+A \gls*{short} is a \gls{command} whose \gls{argument} may not
+contain a paragraph break (either as a blank line or using
+\glsi{par}.) Conversely, a \keywordfmt{long command} is a command whose
+\gls{argument} may contain a paragraph break.
+
+Using short commands helps to test for forgotten braces, so it is
+recommended that when you \htmlref{define a new
+command}{ch:newcom}\latex{ (see \chapterref{ch:newcom})} you should
+always make the command a short command, unless there is a chance
+that the argument may need to contain a paragraph break.

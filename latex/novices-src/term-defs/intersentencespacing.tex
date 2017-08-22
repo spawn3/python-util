@@ -1,0 +1,124 @@
+\Gls*{intersentencespacing} refers to the default type of space
+to be inserted between adjacent sentences within a paragraph. There is
+disagreement over what size this space should be. French spacing
+uses the same space as used between words. English spacing uses an
+\Index{en-space} (half an \htmlref{em}{tab:units}\doifbook
+ {\csname footnote\endcsname{see \sectionref{sec:length}}}-space). With proportional
+fonts\latex{ (such as this one)}, the en-space is slightly larger than a
+single space. The difference is shown here:
+\begin{code}
+\begin{alltt}
+X X
+
+X\gls{enspace} X
+\end{alltt}
+\end{code}
+\begin{result}
+X X
+\glspar
+X\enspace X
+\end{result}
+(Note that with fully-justified paragraphs, in both cases the spaces
+may be stretched to ensure the sides of the paragraph are flushed.)
+
+\TeX\ (and \LaTeX) defaults to English spacing, but you can switch
+to French spacing using the declaration:
+\begin{definition}
+\gls{frenchspacing}
+\end{definition}
+and switch back again using
+\begin{definition}
+\gls{nonfrenchspacing}
+\end{definition}
+
+There was no en-space on a typewriter, so typists started using two
+spaces in an attempt to emulate that slightly larger than one space
+look. This habit has spread to word-processor users as well, and now
+many people incorrectly assume English spacing means adding two
+spaces after a full stop, which is too wide and looks ugly, but this
+error shouldn't be used as a criticism against English spacing.
+
+There has been a gradual trend towards French spacing over the last
+century, and some publishers insist on it. I~think this may in part
+be due to a backlash against the ugliness of two spaces in
+typewritten and word-processed documents. In fact the Oxford Style
+Manual~\cite{oxford} simply states, \dq{In text, only use a single
+space after all sentence punctuation.}
+
+Personally, I~prefer English spacing, particularly in reference
+books. I~have many reference books on my shelf, but I~haven't read
+any of them from cover-to-cover. I~flick to a particular section and
+skim through the paragraphs until I~reach the desired bit of
+information. Sometimes I've already looked something up, so I~have a vague
+idea as to where to find the information. The extra space between
+sentences makes it easier to locate a particular sentence.
+
+This isn't so much of an issue with books designed to be read from
+beginning to end, such as a novel. However, I~have read one such
+book that used a font where the commas had tiny tails and most of
+the sentences contained multiple proper nouns, which made it very
+difficult to read as it wasn't clear where the sentences ended. Is
+that a full stop followed by a new sentence that happens to start
+with a proper noun, or is it a comma whose tiny tail is blurred by
+my short-sighted eyes followed by a clause that happens to start
+with a proper noun? A~well-written, well-presented document should
+not interrupt the reader, forcing them to continually go back to
+re-parse a sentence.
+
+However, if you are writing a document, whether prose or technical,
+with the intention of having it published you must check with the
+publisher's guidelines to see if they insist on a particular style.
+\xminisec{Notes:}
+An end of sentence punctuation mark can be one of: a full stop
+(\gls{sentence.periodchar}), exclamation mark
+(\gls{sentence.exclamchar}) or question mark (\gls{questionchar}).
+
+\begin{enumerate}
+\item If an end of sentence punctuation mark follows a lower case
+character, \TeX\ assumes the punctuation mark indicates the end of
+the sentence. For example, as in:
+\begin{codeS}
+Did you see that? I certainly did.
+\end{codeS}
+
+\item Where this isn't the case, use \gls{spacesym} (backslash
+followed by a space).
+\begin{code}
+This can happen when a sentence contains
+a lower case abbreviation, e.g.\glsni{spacesym}like this
+one.
+\end{code}
+
+\item If an end of sentence punctuation mark follows an upper case
+character, \TeX\ assumes the sentence hasn't ended at that point.
+For example, as in:
+\begin{codeS}
+The G.P. said it was only hypochondria.
+\end{codeS}
+
+\item Where the sentence actually ends with an upper case letter,
+add \gls{at} after the letter and before the punctuation mark.
+\begin{code}
+Yesterday, I saw my G.P\glsni{at}. Tomorrow I'm going to see the
+specialist.
+\end{code}
+
+\end{enumerate}
+
+\xminisec{Note on Typewriter Fonts}
+
+Note that \gls{nonfrenchspacing} in a monospaced font will insert
+two spaces between sentences, emulating a typewritten document.
+\begin{code}
+\begin{alltt}
+\glsni{ttfamily}
+\glsni{nonfrenchspacing} x. x.
+
+\glsni{frenchspacing} x. x.
+\end{alltt}
+\end{code}
+\begin{result}\ttfamily
+\nonfrenchspacing x. x.
+
+\frenchspacing x. x.
+\end{result}

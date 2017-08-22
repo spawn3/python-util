@@ -1,0 +1,34 @@
+Words sometimes require \gls*{hyphenation} to help justify paragraphs
+and prevent overly large areas of white space or protrusions into
+the right margin. Some word processors by default don't hyphenate
+words in fully-justified paragraphs, which has led some people to
+believe that hyphenation is bad. Just because word processors do
+something a certain way, doesn't mean that it's the correct way.
+\TeX\ has an excellent hyphenation algorithm, but the default
+hyphenation pattern is designed for English. If you are writing in
+another language, use the \isty{babel} package to switch the
+hyphenation pattern (see \sectionref{sec:babel}).
+
+Despite using an excellent algorithm, \TeX\ occasionally gets the
+hyphenation wrong, particularly where the hyphenation is context
+sensitive. There are two ways of setting the hyphenation for a given
+word.
+
+\begin{enumerate}
+\item For all occurrences of the word, use
+\begin{definition}
+\gls{cshyphenation}\marg{\meta{hyphenated word}}
+\end{definition}
+inserting a hyphen \Indextt{-} at all possible hyphenation
+points. For example:
+\begin{codeS}
+\glsni{cshyphenation}\marg{gal-axy}
+\end{codeS}
+
+\item For a particular instance of a word, use \gls{hyphen} at the
+hyphenation point within the word. For example:
+\begin{code}
+There once was a little alien called Uiop who lived in the faraway gal\glsni{hyphen}axy of
+Zxcv.
+\end{code} 
+\end{enumerate}

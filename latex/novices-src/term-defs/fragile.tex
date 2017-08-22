@@ -1,0 +1,26 @@
+Certain types of \glspl{command}, called \glspl*{fragile}, can
+seriously mess things up when they are used in what is termed a
+\emph{moving argument}. These types of
+\gls{argument}
+are generally those whose contents are copied to another part of the
+document. For example, section headings appear at the start of a
+section, but they can also appear in the table of contents. The
+\glsi{footnote} command is a fragile command, so
+\begin{alltt}\wrong
+\glsni{section}\marg{A heading\glsni{footnote}\marg{with a footnote}}
+\end{alltt}
+will cause an error\faq{An extra `\rightbracesym'??}{extrabrace}.
+
+If there is no other command to use in its place, you should
+use \gls{protect} immediately before the
+fragile command:
+\begin{codeS}
+\begin{alltt}
+\glsni{section}\marg{A heading\glsni{protect}\glsni{footnote}\marg{with a footnote}}
+\end{alltt}
+\end{codeS}%
+\faq{Footnotes in LaTeX section headings}{ftnsect}This, however, is
+a contrived example, because it isn't a good idea to have a footnote
+in a
+section heading, as it will also end up in the table of contents,
+and possibly in page headings.

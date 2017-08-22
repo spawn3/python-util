@@ -1,0 +1,85 @@
+\documentclass[12pt]{scrbook}
+
+\usepackage{datetime}
+
+\pagestyle{headings}
+
+\title{A Simple Document}
+\author{Me}
+
+\begin{document}
+
+\maketitle
+
+\frontmatter
+\tableofcontents
+
+\chapter{Summary}
+A brief document to
+illustrate how to use \LaTeX.
+
+\mainmatter
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{The First Section}
+
+This is a simple \LaTeX\ document.
+Here is the first paragraph.
+The next chapter is Chapter~\ref{ch:another}
+and is on page~\pageref{ch:another}.
+The next section is Section~\ref{sec:next}.
+
+\section{The Next Section}
+\label{sec:next}
+
+Here is the second paragraph\footnote{with a footnote}. 
+As you can see it's a rather short paragraph, but not 
+as short as the previous one. This document was 
+created on: \today\ at \currenttime.
+
+\chapter{Another Chapter}
+\label{ch:another}
+
+Here's another very interesting chapter.
+We're going to put a picture here later.
+See Chapter~\ref{ch:intro} for an 
+introduction.
+
+\chapter{Recommended Reading}
+
+For a basic introduction to \LaTeX\ see Lamport~\cite{lamport94}.
+For more detailed information about \LaTeX\ and
+associated applications, consult Kopka and Daly~\cite{kopka95}
+or Goossens \emph{et al}~\cite{goossens94}.
+
+\chapter*{Acknowledgements}
+
+I would like to acknowledge all those
+very helpful people who have assisted
+me in my work.
+
+\appendix
+\chapter{Tables}
+
+We will turn this tabular environment into a table later.
+
+\begin{tabular}{lrr}
+ & \multicolumn{2}{c}{\bfseries Expenditure}\\
+ & \multicolumn{1}{c}{Year1} & \multicolumn{1}{c}{Year2}\\
+\bfseries Travel & 100,000 & 110,000\\
+\bfseries Equipment & 50,000 & 60,000
+\end{tabular}
+
+\begin{thebibliography}{1}
+\bibitem{goossens94} ``The \LaTeX\ Companion'', Michel Goossens, Frank Mittelbach and
+Alexander Samarin, Addison-Wesley, (1994).
+
+\bibitem{lamport94} ``\LaTeX\ : a document preparation system'', Leslie Lamport,
+2nd edition (updated for \LaTeX2e), Addison-Wesley (1994).
+
+\bibitem{kopka95} ``A Guide to \LaTeX2e: document preparation for beginners
+and advanced users'', Helmut Kopka and Patrick W. Daly, Addison-Wesley (1995).
+
+\end{thebibliography}
+\end{document}

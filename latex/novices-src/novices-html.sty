@@ -1,0 +1,60 @@
+% This file is just for the image creation done via LaTeX2HTML.
+% Only the main frame is needed by the others to keep latex quiet.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{novices-html}
+\DeclareOption{draft}{}
+\DeclareOption{final}{\PassOptionsToPackage{final}{flowfram}}
+\DeclareOption{rotate}{\PassOptionsToPackage{rotate}{flowfram}}
+\DeclareOption{norotate}{\PassOptionsToPackage{norotate}{flowfram}}
+\DeclareOption{ttbtitle}{\PassOptionsToPackage{ttbtitle}{flowfram}}
+\DeclareOption{ttbnotitle}{\PassOptionsToPackage{ttbnotitle}{flowfram}}
+\DeclareOption{ttbnum}{\PassOptionsToPackage{ttbnum}{flowfram}}
+\DeclareOption{ttbnonum}{\PassOptionsToPackage{ttbnonum}{flowfram}}
+\DeclareOption{color}{\PassOptionsToPackage{color}{flowfram}}
+\DeclareOption{nocolor}{\PassOptionsToPackage{nocolor}{flowfram}}
+\ProcessOptions
+\RequirePackage{flowfram}
+\RequirePackage{pgf}
+\RequirePackage[a4paper,portrait]{geometry}
+
+% Make a fairly narrow text width in case a narrow screen is in use.
+\geometry{textwidth=5in}
+\newflowframe[all]{\textwidth}{\textheight}{0bp}{0bp}[main]
+
+\newflowframe[none]{454.599976bp}{699.400024bp}{-0.5bp}{-1.008956bp}[title]
+
+\newdynamicframe[none]{87.388458bp}{699.400024bp}{424.311615bp}{-1.008956bp}[sidepanel]
+
+\setdynamicframe*{sidepanel}{valign=t}
+\newdynamicframe[all]{411.529968bp}{22.599998bp}{-0.561401bp}{711.79107bp}[header]
+
+\setdynamicframe*{header}{valign=t}
+\newdynamicframe[all]{411.529938bp}{22.600037bp}{-0.562958bp}{-37.008956bp}[footer]
+
+\setdynamicframe*{footer}{valign=t}
+\newflowframe[none]{194.866699bp}{699.400024bp}{-0.189491bp}{-1.008956bp}[left]
+
+\newflowframe[none]{194.863831bp}{699.400024bp}{215.810486bp}{-1.008956bp}[right]
+
+\newflowframe[none]{411.268066bp}{152.386719bp}{-0.430183bp}{545.411401bp}[header]
+
+\newflowframe[none]{194.866699bp}{532.870667bp}{-0.189491bp}{-1.148116bp}[leftshort]
+
+\newflowframe[none]{194.866699bp}{532.870667bp}{215.810516bp}{-1.148116bp}[rightshort]
+
+\renewcommand{\@dothehead}{}%
+\renewcommand{\@dodynamicthehead}{%
+\@dynamicframeid{header}%
+\expandafter
+\def\csname @dynamicframe@\romannumeral\ff@id\endcsname{%
+\vfill\@thehead\vfill}%
+}%
+\renewcommand{\@dothefoot}{}%
+\renewcommand{\@dodynamicthefoot}{%
+\@dynamicframeid{footer}%
+\expandafter
+\def\csname @dynamicframe@\romannumeral\ff@id\endcsname{%
+\vfill\@thefoot\vfill}%
+}%
+\endinput

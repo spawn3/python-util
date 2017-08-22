@@ -1,0 +1,30 @@
+\documentclass[12pt]{scrartcl}
+
+\usepackage{amsmath}
+
+\DeclareMathOperator{\diag}{diag}
+\renewcommand*{\vec}[1]{\boldsymbol{#1}}
+
+\begin{document}
+
+The set of linear equations:
+\[
+a_ix_i = b_i  \qquad \forall i=1, \ldots, n
+\]
+can be written as a matrix equation:
+\[
+\diag(\vec{a})\vec{x} = \vec{b}
+\]
+where $\vec{x} = (x_1, \ldots, x_n)^T$, $\vec{b} = (b_1, \ldots, b_n)^T$
+and
+\[
+\diag(\vec{a}) = 
+\begin{bmatrix}
+a_1 & 0 & \cdots & 0\\
+0 & a_2 & \ddots & \vdots\\
+\vdots & \ddots & \ddots & 0\\
+0 & \cdots & 0 & a_n
+\end{bmatrix}
+\]
+
+\end{document}
