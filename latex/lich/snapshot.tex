@@ -2,7 +2,7 @@
 
 \begin{tcolorbox}
 需要支持的快照操作：
-    \begin{itemize}
+    \begin{compactenum}
         \item create
         \item rm
         \item list
@@ -11,7 +11,7 @@
         \item cat
         \item flatten
         \item protect/unprotect
-    \end{itemize}
+    \end{compactenum}
 \end{tcolorbox}
 
 \begin{tabular}{|s|p{0.6cm}|p{0.6cm}|p{0.6cm}|p{0.6cm}| }
@@ -99,11 +99,11 @@ ROW，快照会产生一个数据项的多个版本。LSV，除了快照之外�
 LSV log结构记录了每页的snap id。
 
 一颗树的节点，可以分为三类：
-\begin{itemize}
+\begin{compactenum}
     \item 根节点
     \item 中间节点（有无分支）
     \item 叶子节点
-\end{itemize}
+\end{compactenum}
 
 \subsection{创建快照}
 

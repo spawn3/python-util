@@ -1,66 +1,149 @@
 \chapter{领域模型}
 
-集群
+定义基本物理概念和逻辑概念。
 
 节点，存储介质
 
-资源池，保护域，故障域
+集群，保护域，存储池，故障域
 
 pool, volume, snapshot等基本概念。
 
-\section{Resource Pool}
+
+\begin{tikzpicture}[show background grid]
+    \begin{class}{Disk}{8, 0}
+    \end{class}
+    \begin{class}{Storage Pool}{8, 2}
+    \end{class}
+    \begin{class}{Volume}{8, 4}
+    \end{class}
+    \begin{class}{Host}{8, 6}
+    \end{class}
+    \begin{class}{Cluster}{0, 2}
+    \end{class}
+    \begin{class}{Snapshot}{0, 4}
+    \end{class}
+
+    \composition{Cluster}{pools}{1..*}{Storage Pool}
+    \composition{Storage Pool}{disks}{1..*}{Disk}
+    \composition{Storage Pool}{volumes}{1..*}{Volume}
+    \composition{Volume}{mapping}{*..*}{Host}
+    \composition{Volume}{snapshots}{1..*}{Snapshot}
+\end{tikzpicture}
+
+\section{Cluster}
+
+整体
+
+\section{Protection Domain}
+
+把物理节点划分为不同的保护域，一个卷的所有数据只出现在一个保护域内。卷可以跨保护域进行复制和迁移。
+
+\section{Storage Pool}
+
+\begin{tcolorbox}
+移动采集中存储池要求，相比于目前的逻辑pool，更多是一种设计上的退步。
+存储虚拟化的目标，是物理位置无关。我们可以基于逻辑容器，实现基于策略的限制。
+\end{tcolorbox}
+
+支持的操作：
+\begin{compactenum}
+    \item 创建
+    \item 删除
+    \item 扩展
+    \item 缩容
+    \item 自动或手动按磁盘速率进行存储池分级划分
+    \item 存储池上可以指定卷的副本数
+    \item 不同存储池之间，卷的复制
+    \item 不同存储池之间，卷的迁移，可在线或离线
+    \item 故障域规则?
+\end{compactenum}
 
 不应该出现在IQN里面。
 
-保护域是物理节点的划分，资源池是存储介质的划分。每块盘只能出现在一个资源池里。
+保护域是物理节点的划分，存储池是存储介质的划分。每块盘只能出现在一个存储池里。
 
-不同资源池之间，卷的copy和migration。
 
-卷和资源池的关系，资源池的CRUD。
+卷和存储池的关系，存储池的CRUD。
 
 diskmap
 
 chunkid到磁盘物理位置有两级映射：chunk的副本节点列表，节点内chunkid到物理地址的映射。
 
 在为卷分配chunk的时候，需要确定各个副本的物理存储位置。当前实现是返回不同副本的节点列表。
-如果指定了资源池，就需要在资源池所在的节点范围内进行分配。
+如果指定了存储池，就需要在存储池所在的节点范围内进行分配。
 
-资源池内，要满足故障域规则(\ref{rule:faultset})
+存储池内，要满足故障域规则(\ref{rule:faultset})
 都需遵循这些规则。
 
 CRC协作类：
-\begin{itemize}
+\begin{compactenum}
     \item node and disk
     \item volume
     \item pool
     \item protection domain
     \item fault set
-\end{itemize}
+\end{compactenum}
 
-资源池是disk的集合，与节点无关。但disk所在的节点构成资源池的节点列表，故障域如果定义在节点级。
+存储池是disk的集合，与节点无关。但disk所在的节点构成存储池的节点列表，故障域如果定义在节点级。
 
-资源池下，可以创建pool和volume。
+存储池下，可以创建pool和volume。
 
-资源池和pool是什么关系？一对一，一对多，多对多。
+存储池和pool是什么关系？一对一，一对多，多对多。
 
-资源池和保护域什么关系？
+存储池和保护域什么关系？
 
-资源池包含故障域。
-
-\section{Fault Set}
-
-资源池内，要满足故障域规则：一个chunk的不同副本，分布在不同的故障域内。\label{rule:faultset}
-
-在初次分配，再平衡和恢复等过程中，都需遵循这些规则。
-
-\section{Pool}
+存储池包含故障域。
 
 \section{Volume}
+
+支持的操作：
+\begin{compactenum}
+    \item rename
+    \item resize \info{在线扩容}
+    \item mv
+    \item copy \change{全量拷贝/增量拷贝} \change{跨存储池拷贝}
+\end{compactenum}
 
 \section{Snapshot}
 
 snapshot隶属于卷，无卷则无快照，一个卷可以有一个快照树，其中有且只有一个快照是可写快照，即卷的写入点。
 
-\section{Volume Group}
+\section{Fault Set}
+
+故障域有粒度之分，如节点，磁盘，机架，机柜。
+
+存储池内，要满足故障域规则：一个chunk的不同副本，分布在不同的故障域内。\label{rule:faultset}
+
+在初次分配，再平衡和恢复等过程中，都需遵循这些规则。
+
+\section{映射}
+
+数据隔离/ACL，数据保护
+
+卷对主机的可见性。一个卷只有映射给了某主机，才可以被该主机访问。
+
+应遵循最小权限的原则。
+
+\section{Pool}
 
 与pool有什么同和异。
+
+\section{Consistency Group}
+
+一致性卷组
+
+\begin{shadequote}
+Consistency Groups could be useful for Data Protection (snapshots, backups) and
+Remote Replication (Mirroring).
+
+The Mirroring support will allow to setup mirroring of multiple volumes in the
+same consistency group (i.e. attaching multiple RBD images to the same journal
+to ensure consistent replay).
+
+There is already an interest to implement this functionality as a part Mirroring feature:
+http://tracker.ceph.com/issues/13295
+
+The snapshot support will allow snapshots of multiple volumes in the same
+consistency group to be taken at the same point-in-time to ensure data
+consistency.
+\end{shadequote}

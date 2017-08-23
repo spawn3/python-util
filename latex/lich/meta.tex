@@ -1,10 +1,19 @@
-\chapter{数据管理}
+\chapter{软件架构}
 
-\section{元数据}
+meta管理采用对称的中心化架构。在节点中选举出admin节点，
+管理全局状态和数据分配工作。当admin节点发生故障时，会发生
+failover过程，选举出新的admin节点来。
+
+lichd进程内嵌各种server，包括iscsi等。
 
 作为存储系统，主要考虑是元数据组织和IO，恢复等关键过程。
+功能之外，性能，可靠性，可扩展性至关重要。
 
-\section{分布，平衡}
+client可以和每个节点进行通信，推荐采用VIP机制，简化连接管理。
+
+\section{VIP}
+
+\section{分布}
 
 数据分布首先要满足规则要求，其次则需做到均衡和局部性。
 规则是强制的，极端条件下可能退化。均衡和局部性则影响系统性能。
@@ -22,7 +31,27 @@ chunk在节点上的分布，节点内chunk在磁盘上的分布（包括分层�
 
 controller在节点上的分布，controller在core上的分布
 
-进一步，需要考虑保护域，故障域，资源池各自的作用和特性。
+进一步，需要考虑保护域，存储池，故障域各自的作用和特性。
+
+\section{复制}
+
+\begin{tabular}{|s|p{6cm}|}
+    %\hline
+    %\rowcolor{lightgray} \multicolumn{5}{|c|} {Snapshot} \\
+    \hline
+    pool & LICH\_REPLICA\_METADATA  \\
+    \hline
+    subpool & LICH\_REPLICA\_METADATA  \\
+    \hline
+    vol & fileinfo \\
+    \hline
+    subvol & fileinfo  \\
+    \hline
+    raw & fileinfo  \\
+    \hline
+\end{tabular}
+
+恢复和再平衡过程，是怎么工作的？
 
 \section{分配和回收}
 
@@ -47,6 +76,13 @@ controller在节点上的分布，controller在core上的分布
 
 分配chunk的过程，会影响到若干特性，如精简配置，恢复，再平衡，写入等，都产生新chunk。
 
+优化allocate的性能：
+\begin{itemize}
+    \item 异步化sqlite，每个db一个工作线程
+    \item 加大lich.inspect线程数到20
+    \item table2 lock粒度 \change{dynamical lock table}
+\end{itemize}
+
 \subsection{磁盘管理}
 
 每块磁盘对应一个bitmap，用于该盘的空间管理。
@@ -68,7 +104,7 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 
 大范围内的随机写入，造成很多的缺页分配，分配过程会成为性能瓶颈。
 
-\section{复制}
+\section{负载均衡}
 
 \section{本地化}
 
@@ -79,7 +115,3 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 \section{分层}
 
 \section{SSD缓存}
-
-\section{映射}
-
-卷对主机的可见性。
