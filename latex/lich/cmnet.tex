@@ -1,0 +1,75 @@
+\chapter{移动集采}
+
+产品评估：功能和质量。质量包括：可靠性，性能，QoS，可扩展性（负载均衡），用户体验(管控，交互，接口)等方面。
+
+性能不是一个值，而是不同场景下的特征曲线。性能是系统配置和负载的函数：$P=F(S, W)$。
+精简配置，快照，故障，实现机制等因素都会影响性能及其抖动。
+
+\section{重要问题}
+
+\subsection{存储池}
+
+模型：概念及其关系。
+
+重建状态和速度按存储池进行统计。
+
+\subsection{卷}
+
+\begin{enumbox}
+    \item 精简配置
+    \item 扩容
+    \item 卷的QoS：IOPS
+    \item 全量拷贝和增量拷贝
+\end{enumbox}
+
+\subsection{快照}
+
+\begin{enumbox}
+    \item 显示卷和快照的创建时间，名称，宿主，\hl{容量，存储池}。
+    \item 快照树是必须的
+    \item 快照验证：每个快照关联一个数据集。
+\end{enumbox}
+
+\subsection{映射}
+
+数据访问和隔离机制，应按\hl{最小权限原则设计}。主机仅能访问映射到该主机的卷
+
+\subsection{故障处理}
+
+\begin{enumbox}
+    \item IO抖动
+    \item 重建
+\end{enumbox}
+
+\subsection{数据恢复}
+
+触发策略，QoS，性能，状态。
+
+\begin{enumbox}
+    \item 在线调整策略：应用优先，或恢复优先。
+    \item 负载调整到原来的20\%时，数据重建效率。
+    \item 显示恢复速度和状态，区分实际重构的，和跳过的
+    \item 拔出硬盘的存储池降级（数据冗余度发生下降，目前恢复进程是节点级的，与存储池没有直接关系，并且，
+        在节点的维度上，存储池是有覆盖的，overlay network，\hl{按卷进行汇总}）
+    \item 磁盘漫游，存储系统不发生重建，且数据无异常
+    \item 模拟故障：单磁盘，单节点，单机架。要求：无读写中断。
+\end{enumbox}
+
+\subsection{负载均衡}
+
+均衡有数据均衡和负载均衡之分。
+
+单卷的负载均衡，因为FusionStor卷控制器绑定到core上，只能利用单核能力。
+CPU利用率上有瓶颈。同时，开启polling模式，会独占core cpu。
+
+\subsection{Misc}
+
+VAAI
+
+\section{不需要做的项}
+
+\begin{enumbox}
+    \item 一致性组
+    \item 同步/异步远程复制
+    \item EC
+\end{enumbox}

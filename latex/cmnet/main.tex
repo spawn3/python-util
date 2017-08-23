@@ -6,9 +6,6 @@
 \usepackage{xeCJK}
 \usepackage[utf8]{inputenc}
 
-% load paralist before enumitem
-\usepackage{paralist}
-
 \usepackage{hyperref}
 \hypersetup{pdftex,colorlinks=true,allcolors=blue}
 \usepackage{hypcap}
@@ -16,6 +13,20 @@
 \usepackage{color}
 \usepackage[usenames, dvipsnames, svgnames, table]{xcolor}
 % \pagecolor{gray}
+
+\usepackage[normalem]{ulem}
+% \usepackage{soul}
+
+\newcommand{\hl}{\bgroup\markoverwith
+  {\textcolor{yellow}{\rule[-.5ex]{2pt}{2.5ex}}}\ULon}
+
+\newcommand{\hlc}[2][yellow]{{%
+    \colorlet{foo}{#1}%
+    \sethlcolor{foo}\hl{#2}}%
+}
+
+% load paralist before enumitem
+\usepackage{paralist}
 
 \usepackage{makeidx}
 \makeindex
@@ -86,18 +97,6 @@
 \@namedef{endshadequote*}{\endshadequote}
 \makeatother
 
-\usepackage[normalem]{ulem}
-
-\newcommand{\hl}{\bgroup\markoverwith
-  {\textcolor{yellow}{\rule[-.5ex]{2pt}{2.5ex}}}\ULon}
-
-%\usepackage{soul}
-
-%\newcommand{\hlc}[2][yellow]{{%
-%    \colorlet{foo}{#1}%
-%    \sethlcolor{foo}\hl{#2}}%
-%}
-
 % todonode
 \usepackage{lipsum}                     % Dummytext
 \usepackage{xargs}                      % Use more than one optional parameter in a new commands
@@ -112,8 +111,8 @@
 
 \usepackage[simplified]{pgf-umlcd}
 
-\title{LICH架构文档}
-\author{董冠军}
+\title{FusionStor移动集采项目需求确认}
+\author{华云网际}
 \date{\today}
 
 \begin{document}
@@ -123,36 +122,8 @@
 
 \listoftodos[Notes]
 
-\part{项目管理}
-
 \include{cmnet}
-\include{todo}
-
-\part{FusionStor}
-
 \include{model}
-\include{hardware}
-\include{meta}
-\include{task}
-\include{optimize}
-\include{snapshot}
-\include{enterprise}
-\include{ft}
-\include{lsv}
-\include{faq}
-\include{impl}
-\include{test}
 
-\part{生态系统}
-
-\include{ceph}
-%\include{sheepdog}
-%\include{openvstorage}
-%\include{VSAN}
-
-\part{理论基础}
-
-\include{theory}
-\include{flow}
 
 \end{document}

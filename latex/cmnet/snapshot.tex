@@ -1,0 +1,163 @@
+\chapter{Snapshot}
+
+\begin{tcolorbox}
+需要支持的快照操作：
+    \begin{compactenum}
+        \item create
+        \item rm
+        \item list
+        \item rollback
+        \item clone
+        \item cat
+        \item flatten
+        \item protect/unprotect
+    \end{compactenum}
+\end{tcolorbox}
+
+\begin{tabular}{|s|p{0.6cm}|p{0.6cm}|p{0.6cm}|p{0.6cm}| }
+    \hline
+    \rowcolor{lightgray} \multicolumn{5}{|c|} {Snapshot} \\
+    \hline
+    Feature & COW & ROW1 & ROW2 & LSV \\
+    \hline
+    snap tree & N &  & & \\
+    \hline
+    snap create & N &  & & \\
+    \hline
+    snap rm -> gc & N &  & & \\
+    \hline
+    snap rollback & N &  & & \\
+    \hline
+    snap clone -> read & N & & & \\
+    \hline
+    write & N &  & & \\
+    \hline
+    read & & N & & \\
+    \hline
+    space & N &  & & \\
+    \hline
+    consistency group & N &  & & \\
+    \hline
+\end{tabular}
+
+采用COW，ROW或两者的组合形式，各有优缺点。
+
+COW方式的快照，卷有完整的索引结构。别的快照点，只有增量的索引结构和发生更新的数据。
+每个快照，存储的是创建之后，到下一个快照点之间发生更新的所有数据块。所以需要尽量降低发生copy的开销。
+适用于频繁且具有局部性的热点负载场景，固定时间段内，每次copy的开销以及\textcolor{red}{复制集的大小}。
+
+ROW方式下，如果meta不发生COW，新的快照点并无完整的索引结构，读过程需要沿着快照链向上回溯。
+并且，rm，rollback等操作需要合并快照点。
+
+如果发生了COW，索引项和数据项引用关系不再是1:1，而是多对多，需要专门的GC机制。
+但rm，rollback等操作实现起来变得简单。
+
+数据项的粒度，定长或变长，不同的负载，读写性能有不同的影响。
+发生COW的粒度，索引结构管理的粒度决定了数据项的粒度。
+
+IO粒度和数据项粒度的关系，如果IO粒度大于数据项粒度
+
+如果IO粒度小于数据项粒度
+
+这条规则是否永远成立：\textcolor{red}{快照树的任一路径，都需要具有完整的索引结构和数据项集，可以有冗余和共享}。
+
+% ROW与LSV的不同，在于同一LBA，只对应一个数据项，而不是对应多个版本的数据项。
+% 但这个数据项的引用计数，可以为0，1，或多个。
+
+ROW，快照会产生一个数据项的多个版本。LSV，除了快照之外，一个LBA的覆盖写入也会产生多个版本。
+
+卷和快照，共存于底层lich卷，是否有问题？
+
+\begin{tcolorbox}
+
+假设有新旧两个快照点S1, S2，每个快照点包括meta和data，提炼出的几个引导性问题：
+
+\begin{enumerate}
+    \item 数据块的粒度，page，chunk，extent？
+    \item 每个快照点是否有完整的索引结构？
+    \item 卷（写入点）是否有完整的索引结构？
+    \item 哪一个是写入点？
+    \item meta是否发生COW？
+    \item data是否发生COW？
+    \item 快照操作(create, rm, rollback, clone, flatten, ls, cat, protect/unprotect)的复杂度？
+\end{enumerate}
+
+\end{tcolorbox}
+
+\section{COW}
+
+\section{ROW2}
+
+\subsection{快照树}
+
+快照树的每个节点，都是一个完整的索引结构。其中一个代表着当前写入点，写入点代表着卷。
+回滚操作会改变当前写入点。
+
+统一一下，卷和快照具有相同的索引结构。
+
+每个快照结构有唯一的ID，是随着创建快照的过程递增的，卷快照/写入点具有最大的snap id。
+LSV log结构记录了每页的snap id。
+
+一颗树的节点，可以分为三类：
+\begin{compactenum}
+    \item 根节点
+    \item 中间节点（有无分支）
+    \item 叶子节点
+\end{compactenum}
+
+\subsection{创建快照}
+
+原有写入点变成只读，创建新的写入点，并复制L1元数据。
+
+\subsection{删除快照}
+
+快照树上不同的节点，需要不同的删除过程。对于叶子节点，直接删除即可，\textcolor{red}{需要回收数据吗}？
+
+回收快照，涉及meta和data两个部分。
+
+不应改变父快照的内容
+保留子节点的共享内容
+
+\subsection{列出快照树}
+
+\subsection{写}
+
+写是ROW的重定向过程，可能发生复制第二层元数据的过程。
+
+如果连续写入，需记录当前的写入点。chunk内数据是逻辑不连续的，或者说，逻辑上连续的在chunk内是随机化了。
+
+如果非连续写入，每页的写入位置计算得到，chunk内数据是逻辑连续的。大范围随机写入的情况下，需要分配很多chunk。
+\textcolor{red}{需大力优化chunk的分配过程}。
+
+pagetable是逻辑连续的，按逻辑空间组织。如果已分配位置，则覆盖写入。如果没有分配位置，如何分配？
+
+逻辑地址怎么映射到物理地址？页式，段页式
+
+\subsection{回滚}
+
+回滚并不会重用回滚到的快照点，而是相当于把写入点嫁接到目标快照点。写入点本身是一个独立的快照结构。
+
+除了写入点的所有快照点，都处于只读状态，没有任何操作可以改变其状态。
+
+回滚后的写入过程
+
+\subsection{读}
+
+如果不复制元数据，ROW实现的读过程需要回溯快照树，性能不佳。
+如果复制元数据，则每一快照点都具有完整的索引结构，可以做到一次即可定位。
+
+复制元数据，快照和数据具有多对多的引用关系，相当于共享数据块。
+
+读优化： 元数据可以一次定位，但可能碎片化，沿着快照链往上读取。可以通过flatten的过程优化。
+
+\subsection{Clone}
+
+clone后，会用到跨卷读快照，类似于ROW过程，所以，创建和clone过程具有相似性。
+
+cat, protect, unprotect, flatten
+
+\subsection{GC}
+
+GC过程和引用计数。每个记录的is\_ref记录是否写入了数据。可以回收写入点，但无法回收一般快照。
+
+LSV: 逐个扫描每个log。
