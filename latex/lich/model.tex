@@ -3,7 +3,7 @@
 \begin{tikzpicture}[show background grid]
     \begin{class}{Disk}{6, 0}
     \end{class}
-    \begin{class}{Storage Pool}{6, 2}
+    \begin{class}{Pool}{6, 2}
     \end{class}
     \begin{class}{Volume}{6, 4}
     \end{class}
@@ -14,9 +14,9 @@
     \begin{class}{Snapshot}{0, 4}
     \end{class}
 
-    \composition{Cluster}{pools}{1..*}{Storage Pool}
-    \composition{Storage Pool}{disks}{1..*}{Disk}
-    \composition{Storage Pool}{volumes}{1..*}{Volume}
+    \composition{Cluster}{pools}{1..*}{Pool}
+    \composition{Pool}{disks}{1..*}{Disk}
+    \composition{Pool}{volumes}{1..*}{Volume}
     \composition{Volume}{mapping}{*..*}{Host}
     \composition{Volume}{snapshots}{1..*}{Snapshot}
 \end{tikzpicture}
@@ -25,7 +25,7 @@
 
 整体
 
-\section{Protection Domain}
+\section{Pool}
 
 把物理节点划分为不同的保护域，一个卷的所有数据只出现在一个保护域内。卷可以跨保护域进行复制和迁移。
 
@@ -33,32 +33,56 @@
 
 % 保护域是物理节点的划分，存储池是存储介质的划分。每块盘只能出现在一个存储池里。
 
-\section{Pool}
+Pool: 逻辑容器
 
-逻辑容器
+故障域有粒度之分，如磁盘，节点，机架，机柜，数据中心。
 
-\section{Storage Pool}
+存储池内，要满足故障域规则：一个chunk的不同副本，分布在不同的故障域内。\label{rule:faultset}
+
+在初次分配，再平衡和恢复等过程中，都需遵循这些规则。
+
+\begin{tcolorbox}
+
+可以参考ceph的CRUSH实现。bucket和device定义了集群的物理拓扑结构，rule定义了数据存取规则，
+pool上关联rule，从而定义了pool中卷数据的放置规则。设备即OSD，对应一个物理磁盘。
+
+***
+
+存储池可以取代保护域，定义所有对象的存放位置是一个节点集。
+
+***
+
+存储池可以用来实现tier cache。重定向IO到cache pool。
+
+***
+
+统一概念：保护域，故障域，存储池，pool。Consistency Group不同于pool，与物理存取无关，
+而是卷的逻辑集合，卷可以来自不同的pool。
+
+\end{tcolorbox}
 
 与存储池有什么同和异？存储池可以看做关联了磁盘的pool，可以看做pool的子类。
 
 属性：
 \begin{enumbox}
-    \item 磁盘列表
-    \item 定义精简池
-    \item 存储池上可以指定卷的副本数
-    \item \hl{有足够的故障域，且不同故障域配置一致的资源量}
+\item 配额
+\item 复制类型：副本 OR EC
+\item 磁盘列表
+\item 定义精简池
+\item 存储池上可以指定卷的副本数
+\item \hl{有足够的故障域，且不同故障域配置一致的资源量}
 \end{enumbox}
 
 操作：
 \begin{enumbox}
-    \item 创建
-    \item 删除
-    \item 扩展（添加磁盘到\hl{已存在的存储池}，该映射关系持久化到本地，同步到admin节点）
-    \item 缩容（从存储池中移除磁盘，引发数据重建过程）
-    \item \hl{自动或手动按磁盘速率进行存储池分级划分}
-    \item 不同存储池之间，卷的复制
-    \item 不同存储池之间，卷的迁移，可在线或离线
-    \item 存储池级别的统计信息
+\item 创建
+\item 删除
+\item 扩展（添加磁盘到\hl{已存在的存储池}，该映射关系持久化到本地，同步到admin节点）
+\item 缩容（从存储池中移除磁盘，引发数据重建过程）
+\item \hl{自动或手动按磁盘速率进行存储池分级划分}
+\item 不同存储池之间，卷的复制
+\item 不同存储池之间，卷的迁移，可在线或离线
+\item 存储池级别的统计信息
 \end{enumbox}
 
 % 存储池是disk的集合，与节点无关。但disk所在的节点构成存储池的节点列表，不同存储池的节点可能覆盖。
@@ -78,13 +102,16 @@
 
 % 存储池内，要满足故障域规则(\ref{rule:faultset})
 
-\section{Fault Set}
+步骤：
+\begin{enumbox}
+\item 创建pool，但此时不能创建pool的元数据chunk，因为还没有绑定磁盘（需要一全局的地方，存储pool名字）
+\item 添加磁盘到pool，通知admin节点
+\item 当在pool下面创建卷的时候，前提条件是已准备好磁盘，生成pool元数据chunk(位于同一pool里)。
+\end{enumbox}
 
-故障域有粒度之分，如磁盘，节点，机架，机柜，数据中心。
+pool元数据chunk必须位于自己的存储池内，如果分布在不同的存储池，不满足故障域条件。
 
-存储池内，要满足故障域规则：一个chunk的不同副本，分布在不同的故障域内。\label{rule:faultset}
-
-在初次分配，再平衡和恢复等过程中，都需遵循这些规则。
+pool引导信息可以存在rootable里。
 
 \section{Volume}
 

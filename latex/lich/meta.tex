@@ -11,6 +11,50 @@ lichd进程内嵌各种server，包括iscsi等。
 
 client可以和每个节点进行通信，推荐采用VIP机制，简化连接管理。
 
+\section{节点}
+
+三类服务器节点：
+\begin{compactenum}
+\item admin
+\item meta
+\item normal
+\end{compactenum}
+
+从meta节点中选举出admin。meta节点是静态指定的吗？meta节点列表构成一个小的集群，类似于ceph的monitor。
+
+normal节点是数据节点，存放元数据和数据。元数据和数据都是按1M的chunk组织。
+元数据包括四类chunk: pool，subpool，vol，subvol。每个chunk具有固定数目的槽位bucket，指向管理的下一级节点。
+集群内的所有chunk，构成一个单根树。每个pool，每个volume，都是这个大树下的子树。
+
+引导信息bootstrap：rootable。记录了根分区的位置，即所在chunk的位置信息。根分区是一个特殊的pool。
+
+所有的控制器，包括pool和volume控制器，通过lease机制保证集群内的唯一性。
+其节点位置，由所在子树的根chunk的主副本确定。
+
+chunk副本的节点分布：基于diskmap的随机分布算法，并记录在元数据里。
+
+chunk副本的磁盘分布：本地数据管理（bitmap+sqlite）
+
+chunk副本之间的一致性：强一致性协议。
+
+\subsection{admin节点}
+
+职责：
+\begin{compactenum}
+\item paxos leader
+\item lease server
+\item 管理系统引导信息
+\item 集群节点列表
+\item 维护diskmap
+\item VIP（控制器当前位置）
+\item 分配卷Id
+\item 分配\hl{chunk副本位置}
+\end{compactenum}
+
+持久化信息和上报信息，心跳机制
+
+可扩展性
+
 \section{VIP}
 
 \section{分布}
@@ -19,11 +63,11 @@ client可以和每个节点进行通信，推荐采用VIP机制，简化连接�
 规则是强制的，极端条件下可能退化。均衡和局部性则影响系统性能。
 
 数据分布规则有：
-\begin{itemize}
+\begin{compactitem}
 \item 保护域规则
 \item 存储池规则
 \item 故障域规则(\ref{rule:faultset})
-\end{itemize}
+\end{compactitem}
 
 负载均衡和本地化两方面考虑，平衡包括数据平衡和任务平衡。
 
@@ -58,30 +102,30 @@ controller在节点上的分布，controller在core上的分布
 \subsection{分配一个chunk的过程}
 
 函数：
-\begin{itemize}
-    \item \verb|__table2_chunk_create|
-    \item \verb|replica_srv_create|
-    \item \verb|disk_create|
-\end{itemize}
+\begin{compactitem}
+\item \verb|__table2_chunk_create|
+\item \verb|replica_srv_create|
+\item \verb|disk_create|
+\end{compactitem}
 
 与admin交互，返回节点列表，即各副本所在节点。
 
 需要持久化的信息：
-\begin{itemize}
-    \item table2 meta，记录chunk info（副本位置）
-    \item sqlite3，记录chkid（副本）到物理地址的映射关系
-    \item disk bitmap，记录磁盘上每个chunk的分配状态
-    \item 填充chunk内容为全0？
-\end{itemize}
+\begin{compactitem}
+\item table2 meta，记录chunk info（副本位置）
+\item sqlite3，记录chkid（副本）到物理地址的映射关系
+\item disk bitmap，记录磁盘上每个chunk的分配状态
+\item 填充chunk内容为全0？
+\end{compactitem}
 
 分配chunk的过程，会影响到若干特性，如精简配置，恢复，再平衡，写入等，都产生新chunk。
 
 优化allocate的性能：
-\begin{itemize}
-    \item 异步化sqlite，每个db一个工作线程
-    \item 加大lich.inspect线程数到20
-    \item table2 lock粒度 \change{dynamical lock table}
-\end{itemize}
+\begin{compactitem}
+\item 异步化sqlite，每个db一个工作线程
+\item 加大lich.inspect线程数到20
+\item table2 lock粒度 \change{dynamical lock table}
+\end{compactitem}
 
 \subsection{磁盘管理}
 

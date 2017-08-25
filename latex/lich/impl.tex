@@ -7,6 +7,11 @@
     \item kernel bypass
 \end{compactitem}
 
+\section{Protocol}
+
+Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
+所以，path中包含protocol组件，并非必须，而是实现上的权宜之计。
+
 \section{Performance}
 
 4K+1M混合读写，极慢
@@ -15,7 +20,41 @@
 
 \section{Redis Cache}
 
-分页，向上
+卷控制器所在节点，IO入口处，分页。当切换卷控制器的时候，清空redis cache。
+
+采用redis LRU或FRU算法。
+
+\begin{compactitem}
+    \item \verb|volume_proto_write|
+    \item \verb|volume_proto_read|
+\end{compactitem}
+
+read过程，从io的两段向中间压缩，选取中间最大的加载区。
+
+若发生volume controller切换，源端能否及时感知该事件，会有清理过程吗？怎么使源端的cache数据失效？
+在cache里，有两级检查机制：卷和页。有总开关，分级，如果设定卷级状态失效，则全体页也是失效的。
+
+为什么会发生volume controller切换？主动move，节点故障，iscsi session切换等。
+
+切走，失效化，切回。如果在切回之前没有失效化，则有\hl{cache一致性问题}。
+
+如何检测到该事件？
+
+\subsection{Lease}
+
+利用lease机制来保证volume controller的唯一性。
+
+加载卷时，尝试创建lease，成功后才能执行加载过程。
+
+若没有IO，如果发生lease超时，admin会回收发生超时的lease。后续如有IO，需要重新申请。
+
+如同锁一样，lease会发生抢占。lease是带timeout的锁。现在的实现，需要client去频繁检查，而不是通知机制。
+
+（心跳，向量时钟，版本）能改善?
+
+通过VIP机制，访问卷控制器的过程，与不同VIP，有所不同。
+
+EREMCHG错误主要用于控制器发生切换的时候。
 
 \section{Log}
 
@@ -38,18 +77,18 @@ syslog
 加载时间较长的模块，用half sync/half async模式来处理。分为两阶段：同步+异步。
 
 一个卷，加载成功，依赖于几个条件：
-\begin{itemize}
+\begin{compactitem}
     \item raw/lsv
     \item module load
-\end{itemize}
+\end{compactitem}
 
 \section{Coroutine}
 
 使用规则：
-\begin{itemize}
+\begin{compactitem}
     \item \verb|schedule_task_get|和\verb|schedule_yield|要匹配
     \item task有数量上的限制：1024，超出后容易引起死锁
-\end{itemize}
+\end{compactitem}
 
 \section{Memory Management}
 
@@ -69,28 +108,28 @@ syslog
 
 异步sqlite3。
 
-\begin{itemize}
+\begin{compactitem}
     \item 共10个db，每个一个线程，每个线程管理一个队列
     \item 所有sqlite3操作，泛化为统一的结构，放入线程队列
     \item 消费者线程批量处理队列中的任务
     \item 生产者线程和消费者线程通过sem进行通信
     \item 采用协程机制(yield/resume)同步任务执行顺序
-\end{itemize}
+\end{compactitem}
 
 消费者线程wait在sem上，生产者线程有消息的时候，调用\verb|sem_post|。
 
 \section{RPC}
 
-\begin{itemize}
+\begin{compactitem}
     \item minirpc
     \item rpc
     \item corerpc
-\end{itemize}
+\end{compactitem}
 
 \section{Algorithm}
 
-\begin{itemize}
+\begin{compactitem}
     \item paxos/raft 选举admin和meta节点
     \item vector clock 副本一致性
     \item lease controller的唯一性
-\end{itemize}
+\end{compactitem}
