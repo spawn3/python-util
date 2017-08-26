@@ -1,0 +1,31 @@
+\chapter{Pool}
+
+\section{接口}
+
+\begin{enumbox}
+\item pool create
+\item pool rm
+\item pool info or stat
+\item pool list all
+\item pool add disk
+\item pool remove disk
+\item pool list disk
+\end{enumbox}
+
+\section{迁移}
+
+离线/在线迁移
+
+不改变卷ID。卷ID和chunkid集群内唯一，迁移过程中保持不变。
+
+怎么判断一个卷是离线还是在线？有无访问者。target上的链接数，
+每个卷的volume\_proto都有一个connect\_list。
+
+\begin{lstlisting}[language=bash,frame=single]
+# lich.inspect --connection /iscsi/p1/v1
+\end{lstlisting}
+
+基于快照实现存储池的迁移和复制。相当于clone了新卷，chunkid皆发生变化。
+
+
+\section{复制}

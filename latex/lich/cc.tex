@@ -1,0 +1,36 @@
+\chapter{Parallel Computing}
+
+\section{事务管理}
+
+详解ACID。
+
+\section{常见并发问题及其分析}
+
+并发访问共享对象，竞态条件
+
+\begin{enumbox}
+\item 过程是否发生了yield，不连续执行？
+\item 临界区有哪些共享对象？
+\item 冲突操作
+\item 如果有多个并发任务重入该过程，会造成什么问题？
+\item 加锁的粒度如何，太大，或太小？
+\item 乱序？
+\item 有无lock free，wait free方案？
+\end{enumbox}
+
+\section{并发设计模式}
+
+范围锁？
+
+意向锁？
+
+\begin{compactitem}
+    \item pipeline
+    \item fork and join
+\end{compactitem}
+
+\section{故障恢复}
+
+REDO
+
+UNDO
