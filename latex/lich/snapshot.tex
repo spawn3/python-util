@@ -68,6 +68,10 @@ ROW，快照会产生一个数据项的多个版本。LSV，除了快照之外�
 
 卷和快照，共存于底层lich卷，是否有问题？
 
+元数据的\hl{基本管理单元是page}。按page来组织，每个page unit：chunkid+pageid。
+在ROW的过程中，可以只改变一页到新chunk。而bitmap则发生了COW，copy 1M，改变其中一项。
+(用chunkid+ page bitmap的方式行不通)。\hl{有一种特殊情况，bitmap管理了连续1M的数据，此时chunkid是重复的}。
+
 \begin{tcolorbox}
 
 假设有新旧两个快照点S1, S2，每个快照点包括meta和data，提炼出的几个引导性问题：

@@ -46,45 +46,50 @@ rebalance 是否也是优先写SSD？ 应与恢复相同策略，不设置QoS情
 
 在每个节点上运行恢复线程，分两个阶段：
 \begin{itemize}
-    \item 扫描，确定需要恢复的chunk
-    \item 恢复，多线程执行
+\item 扫描，确定需要恢复的chunk
+\item 恢复，多线程执行
 \end{itemize}
 
 每个节点只处理属于本节点的数据，即主副本位于本地节点。从sqlite扫描chkid，逐个检查其repnum，
 是否与fileinfo一致，如果不一致，追加到一临时文件
 \begin{itemize}
-    \item chkinfo.repnum是实际副本数（需要进一步查看各副本的真实状态）
-    \item fileinfo.repnum是目标副本数
+\item chkinfo.repnum是实际副本数（需要进一步查看各副本的真实状态）
+\item fileinfo.repnum是目标副本数
 \end{itemize}
 
 控制参数：
 \begin{itemize}
-    \item 线程数
-    \item 线程处理完一个chunk后的sleep时间
-    \item 数据恢复的最大带宽
+\item 功能开关
+\item 数据恢复的最大带宽
+\item 线程数
+\item 线程处理完一个chunk后的sleep时间
 \end{itemize}
+
+前端优先对应的控制参数是什么？恢复优先对应的控制参数是什么？自定义QoS？
 
 系统级别的配置信息存在哪儿？结构采用KV，有几种方案可供选择：
 \begin{itemize}
-    \item etcd           增加了外部依赖性
-    \item ZK             增加了外部依赖性
-    \item /config/       lich运行后，方可访问
-    \item /dev/shm/lich4 非持久化
+\item etcd           增加了外部依赖性
+\item ZK             增加了外部依赖性
+\item /config/       lich运行后，方可访问
+\item /dev/shm/lich4 非持久化
 \end{itemize}
+
+单次扫描的条目不宜过多。
 
 \subsection{实现}
 
 配置目录：/dev/shm/lich4/nodectl/recovery
 
 \begin{itemize}
-    \item immediately       功能开关
-    \item interval          恢复任务的时间间隔
-    \item thread            工作线程数
-    \item suspend
-    \item qos\_maxbandwidth 设置最大带宽
-    \item qos\_sleep        设置sleep多少豪秒
-    \item qos\_cycle        设置计算带宽的时间间隔
-    \item info              输出结果
+\item immediately       功能开关
+\item interval          恢复任务的时间间隔
+\item thread            工作线程数
+\item suspend
+\item qos\_maxbandwidth 设置最大带宽
+\item qos\_sleep        设置sleep多少豪秒
+\item qos\_cycle        设置计算带宽的时间间隔
+\item info              输出结果
 \end{itemize}
 
 md\_chunk\_getinfo
@@ -96,9 +101,9 @@ md\_chunk\_check
 从串行到并行
 
 \begin{itemize}
-    \item 各阶段时间
-    \item 磁盘利用率
-    \item 并发度
+\item 各阶段时间
+\item 磁盘利用率
+\item 并发度
 \end{itemize}
 
 为什么在有前台IO的情况下，性能严重下降？

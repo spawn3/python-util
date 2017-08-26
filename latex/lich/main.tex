@@ -39,6 +39,14 @@
     \end{tcolorbox}
 }
 
+\newenvironment{itembox}[0]{
+    \begin{tcolorbox}
+    \begin{compactitem}
+} {
+    \end{compactitem}
+    \end{tcolorbox}
+}
+
 % table
 \setlength{\arrayrulewidth}{1pt}
 \setlength{\tabcolsep}{16pt}
@@ -125,8 +133,8 @@
 
 \part{项目管理}
 
-\include{cmnet}
 \include{todo}
+\include{cmnet}
 
 \part{FusionStor}
 

@@ -55,6 +55,25 @@ chunk副本之间的一致性：强一致性协议。
 
 可扩展性
 
+admin上持久化的信息，\hl{是如何避免单点故障的，即如何同步到各个meta节点上的}？可以rootable为例。
+
+\subsection{数据目录}
+
+/opt/fusionstack/data:
+\begin{itembox}
+\item node/rootable (\hl{global info})
+    \begin{compactitem}
+    \item sysroot/root
+    \item misc/fileid
+    \item node/t53
+    \end{compactitem}
+\item disk (local, disk management)
+\item chunk (local, sqlite3)
+\item status
+\end{itembox}
+
+\subsection{引入etcd}
+
 \section{VIP}
 
 \section{分布}
