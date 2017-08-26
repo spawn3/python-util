@@ -40,6 +40,11 @@ read过程，从io的两段向中间压缩，选取中间最大的加载区。
 
 如何检测到该事件？
 
+\begin{tcolorbox}
+每发生一次切换，\verb|info_version|即+1，在redis key里加入该信息。
+利用redis自身的置换机制，则切换不会造成cache一致性问题。
+\end{tcolorbox}
+
 \subsection{Lease}
 
 利用lease机制来保证volume controller的唯一性。

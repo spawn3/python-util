@@ -7,9 +7,9 @@
         \item rm
         \item list
         \item rollback
-        \item clone
-        \item cat
-        \item flatten
+        \item clone(跨卷read)
+        \item read
+        \item flatten(存储池迁移和复制，需要实现该接口)
         \item protect/unprotect
     \end{compactenum}
 \end{tcolorbox}
@@ -71,6 +71,41 @@ ROW，快照会产生一个数据项的多个版本。LSV，除了快照之外�
 元数据的\hl{基本管理单元是page}。按page来组织，每个page unit：chunkid+pageid。
 在ROW的过程中，可以只改变一页到新chunk。而bitmap则发生了COW，copy 1M，改变其中一项。
 (用chunkid+ page bitmap的方式行不通)。\hl{有一种特殊情况，bitmap管理了连续1M的数据，此时chunkid是重复的}。
+如无页级元数据，则需要发生1M的COW。有页级元数据，引入了优化的机会。
+
+bitmap管理1M对应底层1M。管理所需元数据：chunkid+各页的元数据。
+
+snap tree, snap, chunk, page构成四级结构。LSV时，没有chunk那一级（写入位置模式）。
+
+写入模式：顺序写入，需要维护当前写入点。1M模式，需要1M：1M的映射, 而不再需要chunk内页索引。
+引用关系是页级的，写入模式是chunk级的。降低了ROW的写入粒度。
+
+vvol：clone时用，跨卷引用。支持多级clone。clone与snapshot基本一致，不同在于跨卷读取。
+
+写入的过程：会检查每个isref，入为1，则表明该chunk归属于本快照，否则，需要创建新的。
+对L2 bitmap言，发生1M的COW；对LOG言，申请分配1M，同时写入。
+
+cache一致性问题：
+
+session聚合写入：
+
+CC：
+
+页式管理的局限性：连续的有信息冗余。
+
+\section{IO过程}
+
+\begin{itembox}
+\item CC: 范围锁，层次锁
+\item 需要的实际IO次数
+\item 页对齐
+\item 跨chunk边界
+\item 重入分析(数据更新，bitmap更新)
+\end{itembox}
+
+两个并发IO，如果落入一个1M，会访问到同一bitmap单元。
+应先锁定bitmap单元，再锁定IO范围。遵循树状锁协议。
+参考\hl{数据库索引结构上的锁协议}。
 
 \begin{tcolorbox}
 

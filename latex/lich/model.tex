@@ -116,6 +116,14 @@ pool引导信息可以存在rootable里。
 原来的/的元数据chunk放置在哪儿？还是不再需要，每个pool有独立的树，多个pool构成森林。
 
 规则：存储池包括其下的所有卷和快照的元数据和数据，都必须存在该存储池关联的磁盘上。
+包括原来/system下的内容。
+
+\subsection{lookup}
+
+\begin{compactitem}
+\item 从path到id 拆分path，逐级查找
+\item 从id到path 遍历pool，找到即退出
+\end{compactitem}
 
 \section{Volume}
 
@@ -123,10 +131,10 @@ pool引导信息可以存在rootable里。
 
 操作：
 \begin{compactenum}
-    \item rename
-    \item resize \info{在线扩容}
-    \item mv
-    \item copy \change{全量拷贝/增量拷贝} \change{跨存储池拷贝} % change不能出现在box里
+\item rename
+\item resize \info{在线扩容}
+\item mv
+\item copy \change{全量拷贝/增量拷贝} \change{跨存储池拷贝} % change不能出现在box里
 \end{compactenum}
 
 \section{Snapshot}
