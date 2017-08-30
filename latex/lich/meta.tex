@@ -76,15 +76,24 @@ admin上持久化的信息，\hl{是如何避免单点故障的，即如何同�
 
 \section{VIP}
 
-\section{分布}
+\section{微控制器}
+
+每一个加载的卷，对应一个集群内唯一的卷控制器，负责卷的IO等操作。
+
+\section{数据分布}
 
 数据分布首先要满足规则要求，其次则需做到均衡和局部性。
 规则是强制的，极端条件下可能退化。均衡和局部性则影响系统性能。
 
+卷属于存储池，存储池上定义副本数和副本放置规则。
+保护域和故障域，可以用存储池来统一。
+
+FusionStor通过元数据来管理，\hl{与CEPH的CRUSH有重大不同}。
+
 数据分布规则有：
 \begin{compactitem}
-\item 保护域规则
 \item 存储池规则
+\item 保护域规则
 \item 故障域规则(\ref{rule:faultset})
 \end{compactitem}
 
@@ -94,7 +103,15 @@ chunk在节点上的分布，节点内chunk在磁盘上的分布（包括分层�
 
 controller在节点上的分布，controller在core上的分布
 
-进一步，需要考虑保护域，存储池，故障域各自的作用和特性。
+各种任务的分布情况，如数据恢复。
+
+\subsection{负载均衡}
+
+\subsection{本地化}
+
+卷控制器所在节点，具有所有chunk的副本。
+
+当切换控制器的时候，需要控制本地化过程的QoS。
 
 \section{复制}
 
@@ -116,7 +133,93 @@ controller在节点上的分布，controller在core上的分布
 
 恢复和再平衡过程，是怎么工作的？
 
-\section{分配和回收}
+\section{分层}
+
+卷的xattr，有目标分层设定：priority。默认是-1，即开启自动分层。先落入tier 0，根据数据热度，
+通过异步过程进行数据迁移(纵向的数据流动)。所以有两个异步任务：
+\begin{compactenum}
+\item 统计访问热度
+\item 按策略执行数据迁移(目标分层的偏离，数据热度)
+\end{compactenum}
+
+每个chunk有实际分层：tier，不是在副本级。
+
+\section{SSD缓存}
+
+SSD Cache实现了写缓存，没有实现读缓存, 通过内存实现读缓存。
+
+\subsection{配置项及系统行为}
+
+相关控制参数：
+\begin{enumbox}
+\item lich.conf/disk\_keep: 10G （废弃）
+\item lich.conf/disk\_cache: 10G
+\item 卷的xattr: writeback
+\item 卷的属性：priority (设定卷的目标存储分层）
+\end{enumbox}
+
+disk\_cache配置磁盘cache区，对新盘有效，若一个盘已经配置，就固定了，不再改变。
+此配置对SSD和HDD都起作用，预留磁盘末尾的空间。
+
+priority是手工分层机制，持久化到卷属性上。
+
+tier是自动分层机制，默认行为是什么？ 优先落到SSD上，若SSD满，落到HDD上。
+
+所以，分三种情况：
+\begin{compactenum}
+\item 自动分层，priority == -1，优先落盘到SSD上，如果SSD满，落盘到HDD上
+\item priority == 0, 同自动分层机制
+\item priority == 1，落盘到HDD上（此时根据writeback的设置，决定是否走SSD cache）
+\end{compactenum}
+
+写IO流程
+
+以下两种情况，会落盘到HDD上：
+\begin{compactenum}
+\item priority == 1
+\item SSD满
+\end{compactenum}
+
+落盘到HDD的写IO，\hl{其行为受xattr.writeback影响}，分两种情况：
+\begin{compactenum}
+\item xattr.writeback == 1，写入ssd的cache区+内存后，返回。
+\item xattr.writeback == 0, 写入HDD。
+\end{compactenum}
+
+落盘到SSD的写IO，不经过Cache, 走原来的IO路径。
+\begin{compactenum}
+\item 自动分层，会优先落到SSD上
+\item priority == 0, 会导致落盘到SSD上
+\end{compactenum}
+
+已知问题
+
+\begin{compactenum}
+\item 原来的分层机制，默认情况下，会写满SSD，导致后续写HDD（先快后慢）。
+\item 异步线程的工作机制 (周期性执行，20min执行一次, 最后才会置换proirity == 0的数据）
+\item disk cache区开启后，就不能再改变，空间无法回收，且不能关闭（不可逆过程）
+\end{compactenum}
+
+不确定的地方
+
+考虑以下问题，初次分配dispatch\_newdisk，等固定了分层后，后续的变更规则是什么？
+
+\section{关键过程}
+
+\subsection{磁盘管理}
+
+每块磁盘对应一个bitmap，用于该盘的空间管理。
+
+磁盘有分层属性，通常0表示SSD，1表示HDD。有三种分层策略：tier==0，表示写入SSD，tier==1表示写入HDD，
+tier==-1表示自动分层，先写入SSD，通过异步后台线程flush不活跃的数据到HDD。
+
+在分配每一个chunk的时候，可以指定tier。没有指定的情况下，默认为卷的priority设定。
+
+chunk\_id到磁盘物理地址的映射，是一随机过程，定位到空闲的bitmap上。
+
+如何确定磁盘的分层？
+
+RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据。
 
 \subsection{分配一个chunk的过程}
 
@@ -146,35 +249,9 @@ controller在节点上的分布，controller在core上的分布
 \item table2 lock粒度 \change{dynamical lock table}
 \end{compactitem}
 
-\subsection{磁盘管理}
-
-每块磁盘对应一个bitmap，用于该盘的空间管理。
-
-磁盘有分层属性，通常0表示SSD，1表示HDD。有三种分层策略：tier==0，表示写入SSD，tier==1表示写入HDD，
-tier==-1表示自动分层，先写入SSD，通过异步后台线程flush不活跃的数据到HDD。
-
-在分配每一个chunk的时候，可以指定tier。没有指定的情况下，默认为卷的priority设定。
-
-chunk\_id到磁盘物理地址的映射，是一随机过程，定位到空闲的bitmap上。
-
-如何确定磁盘的分层？
-
-RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据。
-
-\section{IO过程}
+\subsection{IO过程}
 
 写过程，可能内在地包含了分配chunk的过程，缺页分配。当在末尾写入时，还可能扩展了卷的大小。
 
 大范围内的随机写入，造成很多的缺页分配，分配过程会成为性能瓶颈。
 
-\section{负载均衡}
-
-\section{本地化}
-
-卷控制器所在节点，具有所有chunk的副本。
-
-当切换控制器的时候，需要控制本地化过程的QoS。
-
-\section{分层}
-
-\section{SSD缓存}

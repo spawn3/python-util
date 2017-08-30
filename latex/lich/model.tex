@@ -63,28 +63,6 @@ pool上关联rule，从而定义了pool中卷数据的放置规则。设备即OS
 
 与存储池有什么同和异？存储池可以看做关联了磁盘的pool，可以看做pool的子类。
 
-属性：
-\begin{enumbox}
-\item 配额
-\item 复制类型：副本 OR EC
-\item 磁盘列表
-\item 定义精简池
-\item 存储池上可以指定卷的副本数
-\item \hl{有足够的故障域，且不同故障域配置一致的资源量}
-\end{enumbox}
-
-操作：
-\begin{enumbox}
-\item 创建
-\item 删除
-\item 扩展（添加磁盘到\hl{已存在的存储池}，该映射关系持久化到本地，同步到admin节点）
-\item 缩容（从存储池中移除磁盘，引发数据重建过程）
-\item \hl{自动或手动按磁盘速率进行存储池分级划分}
-\item 不同存储池之间，卷的复制
-\item 不同存储池之间，卷的迁移，可在线或离线
-\item 存储池级别的统计信息
-\end{enumbox}
-
 % 存储池是disk的集合，与节点无关。但disk所在的节点构成存储池的节点列表，不同存储池的节点可能覆盖。
 
 存储池下，可以创建volume。没有关联磁盘的存储池，不能创建卷。
@@ -127,6 +105,7 @@ pool引导信息可以存在rootable里。
 
 \section{Volume}
 
+\section{Snapshot}
 属性：
 
 操作：
@@ -137,7 +116,6 @@ pool引导信息可以存在rootable里。
 \item copy \change{全量拷贝/增量拷贝} \change{跨存储池拷贝} % change不能出现在box里
 \end{compactenum}
 
-\section{Snapshot}
 
 snapshot隶属于卷，无卷则无快照，快照组织成快照树，其中有且只有一个快照是可写快照，即卷的写入点。
 

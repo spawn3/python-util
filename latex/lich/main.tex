@@ -3,7 +3,7 @@
 
 \documentclass[UTF8,oneside]{ctexbook}
 
-\usepackage{xeCJK}
+% \usepackage{xeCJK}
 \usepackage[utf8]{inputenc}
 
 % load paralist before enumitem
@@ -138,16 +138,19 @@
 
 \part{FusionStor}
 
-\include{model}
 \include{hardware}
 \include{meta}
+\include{model}
 \include{pool}
 \include{volume}
 \include{snapshot}
+\include{mapping}
+\include{consistencygroup}
 \include{task}
-\include{optimize}
-\include{enterprise}
 \include{ft}
+\include{cache}
+\include{enterprise}
+\include{optimize}
 \include{lsv}
 \include{iscsi}
 \include{impl}

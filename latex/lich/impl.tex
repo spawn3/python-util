@@ -18,33 +18,6 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 
 机械盘关闭localize
 
-\section{Redis Cache}
-
-卷控制器所在节点，IO入口处，分页。当切换卷控制器的时候，清空redis cache。
-
-采用redis LRU或FRU算法。
-
-\begin{compactitem}
-    \item \verb|volume_proto_write|
-    \item \verb|volume_proto_read|
-\end{compactitem}
-
-read过程，从io的两段向中间压缩，选取中间最大的加载区。
-
-若发生volume controller切换，源端能否及时感知该事件，会有清理过程吗？怎么使源端的cache数据失效？
-在cache里，有两级检查机制：卷和页。有总开关，分级，如果设定卷级状态失效，则全体页也是失效的。
-
-为什么会发生volume controller切换？主动move，节点故障，iscsi session切换等。
-
-切走，失效化，切回。如果在切回之前没有失效化，则有\hl{cache一致性问题}。
-
-如何检测到该事件？
-
-\begin{tcolorbox}
-每发生一次切换，\verb|info_version|即+1，在redis key里加入该信息。
-利用redis自身的置换机制，则切换不会造成cache一致性问题。
-\end{tcolorbox}
-
 \subsection{Lease}
 
 利用lease机制来保证volume controller的唯一性。

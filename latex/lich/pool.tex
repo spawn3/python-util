@@ -1,6 +1,18 @@
 \chapter{Pool}
 
-\section{接口}
+\section{属性}
+
+\begin{enumbox}
+\item 副本数
+\item 故障级
+\item 精简池
+\item 磁盘列表
+\item 复制类型（复制，EC）
+\item 配额
+\item \hl{有足够的故障域，且不同故障域配置一致的资源量}
+\end{enumbox}
+
+\section{操作}
 
 \begin{enumbox}
 \item pool create
@@ -10,6 +22,12 @@
 \item pool add disk
 \item pool remove disk
 \item pool list disk
+\item 扩展（添加磁盘到\hl{已存在的存储池}，该映射关系持久化到本地，同步到admin节点）
+\item 缩容（从存储池中移除磁盘，引发数据重建过程）
+\item 不同存储池之间，卷的复制
+\item 不同存储池之间，卷的迁移，可在线或离线
+\item 存储池级别的统计信息
+\item \hl{自动或手动按磁盘速率进行存储池分级划分}
 \end{enumbox}
 
 \section{迁移}

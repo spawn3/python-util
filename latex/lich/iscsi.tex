@@ -39,9 +39,12 @@ In function \verb|ns_build_auth_chap|
 \end{compactitem}
 
 没有设置ip或initiator，默认拥有全部权限，不符合白名单语义，最小权限原则。
+可以切换到黑名单机制。
 
 xattr用于保持ip或initiator白名单，如果很长，则溢出。
 需要找到更合适的存储方式。
+
+可以采用编/解码方式存入，通过多个xattr进行扩展。
 
 \section{Initiator}
 
