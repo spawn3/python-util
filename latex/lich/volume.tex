@@ -25,7 +25,7 @@ typedef struct {
 } fileinfo_t;
 \end{lstlisting}
 
-卷的属性记录在L1 chunk的fileinfo区。
+卷的属性记录在L1 chunk的fileinfo段。fileinfo段是vol info区的第一个段。
 
 \subsection{大小}
 
@@ -45,7 +45,9 @@ L2 chunk有16000个槽位，每个槽位指向一个raw chunk。所以，最大�
 \end{compactitem}
 
 L1 chunk：vol.xxx.0, vol.xxx.1, vol.xxx.2。其中，vol.xxx.0的chunkinfo记录在pool。
-\hl{vol.xxx.1等chunkinfo记录到vol.xxx.0里fileinfo区，并需记录其个数}。动态加载。
+\hl{vol.xxx.1等chunkinfo记录到vol.xxx.0里info区的第二个块，并需记录其个数}。动态加载。
+
+父：raw和subvol的父chkid为vol.xxx.0，vol.xxx.1的父chkid也为vol.xxx.0。vol.xxx.0的父chkid为所在pool的chkid。
 
 缺页中断：从上到下检查。创建chunk的时候，先检查L1 chunk是否存在，然后检查L2 chunk是否存在。
 不存在，则创建。在以下过程会改变卷的数据结构树：
@@ -56,7 +58,22 @@ L1 chunk：vol.xxx.0, vol.xxx.1, vol.xxx.2。其中，vol.xxx.0的chunkinfo记�
 \item \verb|__volume_proto_chunk_allocate|
 \end{compactitem}
 
+\begin{lstlisting}[frame=single]
+lichbd write /iscsi/p1/v1 hello -o 280375465082880
+lichbd cat /iscsi/p1/v1 -o 280375465082880 -l 5
+\end{lstlisting}
+
 chunk allocate开销较大，即要申请磁盘空间，也涉及记录元数据到父节点。
+
+遗留问题：
+\begin{enumbox}
+\item lich.inspect --stat极慢
+\item 分析内存占用量
+\item clone
+\item recovery
+\item balance
+\item 回收空间
+\end{enumbox}
 
 \section{操作}
 
