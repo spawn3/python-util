@@ -1,18 +1,16 @@
 \chapter{Snapshot}
 
-\begin{tcolorbox}
 需要支持的快照操作：
-    \begin{compactenum}
-        \item create
-        \item rm
-        \item list
-        \item rollback
-        \item clone(跨卷read)
-        \item read
-        \item flatten(存储池迁移和复制，需要实现该接口)
-        \item protect/unprotect
-    \end{compactenum}
-\end{tcolorbox}
+\begin{enumbox}
+\item create
+\item rm
+\item list
+\item rollback
+\item clone(跨卷read)
+\item read
+\item flatten(存储池迁移和复制，需要实现该接口)
+\item protect/unprotect
+\end{enumbox}
 
 \begin{tabular}{|s|p{0.6cm}|p{0.6cm}|p{0.6cm}|p{0.6cm}| }
     \hline
@@ -139,9 +137,9 @@ LSV log结构记录了每页的snap id。
 
 一颗树的节点，可以分为三类：
 \begin{compactenum}
-    \item 根节点
-    \item 中间节点（有无分支）
-    \item 叶子节点
+\item 根节点
+\item 中间节点（有无分支）
+\item 叶子节点
 \end{compactenum}
 
 \subsection{创建快照}
@@ -200,3 +198,9 @@ cat, protect, unprotect, flatten
 GC过程和引用计数。每个记录的is\_ref记录是否写入了数据。可以回收写入点，但无法回收一般快照。
 
 LSV: 逐个扫描每个log。
+
+\subsection{问题}
+
+\begin{enumbox}
+\item session方式，无commit
+\end{enumbox}
