@@ -25,6 +25,8 @@ typedef struct {
 } fileinfo_t;
 \end{lstlisting}
 
+卷是ServerSAN核心对象，是pool，snapshot，mapping和cg的中心。
+
 卷的属性记录在L1 chunk的fileinfo段。fileinfo段是vol info区的第一个段。
 
 \subsection{大小}
@@ -67,13 +69,15 @@ chunk allocate开销较大，即要申请磁盘空间，也涉及记录元数据
 
 遗留问题：
 \begin{enumbox}
-\item lich.inspect --stat极慢
+\item lich.inspect --stat极慢 (统计，load)
 \item 分析内存占用量
 \item clone
 \item recovery
 \item balance
 \item 回收空间
 \end{enumbox}
+
+\subsection{副本数}
 
 \section{操作}
 
@@ -95,3 +99,10 @@ chunk allocate开销较大，即要申请磁盘空间，也涉及记录元数据
 \end{enumbox}
 
 \subsection{create}
+
+\subsection{QoS}
+
+token bucket。IOPS与block size相关，两者乘积等于带宽。
+如果各层发生IO聚合，则在流量守恒的情况下，显示IOPS有所不同。
+
+IOPS必须假定一定的block size。

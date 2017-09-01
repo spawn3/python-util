@@ -44,6 +44,7 @@ read过程，从io的两段向中间压缩，选取中间最大的加载区。
 \item 随机读，破坏局部性
 \item 内存cache？
 \item 必须考虑基准性能，SSD read和redis read，IOPS哪个多？
+\item \hl{快照回滚对cache的影响}
 \end{enumbox}
 
 即使是连接本地redis，tcp开销也是很大的，最多3w IOPS。如果缓存命中率低，或者分页引起的tcp开销，反而会导致读写性能下降。

@@ -51,4 +51,11 @@ xattr用于保持ip或initiator白名单，如果很长，则溢出。
 \begin{lstlisting}[language=bash,frame=single]
 echo 2 > /sys/block/sdd/device/queue_depth
 cat /etc/iscsi/initiatorname.iscsi
+
+iscsiadm -m node -u
+iscsiadm -m discovery -t st -p 192.168.110.219 -l
 \end{lstlisting}
+
+看日志
+
+VIP与普通方式有别
