@@ -11,6 +11,40 @@ lichd进程内嵌各种server，包括iscsi等。
 
 client可以和每个节点进行通信，推荐采用VIP机制，简化连接管理。
 
+\section{元数据管理}
+
+元数据包括：
+\begin{enumbox}
+\item \hl{引导信息，用于加载相应对象}
+\item 目录下包含哪些文件？
+\item 文件包含哪些chunk？
+\item chunk的副本位置（节点和节点上的磁盘）
+\item 快照以及快照树
+\item 各实体对象描述信息，包括创建时间，id等
+\item xattr
+\end{enumbox}
+
+关键问题有：
+\begin{enumbox}
+\item 空间管理，分配和回收
+\item 数据分布
+\item 复制/EC
+\item 数据恢复和平衡
+\end{enumbox}
+
+在顶层设计下的case by case。
+
+每一个卷的元数据和数据，共有三层chunk，L1和L2是元数据，L3是数据，构成chunk的单根树。
+快照和clone出的卷采用统一的chunk树结构，不过增加了交叉引用关系。
+
+L1原先只有一个chunk，有固定数目的槽位，指向L2的chunk，L2的chunk，有固定条目的槽位，指向L3的数据chunk。
+
+table1包含了指向全部L2 chunk的指针数组(table\_proto)，table2包含了指向全部L3 chunk的指针数组（chkinfo+chkstat）
+table\_proto内在也包含chkinfo和chkstat。每一个chunk，都需要在其父节点上登记，\hl{卷的第一个chunk}登记在pool里。
+
+如果\verb|table1->table_count|和\verb|table2->chknum|比较大，会有扩展性和性能方面的问题。
+
+
 \section{节点}
 
 三类服务器节点：
