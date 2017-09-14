@@ -1,0 +1,35 @@
+\chapter{Deploy}
+
+\section{nohosts}
+
+\begin{lstlisting}[frame=single]
+[root@node76 ~]# cat /etc/hosts
+192.168.1.76 node76
+192.168.1.77 node77
+192.168.1.78 node78
+192.168.1.83 node83
+
+[root@node76 ~]# cat /opt/fusionstack/etc/hosts.conf 
+#hosts list for nohost mode
+192.168.110.76 node76
+192.168.110.77 node77
+192.168.110.78 node78
+192.168.110.83 node83
+\end{lstlisting}
+
+\section{Network}
+
+网段和netmask一致，vip一致
+
+ip addr检查相同IP
+
+arping检查IP冲突 
+
+\section{Disk}
+
+Disk Cache和raid cache下，磁盘读写的行为分析。
+
+如果raid cache打开，writeback写，全随机，则r_await远远大于w_await。
+同时，写入的情况下，iostat util较低。
+
+

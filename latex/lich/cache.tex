@@ -50,3 +50,28 @@ read过程，从io的两段向中间压缩，选取中间最大的加载区。
 即使是连接本地redis，tcp开销也是很大的，最多3w IOPS。如果缓存命中率低，或者分页引起的tcp开销，反而会导致读写性能下降。
 
 实现cache有一些通用问题和瓶颈，可以提前指出。
+
+\section{SSD Cache}
+
+特性开关：xattr writeback
+
+入口：\verb|writeback_commit|
+
+节点级别，在添加磁盘时指定\hl{--cache}选项，即创建了SSD cache盘。
+
+journalling? 优化随机IO。写入WAL即可返回。
+
+所有非\verb|__FILE_ATTR_DIRECT__| IO，都流经SSD cache，由QoS机制控制流入流出的速率，达到流入流出的平衡。
+同时，通过异步线程flush ssd cache的内容到目标位置。
+
+与分层有什么不同：
+\begin{compactitem}
+\item IO路径(包括入口)
+\item 目标位置
+\end{compactitem}
+
+tier考虑了热点数据。
+
+\subsection{BUG}
+
+BUG: ssd cache假定io 512对齐。如果有非512对齐的IO，会产生core。

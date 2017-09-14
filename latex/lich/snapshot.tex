@@ -1,5 +1,16 @@
 \chapter{Snapshot}
 
+\section{问题}
+
+\begin{enumbox}
+\item session方式，无commit
+\item 随机IO，小cache，频繁swap，有问题
+\item 如果标记dirty，会出现all dirty的情况
+\item 如果有COW，需要pin住源
+\end{enumbox}
+
+\section{操作}
+
 需要支持的快照操作：
 \begin{enumbox}
 \item create
@@ -158,6 +169,8 @@ LSV log结构记录了每页的snap id。
 不应改变父快照的内容
 保留子节点的共享内容
 
+分两个节点：\hl{标记和回收}。
+
 \subsection{列出快照树}
 
 \subsection{写}
@@ -202,8 +215,3 @@ GC过程和引用计数。每个记录的is\_ref记录是否写入了数据。�
 
 LSV: 逐个扫描每个log。
 
-\subsection{问题}
-
-\begin{enumbox}
-\item session方式，无commit
-\end{enumbox}

@@ -1,5 +1,7 @@
 \chapter{Volume}
 
+卷可以建模为状态机，不同状态允许不同的操作，按条件在不同状态之间切换。
+
 \section{属性}
 
 \begin{lstlisting}[language=c,frame=single]
@@ -99,6 +101,19 @@ chunk allocate开销较大，即要申请磁盘空间，也涉及记录元数据
 \end{enumbox}
 
 \subsection{create}
+
+\subsection{rm}
+
+显式回收空间
+
+分为两阶段：标记和回收。先把卷移入/system/unlink，有后台异步线程负责回收。
+
+相关源文件：
+\begin{compactitem}
+\item pool\_rmvol.c
+\item rmvol\_bh.c
+\end{compactitem}
+
 
 \subsection{QoS}
 

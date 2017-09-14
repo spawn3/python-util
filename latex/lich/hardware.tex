@@ -1,9 +1,60 @@
 \chapter{硬件架构}
 
+\section{Disk}
+
+\subsection{Cache}
+
+RAID
+
+关闭磁盘 cache，防止出现数据不一致情况。带电池的情况下，可以打开RAID cache。
+
+\subsection{Tier}
+
+检测磁盘分层，支持两个磁盘分层：0和1,0是SSD，1是HDD。
+
+\subsection{Meta}
+
+磁盘管理元数据目录：/opt/fusionstack/data/disk：
+\begin{compactitem}
+\item disk
+\item \hl{bitmap}
+\item info
+\item tier
+\end{compactitem}
+
+对每块磁盘，开头的1M是引导信息，通过bitmap来进行空间管理。
+引导信息包含了所在节点信息，所以只能在节点内进行磁盘漫游。
+
+所在源文件是\emph{diskmd.c}。调用fnotify\_register监控磁盘目录的变化，进而添加或移除相应磁盘。
+
+每个节点最多可以添加256个磁盘。
+
+sqlite3划分为10个db文件，chkid信息hash到相应的db。每个db包含两个table：metadata和raw。
+
+\begin{lstlisting}[frame=single]
+CREATE TABLE metadata (key text primary key, 
+    disk integer, 
+    offset integer, 
+    parent text, 
+    priority integer, 
+    meta_version integer, 
+    fingerprint integer, 
+    wbdisk integer);
+
+CREATE TABLE raw (key text primary key, 
+    disk integer, 
+    offset integer, 
+    parent text, 
+    priority integer, 
+    meta_version integer, 
+    fingerprint integer, 
+    wbdisk integer);
+\end{lstlisting}
+
+\section{Advanced}
+
 NVMe
 
 RDMA/DPDK/SPDK
 
 AFA
-
-

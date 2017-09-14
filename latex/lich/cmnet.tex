@@ -32,11 +32,11 @@
 \subsection{卷}
 
 \begin{enumbox}
-    \item 精简配置
-    \item 三副本
-    \item 扩容
-    \item 卷的QoS：IOPS
-    \item 全量拷贝和增量拷贝
+\item 精简配置
+\item 三副本
+\item 扩容
+\item 卷的QoS：IOPS
+\item 全量拷贝和增量拷贝
 \end{enumbox}
 
 三副本 \info{三副本性能}
@@ -44,9 +44,9 @@
 \subsection{快照}
 
 \begin{enumbox}
-    \item 显示卷和快照的创建时间，名称，宿主，\hl{容量，存储池}。
-    \item 快照树是必须的
-    \item 快照验证：每个快照关联一个数据集。
+\item 显示卷和快照的创建时间，名称，宿主，\hl{容量，存储池}。
+\item 快照树是必须的
+\item 快照验证：每个快照关联一个数据集。
 \end{enumbox}
 
 \subsection{映射}
@@ -56,8 +56,8 @@
 \subsection{故障处理}
 
 \begin{enumbox}
-    \item IO抖动
-    \item 重建
+\item IO抖动
+\item 重建
 \end{enumbox}
 
 \subsection{数据恢复}
@@ -65,14 +65,34 @@
 触发策略，QoS，性能，状态。
 
 \begin{enumbox}
-    \item 在线调整策略：应用优先，或恢复优先。
-    \item 负载调整到原来的20\%时，数据重建效率。
-    \item 显示恢复速度和状态，区分实际重构的，和跳过的
-    \item 拔出硬盘的存储池降级（数据冗余度发生下降，目前恢复进程是节点级的，与存储池没有直接关系，并且，
-        在节点的维度上，存储池是有覆盖的，overlay network，\hl{按卷进行汇总}）
-    \item 磁盘漫游，存储系统不发生重建，且数据无异常
-    \item 模拟故障：单磁盘，单节点，单机架。要求：无读写中断。
+\item 在线调整策略：应用优先，或恢复优先。
+\item 负载调整到原来的20\%时，数据重建效率。
+\item 显示恢复速度和状态，区分实际重构的，和跳过的
+\item 拔出硬盘的存储池降级（数据冗余度发生下降，目前恢复进程是节点级的，与存储池没有直接关系，并且，在节点的维度上，存储池是有覆盖的，overlay network，\hl{按卷进行汇总}）
+\item 磁盘漫游，存储系统不发生重建，且数据无异常
+\item 模拟故障：单磁盘，单节点，单机架。要求：无读写中断。
 \end{enumbox}
+
+要研究的问题：
+\begin{enumbox}
+\item 在业务负载限定为标准负载的20\%的情况下，恢复性能如何？
+\item 如业务IO和数据恢复并存，数据恢复会挤压到很小。原因是什么？\hl{如何做到恢复优先}？
+\item 拔盘后，感知状态变化较慢。如\verb|md_chunk_set|不持久化meta，有无副作用？恢复时，也可不持久化。
+\end{enumbox}
+
+\subsection{QoS算法}
+
+卷的IOPS和带宽，数据恢复的QoS，采用同一算法：令牌桶Token bucket。
+
+按恒定速度往桶里加入令牌，任务会消费令牌。如果令牌不足，则任务进入等待状态。
+目前，等待时间采用polling策略。等待一个较小的值（200us），唤醒后重新检查。
+
+接口保持不变。
+
+\begin{tcolorbox}
+fio队列深度过大，iscsi会有优化，进行IO聚合提交。这样一来，前端工具看到的IOPS可能会有所不同。
+但是，各层观察到的带宽应该一致，保证流量守恒。
+\end{tcolorbox}
 
 \subsection{负载均衡}
 
@@ -88,7 +108,7 @@ VAAI
 \section{不需要做的项}
 
 \begin{enumbox}
-    \item 一致性组
-    \item 同步/异步远程复制
-    \item EC
+\item 一致性组
+\item 同步/异步远程复制
+\item EC
 \end{enumbox}
