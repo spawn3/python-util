@@ -27,9 +27,13 @@ arping检查IP冲突
 
 \section{Disk}
 
-Disk Cache和raid cache下，磁盘读写的行为分析。
+Disk Cache和raid cache下，磁盘读写的行为分析，cache的行为具有通用性。
 
-如果raid cache打开，writeback写，全随机，则r_await远远大于w_await。
-同时，写入的情况下，iostat util较低。
+如果raid cache打开，writeback写，全随机，则r\_await远远大于w\_await。
+同时，写入的情况下，iostat util较低。\hl{写采用writeback模式，故性能高；
+在全随机的情况下，读不具有局部性，缓存命中率低，故性能低}。
 
-
+\begin{tcolorbox}
+存储池内每一个节点上，都需有SSD，用于tier和cache。
+如果一个节点属于多个存储池，也需满足以上条件。
+\end{tcolorbox}

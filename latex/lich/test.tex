@@ -1,9 +1,92 @@
-\chapter{Testing}
+\chapter{测试}
+
+\lstset{numbers=left,
+    frame=shadowbox,
+    numberstyle= \tiny,
+    keywordstyle= \color{ blue!70},commentstyle=\color{red!50!green!50!blue!50}, 
+    rulesepcolor= \color{ red!20!green!20!blue!20} 
+}
+
+\section{已知问题}
 
 \begin{enumbox}
-    \item dd
-    \item fio
-    \item iometer
-    \item hazard
-    \item vdbench
+\item vol resize会产生死锁
+\item vol copy的提示
+\item flat后保护快照
 \end{enumbox}
+
+\section{部署}
+
+基本步骤：
+\begin{enumbox}
+\item 创建集群
+\item 创建存储池
+\item 向存储池添加磁盘(Tier, SSD Cache)
+\item 创建卷
+\item 创建快照
+\end{enumbox}
+
+\subsection{创建集群}
+
+\begin{lstlisting}[language=bash]
+lich prep t151 t152 t153
+lich create t151 t152 t153
+\end{lstlisting}
+
+\hl{注意事项}：
+\begin{compactenum}
+\item 检查IP是否重复
+\item 检查子网mask是否匹配
+\item ...
+\end{compactenum}
+
+\subsection{创建存储池}
+
+\begin{lstlisting}[language=bash]
+lichbd pool create p1
+\end{lstlisting}
+
+\subsection{向存储池添加磁盘}
+
+\begin{lstlisting}[language=bash]
+lich.node --disk_add all --force --pool p1
+\end{lstlisting}
+
+\hl{注意事项}：
+\begin{compactenum}
+\item 存储池内每个节点上需要有SSD，支持tier功能
+\item 存储池内每个节点上需要有SSD，支持SSD cache功能
+\end{compactenum}
+
+\subsection{创建卷}
+
+\begin{lstlisting}[language=bash]
+# 卷路径规范：<pool>/<protocol>/<volume>
+# 三副本
+# row2格式
+lichbd vol create p1/iscsi/v1 --size 4096Gi --repnum 3 -F row2
+lich.inspect --localize /iscsi/v1 0 --pool p1
+\end{lstlisting}
+
+\hl{注意事项}：
+\begin{compactenum}
+\item 卷格式：row2 or raw (default)
+\item 三副本 (default: 2)
+\item 关闭localize
+\end{compactenum}
+
+\subsection{创建快照}
+
+\begin{lstlisting}[language=bash]
+# 快照路径规范：<pool>/<protocol>/<volume>@<snap>
+lichbd snap create p1/iscsi/v1@snap1
+\end{lstlisting}
+
+\section{工具}
+
+省略...
+
+\begin{lstlisting}[language=bash]
+iscsiadm -m discovery -t st -p 192.168.251.202
+\end{lstlisting}
+

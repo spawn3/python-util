@@ -70,6 +70,52 @@ IO粒度和数据项粒度的关系，如果IO粒度大于数据项粒度
 
 这条规则是否永远成立：\textcolor{red}{快照树的任一路径，都需要具有完整的索引结构和数据项集，可以有冗余和共享}。
 
+\section{COW}
+
+为了支持快照树，需要分析rollback和读快照的过程。
+
+\subsection{Create}
+
+卷，clone卷，快照具有相同的索引结构，不同在于fileinfo的attr。
+
+卷和快照的所有chunk，都是私有的，无法通过索引结构有效地定位chunk的位置。
+
+创建快照是相当简单的过程，创建索引结构，设置正确的fileinfo，同时复制xattr。
+卷的snap\_from指向其挂载的快照。
+
+在写入卷的时候，发生COW过程，被修改的chunk先复制到卷的最近一个快照的私有存储空间里，
+然后在卷上进行in place写。
+
+\subsection{Rollback}
+
+rollback，卷为源，以目标快照的内容覆盖源卷的内容。同时，为了不丢失信息，需要提前保存一定的数据。
+需要保存什么数据？沿着快照树的根，到卷的当前快照(所在分支的最后一个快照)，\hl{所有修改过的chunk}。
+
+卷的当前快照：只有在卷的当前快照是叶子节点的时候，才需要保持数据。
+
+读快照的规则：
+\begin{compactenum}
+\item 自身
+\item 下游
+\item 回溯至卷(先回溯至公共父节点，然后到卷)
+\end{compactenum}
+
+前两步是为了读取修改过的chunk，后一步是为了读取所在分支上从来没有修改过的chunk。
+两者合起来，代表快照的数据。
+
+通过fileinfo的snap\_from建立快照树，通过snap\_version为每个快照分配id，通过snap\_rollback指定要回滚的目标快照版本号。
+
+rollback的状态变迁
+
+rollback过程依赖于两个快照路径：
+\begin{compactenum}
+\item root snap list
+\item cross snap list
+\end{compactenum}
+
+
+\section{ROW}
+
 % ROW与LSV的不同，在于同一LBA，只对应一个数据项，而不是对应多个版本的数据项。
 % 但这个数据项的引用计数，可以为0，1，或多个。
 
@@ -105,7 +151,7 @@ IO锁最好是区间锁。bitmap单元的提交操作。
 
 空间管理：\hl{逻辑空间和物理空间的关系，物理空间的扩展性}。
 
-\section{IO过程}
+\subsection{IO过程}
 
 \begin{itembox}
 \item CC: 范围锁，层次锁
@@ -186,6 +232,8 @@ pagetable是逻辑连续的，按逻辑空间组织。如果已分配位置，�
 
 逻辑地址怎么映射到物理地址？页式，段页式
 
+\hl{写入位置，有三种分配策略：ROW2，ROW3，LSV}，都是按页粒度管理物理卷空间。
+
 \subsection{回滚}
 
 回滚并不会重用回滚到的快照点，而是相当于把写入点嫁接到目标快照点。写入点本身是一个独立的快照结构。
@@ -205,7 +253,8 @@ pagetable是逻辑连续的，按逻辑空间组织。如果已分配位置，�
 
 \subsection{Clone}
 
-clone后，会用到跨卷读快照，类似于ROW过程，所以，创建和clone过程具有相似性。
+卷和其上的快照位于同一个物理卷内，所以不涉及跨卷读。clone后，会用到跨卷读快照，
+类似于ROW过程，所以，创建和clone过程具有相似性。
 
 cat, protect, unprotect, flatten
 
@@ -214,4 +263,3 @@ cat, protect, unprotect, flatten
 GC过程和引用计数。每个记录的is\_ref记录是否写入了数据。可以回收写入点，但无法回收一般快照。
 
 LSV: 逐个扫描每个log。
-
