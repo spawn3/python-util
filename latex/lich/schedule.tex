@@ -1,0 +1,42 @@
+\chapter{Scheduler}
+
+\section{实现}
+
+系统可以指定几个core，专门处理IO。每个core关联一个core thread，运行scheduler代码。
+
+本质上，所谓的scheduler，就运行特定指令序列的操作系统线程，通过操作特定的数据结构和上下文切换，
+模拟协程行为。
+
+别的线程要与core thread通信，需要进行同步。core thread内部，不需要同步措施。
+
+调度器和协程代码，交错执行。调度器切换到task，则执行task指令；
+task让出控制权，或者返回，则执行调度器指令。
+
+创建task，通过makecontext管理task要执行的过程，通过swapcontext在调度器和task之间切换上下文。
+
+task的生灭过程，一个task的生命周期，状态变迁：FREE, RUNABLE/READY, RUNNING, SUSPEND, BACKTRACE。
+
+BACKTRACE用于打印日志，扫描每一个task，检查task的存活时间。目前，不允许有特长时间的任务存在。
+BACKTRACE是由调度器发起的。BACKTRACE不检查sleep状态的task。
+
+每个task，有parent，从而构成task树。
+
+目前维护有三个task队列(runable, reply\_local, reply\_remote)，两个新的申请队列(wait\_task, request\_queue)。
+
+task队列占用tasks槽位，总数受限，\hl{目前默认为1024个槽位}。
+
+调度器支持优先级队列：引入不同于runable的队列，多队列之间分配时间片。
+
+\section{使用}
+
+\subsection{接口}
+
+\subsection{使用模式}
+
+\subsection{FAQ}
+
+\begin{compactenum}
+\item schedule\_yield1 timeout。检查的是\hl{从yield到再次唤醒的时间，而不是任务的age，一个task可以多次yield/resume}
+\item tasks槽位占满后，再加入的请求会放入wait list。task和wait list之间，可能形成相互依赖的deadlock。
+\item schedule\_task\_get和schedule\_yield1必须配对使用
+\end{compactenum}

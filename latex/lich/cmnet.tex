@@ -5,6 +5,56 @@
 性能不是一个值，而是不同场景下的特征曲线。性能是系统配置和负载的函数：$P=F(S, W)$。
 精简配置，快照，故障，实现机制等因素都会影响性能及其抖动。
 
+\section{LEFT}
+
+\subsection{可靠性}
+
+诊断写错误效率太低，需要完善分析方法和工具。
+
+log分析法
+
+chunk，副本级数据一致性校验(disk bitmap和sqlite)。
+
+disk bitmap无，而sqlite有。会导致什么结果？多个sqlite记录指向同一个磁盘位置。
+
+\subsection{性能}
+
+clock(副本一致性)
+msqqueue(操作日志)
+
+卷分为chunk，chunk有多副本。在独立的部分之间，尽量并发。
+
+多个卷，要注意session和controller平衡。
+
+在分配阶段，一个chunk的持久化信息，包括三部分：diskmd，sqlite和table2 meta。
+
+并发，锁的粒度。
+
+\subsection{删除}
+
+删除卷，比删除快照更早完成，导致快照无法删除
+
+回收replica时，sqlite有，disk bitmap无。
+
+并发删除一个卷的多个快照会如何？
+
+有节点不在线，无法完成删卷操作，反复重试而无果。
+
+timer不工作，是堵塞还是其它？
+
+删除队列里的快照，也计入快照数，满足一下不等式：root+auto+rmsnap+user <= 256。
+
+提供强制回收的工具
+
+\subsection{平衡}
+
+批量分配卷
+
+\subsection{md5sum}
+
+每个chunk有几种状态：没分配，分配，分配并填0。
+第一种和第三种状态等价，第二种状态结果不可知。
+
 \section{TODO}
 
 \begin{enumbox}

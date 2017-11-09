@@ -263,3 +263,23 @@ cat, protect, unprotect, flatten
 GC过程和引用计数。每个记录的is\_ref记录是否写入了数据。可以回收写入点，但无法回收一般快照。
 
 LSV: 逐个扫描每个log。
+
+\section{实现}
+
+快照列表信息记录在卷table\_proto的smap和sinfo区，info区的每一项包括name和chkinfo，还包括snap\_attr\_t。
+smap用bit标记该位置是否有效。卷上的所有快照，构成快照树。
+
+每个快照有自己的snap\_version和snap\_from，分别表示自己的版本号和父节点的版本号。
+
+新创建的快照，采用卷当时的版本号和父版本号，创建成功后，更新卷版本号和父版本号，rollback版本号与卷版本号一致。
+
+revert的时候，rollback版本号表示目标快照的版本号，如有autosnap生成，采用卷当时的版本号和父版本号。
+完成后，更新卷的版本号，父版本号和rollback版本号。
+
+卷的每一chunk具有自身的版本号，revert成功后，所有chunk的版本都等于目标快照版本号。
+
+\subsection{rollback}
+
+主要通过4个变量来控制rollback过程：fileinfo(snap\_version)。
+
+/pool1/system/rollback/vol.32.0

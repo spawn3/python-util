@@ -90,3 +90,31 @@ lichbd snap create p1/iscsi/v1@snap1
 iscsiadm -m discovery -t st -p 192.168.251.202
 \end{lstlisting}
 
+\section{故障测试}
+
+每类节点故障行为不同。除选举过程外，还有vip，iscsi连接，controller的切换，lease，io，恢复过程等。
+评价可靠性的指标，主要是vdbench测试中，各种故障条件下io无中断。
+
+另外，故障点还会破坏事务执行的原子性，如allocte过程，创建snapshot过程，
+导致严重后果，如造成垃圾，数据状态不一致。如何通过可重入性，或事务解决此类问题？
+
+快照的rollback，delete，flat都设计为可重入过程。如果任务执行失败，可以重新调度。
+各种持久化状态之间，保持一致性。
+
+\subsection{单磁盘故障}
+
+磁盘有两种角色：数据盘和cache盘。拔cache盘等同于节点故障？
+
+\subsection{节点故障}
+
+节点有多种角色：
+\begin{compactenum}
+\item etcd master
+\item lich admin
+\item lich normal
+\end{compactenum}
+
+受VIP机制影响，arp协议会影响客户端到iscsi target的网络连接。
+需要注意的是，大部分网络会禁用arp广播，单播则可以。
+
+控制器的加载，lease获取等需要一定时间。
