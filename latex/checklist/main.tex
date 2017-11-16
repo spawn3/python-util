@@ -1,7 +1,7 @@
 % -*- coding: UTF-8 -*-
 % hello.tex
 
-\documentclass[UTF8,oneside]{ctexbook}
+\documentclass[UTF8,oneside]{ctexart}
 
 % \usepackage{xeCJK}
 \usepackage[utf8]{inputenc}
@@ -120,7 +120,7 @@
 
 \usepackage[simplified]{pgf-umlcd}
 
-\title{LICH架构文档}
+\title{LICH故障排查清单}
 \author{董冠军}
 \date{\today}
 
@@ -129,57 +129,7 @@
 \maketitle
 \tableofcontents
 
-\listoftodos[Notes]
+\include{content}
 
-\part{测试}
-
-\include{test}
-
-\part{项目管理}
-
-\include{todo}
-\include{cmnet}
-\include{problem}
-
-\part{FusionStor}
-
-\include{deploy}
-\include{hardware}
-\include{meta}
-\include{etcd}
-\include{model}
-\include{pool}
-\include{volume}
-\include{snapshot}
-\include{mapping}
-\include{consistencygroup}
-\include{task}
-\include{ft}
-\include{cache}
-\include{enterprise}
-\include{optimize}
-\include{lsv}
-\include{iscsi}
-\include{faq}
-\include{bug}
-\include{design}
-\include{impl}
-\include{schedule}
-
-\part{生态系统}
-
-\include{ceph}
-%\include{sheepdog}
-%\include{openvstorage}
-%\include{VSAN}
-
-\part{理论基础}
-
-\include{tool}
-\include{theory}
-\include{cc}
-\include{pattern}
-\include{book}
-\include{flow}
 
 \end{document}

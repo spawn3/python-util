@@ -1,0 +1,37 @@
+\chapter{问题集}
+
+\section{空间分配和元数据管理}
+
+目前的空间分配和元数据管理，在支持关键特性和过程上，不够高效。
+
+sqlite层采用(chkid, parent, diskid, offset)指定chkid到磁盘空间的映射。
+chkid包含了卷ID，可以利用该信息加快卷的回收过程，但不方便reuse该数据空间。
+
+目前的元数据管理分两层：chunk和replica。
+分配一个chunk需要多次IO：
+\begin{compactenum}
+\item disk bitmap
+\item sqlite
+\item table2/table1 meta
+\end{compactenum}
+
+discard操作与allocate操作顺序相反。
+
+关键过程：
+\begin{compactenum}
+\item chunk allocate
+\item chunk discard (+ reuse)
+\end{compactenum}
+
+特性：
+\begin{compactenum}
+\item replication
+\item EC
+\end{compactenum}
+
+快照实现：
+\begin{compactenum}
+\item COW
+\item ROW2
+\item LSV
+\end{compactenum}

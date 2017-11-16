@@ -20,8 +20,8 @@ client可以和每个节点进行通信，推荐采用VIP机制，简化连接�
 \item 文件包含哪些chunk？
 \item chunk的副本位置（节点和节点上的磁盘）
 \item 快照以及快照树
-\item 各实体对象描述信息，包括创建时间，id等
 \item xattr
+\item 各实体对象描述信息，包括创建时间，id等
 \end{enumbox}
 
 关键问题有：
@@ -43,16 +43,16 @@ table1包含了指向全部L2 chunk的指针数组(table\_proto)，table2包含�
 table\_proto内在也包含chkinfo和chkstat。每一个chunk，都需要在其父节点上登记，\hl{卷的第一个chunk}登记在pool里。
 
 parent的界定：\hl{raw和subvol的parent都是volume的chkid，subpool的parent是pool的chkid。
-vol的parent是pool的chkid}，即parent都是可寻址的实体对象。
+vol的parent是pool的chkid}，即parent都是可寻址的实体对象(具有控制器)。\hl{sqlite记录的parent遵循该语义}。
 
-如果\verb|table1->table_count|和\verb|table2->chknum|比较大，会有扩展性和性能方面的问题。
+如果\verb|table1->table_count|和\verb|table2->chknum|比较大，会有扩展性和性能方面的问题，同时会消耗比较多的内存。
 
 \section{节点}
 
 三类服务器节点：
 \begin{compactenum}
 \item admin
-\item meta
+\item meta （废弃）
 \item normal
 \end{compactenum}
 
@@ -67,11 +67,17 @@ normal节点是数据节点，存放元数据和数据。元数据和数据都�
 所有的控制器，包括pool和volume控制器，通过lease机制保证集群内的唯一性。
 其节点位置，由所在子树的根chunk的主副本确定。
 
-chunk副本的节点分布：基于diskmap的随机分布算法，并记录在元数据里。
+chunk副本的节点分布：基于diskmap的随机分布算法，并记录在元数据里。同时，遵循故障域规则。
 
 chunk副本的磁盘分布：本地数据管理（bitmap+sqlite）
 
-chunk副本之间的一致性：强一致性协议。
+chunk副本之间的一致性：强一致性协议。在每次IO操作前，检查各副本的clock和dirty状态，必要的情况下，进行修复。
+
+为了提升性能，需要充分考虑聚合和并发。聚合优于并发，先考虑聚合/批处理。
+聚合，一次提交多个chunk。
+并发的粒度，多个chunk，一个chunk的多个副本。同时，锁的粒度要恰如其分。
+
+副本数据的管理，没有采用资源池模式，与chkid紧耦合，非共享，不利于分配和释放。
 
 \subsection{admin节点}
 
@@ -92,6 +98,8 @@ chunk副本之间的一致性：强一致性协议。
 可扩展性
 
 admin上持久化的信息，\hl{是如何避免单点故障的，即如何同步到各个meta节点上的}？可以rootable为例，参见\verb|mq_master.c|。
+
+引入etcd后，admin处理逻辑会简单些。同时引入了多存储池，寻址过程变得复杂。
 
 \subsection{数据目录}
 
@@ -291,3 +299,32 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 
 大范围内的随机写入，造成很多的缺页分配，分配过程会成为性能瓶颈。
 
+\subsection{事务处理}
+
+一个复杂的主题是事务处理，即如何保证在故障条件下，过程执行的ACID属性。
+需要做出事务保证的典型过程有：
+\begin{compactenum}
+\item 创建卷(metadata表出现垃圾记录)
+\item 创建快照(snap\_version得不到有效维护)
+\item 分配chunk(meta和副本不一致)
+\end{compactenum}
+
+以分配chunk为例，基本操作有：
+\begin{compactenum}
+\item 申请chkid和chkinfo
+\item 分配disk bitmap
+\item 分配sqlite记录
+\item 写入meta
+\end{compactenum}
+
+任何两个操作之间发生故障，都会导致问题。
+
+\subsection{异步过程:删除卷}
+
+\subsection{异步过程:删除快照}
+
+\subsection{异步过程:回滚快照}
+
+\subsection{异步过程:flat快照}
+
+\subsection{异步过程:数据恢复}

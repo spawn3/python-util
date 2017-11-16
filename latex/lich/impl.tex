@@ -111,3 +111,17 @@ syslog
     \item vector clock 副本一致性
     \item lease controller的唯一性
 \end{compactitem}
+
+\section{编程注意事项}
+
+\begin{compactitem}
+\item goto之前，先设置ret
+\end{compactitem}
+
+\subsection{Profile}
+
+lich.conf: performance\_analysis: on
+
+kill -USR1 <pid>
+
+tail -f /opt/fusionstack/log/lich.log |grep analysis
