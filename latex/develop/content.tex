@@ -4,11 +4,23 @@
 
 分进合击
 
+\subsection{编码规范}
+
+\begin{lstlisting}
+语法结构
+
+命名
+
+返回值和错误码
+
+缓存，聚合和并发
+\end{lstlisting}
+
 \subsection{版本控制GIT}
 
 \subsection{文档工具Doxygen}
 
-\subsection{编辑器VIM/Clion}
+% \subsection{编辑器VIM/Clion}
 
 \section{测试方法}
 
@@ -148,6 +160,11 @@ lich health
 
 \subsection{检查卷控制器的平衡性}
 
+\begin{lstlisting}
+lich.balance --scan
+lich.balance --balance
+\end{lstlisting}
+
 \subsection{查看CORE}
 
 \begin{lstlisting}
@@ -182,12 +199,12 @@ chunk副本一致性检查
 
 \subsection{启用performance\_analysis}
 
-\begin{enumbox}
-\item 在代码里采用<ANALYSIS\_BEGIN, ANALYSIS\_QUEUE>对，测量过程的执行时间
-\item 在/opt/fusionstack/etc/lich.conf里设定：performance\_analysis on
-\item 输出一：相关性能取样的条目会出现在日志文件：/opt/fusionstack/log/perf.log
-\item 输出二：kill -USR1 <pid> 命令，聚合输出到日志文件：tail -f /opt/fusionstack/log/lich.log|grep --color analysis
-\end{enumbox}
+\begin{lstlisting}
+1. 在代码里采用<ANALYSIS_BEGIN, ANALYSIS_QUEUE>对，测量过程的执行时间
+2. 在/opt/fusionstack/etc/lich.conf里设定：performance_analysis on
+3. 输出一：相关性能取样的条目会出现在日志文件：/opt/fusionstack/log/perf.log
+4. 输出二：kill -USR1 <pid> 命令，聚合输出到日志文件：tail -f /opt/fusionstack/log/lich.log|grep --color analysis
+\end{lstlisting}
 
 注意事项：
 \begin{compactenum}
