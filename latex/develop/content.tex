@@ -1,24 +1,199 @@
+\chapter{分析方法}
+
 \section{开发流程}
+
+分进合击
+
+\subsection{版本控制GIT}
+
+\subsection{文档工具Doxygen}
+
+\subsection{编辑器VIM/Clion}
 
 \section{测试方法}
 
 \subsection{基于docker的自动化测试}
 
+\begin{lstlisting}
+# 以下过程只需要执行一次
+python test.py --pull
+
+# 如遇docker build失败，重启docker服务：systemctl restart docker，然后重试
+python test.py --build
+python test.py --run
+python test.py --conf
+
+# 可以多次执行test过程
+python test.py --test
+python test.py --test --nofail
+\end{lstlisting}
+
+注意事项：
+\begin{compactenum}
+\item 共创建8个docker容器，IP地址为：172.17.0.[2-9]
+\item 检查到docker容器的ssh连接是否正常，取消docker容器内部的/etc/resolv.conf设定
+\item time ./run.sh 10，共运行10次test，遇到异常则退出
+\end{compactenum}
+
+\subsection{单元测试框架cmock}
+
 \section{调试方法}
 
 \subsection{基于core的调试}
+
+\begin{lstlisting}
+ulimit -c
+ulimit -c unlimited
+
+cat /proc/sys/kernel/core_pattern
+echo "/opt/fusionstack/core/core-%e-%p-%s" > /proc/sys/kernel/core_pattern
+\end{lstlisting}
+
 \subsection{调试运行中的程序}
 
 \section{日志分析}
 
+\subsection{打开backtrace}
+
+通过backtrace可以跟踪GOTO的退出路径，方便定位错误的根源。
+
+\begin{lstlisting}
+方法1：echo 1 > /dev/shm/lich4/msgctl/backtrace
+方法2：配置文件/opt/fusionstack/etc/lich.conf globals中添加: backtrace on;
+\end{lstlisting}
+
+\subsection{调整日志等级}
+
+\begin{lstlisting}
+echo n > /dev/shm/lich4/msgctl/level
+
+其中，n的取值范围：
+    1: DBUG （配合子模块使用)
+    2: DINFO
+    3: DWARN
+    4: DERROR
+    5: DFATAL
+
+echo 1 > /dev/shm/lich4/msgctl/sub/<module>
+
+module的取值范围：
+    ylib
+    ynet
+    schedule
+    storage
+    cluster
+    interface
+    lsv
+\end{lstlisting}
+
+
+\subsection{检查lichd进程是否重启}
+
+% \begin{itembox}
+% \item grep \verb+'run as\|exit\|process\|assert' /opt/fusionstack/log/lich.log+
+% \end{itembox}
+
+\begin{lstlisting}
+grep 'run as\|exit\|process\|assert' /opt/fusionstack/log/lich.log
+\end{lstlisting}
+
+\subsection{检查卷是否reload}
+
+有时前端无IO，可能与卷反复地重新加载有关。
+
+\subsection{全历史日志分析法}
+
+比如调试hazard错误，需要跟踪对象生命周期内的所有行为，才能精准地定位问题的根源。
+
 \section{内存分析}
 
-先停止lichd进程。然后用valgrind启动lichd进程。
-valgrind --tool=memcheck --leak-check=full --show-reachable=yes -v  /opt/fusionstack/lich//sbin/lichd --home /opt/fusionstack/data -f  > log.txt 2>&1
-运行一段时间后可以使用ctrl + c 中止，但需要等valgrind分析完内存。再查看错误：
-grep 'llegal\|inappropriate\|inadequate\|verlapping\|emory leak\|overlap\|nvalid\|definitely' log.txt
-比较严重的错误：　　　Invalid read （内存非法读取）,Invalid write（内存非法写入）, definitely lost　（内存泄漏）
+\subsection{valgrind的用法}
+
+\begin{lstlisting}
+先停止lichd进程，然后用valgrind启动lichd进程:
+    valgrind --tool=memcheck --leak-check=full --show-reachable=yes -v /opt/fusionstack/lich/sbin/lichd --home /opt/fusionstack/data -f > log.txt 2>&1
+
+运行一段时间后可以使用ctrl + c 中止，但需要等valgrind分析完内存，再查看错误：
+    grep 'illegal\|inappropriate\|inadequate\|overlapping\|memory leak\|overlap\|invalid\|definitely' log.txt
+
+比较严重的错误：　　　
+    invalid read （内存非法读取）
+    invalid write（内存非法写入）
+    definitely lost　（内存泄漏）
+\end{lstlisting}
 
 \section{故障诊断}
 
+故障诊断要结合集群和节点状态，core，日志，硬件，数据等因素。
+
+\subsection{检查系统时间}
+
+\subsection{检查lichd和etcd版本}
+
+\subsection{检查集群健康状态}
+
+\begin{lstlisting}
+# etcd状态
+etcdctl ls -r
+
+# 节点，存储池和容量
+lich stat
+
+# 节点列表
+lich list
+
+# 检查恢复状态
+lich health
+\end{lstlisting}
+
+\subsection{检查卷控制器的平衡性}
+
+\subsection{查看CORE}
+
+\begin{lstlisting}
+./lscore.sh
+\end{lstlisting}
+
+\subsection{查看日志}
+
+必要时，开启backtrace
+
+必要时，开启DBUG日志等级
+
+\subsection{检查硬件和操作系统状态}
+
+CPU，内存，磁盘和网络
+
+\subsubsection{磁盘分区满}
+
+\lstinputlisting{code/du.sh}
+
+%\begin{verbatim}
+%TMP='/';for i in `/bin/ls $TMP`; do du -sh $TMP/$i; done
+%\end{verbatim}
+
+\subsection{检查数据一致性}
+
+节点内sqlite/disk bitmap一致性检查
+
+chunk副本一致性检查
+
 \section{性能优化}
+
+\subsection{启用performance\_analysis}
+
+\begin{enumbox}
+\item 在代码里采用<ANALYSIS\_BEGIN, ANALYSIS\_QUEUE>对，测量过程的执行时间
+\item 在/opt/fusionstack/etc/lich.conf里设定：performance\_analysis on
+\item 输出一：相关性能取样的条目会出现在日志文件：/opt/fusionstack/log/perf.log
+\item 输出二：kill -USR1 <pid> 命令，聚合输出到日志文件：tail -f /opt/fusionstack/log/lich.log|grep --color analysis
+\end{enumbox}
+
+注意事项：
+\begin{compactenum}
+\item 查询lichd pid的方法：pgrep lichd，通常输出两行，取第二行的pid
+\end{compactenum}
+
+\subsection{动态追踪工具SystemTap}
+
+\subsection{火焰图}
