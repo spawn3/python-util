@@ -1,5 +1,54 @@
 \chapter{FAQ}
 
-\section{性能问题}
+\section{Pool}
+
+\subsection{加载pool失败}
+
+\section{卷}
+
+\subsection{加载卷失败}
+
+\subsection{没有卷的存储池，占用了71M的存储空间}
+
+每个盘的第一个1M，用于记录特殊的元数据。同时，系统目录也会占空间，每个目录占1或2个chunk（如果分配了subpool）。
+
+存储池下的系统目录包括：
+\begin{compactitem}
+\item system/unlink
+\item system/rmsnap
+\item system/rollback
+\item system/flat
+\end{compactitem}
+
+如果按每个chunk三副本计算，则所需空间为
+
+\subsection{卷allocate后，实际使用空间大于理论计算值}
+
+\section{快照}
+
+\subsection{快照容量}
+\subsection{单卷上的快照数量}
+
+\section{QoS}
+
+\subsection{QoS机制}
+
+本质上是控制系统的负反馈调节。
+
+\begin{lstlisting}
+1. token bucket
+2. 距离函数
+3. slow start
+\end{lstlisting}
+
+\section{性能}
 
 \subsection{IOPS降为0}
+
+检查lichd进程是否重启，或卷是否反复加载。
+
+\section{内存}
+
+\subsection{怎么评估lichd进程的内存使用量}
+
+\subsection{是否发生内存泄露}

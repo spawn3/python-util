@@ -11,9 +11,15 @@
 
 命名
 
+架构和模块化
+
 返回值和错误码
 
+函数的可重入性
+
 缓存，聚合和并发
+
+识别模式
 \end{lstlisting}
 
 \subsection{版本控制GIT}
@@ -21,6 +27,15 @@
 \subsection{文档工具Doxygen}
 
 % \subsection{编辑器VIM/Clion}
+
+\subsection{设计原则和指标}
+
+\begin{itembox}
+\item 多: 扩展性，接口丰富，面向场景/生态建设
+\item 快: 性能（cache，tier，聚合，并发）
+\item 好: 数据安全，稳定性，可靠性，健壮性，QoS，事务管理，恢复和平衡，备份/DR
+\item 省: 经济，容量（如精简配置，EC），易管理
+\end{itembox}
 
 \section{测试方法}
 
@@ -192,6 +207,10 @@ CPU，内存，磁盘和网络
 \subsection{检查数据一致性}
 
 节点内sqlite/disk bitmap一致性检查
+
+\begin{lstlisting}
+python diskcheck.py --scan
+\end{lstlisting}
 
 chunk副本一致性检查
 
