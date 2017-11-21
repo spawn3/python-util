@@ -1,0 +1,61 @@
+\chapter{关键过程}
+
+\section{存储池}
+
+\subsection{创建存储池}
+
+\subsection{添加磁盘}
+
+% \subsection{添加缓存盘}
+
+\subsection{空间分配}
+
+admin维护着集群的拓扑结构。
+
+故障域规则
+
+\subsection{拔盘}
+
+拔盘会产生一系列的影响，如IO抖动，控制器主副本丢失，存储池降级等。
+与读写，控制器切换，QoS策略，恢复，平衡等过程都有密切关系。
+
+\subsection{删除存储池}
+
+\section{卷}
+
+\subsection{创建卷}
+\subsection{删除卷}
+\subsection{加载卷}
+
+\begin{compactenum}
+\item 延迟加载table2
+\item 获取allocate属性的方式和性能
+\end{compactenum}
+
+\subsection{分配卷空间}
+\subsection{unmap卷空间}
+
+\subsection{切换卷控制器}
+
+\begin{compactenum}
+\item 源端volume\_proto是怎么回收的？
+\item lease机制怎么影响本过程？
+\end{compactenum}
+
+\section{快照}
+
+\subsection{创建快照}
+\subsection{删除快照}
+\subsection{回滚快照}
+\subsection{克隆}
+\subsection{FLATTEN}
+
+\section{主机映射}
+
+\section{后台任务}
+
+\subsection{恢复}
+
+\subsection{平衡}
+
+平衡分控制器平衡和数据平衡。

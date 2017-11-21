@@ -2,7 +2,49 @@
 
 \section{开发流程}
 
-分进合击
+后续LICH代码维护和开发模式，可称之为\hl{“分进合击”}。
+所谓分进，指的是维护工作分层分模块，责任到人，平时通过串讲讨论等多种沟通形式，进行知识总结/分享；
+所谓合击，指的是开发新功能时，组成多人小组，联合设计/开发，提高协同能力，避免孤军作战。
+
+从组织结构上来说，进一步分为开发组和架构组，承担不同职责。
+
+\begin{longtable}{|c|c|c|}
+\caption{LICH模块和责任人}\\
+\hline
+    & 模块 & 责任人\\
+\hline\hline
+\endhead
+
+\multirow{2}*{管理层} & 监控 & 王少飞 \\
+                      & 报警 &   \\
+\hline
+
+\multirow{3}*{接口层} & ISCSI &  \\
+                      & VAAI  &  \\
+                      & FC    &  \\
+\hline
+
+\multirow{3}*{特性层} & QoS   &  \\
+                      & Cache &  \\
+                      & EC    &  \\
+\hline
+
+\multirow{5}*{服务层} & Pool &  \\
+                      & Volume &   \\
+                      & Snapshot &   \\
+                      & 数据恢复 &   \\
+                      & 数据平衡 &   \\
+\hline
+
+\multirow{7}*{引擎层} & Scheduler &  \\
+                      & Memory &   \\
+                      & Disk &   \\
+                      & Network &   \\
+                      & 可靠性 &   \\
+                      & 性能 &   \\
+                      & 扩展性 &   \\
+\hline
+\end{longtable}
 
 \subsection{编码规范}
 
