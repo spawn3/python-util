@@ -1,4 +1,4 @@
-\chapter{分析方法}
+\chapter{分析方法和工具}
 
 \section{开发流程}
 
@@ -6,7 +6,9 @@
 所谓分进，指的是维护工作分层分模块，责任到人，平时通过串讲讨论等多种沟通形式，进行知识总结/分享；
 所谓合击，指的是开发新功能时，组成多人小组，联合设计/开发，提高协同能力，避免孤军作战。
 
-从组织结构上来说，进一步分为开发组和架构组，承担不同职责。
+从组织结构上来说，进一步分为开发组和架构组，在共同目标之下，承担职责，协同作战。
+
+\subsection{模块及其负责人}
 
 \begin{longtable}{|c|c|c|}
 \caption{LICH模块和责任人}\\
@@ -15,34 +17,37 @@
 \hline\hline
 \endhead
 
-\multirow{2}*{管理层} & 监控 & 王少飞 \\
-                      & 报警 &   \\
+\multirow{2}*{管理层} & Monitoring & 王少飞 \\
+                      & Alert &   \\
 \hline
 
-\multirow{3}*{接口层} & ISCSI &  \\
-                      & VAAI  &  \\
+\multirow{4}*{接口层} & ISCSI &  \\
                       & FC    &  \\
+                      & VAAI  &  \\
+                      & OpenStack  &  \\
 \hline
 
-\multirow{3}*{特性层} & QoS   &  \\
+\multirow{5}*{特性层} & QoS   &  \\
                       & Cache &  \\
                       & EC    &  \\
+                      & Backup    &  \\
+                      & DR    &  \\
 \hline
 
 \multirow{5}*{服务层} & Pool &  \\
                       & Volume &   \\
                       & Snapshot &   \\
-                      & 数据恢复 &   \\
-                      & 数据平衡 &   \\
+                      & Recovery &   \\
+                      & Balance &   \\
 \hline
 
 \multirow{7}*{引擎层} & Scheduler &  \\
                       & Memory &   \\
                       & Disk &   \\
                       & Network &   \\
-                      & 可靠性 &   \\
-                      & 性能 &   \\
-                      & 扩展性 &   \\
+                      & Robustness &   \\
+                      & Performance &   \\
+                      & Extentablity &   \\
 \hline
 \end{longtable}
 
@@ -105,6 +110,13 @@ python test.py --test --nofail
 \end{compactenum}
 
 \subsection{单元测试框架cmock}
+
+\subsection{Hazard测试}
+\subsection{vdbench测试}
+\subsection{fio测试}
+\subsection{iscsi协议测试}
+
+libiscsi
 
 \section{调试方法}
 
@@ -273,5 +285,8 @@ chunk副本一致性检查
 \end{compactenum}
 
 \subsection{动态追踪工具SystemTap}
+
+% PDF输出中会改变-，单引号和双引号等
+\lstinputlisting{code/systemtap.sh}
 
 \subsection{火焰图}

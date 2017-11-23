@@ -10,9 +10,13 @@
 
 \section{SQLITE}
 
+异步化
+
 \section{DISK BITMAP}
 
 空间分配器
+
+\section{LEASE}
 
 \section{CLOCK}
 
@@ -21,6 +25,8 @@
 \section{MSGQUEUE}
 
 离线消息处理
+
+异步化，是否可提取出异步化框架？
 
 \section{控制器缓存}
 
@@ -35,3 +41,11 @@
 \section{快照}
 
 \section{克隆卷}
+
+\section{CORE AND Scheduler}
+
+每个core有独立scheduler。为了与其它节点上的core进行通信，抽象出了corenet的概念。
+
+实体标识和命名：hostname，nid，core hash，sockid。
+
+RPC有发送端和接收端。

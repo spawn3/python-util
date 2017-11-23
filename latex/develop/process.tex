@@ -1,5 +1,18 @@
 \chapter{关键过程}
 
+过程分析分两种：正常情况和异常情况。特别是故障情况下，过程之间存在广泛的交互作用，变得更为复杂。
+
+过程需要具备一些重要属性，如事务ACID，safety和liveness等，要具体情况具体分析。
+值得注意的是，若干过程需要实现为可重入的。
+
+其它注意事项：
+\begin{compactenum}
+\item 必须正确处理过程的返回值。
+\item 过程运行在协程内，还是协程外？
+\item 过程是否并发安全？
+\item 过程执行时间是否过长，且中间无中断？比如有大循环，有同步IO操作等
+\end{compactenum}
+
 \section{存储池}
 
 \subsection{创建存储池}
@@ -14,6 +27,10 @@ admin维护着集群的拓扑结构。
 
 故障域规则
 
+分两层：副本的节点位置和副本的磁盘位置。
+
+注意多个chunk的局部性对性能和恢复性能的影响。
+
 \subsection{拔盘}
 
 拔盘会产生一系列的影响，如IO抖动，控制器主副本丢失，存储池降级等。
@@ -24,15 +41,19 @@ admin维护着集群的拓扑结构。
 \section{卷}
 
 \subsection{创建卷}
+
 \subsection{删除卷}
+
 \subsection{加载卷}
 
 \begin{compactenum}
 \item 延迟加载table2
+\item 预加载table2
 \item 获取allocate属性的方式和性能
 \end{compactenum}
 
 \subsection{分配卷空间}
+
 \subsection{unmap卷空间}
 
 \subsection{切换卷控制器}
