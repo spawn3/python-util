@@ -1,7 +1,76 @@
 \chapter{导言}
 
-流程，方法和工具
+团队
 
-领域模型
+\section{人}
 
-基础库
+后续LICH代码维护和开发模式，可称之为\hl{“分进合击”}。
+所谓分进，指的是维护工作分层分模块，责任到人，平时通过串讲讨论等多种沟通形式，进行知识总结/分享；
+所谓合击，指的是开发新功能时，组成多人小组，联合设计/开发，提高协同能力，避免孤军作战。
+
+从组织结构上来说，进一步分为开发组和架构组，在共同目标之下，承担职责，协同作战。
+
+自我驱动，开放进取，集中优势，协同进化
+
+\begin{shadequote}
+兵无选锋曰北
+\end{shadequote}
+
+\subsection{模块及其负责人}
+
+产品，场景及其生态
+
+\begin{longtable}{|c|c|c|}
+\caption{LICH模块和责任人}\\
+\hline
+    & 模块 & 责任人\\
+\hline\hline
+\endhead
+
+\multirow{2}*{管理层} & Monitoring & 王少飞 \\
+                      & Alert &   \\
+\hline
+
+\multirow{2}*{应用层} & OpenStack & \\
+                      & VAAI &   \\
+\hline
+
+\multirow{2}*{接口层} & ISCSI &  \\
+                      & FC    &  \\
+                      & RDMA/SPDK &  \\
+\hline
+
+\multirow{5}*{特性层} & Recovery &  \\
+                      & Balance &   \\
+                      & Thin Provisioning & \\
+                      & QoS &   \\
+                      & Cache* &  \\
+                      & Tier &  \\
+                      & EC* &  \\
+                      & Backup &  \\
+                      & DR &  \\
+                      & Dedup &  \\
+                      & Compression &  \\
+\hline
+
+\multirow{7}*{引擎层} & Resource(CPU/Memory/Disk/Network) &  \\
+                      & Cluster(Pool/Volume/Snapshot) & \\
+                      & Metadata Management &   \\
+                      & RAS(Reliability/Availability/Serviceability) &  \\
+                      & Performance &   \\
+                      & Extentablity &   \\
+\hline
+
+\multirow{4}*{标准库} & Data Structures &  \\
+                      & Algorithm &   \\
+                      & ... &   \\
+\hline
+\end{longtable}
+
+\section{事}
+
+% 流程，方法和工具
+
+% 领域模型
+
+% 基础库

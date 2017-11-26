@@ -6,6 +6,9 @@
 \usepackage{xeCJK}
 \usepackage[utf8]{inputenc}
 
+% load paralist before enumitem
+\usepackage{paralist}
+
 \usepackage{hyperref}
 \hypersetup{pdftex,colorlinks=true,allcolors=blue}
 \usepackage{hypcap}
@@ -25,6 +28,8 @@
 \usepackage{fancybox}
 \usepackage{tcolorbox}
 \usepackage{enumitem}
+\usepackage{multirow}
+\usepackage{longtable}
 
 \usepackage{indentfirst}
 
@@ -42,6 +47,22 @@
 \usepackage{graphicx}
 \usepackage{framed}
 
+\newenvironment{enumbox}[0]{
+    \begin{tcolorbox}
+    \begin{compactenum}
+} {
+    \end{compactenum}
+    \end{tcolorbox}
+}
+
+\newenvironment{itembox}[0]{
+    \begin{tcolorbox}
+    \begin{compactitem}
+} {
+    \end{compactitem}
+    \end{tcolorbox}
+}
+
 \newcommand*\openquote{\makebox(25,-22){\scalebox{5}{``}}}
 \newcommand*\closequote{\makebox(25,-22){\scalebox{5}{''}}}
 \colorlet{shadecolor}{Azure}
@@ -58,7 +79,7 @@
 
 
 \title{成长}
-\author{董冠军}
+\author{炼金术士}
 \date{\today}
 
 % \bibliographystyle{plain}
@@ -69,58 +90,6 @@
 \maketitle
 \tableofcontents
 
-\section{导言}
-
-研判形势，淬炼心法，有所为，有所不为，乃至无为而无不为。
-
-\begin{shadequote}
-
-    道生一，一生二，二生三，三生万物。\\
-    道生之，德蓄之，物形之，势成之。
-\end{shadequote}
-
-精一之学，体用兼备。
-\begin{shadequote}
-
-    天地之道，可一言而尽也：其为物不二，则其生物不测。\\
-    天下之动，贞夫一者也。\\
-    圣人抱一以为天下式。\\
-    恒以一德。
-\end{shadequote}
-
-太极哲学，双线法则，圆点哲学，一分为三，提供了诸多值得反复体味的命题。
-
-一，切己言之，就是事业，须更上一层楼。一是整体，是根据地，是不间断，也是突破点。
-
-博厚，高明，悠久。
-
-空灵之境，有无相生，有生于无。空非空寂，众缘所起，云行雨施，品物流行。
-
-太极本无极。
-
-上溯，万法归一，一归空。
-
-五轮书，地水火风空。
-
-建立自我，追求无我，是逆向工程。下学而上达。
-
-\section{战略，或道}
-
-\section{方法谈}
-
-爱因斯坦说过这句话：我们不能用制造问题时同一水平的思维来解决问题。也许他意味着我们需要摆脱与我们对一个问题有关的消极的看法。如果我们对问题本身太投入，那么我们永远无法越过这个局面。
-
-在一本叫“治愈与复原”中，David R. Hawkins详细阐述了这一点。他说，“问题最好不要在他们发生的同一水平上解决，而是在他们的上一个阶级上解决...通过超越他们，从更高的角度看待问题，问题很容易迎刃而解。
-较高层次上，由于这种观点的转变，问题会自动解决，否则人们可能会看不到任何的问题。”
-
-很多时候，我们面对一个问题时，总会把精力集中在问题上，一直问怎么“解决”呢？我们可能最终会走入死角，沮丧。
-因为我们似乎找不到很好的解决办法。无论如何，不要把精力集中在问题本身上。花几分钟时间，花费你的时间和精力来正面地解析。
-我们无法控制经常会有事情出现的，不要浪费时间担心这些事情；只花时间在你可以改变或控制的事情上。
-
-\subsection{80/20规则}
-\subsection{双线法则}
-\subsection{黄金圈法则}
-
-\section{产品的世界}
+\include{intro}
 
 \end{document}

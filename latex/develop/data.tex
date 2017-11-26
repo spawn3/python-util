@@ -1,20 +1,44 @@
 \chapter{核心数据结构}
 
-\section{ETCD}
+计算机程序的构造和解释，从数据结构开始理解软件。
 
-集群状态
+\section{卷}
+
+\subsection{Thin Provisioning}
+
+存入fileinfo，xattr有点不便
+
+创建的快照和基于快照clone出的卷，都是精简配置，与原卷是否是精简配置无关。
+
+在卷迁移和复制的具体实现中，用到了快照和克隆。此时，需要保留原卷相关属性。
+
+\subsection{扩展属性}
+
+\section{快照}
+
+快照是一特殊的卷，克隆也是。卷，快照，克隆从数据组织上基本一致，支持的部分操作有所不同。
+
+目前快照实现无数据索引，导致rollback，delete，read等操作性能低下。
 
 \section{元数据管理}
 
 对象标识和寻址机制
 
-\section{SQLITE}
+\subsection{SQLITE}
+
+索引
+
+批处理
 
 异步化
 
-\section{DISK BITMAP}
+\subsection{DISK BITMAP}
 
 空间分配器
+
+\section{ETCD}
+
+集群状态
 
 \section{LEASE}
 
@@ -22,25 +46,25 @@
 
 副本数据一致性
 
+当重启一个节点的时候，clock文件可能丢失，引发数据检查和修复过程，降低系统整体性能。
+
 \section{MSGQUEUE}
 
 离线消息处理
 
 异步化，是否可提取出异步化框架？
 
-\section{控制器缓存}
+理想情况下，拔出的盘，回收完成后，其disk bitmap大小为1，sqlite无关联记录。
+
+\section{Cache}
+
+\subsection{控制器缓存}
 
 采用引用计数技术。
 
 控制器切换和平衡
 
-\section{副本缓存}
-
-\section{扩展属性}
-
-\section{快照}
-
-\section{克隆卷}
+\subsection{副本缓存}
 
 \section{CORE AND Scheduler}
 

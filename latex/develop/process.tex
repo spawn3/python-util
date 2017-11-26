@@ -11,15 +11,45 @@
 \item 过程运行在协程内，还是协程外？
 \item 过程是否并发安全？
 \item 过程执行时间是否过长，且中间无中断？比如有大循环，有同步IO操作等
+\item 一定要检查加锁的返回值，返回值失败，不能unlock，从而保证加锁解锁的对称性
+\item 资源的分配和释放，使用goto方法，用stack方式管理
 \end{compactenum}
+
+实体有复合和简单之分。简单实体的基本操作包括增删改查，复合实体在此基础上多出了子节点的相关操作。
+
+按一颗树来组织，简单实体是叶子节点，复合实体是中间节点或根节点。
+
+\section{集群}
+
+\subsection{加入节点}
+\subsection{删除节点}
 
 \section{存储池}
 
 \subsection{创建存储池}
 
+\subsection{删除存储池}
+
 \subsection{添加磁盘}
 
 % \subsection{添加缓存盘}
+
+\subsection{拔盘}
+
+拔盘会产生一系列的影响，如IO抖动，控制器主副本丢失，存储池降级等。
+与读写，控制器切换，QoS策略，恢复，平衡等过程都有密切关系。
+
+\begin{compactenum}
+\item 更高效的检测方法
+\item 何时关闭fd，应避免fd重用造成的影响
+\item 如何降低check过程对性能的干扰
+\item lich health clean是否可以自动化
+\item 盘会不会重新加入，从而造成副本数增多
+\item RAID的影响，干扰别的盘，造成IO中断
+\item rescan，不必等到下次恢复周期
+\end{compactenum}
+
+diskid字段上加索引
 
 \subsection{空间分配}
 
@@ -30,13 +60,6 @@ admin维护着集群的拓扑结构。
 分两层：副本的节点位置和副本的磁盘位置。
 
 注意多个chunk的局部性对性能和恢复性能的影响。
-
-\subsection{拔盘}
-
-拔盘会产生一系列的影响，如IO抖动，控制器主副本丢失，存储池降级等。
-与读写，控制器切换，QoS策略，恢复，平衡等过程都有密切关系。
-
-\subsection{删除存储池}
 
 \section{卷}
 
@@ -52,16 +75,35 @@ admin维护着集群的拓扑结构。
 \item 获取allocate属性的方式和性能
 \end{compactenum}
 
-\subsection{分配卷空间}
-
-\subsection{unmap卷空间}
-
 \subsection{切换卷控制器}
 
 \begin{compactenum}
 \item 源端volume\_proto是怎么回收的？
 \item lease机制怎么影响本过程？
 \end{compactenum}
+
+\subsection{分配卷空间}
+
+局部性
+
+\subsection{unmap卷空间}
+
+\subsection{resize}
+
+\subsection{rename}
+
+\subsection{拷贝}
+
+前置条件和后置条件
+
+不变式
+
+考虑在server端做！
+
+\subsection{迁移}
+
+\subsection{write}
+\subsection{read}
 
 \section{快照}
 
@@ -75,8 +117,24 @@ admin维护着集群的拓扑结构。
 
 \section{后台任务}
 
+\subsection{监控磁盘状态}
+
 \subsection{恢复}
+
+局部性
+
+恢复性能与批量分配有关。如果连续的chunk，被分配到部分节点的部分盘上，就会影响到恢复性能。
+
+恢复是按卷顺序扫描，调整该顺序，可以提高并行度。
 
 \subsection{平衡}
 
 平衡分控制器平衡和数据平衡。
+
+\subsection{回收卷}
+
+\subsection{回收快照}
+
+\subsection{恢复快照}
+
+\subsection{FLAT卷}
