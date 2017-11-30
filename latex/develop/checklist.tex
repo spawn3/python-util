@@ -1,0 +1,75 @@
+\chapter{LICH系统故障排查检查表}
+
+\section{故障诊断}
+
+故障诊断要结合集群和节点状态，core，日志，硬件，数据等因素。
+
+\subsection{检查集群健康状态}
+
+\begin{lstlisting}
+# 节点列表，检查latency，uptime, nid等
+lich list -v
+
+# 节点，存储池和容量
+lich stat
+
+# 检查恢复状态
+lich health
+\end{lstlisting}
+
+\subsection{检查ETCD}
+
+\begin{lstlisting}
+# etcd状态
+etcdctl ls -r
+
+# 版本
+\end{lstlisting}
+
+\subsection{检查系统时间}
+
+\subsection{检查lichd版本}
+
+\subsection{检查卷控制器的平衡性}
+
+\begin{lstlisting}
+# 节点间平衡
+lich.balance --scan
+lich.balance --balance
+
+# 节点内core平衡
+\end{lstlisting}
+
+\subsection{查看CORE}
+
+\begin{lstlisting}
+./lscore.sh
+\end{lstlisting}
+
+\subsection{查看日志}
+
+必要时，开启backtrace
+
+必要时，开启DBUG日志等级
+
+\subsection{检查硬件和操作系统状态}
+
+CPU，内存，磁盘和网络
+
+\subsubsection{磁盘分区满}
+
+\lstinputlisting{code/du.sh}
+
+%\begin{verbatim}
+%TMP='/';for i in `/bin/ls $TMP`; do du -sh $TMP/$i; done
+%\end{verbatim}
+
+\subsection{检查数据一致性}
+
+节点内sqlite/disk bitmap一致性检查
+
+\begin{lstlisting}
+python diskcheck.py --scan
+\end{lstlisting}
+
+chunk副本一致性检查
