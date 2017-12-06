@@ -30,6 +30,11 @@ etcdctl ls -r
 
 \subsection{检查lichd版本}
 
+\subsection{检查网络服务}
+
+检查网络服务：ssh，ssh会影响到很多关键过程。
+如果ssh连接过慢，引起超时异常。
+
 \subsection{检查卷控制器的平衡性}
 
 \begin{lstlisting}
@@ -73,3 +78,13 @@ python diskcheck.py --scan
 \end{lstlisting}
 
 chunk副本一致性检查
+
+\subsection{检查性能问题}
+
+节点延时
+
+clock文件丢失
+
+恢复任务
+
+QoS设定

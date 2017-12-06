@@ -64,6 +64,13 @@ admin维护着集群的拓扑结构。
 
 \section{卷}
 
+卷属性：
+\begin{lstlisting}
+- 副本数
+- 精简配置
+- 当前链接
+\end{lstlisting}
+
 \subsection{创建卷}
 
 \subsection{删除卷}
@@ -76,6 +83,44 @@ admin维护着集群的拓扑结构。
 \item 获取allocate属性的方式和性能
 \end{compactenum}
 
+\subsection{分配卷空间}
+
+局部性
+
+\subsection{unmap卷空间}
+
+\subsection{查询卷属性}
+
+\subsection{计算卷md5sum}
+
+存在不能返回的情况
+
+\subsection{resize}
+
+扩容，不允许缩容
+
+\subsection{rename}
+
+前置条件：不能跨存储池
+
+\subsection{拷贝}
+
+两种实现方式：读写，基于快照
+
+考虑在server端做！
+
+可控的并发度
+
+前置条件和后置条件
+
+不变式
+
+\subsection{迁移}
+
+同池迁移，同rename
+
+跨池迁移，前置条件
+
 \subsection{切换卷控制器}
 
 \begin{compactenum}
@@ -83,27 +128,8 @@ admin维护着集群的拓扑结构。
 \item lease机制怎么影响本过程？
 \end{compactenum}
 
-\subsection{分配卷空间}
-
-局部性
-
-\subsection{unmap卷空间}
-
-\subsection{resize}
-
-\subsection{rename}
-
-\subsection{拷贝}
-
-前置条件和后置条件
-
-不变式
-
-考虑在server端做！
-
-\subsection{迁移}
-
 \subsection{write}
+
 \subsection{read}
 
 \section{快照}
