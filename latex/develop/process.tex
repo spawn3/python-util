@@ -20,6 +20,23 @@
 
 按一颗树来组织，简单实体是叶子节点，复合实体是中间节点或根节点。
 
+事务分析：
+\begin{compactenum}
+\item 可串行化(两阶段锁，树协议)
+\item 事务日志：持久化每一个操作，包括必须的上下文信息
+\item 重启时，REDO/UNDO(原子性)
+\item 为减少需要REDO的操作，记录检查点
+\end{compactenum}
+
+if-then/what-if假设分析：
+\begin{compactenum}
+\item 资源管理的对称性（分配/释放）
+\item 如果此处发生故障，会如何？容错
+\item 如果有多个task进入，会如何？并发
+\item 会有什么不良影响吗？safety
+\item 过程能完成吗？liveness
+\end{compactenum}
+
 \section{集群}
 
 \subsection{加入节点}
