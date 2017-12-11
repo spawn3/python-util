@@ -9,16 +9,25 @@
 \begin{compactenum}
 \item 必须正确处理过程的返回值。
 \item 一定要检查加锁的返回值，返回值失败，不能unlock，从而保证加锁解锁的对称性
+\item 资源的分配和释放，使用goto方法，用stack方式管理
 \item 过程运行在协程内，还是协程外？
 \item 变量作用域，在作用域以外访问变量
 \item 过程是否并发安全？
 \item 过程执行时间是否过长，且中间无中断？比如有大循环，有同步IO操作等
-\item 资源的分配和释放，使用goto方法，用stack方式管理
 \end{compactenum}
 
 实体有复合和简单之分。简单实体的基本操作包括增删改查，复合实体在此基础上多出了子节点的相关操作。
 
 按一颗树来组织，简单实体是叶子节点，复合实体是中间节点或根节点。
+
+if-then/what-if假设分析：
+\begin{compactenum}
+\item 资源管理的对称性（分配/释放, 资源包括fd，lock，malloc等）
+\item 如果此处发生故障，会如何？容错
+\item 如果有多个task进入，会如何？并发
+\item 会有什么不良影响吗？safety
+\item 过程能完成吗？liveness
+\end{compactenum}
 
 事务分析：
 \begin{compactenum}
@@ -26,15 +35,6 @@
 \item 事务日志：持久化每一个操作，包括必须的上下文信息
 \item 重启时，REDO/UNDO(原子性)
 \item 为减少需要REDO的操作，记录检查点
-\end{compactenum}
-
-if-then/what-if假设分析：
-\begin{compactenum}
-\item 资源管理的对称性（分配/释放）
-\item 如果此处发生故障，会如何？容错
-\item 如果有多个task进入，会如何？并发
-\item 会有什么不良影响吗？safety
-\item 过程能完成吗？liveness
 \end{compactenum}
 
 \section{集群}
@@ -180,12 +180,18 @@ admin维护着集群的拓扑结构。
 
 QoS，slow start
 
+恢复要能有效处理多种故障情况，做到高效及时，QoS。
+
 \subsection{平衡}
 
 平衡分控制器平衡和数据平衡。
 
 卷在节点间和节点内的平衡，节点内core间平衡，可以引入一hash table来解决，
 带来的问题是什么？可以容易地克服吗？
+
+通过迁移控制器来实现卷在节点和corenet上的平衡。每个corenet指的是各个节点上具有相同core hash的core组成的网络。
+
+平衡算法要保证输出的稳定性，分两阶段：定位和迁移。定位阶段确定所有卷控制器的位置，每个卷最多迁移一次。
 
 \subsection{回收卷}
 
@@ -204,3 +210,20 @@ flat性能分析：读，分配，写多个阶段。能否批处理？并发度�
 删除卷
 
 因为table2的写入特性，顺序处理各个chunk，并发度不高。
+
+\subsection{存储池状态}
+
+\begin{compactitem}
+\item Available
+\item Degraded
+\item Readonly
+\item Unavailable
+\end{compactitem}
+
+异步处理
+
+cron后台执行一定的策略，如nagios等监控系统，处理结果放入/dev/shm
+
+时间戳
+
+pending状态
