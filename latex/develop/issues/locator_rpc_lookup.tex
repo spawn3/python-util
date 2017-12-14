@@ -1,0 +1,28 @@
+\chapter{Issues}
+
+\section{Locator RPC}
+
+误判，返回ENOENT。经诊断发现，一个节点返回了多次结果，client没有正确处理这种情况。
+
+server端收到从两个网卡上收到两个数据包。
+
+请求携带有集群uuid和请求uuid，需要进行匹配。
+
+诊断工具：
+\begin{compactitem}
+\item nmap -sU 192.168.222.116 -p 20915 -Pn
+\item tcpdump and wireshark
+\item iptables
+\item systemtap
+\end{compactitem}
+
+网络拓扑，bond，路由器转发规则，pool工作原理
+
+诊断问题时，抓包和systemtap可以减少log的使用。系统要能安装所需诊断工具。
+
+解决方法：client端过滤返回结果，统一uuid的只接收一次。
+
+相关问题：
+
+重入对广播的影响
+
