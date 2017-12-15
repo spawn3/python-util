@@ -168,7 +168,6 @@
 \usepackage[simplified]{pgf-umlcd}
 
 
-
 \title{LICH开发者指南}
 \author{董冠军}
 \date{\today}
@@ -178,15 +177,50 @@
 \maketitle
 \tableofcontents
 
-\include{checklist}
 \include{intro}
-\include{tool}
+
+RAS
+
+多快好省
+
 \include{model}
+
+\part{硬件抽象层}
+\include{hal}
+
+\part{存储引擎层}
 \include{data}
 \include{process}
 \include{runtime}
+
+% recovery, balance, gc
+
+\part{存储特性层}
+\include{thin}
+\include{qos}
+\include{snapshot}
+\include{ec}
+\include{cache}
+\include{tier}
+\include{dr}
+
+\part{存储协议层}
+\include{iscsi}
+\include{nbd}
+
+\part{公共构造块}
 \include{library}
-\include{impl}
+
+\part{管理和应用}
+
+\include{ump}
+\include{openstack}
+\include{vmware}
+
+\part{工具和流程}
+\include{checklist}
 \include{faq}
+\include{tool}
+\include{impl}
 
 \end{document}
