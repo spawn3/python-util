@@ -40,6 +40,7 @@ if-then/what-if假设分析：
 \section{集群}
 
 \subsection{加入节点}
+
 \subsection{删除节点}
 
 \section{存储池}
@@ -52,7 +53,7 @@ if-then/what-if假设分析：
 
 % \subsection{添加缓存盘}
 
-\subsection{拔盘}
+\subsection{删除磁盘}
 
 拔盘会产生一系列的影响，如IO抖动，控制器主副本丢失，存储池降级等。
 与读写，控制器切换，QoS策略，恢复，平衡等过程都有密切关系。
@@ -78,6 +79,8 @@ admin维护着集群的拓扑结构。
 分两层：副本的节点位置和副本的磁盘位置。
 
 注意多个chunk的局部性对性能和恢复性能的影响。
+
+\section{目录}
 
 \section{卷}
 

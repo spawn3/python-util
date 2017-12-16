@@ -168,7 +168,7 @@
 \usepackage[simplified]{pgf-umlcd}
 
 
-\title{LICH开发者指南}
+\title{LICH技术指南}
 \author{董冠军}
 \date{\today}
 
@@ -183,30 +183,32 @@ RAS
 
 多快好省
 
-\include{model}
-
 \part{硬件抽象层}
 \include{hal}
 
 \part{存储引擎层}
-\include{data}
+\include{model}
+\include{meta}
 \include{process}
+\include{data}
 \include{runtime}
 
-% recovery, balance, gc
+% malloc/gc, recovery, balance
 
 \part{存储特性层}
 \include{thin}
-\include{qos}
-\include{snapshot}
 \include{ec}
 \include{cache}
 \include{tier}
+\include{qos}
+\include{snapshot}
 \include{dr}
 
 \part{存储协议层}
 \include{iscsi}
 \include{nbd}
+
+% RDMA, SPDK
 
 \part{公共构造块}
 \include{library}
@@ -220,6 +222,7 @@ RAS
 \part{工具和流程}
 \include{checklist}
 \include{faq}
+\include{problem}
 \include{tool}
 \include{impl}
 
