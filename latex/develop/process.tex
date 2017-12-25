@@ -37,6 +37,11 @@ if-then/what-if假设分析：
 \item 为减少需要REDO的操作，记录检查点
 \end{compactenum}
 
+coroutine
+\begin{compactenum}
+\item 协程里不能出现同步io调用，如write等。
+\end{compactenum}
+
 \section{集群}
 
 \subsection{加入节点}
@@ -198,6 +203,9 @@ QoS，slow start
 通过迁移控制器来实现卷在节点和corenet上的平衡。每个corenet指的是各个节点上具有相同core hash的core组成的网络。
 
 平衡算法要保证输出的稳定性，分两阶段：定位和迁移。定位阶段确定所有卷控制器的位置，每个卷最多迁移一次。
+
+原则：推荐存储池内故障域大于副本数。否则，如果各个故障域的容量不均衡的话，
+因为要优先遵循故障域规则，导致平衡无法工作。
 
 \subsection{回收卷}
 
