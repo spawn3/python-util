@@ -1,0 +1,36 @@
+\chapter{灾备}
+
+目前收集到的信息：
+
+\begin{compactenum}
+\item 方案1：forward 控制流和数据流，故障情况下异步传输
+\item 方案2：基于libiscsi和iscsi协议（张胜玉提供，以前做过相关功能）
+\item 方案3：老王提供的方案，先写入远程站点，故障情况下，从本地站点全量flush到远程站点
+\end{compactenum}
+
+中科院魏征当时实现了一部分，没有完成，类似方案1，考虑这部分代码是否可以复用。
+
+主要的困难：
+\begin{compactenum}
+\item 选择网络拓扑，传输协议，复制策略
+\item 控制流/数据流的保序
+\item 故障处理
+\item failover
+\item 传输性能
+\end{compactenum}
+
+\begin{lstlisting}
+我解释下iscsi的优势：
+1. 我们系统本身就支持了iscsi server，因此无需再去实现一套server，实现一套server需要额外的代码，关键是对应的管理功能
+2. 我们可以利用scsi协议预留给厂商的指令，封装一些控制指令（比如建立快照等）很好保证时序。
+3. 有利于将来扩展，相比以上两点，这个重要性更高，因为我们的系统对外不管是iscsi，iser还是光纤，
+最后里面都是要走scsi协议，一些scsi协议需要redirect到远端。如果不用这个方案，需要每个特殊命令单独实现一个同步指令。
+
+控制流/数据流的保序，iscsi本身有时序处理
+- 故障处理   - failover， 发生中断要进行本地记录增量日志，待恢复后将数据刷过去。
+- 传输性能， iscsi协议本身无此瓶颈。
+\end{lstlisting}
+
+业务流量和复制流量隔离
+
+多复制流量多通路

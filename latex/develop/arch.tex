@@ -1,0 +1,51 @@
+\chapter{软件架构}
+
+\section{ETCD}
+
+\section{Admin Node}
+
+问题集：
+\begin{compactenum}
+\item admin承担什么职责？
+\item 怎么选举出admin节点？
+\item admin是否成为系统瓶颈？可扩展性如何？
+\item 什么会导致admin发生切换？admin切换会影响到什么？
+\end{compactenum}
+
+管理vip。
+
+diskmap：admin维护每个节点的nodetable结构和每个pool的diskmap结构。
+
+节点下线，nodetable和diskmap如何随之而变化？参考nodetable\_offline函数。
+检查到网络错误，会触发该过程。
+
+lease admin: controller与admin获取lease，并周期性renew。
+
+管理后台任务
+
+\section{Normal Node}
+
+normal以心跳方式向admin注册，并周期性地更新节点信息，代码在node\_srv.c。
+
+可以成为各种controller。为了保证controller的唯一性，采用了lease机制。
+一个卷的所有操作都经过controller执行，包括元数据操作和IO操作。
+
+在iscsi层，通过core\_attach关联卷到core上，进入scheduler，所有IO消息都通过corerpc进行。
+
+真实的io采用aio机制，由外部线程执行。sqlite，rpc，disk allocator都采用了异步模式。
+core thread和外部线程通过队列对象通信。总而言之，core thread不能执行同步或堵塞代码，
+如write，fsync等，否则会严重影响调度器性能。(倾向于不区分本地和远程，利用rpc timeout特性)
+
+远程更新元数据，是通过rpc机制，同步写入；远程更新raw数据，采用了corerpc机制。
+
+元数据的分配和回收，开销大，且易错。需要多次io，
+如果中间插入故障点，可能会导致数据不一致。
+
+本地空间管理：采用sqlite管理本地磁盘空间。replica cache占用大量内存。
+
+tier和cache属于节点内特性，另外，全局cache也是需要的。
+
+writeback and writethrough
+
+引用计数。fd，pool，cache entry。在一个过程使用某个资源或结构体的时候，
+可能被另一并发过程销毁，导致内存错误。fd重用会导致严重后果。

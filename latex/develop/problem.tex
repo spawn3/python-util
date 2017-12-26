@@ -1,0 +1,104 @@
+\chapter{问题集}
+
+任务管理：
+\begin{lstlisting}
+每个节点启动若干core线程，并监听17902端口。
+
+在iscsi层，core\_attach加入core的poll模式。即进入core线程进行处理。
+通过corerpc与不同节点上的core进行通信。corerpc会把相关请求发送到该节点具有相同core hash的core上。
+两个节点上两个core有sock连接。
+
+对每一连接，按core hash到相应的core（包括corenet和corenet\_mapping）
+
+每个core监听独立的epool fd，把该连接socket关联到对应core的epoll fd上即可。
+
+rpc的worker\_t和corerpc的core\_t具有相似性，都包括epoll fd和scheduler。
+coreprc通过corenet管理epoll fd，用来监视跟踪的sd的io就绪状态。
+accept建立连接后，即把相应sd加入epoll的兴趣列表。
+\end{lstlisting}
+
+内存：
+\begin{lstlisting}
+hugepage
+
+mbuffer
+\end{lstlisting}
+
+磁盘：
+\begin{lstlisting}
+\end{lstlisting}
+
+网络层：
+\begin{lstlisting}
+为什么有多种RPC机制？
+
+corenet是各节点上相同core hash的core构成的网络？
+
+为什么需要vnode\_location？与md\_map\_getsrv不是相同的吗？
+
+命令行工具通过rpc与lichd通信，不能位于fusionstor集群之外。命令行工具进程具有什么nid？
+命令行进程具有空的nid，lichbd不依赖于nid就可以进行通信。
+集群外的情况没考虑，涉及版本和通信的二进制兼容性问题。
+
+netable什么用？管理节点间的网络连接，同时收集latenccy信息，用于节点间的负载均衡。
+
+如何采集多副本读负载均衡所需的信息？
+
+rpc table用于匹配request和reply，如果reply找不到相应的request，则丢弃。
+
+net\_islocal会被取代，本地通信也用rpc机制，主要是因为rpc有timeout，可以发现一些异常情况。
+
+heartbeat是如何工作的？频率如何？在建立连接的时候，启动hb timer。
+
+minirpc采用UDP，进行一些简单的通信，corerpc用于io数据流量，rpc用于一般的集群通信元数据流量。
+
+\end{lstlisting}
+
+分布式：
+\begin{lstlisting}
+lease能用etcd替代吗？
+
+VC什么时候会发生切换？PC呢？VC切换后iscsi session如何变化？切换需要多久才能完成？
+
+admin何时发生切换？会导致所有lease失效？
+\end{lstlisting}
+
+元数据：
+\begin{lstlisting}
+谁负责创建存储池的root目录？/目录下有iscsi，nbd等二级目录。
+
+区分存储池和目录，区分内存结构和磁盘结构。
+\end{lstlisting}
+
+ssd cache
+\begin{lstlisting}
+cache容量不计入有效容量，tier则会计入。
+
+模拟cache的方法，导致ssd盘首先被消耗完。
+
+界面上没有节点级的磁盘使用量和使用率。
+\end{lstlisting}
+
+内存cache
+\begin{lstlisting}
+controller cache
+replica cache
+
+以及各种mapping关系，如net table，corerpc mapping等。
+\end{lstlisting}
+
+架构方面：
+\begin{lstlisting}
+
+IO中断与代码的什么方面有关？如何优化？
+
+客户端任务派遣模型: 1对1，1对m。
+
+是否需要引入MQ？哪些地方用得着？
+
+AFA是什么？RDMA，iSER，SPDK怎么理解？
+
+与ceph的全方位对比？
+
+如何提高系统的可视性和可诊断性？
+\end{lstlisting}
