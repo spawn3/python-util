@@ -6,11 +6,10 @@
 
 文件描述符，指针在使用过程中被别的过程清理掉了，会导致严重后果。
 
+引用计数。fd，pool，cache entry。在一个过程使用某个资源或结构体的时候，
+可能被另一并发过程销毁，导致内存错误。fd重用会导致严重后果。
+
 \section{UDP Broadcast}
-
-\section{Lease}
-
-卷控制器发生切换，A->B。A上依然持有lease且能renew成功，B无法持有lease。
 
 \section{ARP}
 
@@ -20,6 +19,20 @@ lich\_arp.py
 
 tools/check\_client\_ip.sh
 
+\section{Lease}
+
+卷控制器发生切换，A->B。A上依然持有lease且能renew成功，B无法持有lease。
+
 \section{vnode cache}
 
 扩容后，iscsi重连，等10s后才能感知到。
+
+\section{数据正确性校验}
+
+meta chunk里每一项都封装在crc，magic，size首部，用于校验数据正确性。
+
+会影响最大副本数。
+
+\section{RETRY}
+
+retry总时间大于切换时间和lease失效时间，结果才是可靠的。

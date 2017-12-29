@@ -2,6 +2,8 @@
 
 etcd，存储池，目录，卷，快照，映射
 
+结合lsv，row snapshot考虑当前的元数据管理，看看会有哪些瓶颈？
+
 \section{元数据}
 
 最重要是chkinfo结构体，表示一个chunk的若干属性，包括副本位置信息。
@@ -41,9 +43,21 @@ sqlite错误记录，指向无效的chunk？
 
 chkstat.chkstat\_clock与replica.clock相等时，说明本次IO写入完成。
 
-写meta和raw不同，与此有关？
-
 写入过程，副本上的io更新序，wlist。
+
+chunk.clock与replica.clock有双向同步的关系。一开始，chunk.clock=0，随着io.clock传播到各副本。
+各副本按io.clock的递增顺序，依次完成每个io。重新加载时，通过fully过程，选择一clean副本，
+并令chunk.clock=replica.clock，并以该副本为基准，对比修复余下的副本。在写入都正常完成的情况下，
+chunk.clock恒等于各副本clock。
+
+各副本写入前，let dirty=1；写入完成后，let dirty=0。通过此标记位来跟踪clock状态。
+
+RM就地编辑，没有记录日志，所以无法应用REDO/UNDO恢复策略。
+对已应答的记录，执行REDO策略；对未应答的记录，执行UNDO策略。
+
+更新chunk.clock后，如果没有成功地传播到副本上，则该chunk上的写不可继续。
+
+\hl{元数据采用与raw一样的一致性等级，是否合理}？ 写meta和raw不同，与此有关？
 
 \subsection{若干故障情况}
 

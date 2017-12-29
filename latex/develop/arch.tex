@@ -14,7 +14,10 @@
 
 管理vip。
 
+nodetable: 每个存储池下有若干节点。节点状态有可写，只读，删除中等。
+
 diskmap：admin维护每个节点的nodetable结构和每个pool的diskmap结构。
+每个节点有存储池的磁盘集合，上报到admin后，构成存储池，故障域，节点（total，used）的层次结构。
 
 节点下线，nodetable和diskmap如何随之而变化？参考nodetable\_offline函数。
 检查到网络错误，会触发该过程。
@@ -47,5 +50,8 @@ tier和cache属于节点内特性，另外，全局cache也是需要的。
 
 writeback and writethrough
 
-引用计数。fd，pool，cache entry。在一个过程使用某个资源或结构体的时候，
-可能被另一并发过程销毁，导致内存错误。fd重用会导致严重后果。
+\hl{节点两两之间的连接管理}：net\_table。连接断开后调用注册的reset handler。
+连接之上注册有心跳过程，可以及时更新连接状态，提高感知网络故障的及时性。
+% 读副本时利用这个信息，进行负载均衡处理。
+
+rpc构建与net table之上，加入了request/reply相关逻辑。
