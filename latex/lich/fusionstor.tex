@@ -18,16 +18,19 @@ v5:
 \item disk封装成对象，支持lfs，raw，bluestore，spdk，libnvme，cmb（control memory buffer）
 \end{compactenum}
 
-分布式系统的编程0-4级金字塔模型
+稳定可靠高性能是下一步演进的指导方针，对标solidfire。
 
-运行在tcp上的multi paxos。
+分布式系统的编程0-4级金字塔模型，运行在tcp上的multi paxos。
 
-cpu的执行模型，上下午切换影响性能，破坏局部性。coroutine的上下午切换也有较大开销，但是比线程要小得多。
+整个性能优化的主要思路，一是减少cs开销，二是减少内存copy。
+
+cpu的执行模型，上下文切换影响性能，破坏局部性。coroutine的上下文切换也有较大开销，但是比线程要小得多。
 减少调用嵌套深度和局部变量的使用，有助于提高cpu cache命中率。cache color。
 
 采用pipeline机制，可以降低上下文切换成本。参考tgt。paper：stage。
 
-分析方法和工具：iostat, vmstat, top, perf，lmbench等。
+性能预测：cpu按时间片执行指令序列。用lmbench观察，比如cs过多，且每次cs耗时过久，会验证影响性能。
+cpu的执行，可以看着一个时间轴，或cs，或block，或执行有效指令。各种lock机制会涉及多core同步。
 
 ceph采用了很多的线程，所以单核iops只有1w左右。更多并发并不一定有更大的iops。
 
@@ -37,15 +40,11 @@ spinlock和rwlock的实现方式有所不同，需要深入理解不同之处。
 TLB: hugepage, page fault, malloc不一定分配物理内存，只有在后期使用的时候，才会分配，有可能导致缺页中断。
 calloc会置零分配的内存区域。采用hugepage内存池，有助于解决这些问题。
 
+内存对齐：分配时对齐，或submit时对齐，哪种效率高？
+
 MESI cache一致性协议。
 
-整个性能优化的主要思路，一是减少cs开销，二是减少内存copy。
-
 重要的项目：tgt，kernel，nginx多看。在big picture下的前提下多看。
-
-性能预测：cpu按时间片执行指令序列。用lmbench观察，比如cs过多，且每次cs耗时过久，会验证影响性能。
-cpu的执行，可以看着一个时间轴，或cs，或block，或执行有效指令。各种lock机制会涉及多core同步。
-
-内存对齐：分配时对齐，或submit时对齐，哪种效率高？
+分析方法和工具：iostat, vmstat, top, perf，lmbench等。
 
 与阿里对比：阿里做的较深，多核调度，qos，io稳定性。（这是一个很好的议题）
