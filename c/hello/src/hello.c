@@ -115,5 +115,7 @@ int main(int argc, char **argv) {
         int *pi = malloc(sizeof(int));
         printf("pi %p\n", pi);
 
+        test_basic();
+
         return 0;
 }

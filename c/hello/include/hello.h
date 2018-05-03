@@ -4,5 +4,6 @@
 
 void test_sizeof();
 
+int test_basic();
 
 #endif

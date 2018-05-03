@@ -31,24 +31,24 @@ endfunction()
 set(HELLO_SOURCE_FILES
     src/hello.c
     src/test1.c
+    src/basic.c
     )
 build_exe(hello "${HELLO_SOURCE_FILES}")
 
 
-set(REDIS_SOURCE_FILES
-    src/redis.c)
-build_exe(redis "${REDIS_SOURCE_FILES}")
-target_link_libraries(redis hiredis_vip gdsl)
+#set(REDIS_SOURCE_FILES src/redis.c)
+#build_exe(redis "${REDIS_SOURCE_FILES}")
+#target_link_libraries(redis hiredis_vip gdsl)
 
 set(VALGRIND_SOURCE_FILES
     src/valgrind.c
     )
 build_exe(val "${VALGRIND_SOURCE_FILES}")
 
-set(HASH_SOURCE_FILES src/hash.c)
-build_exe(hash "${HASH_SOURCE_FILES}")
-target_link_libraries(hash gdsl)
+#set(HASH_SOURCE_FILES src/hash.c)
+#build_exe(hash "${HASH_SOURCE_FILES}")
+#target_link_libraries(hash gdsl)
 
-set(RBTREE_SOURCE_FILES src/rbtree.c)
-build_exe(rbtree "${RBTREE_SOURCE_FILES}")
-target_link_libraries(rbtree gdsl)
+#set(RBTREE_SOURCE_FILES src/rbtree.c)
+#build_exe(rbtree "${RBTREE_SOURCE_FILES}")
+#target_link_libraries(rbtree gdsl)

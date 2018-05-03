@@ -1,0 +1,31 @@
+\chapter{提问}
+
+疑问词：5W1H，why，why not？
+
+\section{网络编程}
+
+Connection，Poller，EventLoop是核心概念。一个Connection最多加入一个EventLoop，EventLoop对应一个Poller，
+分离时间到不同的Connection，由该Connection的事件处理程序处理。一个Connection应该具有哪些属性？
+连接的建立，断开，错误当如何处理？
+
+两个节点之间的RPC需要建立连接，有且只有一条连接。
+\begin{compactenum}
+\item 若两节点同时建立连接，每个节点上的netable会增加几项？
+\item nid小的发起连接？
+\end{compactenum}
+
+corerpc时，情况较为复杂。每个节点上有N个core参与，相同编号的core构成corenet。
+一个corenet类似于普通rpc连接管理机制。
+
+\begin{compactenum}
+\item 什么时候用普通rpc，什么时候用corerpc？
+\item 选中几个core参与corerpc，为什么？
+\item 每个节点的polling core数量必须相等吗？
+\item polling core的数量可以动态调整吗？
+\end{compactenum}
+
+故障，TP，snapshot的性能损耗\%分别是多少？
+
+如etcd与存储网一样，有较多的timeout，etcd应该分网而治吗？（管理网，存储网）
+
+降级写+整体掉电会影响数据的顺序一致性，客户端可见IO Error？
