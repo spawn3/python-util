@@ -7,4 +7,4 @@ func Add(a int, b int) int {
 func Add2(a int, b int) (ret int) {
     ret = a + b
     return
-
+}
