@@ -6,25 +6,25 @@
 
 
 int sum1(int *arr, int count, int i) {
-        if (i == count - 1) {
-                return arr[i];
-        } else {
-                return arr[i] + sum1(arr, count, i+1);
-        }
+    if (i == count - 1) {
+        return arr[i];
+    } else {
+        return arr[i] + sum1(arr, count, i+1);
+    }
 }
 
 
 int sum(int *arr, int count) {
-        return sum1(arr, count, 0);
+    return sum1(arr, count, 0);
 }
 
 
 int f1(int a, int b) {
-        return a + b;
+    return a + b;
 }
 
 int f2(int a, int b) {
-        return a - b;
+    return a - b;
 }
 
 
