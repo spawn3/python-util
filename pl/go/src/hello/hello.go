@@ -4,10 +4,10 @@ import (
     "fmt"
     "util"
     "wbuf"
+    "simplemath"
 )
 
-
-func main() {
+func test1() {
     pWbuf := new(wbuf.Wbuf)
     pWbuf.Init()
 
@@ -33,4 +33,35 @@ func main() {
 
     fmt.Printf("add(1, 2) = %d\n", util.Add(1, 2))
     fmt.Printf("add2(1, 2) = %d\n", util.Add2(1, 2))
+}
+
+func testOOP() {
+    b := simplemath.Base{"Base"}
+    f := &simplemath.Foo{10, b}
+
+    fmt.Printf("Name %s\n", f.Name)
+    fmt.Printf("Foo() %s\n", f.Foo())
+    fmt.Printf("Bar() %s\n", f.Bar())
+}
+
+func testSlice() {
+    xs := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+    for k, v := range xs {
+        fmt.Printf("slice %d %d\n", k, v)
+    }
+}
+
+func testMap() {
+    xs := map[string]int{"A": 1, "B": 2, "C": 3}
+
+    for k, v := range xs {
+        fmt.Printf("map %s %d\n", k, v)
+    }
+}
+
+func main() {
+    testSlice()
+    testMap()
+    testOOP()
 }
