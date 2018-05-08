@@ -24,7 +24,6 @@ include_directories(
 
 link_directories(
     /usr/local/lib
-    /usr/lib/x86_64-linux-gnu
     )
 
 function(build_exe name source_files)
