@@ -1,11 +1,16 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 typedef std::vector<int> int_vector;
 
 int test_vector() {
     std::cout << "== TEST VECTOR ==\n";
+
+    const int ci = 1;
+
+    // ci = 2;
 
     int_vector v;
     for (int i=0; i < 10; i++) {
@@ -64,6 +69,21 @@ void test_class() {
     delete p;
 }
 
+void test_except() {
+    std::cout << "== TEST EXCEPT ==\n";
+
+    try {
+        std::vector<int> v{3, 4, 3, 1};
+        int i{v.at(4)};
+    } catch (std::out_of_range &e) {
+        std::cerr << e.what() << std::endl;
+    } catch (std::exception &e) {
+        std::cerr << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Some fatal error\n";
+    }
+}
+
 
 int main(int argc, char **argv) {
     for (int i=0; i < argc; i++) {
@@ -72,6 +92,7 @@ int main(int argc, char **argv) {
 
     test_vector();
     test_class();
+    test_except();
 
     return 0;
 }

@@ -21,15 +21,20 @@ include_directories(
     /usr/local/include
     include
     )
+
 link_directories(
     /usr/local/lib
+    /usr/lib/x86_64-linux-gnu
     )
 
 function(build_exe name source_files)
     add_executable(${name} ${source_files})
 endfunction()
 
-set(HELLO_SOURCE_FILES
-    src/hello.cc
-    )
+set(HELLO_SOURCE_FILES src/hello.cc)
 build_exe(hello "${HELLO_SOURCE_FILES}")
+
+set(LDB_SOURCE_FILES src/ldb.cc)
+add_executable(ldb ${LDB_SOURCE_FILES})
+# target_link_libraries(ldb pthread snappy leveldb)  // ERROR
+target_link_libraries(ldb leveldb pthread snappy)
