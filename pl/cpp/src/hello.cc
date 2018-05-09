@@ -5,11 +5,45 @@
 #include <string>
 #include <stdexcept>
 #include <cassert>
+#include <algorithm>
+#include <functional>
+
+#include "hello.h"
 
 typedef std::vector<int> int_vector;
 
+static inline void test_header(const char *tip) {
+    std::cout << "\n== TEST " << tip << " ==\n";
+}
+
+void test_hello() {
+    assert(hello_sum(1, 1) == 2);
+}
+
+void test_lambda() {
+    test_header(__FUNCTION__);
+
+    std::vector<int> c = {1, 2, 3, 4, 5, 6, 7};
+    int x = 5;
+    c.erase(std::remove_if(c.begin(), c.end(), [x](int n) { return n < x;  }), c.end());
+
+    std::cout << "c: ";
+    std::for_each(c.begin(), c.end(), [](int i){ std::cout << i << ' ';  });
+    std::cout << '\n';
+
+    // the type of a closure cannot be named, but can be inferred with auto
+    // since C++14, lambda could own default arguments
+    auto func1 = [](int i = 6) { return i + 4;  };
+    std::cout << "func1: " << func1() << '\n';
+
+    // like all callable objects, closures can be captured in std::function
+    // (this may incur unnecessary overhead)
+    std::function<int(int)> func2 = [](int i) { return i + 4;  };
+    std::cout << "func2: " << func2(6) << '\n';
+}
+
 int test_vector() {
-    std::cout << "== TEST VECTOR ==\n";
+    test_header(__FUNCTION__);
 
     const int ci = 1;
 
@@ -63,7 +97,7 @@ public:
 };
 
 void test_class() {
-    std::cout << "== TEST CLASS ==\n";
+    test_header(__FUNCTION__);
 
     Person *p = new Student();
     p->aboutMe();
@@ -73,7 +107,7 @@ void test_class() {
 }
 
 void test_except() {
-    std::cout << "== TEST EXCEPT ==\n";
+    test_header(__FUNCTION__);
 
     try {
         std::vector<int> v{3, 4, 3, 1};
@@ -88,7 +122,7 @@ void test_except() {
 }
 
 void test_memory() {
-    std::cout << "== TEST MEMORY ==\n";
+    test_header(__FUNCTION__);
 
     int ret;
     void *ptr;
@@ -115,10 +149,12 @@ int main(int argc, char **argv) {
         std::cout << i << std::endl;
     }
 
+    test_hello();
     test_vector();
     test_class();
     test_except();
     test_memory();
+    test_lambda();
 
     return 0;
 }

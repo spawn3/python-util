@@ -1,5 +1,7 @@
 #include <cassert>
+
 #include "leveldb/db.h"
+#include "hello.h"
 
 void test_ldb() {
     leveldb::DB *db;
@@ -12,5 +14,8 @@ void test_ldb() {
 }
 
 int main() {
+    assert(hello_sum(1, 2) == 3);
+
+    test_ldb();
     return 0;
 }
