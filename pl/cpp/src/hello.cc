@@ -18,6 +18,15 @@ static inline void test_header(const char *tip) {
 
 void test_hello() {
     assert(hello_sum(1, 1) == 2);
+
+    std::string a = "aaa";
+    std::string&& b = std::move(a);
+    std::string c = std::move(b);
+    // std::string&& b = static_cast<std::string&&>(a);
+
+    std::cout << "a = " << a << std::endl;
+    std::cout << "b = " << b << std::endl;
+    std::cout << "c = " << c << std::endl;
 }
 
 void test_lambda() {

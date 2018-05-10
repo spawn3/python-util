@@ -35,6 +35,10 @@ set(HELLO_SOURCE_FILES
     )
 build_exe(hello "${HELLO_SOURCE_FILES}")
 
+set(BPT_SOURCE_FILES
+    src/bpt.c
+    )
+build_exe(bpt "${BPT_SOURCE_FILES}")
 
 #set(REDIS_SOURCE_FILES src/redis.c)
 #build_exe(redis "${REDIS_SOURCE_FILES}")
