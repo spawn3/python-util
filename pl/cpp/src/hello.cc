@@ -29,6 +29,14 @@ void test_hello() {
     std::cout << "c = " << c << std::endl;
 }
 
+void test_constexpr() {
+    const int n = 5;
+    std::array<int, n> v;
+
+    (void) v;
+
+}
+
 void test_lambda() {
     test_header(__FUNCTION__);
 
@@ -54,7 +62,7 @@ void test_lambda() {
 int test_vector() {
     test_header(__FUNCTION__);
 
-    const int ci = 1;
+    // const int ci = 1;
 
     // ci = 2;
 
@@ -121,6 +129,7 @@ void test_except() {
     try {
         std::vector<int> v{3, 4, 3, 1};
         int i{v.at(4)};
+        (void) i;
     } catch (std::out_of_range &e) {
         std::cerr << e.what() << std::endl;
     } catch (std::exception &e) {
@@ -142,6 +151,20 @@ void test_memory() {
     printf("ret %d ptr %p\n", ret, ptr);
 }
 
+int func_args_stack(int a, int b) {
+    printf("a = %d, b = %d\n", a, b);
+    return 0;
+}
+
+int f() {
+    printf("f called\n");
+    return 0;
+}
+
+int g() {
+    printf("g called\n");
+    return 0;
+}
 
 int main(int argc, char **argv) {
     printf("enter main\n");
@@ -164,6 +187,11 @@ int main(int argc, char **argv) {
     test_except();
     test_memory();
     test_lambda();
+    test_constexpr();
+
+    {
+        func_args_stack(f(), g());
+    }
 
     return 0;
 }

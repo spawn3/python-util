@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(hello)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -std=c11 -Wall -Werror")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Werror")
 
 add_definitions(-std=c++11)
 
@@ -33,7 +33,14 @@ endfunction()
 set(HELLO_SOURCE_FILES src/hello.cc)
 build_exe(hello "${HELLO_SOURCE_FILES}")
 
+set(BIT_SOURCE_FILES src/bit.cc)
+build_exe(bit "${BIT_SOURCE_FILES}")
+
 set(LDB_SOURCE_FILES src/ldb.cc)
 add_executable(ldb ${LDB_SOURCE_FILES})
 # target_link_libraries(ldb pthread snappy leveldb)  // ERROR
 target_link_libraries(ldb leveldb pthread snappy)
+
+set(ALGO_SOURCE_FILES src/algo.cc)
+build_exe(algo "${ALGO_SOURCE_FILES}")
+
