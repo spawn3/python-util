@@ -166,14 +166,15 @@ int g() {
     return 0;
 }
 
-int main(int argc, char **argv) {
+/**
+ * argv is a pointer array
+ */
+int main(int argc, char *argv[]) {
     printf("enter main\n");
 
-#if 0
     for (int i=0; i < argc; i++) {
-        std::cout << i << ": " << argv[i] << std::endl;
+        std::cout << i << ": " << &argv[i] << " " << argv[i] << std::endl;
     }
-#endif
 
     int a[] = {1, 2, 3, 4, 5};
 
