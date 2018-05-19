@@ -157,7 +157,7 @@ controller在节点上的分布，controller在core上的分布
 
 当切换控制器的时候，需要控制本地化过程的QoS。
 
-\section{复制}
+\section{复制一致性}
 
 \begin{tabular}{|s|p{6cm}|}
     %\hline
@@ -176,6 +176,19 @@ controller在节点上的分布，controller在core上的分布
 \end{tabular}
 
 恢复和再平衡过程，是怎么工作的？
+
+控制器协调所有IO操作，通过(owner, magic, clock)维护副本一致性。
+owner，magic联合起来，处理controller切换的情况。clock处理一个chunk内所有变更的顺序。
+因为有owner和magic，是否不需要再维护controller的唯一性？
+
+chunk内的更新按clock顺序提交，这样做影响并发度，进一步影响到性能。
+如果不遵循clock序提交，需要有一假设：所有并发任务无重叠，或者是在有重叠的地方按clock串行化。
+上层应用不会提交重叠的IO，内部元数据涉及小IO，比如小于512B的IO，多个更新可能指向同一扇区。
+如果多个副本不按同样的顺序，就会出现数据一致性问题。
+
+在降级写的时候，没有参与的副本标记持久化状态stale，保证在reload的时候，不会被选为权威副本。
+
+网络分区
 
 \section{分层}
 
