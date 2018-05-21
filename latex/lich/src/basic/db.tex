@@ -1,1 +1,45 @@
 \chapter{数据库系统}
+
+从操作系统开始到数据库管理系统，对并发现象的讨论，上升到新的高度。
+硬件提供了基础原子指令，利用这些原子指令封装成并发原语，进一步去实现事物的ACID要求。
+
+\section{事务管理}
+
+详解ACID。
+
+\section{常见并发问题及其分析}
+
+并发访问共享对象，竞态条件
+
+\begin{enumbox}
+\item 过程是否发生了yield，不连续执行？
+\item 临界区有哪些共享对象？
+\item 冲突操作
+\item 如果有多个并发任务重入该过程，会造成什么问题？
+\item 加锁的粒度如何，太大，或太小？
+\item 乱序？
+\item 有无lock free，wait free方案？
+\end{enumbox}
+
+\section{可串行化理论}
+
+冲突
+
+\section{并发设计模式}
+
+范围锁？
+
+意向锁？
+
+\begin{compactitem}
+    \item double check
+    \item fork and join
+    \item pipeline
+    \item half sync, half async
+\end{compactitem}
+
+\section{故障恢复}
+
+REDO
+
+UNDO
