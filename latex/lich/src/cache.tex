@@ -68,9 +68,10 @@ journalling? 优化随机IO。写入WAL即可返回。
 \begin{compactitem}
 \item IO路径(包括入口)
 \item 目标位置
+\item 容量
 \end{compactitem}
 
-tier考虑了热点数据。
+tier考虑了热点数据，tier层容量计入总容量，cache层容量不计入总容量。
 
 \subsection{BUG}
 

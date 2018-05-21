@@ -11,6 +11,15 @@ lichd进程内嵌各种server，包括iscsi等。
 
 client可以和每个节点进行通信，推荐采用VIP机制，简化连接管理。
 
+\section{架构演化}
+
+\begin{enumbox}
+\item{引入存储池}
+\item{引入etcd}
+\item{引入Bcache}
+\item{引入VDO}
+\end{enumbox}
+
 \section{元数据管理}
 
 元数据包括：
@@ -116,8 +125,6 @@ admin上持久化的信息，\hl{是如何避免单点故障的，即如何同�
 \item status
 \end{itembox}
 
-\subsection{引入etcd}
-
 \section{VIP}
 
 \section{微控制器}
@@ -137,7 +144,7 @@ FusionStor通过元数据来管理，\hl{与CEPH的CRUSH有重大不同}。
 数据分布规则有：
 \begin{compactitem}
 \item 存储池规则
-\item 保护域规则
+% \item 保护域规则
 \item 故障域规则(\ref{rule:faultset})
 \end{compactitem}
 
