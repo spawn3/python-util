@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <cassert>
 
+// n & (n-1) 消去最后的1
+
 
 void test_bit() {
     for (int i=0; i < 129; i++) {
@@ -9,7 +11,7 @@ void test_bit() {
         assert(~i + 1 == -i);
     }
 
-    int x = 0x1;
+    int x = 0x01020304;
     const char *p = (const char *)&x;
     // printf("%p %d\n", p, *p++);
     // printf("%p %d\n", p, *p++);

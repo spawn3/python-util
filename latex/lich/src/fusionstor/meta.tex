@@ -185,17 +185,52 @@ controller在节点上的分布，controller在core上的分布
 恢复和再平衡过程，是怎么工作的？
 
 控制器协调所有IO操作，通过(owner, magic, clock)维护副本一致性。
-owner，magic联合起来，处理controller切换的情况。clock处理一个chunk内所有变更的顺序。
-因为有owner和magic，是否不需要再维护controller的唯一性？
+owner，magic联合起来，处理controller切换的情况。
+clock处理一个chunk内所有变更的顺序。
+
+若干问题：
+\begin{enumbox}
+\item 因为有owner和magic，是否不需要再维护controller的唯一性？
+\item 没有使用日志
+\end{enumbox}
+
+\subsection{正常情况}
 
 chunk内的更新按clock顺序提交，这样做影响并发度，进一步影响到性能。
 如果不遵循clock序提交，需要有一假设：所有并发任务无重叠，或者是在有重叠的地方按clock串行化。
 上层应用不会提交重叠的IO，内部元数据涉及小IO，比如小于512B的IO，多个更新可能指向同一扇区。
 如果多个副本不按同样的顺序，就会出现数据一致性问题。
 
+如果收到clock连续的io，且这些io无重叠部分，可以直接提交。
+如果io有重叠，按clock序依次提交。采用lattice，可以实施聚合优化。
+
+一种做法是保证并发io无重叠。需要分析每一种io情况，包括应用层io，内部元数据等。
+另一种做法是维护一数据结构，能够跟踪io重叠情况。
+
+\subsection{故障情况}
+
+控制器切换
+
 在降级写的时候，没有参与的副本标记持久化状态stale，保证在reload的时候，不会被选为权威副本。
 
 网络分区
+
+节点掉电
+
+集群掉电
+
+disk and raid cache
+
+\section{精简配置}
+
+每个raw chunk有三者状态：ENOENT，alloc，alloc and zero。第一种和第三种等价。
+
+分配一个chunk，开销较大，影响到精简配置和快照的性能。
+分配一个chunk，涉及到更新元数据。
+
+快照、克隆卷天然就是精简配置的。
+
+磁盘空间分配器，db记录chkid到磁盘位置的映射(采用rocksdb？)。
 
 \section{分层}
 
@@ -298,19 +333,19 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 
 需要持久化的信息：
 \begin{compactitem}
-\item table2 meta，记录chunk info（副本位置）
-\item sqlite3，记录chkid（副本）到物理地址的映射关系
 \item disk bitmap，记录磁盘上每个chunk的分配状态
+\item sqlite3，记录chkid（副本）到物理地址的映射关系
+\item table2 meta，记录chunk info（副本位置）
 \item 填充chunk内容为全0？
 \end{compactitem}
 
-分配chunk的过程，会影响到若干特性，如精简配置，恢复，再平衡，写入等，都产生新chunk。
+分配chunk的过程，会影响到若干特性，如精简配置，快照、恢复，再平衡，写入等，都产生新chunk。
 
 优化allocate的性能：
 \begin{compactitem}
-\item 异步化sqlite，每个db一个工作线程
 \item 加大lich.inspect线程数到20
 \item table2 lock粒度 \change{dynamical lock table}
+\item 异步化sqlite，每个db一个工作线程
 \end{compactitem}
 
 \subsection{IO过程}
