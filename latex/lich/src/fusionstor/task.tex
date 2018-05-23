@@ -4,6 +4,34 @@
 
 \section{恢复}
 
+采用SEDA架构组织处理过程，分scan和recovery两阶段，边扫描，边恢复。
+pipeline
+
+QoS，参考操作系统的进程调度(MLFQ)，网络的流量控制，多级反馈队列等。
+
+采用强化学习的思路动态调整控制参数。
+
+区分节点故障和磁盘故障，磁盘故障时可以利用sqlite信息，直接扫描。
+
+移除磁盘时，调用\verb|md_chunk_set|，设置该磁盘上所有chunk的chkinfo的对应副本状态为\verb|_S_CHECK__|。
+恢复过程，根据chkinfo的副本状态，判断是否需要恢复。如果需要恢复，调用\verb|md_chunk_check|。
+
+\verb|md_chunk_set|过程开销较大，故感知磁盘故障的延时较长。\hl{把副本状态持久化到chkinfo里，是否真的必要}？
+
+\hl{节点下线}触发怎么样的过程？ \verb|network_connect1|。
+
+故障域规则
+
+单个磁盘
+
+单个节点
+
+单个机柜
+
+重建性能
+
+不中断IO
+
 \subsection{需求}
 
 恢复性能和Qos机制。

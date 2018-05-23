@@ -181,8 +181,6 @@ IO锁最好是区间锁。bitmap单元的提交操作。
 
 \end{tcolorbox}
 
-\section{COW}
-
 \section{ROW2}
 
 \subsection{快照树}
@@ -283,3 +281,5 @@ revert的时候，rollback版本号表示目标快照的版本号，如有autosn
 主要通过4个变量来控制rollback过程：fileinfo(snap\_version)。
 
 /pool1/system/rollback/vol.32.0
+
+\section{ConsistencyGroup}
