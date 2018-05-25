@@ -7,61 +7,25 @@ failover过程，选举出新的admin节点来。
 lichd进程内嵌各种server，包括iscsi等。
 
 作为存储系统，主要考虑是元数据组织和IO，恢复等关键过程。
-功能之外，性能，可靠性，可扩展性至关重要。
+功能之外，可靠性、性能，可扩展性至关重要。
 
 client可以和每个节点进行通信，推荐采用VIP机制，简化连接管理。
 
 \section{架构演化}
 
 \begin{enumbox}
-\item{引入存储池}
 \item{引入etcd}
+\item{引入存储池}
 \item{引入Bcache}
 \item{引入VDO}
+\item{引入ROW3}
 \end{enumbox}
-
-\section{元数据管理}
-
-元数据包括：
-\begin{enumbox}
-\item \hl{引导信息，用于加载相应对象}
-\item 目录下包含哪些文件？
-\item 文件包含哪些chunk？
-\item chunk的副本位置（节点和节点上的磁盘）
-\item 快照以及快照树
-\item xattr
-\item 各实体对象描述信息，包括创建时间，id等
-\end{enumbox}
-
-关键问题有：
-\begin{enumbox}
-\item 空间管理，分配和回收
-\item 数据分布
-\item 复制/EC
-\item 数据恢复和平衡
-\end{enumbox}
-
-在顶层设计下的case by case。
-
-每一个卷的元数据和数据，共有三层chunk，L1和L2是元数据，L3是数据，构成chunk的单根树。
-快照和clone出的卷采用统一的chunk树结构，不过增加了交叉引用关系。
-
-L1原先只有一个chunk，有固定数目的槽位，指向L2的chunk，L2的chunk，有固定条目的槽位，指向L3的数据chunk。
-
-table1包含了指向全部L2 chunk的指针数组(table\_proto)，table2包含了指向全部L3 chunk的指针数组（chkinfo+chkstat）
-table\_proto内在也包含chkinfo和chkstat。每一个chunk，都需要在其父节点上登记，\hl{卷的第一个chunk}登记在pool里。
-
-parent的界定：\hl{raw和subvol的parent都是volume的chkid，subpool的parent是pool的chkid。
-vol的parent是pool的chkid}，即parent都是可寻址的实体对象(具有控制器)。\hl{sqlite记录的parent遵循该语义}。
-
-如果\verb|table1->table_count|和\verb|table2->chknum|比较大，会有扩展性和性能方面的问题，同时会消耗比较多的内存。
 
 \section{节点}
 
-三类服务器节点：
+两类服务器节点：
 \begin{compactenum}
 \item admin
-\item meta （废弃）
 \item normal
 \end{compactenum}
 
@@ -106,7 +70,8 @@ chunk副本之间的一致性：强一致性协议。在每次IO操作前，检�
 
 可扩展性
 
-admin上持久化的信息，\hl{是如何避免单点故障的，即如何同步到各个meta节点上的}？可以rootable为例，参见\verb|mq_master.c|。
+admin上持久化的信息，\hl{是如何避免单点故障的，即如何同步到各个meta节点上的}？
+可以rootable为例，参见\verb|mq_master.c|。
 
 引入etcd后，admin处理逻辑会简单些。同时引入了多存储池，寻址过程变得复杂。
 
@@ -124,6 +89,42 @@ admin上持久化的信息，\hl{是如何避免单点故障的，即如何同�
 \item chunk (local, sqlite3)
 \item status
 \end{itembox}
+
+\section{元数据管理}
+
+元数据包括：
+\begin{enumbox}
+\item \hl{引导信息，用于加载相应对象}
+\item 目录下包含哪些文件？
+\item 文件包含哪些chunk？
+\item chunk的副本位置（节点和节点上的磁盘）
+\item 快照以及快照树
+\item xattr
+\item 各实体对象描述信息，包括创建时间，id等
+\end{enumbox}
+
+关键问题有：
+\begin{enumbox}
+\item 空间管理，分配和回收
+\item 数据分布
+\item 复制/EC
+\item 数据恢复和平衡
+\end{enumbox}
+
+在顶层设计下的case by case。
+
+每一个卷的元数据和数据，共有三层chunk，L1和L2是元数据，L3是数据，构成chunk的单根树。
+快照和clone出的卷采用统一的chunk树结构，不过增加了交叉引用关系。
+
+L1原先只有一个chunk，有固定数目的槽位，指向L2的chunk，L2的chunk，有固定条目的槽位，指向L3的数据chunk。
+
+table1包含了指向全部L2 chunk的指针数组(table\_proto)，table2包含了指向全部L3 chunk的指针数组（chkinfo+chkstat）
+table\_proto内在也包含chkinfo和chkstat。每一个chunk，都需要在其父节点上登记，\hl{卷的第一个chunk}登记在pool里。
+
+parent的界定：\hl{raw和subvol的parent都是volume的chkid，subpool的parent是pool的chkid。
+vol的parent是pool的chkid}，即parent都是可寻址的实体对象(具有控制器)。\hl{sqlite记录的parent遵循该语义}。
+
+如果\verb|table1->table_count|和\verb|table2->chknum|比较大，会有扩展性和性能方面的问题，同时会消耗比较多的内存。
 
 \section{VIP}
 
@@ -303,9 +304,20 @@ tier是自动分层机制，默认行为是什么？ 优先落到SSD上，若SSD
 
 考虑以下问题，初次分配dispatch\_newdisk，等固定了分层后，后续的变更规则是什么？
 
+\section{分区容忍性}
+
+参考fence.c
+
 \section{关键过程}
 
-\subsection{磁盘管理}
+\subsection{启动集群}
+
+\subsection{创建存储池}
+
+创建存储池后，会在etcd上记录引导信息。
+创建存储池后，必须添加磁盘到该存储池。一块磁盘只能属于一个存储池。
+
+\subsubsection{磁盘管理}
 
 每块磁盘对应一个bitmap，用于该盘的空间管理。
 
@@ -320,7 +332,20 @@ chunk\_id到磁盘物理地址的映射，是一随机过程，定位到空闲�
 
 RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据。
 
+\subsection{创建卷}
+
+\subsection{IO过程}
+
+写过程，可能内在地包含了分配chunk的过程，缺页分配。当在末尾写入时，还可能扩展了卷的大小。
+
+大范围内的随机写入，造成很多的缺页分配，分配过程会成为性能瓶颈。
+
 \subsection{分配一个chunk的过程}
+
+分为两阶段：分配空间，chkid和磁盘位置的映射。两阶段按SEDA方式组织，没按pipeline组织。
+
+分配空间线程池：每个磁盘一个线程，多线程共享任务队列。
+
 
 函数：
 \begin{compactitem}
@@ -347,12 +372,6 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 \item table2 lock粒度 \change{dynamical lock table}
 \item 异步化sqlite，每个db一个工作线程
 \end{compactitem}
-
-\subsection{IO过程}
-
-写过程，可能内在地包含了分配chunk的过程，缺页分配。当在末尾写入时，还可能扩展了卷的大小。
-
-大范围内的随机写入，造成很多的缺页分配，分配过程会成为性能瓶颈。
 
 \subsection{事务处理}
 
@@ -384,6 +403,3 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 
 \subsection{异步过程:数据恢复}
 
-\section{分区容忍性}
-
-参考fence.c

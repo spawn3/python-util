@@ -1,5 +1,8 @@
 \chapter{Scheduler}
 
+从操作系统的角度去理解协程。协程也意味着执行的不连续性，与上下午切换。
+协程有独立的调度器，负责从就绪队列里选出下一个要执行的任务。
+
 \section{实现}
 
 系统可以指定几个core，专门处理IO。每个core关联一个core thread，运行scheduler代码。
@@ -26,6 +29,8 @@ BACKTRACE是由调度器发起的。BACKTRACE不检查sleep状态的task。
 task队列占用tasks槽位，总数受限，\hl{目前默认为1024个槽位}。
 
 调度器支持优先级队列：引入不同于runable的队列，多队列之间分配时间片。
+
+Actor编程模型，SEDA高并发架构。
 
 \section{使用}
 
