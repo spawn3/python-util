@@ -1,0 +1,91 @@
+\chapter{作为一个操作系统}
+
+\section{Scheduler}
+
+从操作系统的角度去理解协程。协程也意味着执行的不连续性，与上下午切换。
+协程有独立的调度器，负责从就绪队列里选出下一个要执行的任务。
+
+\subsection{实现}
+
+系统可以指定几个core，专门处理IO。每个core关联一个core thread，运行scheduler代码。
+
+本质上，所谓的scheduler，就运行特定指令序列的操作系统线程，通过操作特定的数据结构和上下文切换，
+模拟协程行为。
+
+别的线程要与core thread通信，需要进行同步。core thread内部，不需要同步措施。
+
+调度器和协程代码，交错执行。调度器切换到task，则执行task指令；
+task让出控制权，或者返回，则执行调度器指令。
+
+创建task，通过makecontext管理task要执行的过程，通过swapcontext在调度器和task之间切换上下文。
+
+task的生灭过程，一个task的生命周期，状态变迁：FREE, RUNABLE/READY, RUNNING, SUSPEND, BACKTRACE。
+
+BACKTRACE用于打印日志，扫描每一个task，检查task的存活时间。目前，不允许有特长时间的任务存在。
+BACKTRACE是由调度器发起的。BACKTRACE不检查sleep状态的task。
+
+每个task，有parent，从而构成task树。
+
+目前维护有三个task队列(runable, reply\_local, reply\_remote)，两个新的申请队列(wait\_task, request\_queue)。
+
+task队列占用tasks槽位，总数受限，\hl{目前默认为1024个槽位}。
+
+调度器支持优先级队列：引入不同于runable的队列，多队列之间分配时间片。
+
+Actor编程模型，SEDA高并发架构。
+
+\subsection{使用}
+
+\subsubsection{接口}
+
+\subsubsection{使用模式}
+
+\subsubsection{FAQ}
+
+\begin{compactenum}
+\item schedule\_yield1 timeout。检查的是\hl{从yield到再次唤醒的时间，而不是任务的age，一个task可以多次yield/resume}
+\item tasks槽位占满后，再加入的请求会放入wait list。task和wait list之间，可能形成相互依赖的deadlock。
+\item schedule\_task\_get和schedule\_yield1必须配对使用
+\end{compactenum}
+
+\section{控制器}
+
+目录和卷，都通过controller进行管理。目录controller的概念有待进一步完善。
+
+每个控制器都可以看着一chunk树，其根节点对应chunk的副本位置列表，决定了控制器的位置：列表中第一副本所在节点。
+在迁移控制器时，同样需要遵循该规则，所以需要先调整根chunk的chkinfo。
+
+所有卷的操作都需要通过controller进行。客户端在访问一个卷时，第一步要找到该卷控制器的所在节点nid，
+然后把nid作为参数传入后续调用中，如nid是客户端，则进程内；否则，发起rpc调用。
+本地访问也可走rpc，可以利用rpc timeout等特性。
+
+md\_map是控制器位置缓存，如可以在cache里找到，直接返回。如缓存不命中，则发起UDP广播。
+每个lichd进程有独立线程监听端口：20915。检查cluster uuid，magic，crc等匹配后，尝试加载控制器，然后做出回应。
+发起UDP广播的客户端收集各lichd进程的响应，如找到匹配的nid，可以直接退出该过程。
+
+控制器加载过程：第一副本非本节点，返回EREMCHG。加载成功后，用vctl缓存管理起来，缓存项带引用计数和删除标志。
+目前，采用lease机制保证vctl的唯一性。其必要性可进一步推演。
+加载过程需要保证并发下的唯一性，如果有多个task发起加载过程，只有一个实际执行，别的进入等待队列。加载完成后，唤醒等待队列里的任务。
+
+\section{内存}
+
+每个core线程拥有私有内存，但不应静态分配一个固定值，而是动态按需分配。
+因为每个core线程所需内存量可能不均衡，出现总量够，而单个core内存不足的情况。
+
+预留、总量
+
+资源池模式
+
+\section{调度}
+
+\section{I/O}
+
+\subsection{Disk Allocator}
+
+\subsection{Sqlite}
+
+\subsection{FS}
+
+\subsection{SPDK}
+
+\subsection{RPC}

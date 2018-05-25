@@ -12,6 +12,46 @@
 Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 所以，path中包含protocol组件，并非必须，而是实现上的权宜之计。
 
+\section{Algorithm}
+
+\begin{compactitem}
+    \item paxos/raft 选举admin和meta节点
+    \item vector clock 副本一致性
+    \item lease controller的唯一性
+\end{compactitem}
+
+\section{Coroutine}
+
+使用规则：
+\begin{compactitem}
+    \item \verb|schedule_task_get|和\verb|schedule_yield|要匹配
+    \item task有数量上的限制：1024，超出后容易引起死锁
+\end{compactitem}
+
+\section{AIO}
+
+生产者-消费者模型。
+
+\section{sqlite3}
+
+异步sqlite3。
+
+\begin{compactitem}
+    \item 共10个db，每个一个线程，每个线程管理一个队列
+    \item 所有sqlite3操作，泛化为统一的结构，放入线程队列
+    \item 消费者线程批量处理队列中的任务
+    \item 生产者线程和消费者线程通过sem进行通信
+    \item 采用协程机制(yield/resume)同步任务执行顺序
+\end{compactitem}
+
+消费者线程wait在sem上，生产者线程有消息的时候，调用\verb|sem_post|。
+
+\section{编程注意事项}
+
+\begin{compactitem}
+\item goto之前，先设置ret
+\end{compactitem}
+
 \section{Performance}
 
 4K+1M混合读写，极慢
@@ -34,13 +74,17 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 
 EREMCHG错误主要用于控制器发生切换的时候。
 
-\section{Log}
+\subsection{Hash}
 
-syslog
+chkid如何选择hash函数？
 
-日志过滤
+\subsection{Profile}
 
-统计数据：准确性和实时性
+lich.conf: performance\_analysis: on
+
+kill -USR1 <pid>
+
+tail -f /opt/fusionstack/log/lich.log |grep analysis
 
 \section{故障}
 
@@ -60,68 +104,11 @@ syslog
     \item module load
 \end{compactitem}
 
-\section{Coroutine}
+\section{Log}
 
-使用规则：
-\begin{compactitem}
-    \item \verb|schedule_task_get|和\verb|schedule_yield|要匹配
-    \item task有数量上的限制：1024，超出后容易引起死锁
-\end{compactitem}
+syslog
 
-\section{Memory Management}
+日志过滤
 
-\subsection{ymalloc}
+统计数据：准确性和实时性
 
-\subsection{mbuffer}
-
-\subsection{huge page}
-
-2M
-
-\section{AIO}
-
-生产者-消费者模型。
-
-\section{sqlite3}
-
-异步sqlite3。
-
-\begin{compactitem}
-    \item 共10个db，每个一个线程，每个线程管理一个队列
-    \item 所有sqlite3操作，泛化为统一的结构，放入线程队列
-    \item 消费者线程批量处理队列中的任务
-    \item 生产者线程和消费者线程通过sem进行通信
-    \item 采用协程机制(yield/resume)同步任务执行顺序
-\end{compactitem}
-
-消费者线程wait在sem上，生产者线程有消息的时候，调用\verb|sem_post|。
-
-\section{RPC}
-
-\begin{compactitem}
-    \item minirpc
-    \item rpc
-    \item corerpc
-\end{compactitem}
-
-\section{Algorithm}
-
-\begin{compactitem}
-    \item paxos/raft 选举admin和meta节点
-    \item vector clock 副本一致性
-    \item lease controller的唯一性
-\end{compactitem}
-
-\section{编程注意事项}
-
-\begin{compactitem}
-\item goto之前，先设置ret
-\end{compactitem}
-
-\subsection{Profile}
-
-lich.conf: performance\_analysis: on
-
-kill -USR1 <pid>
-
-tail -f /opt/fusionstack/log/lich.log |grep analysis
