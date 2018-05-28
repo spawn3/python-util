@@ -222,6 +222,24 @@ chunk内的更新按clock顺序提交，这样做影响并发度，进一步影�
 
 disk and raid cache
 
+\subsection{Clock}
+
+每个core对应一个\verb|logical_clock_t|和hash索引。
+进一步分组，每组对应一个\verb|clock_queue_t|，表示1M的mmap空间。
+提交clock时，会append到相应的queue file。
+满1M时，切换到新的clock文件。
+
+在启动、关闭节点时，同步clock目录下的文件。
+
+掉电情况下，因为保持在/dev/shm/lich4/clock目录下，没有真正的持久化，clock文件会丢失。
+clock丢失，会引起chunk sync过程，极大降低性能。
+
+同一queue的clock file需要定期合并。
+
+如果core hash变化，则需要重建所有clock？
+
+评估内存占用量，load时间等性能指标。如何优化？nvdimm？
+
 \section{精简配置}
 
 每个raw chunk有三者状态：ENOENT，alloc，alloc and zero。第一种和第三种等价。

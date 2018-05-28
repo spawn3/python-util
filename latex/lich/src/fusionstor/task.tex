@@ -2,6 +2,17 @@
 
 \section{平衡}
 
+\subsection{控制器平衡}
+
+\subsection{数据平衡}
+
+\begin{enumbox}
+\item 按pool划分
+\item 每个pool，分布在多个节点上，每个节点可得其磁盘利用率
+\item 符合move条件的raw chunk，确定其新的副本位置集
+\item 迭代执行，重新评估
+\end{enumbox}
+
 \section{恢复}
 
 采用SEDA架构组织处理过程，分scan和recovery两阶段，边扫描，边恢复。
@@ -144,6 +155,10 @@ md\_chunk\_check
     手动触发：echo 1 > /dev/shm/lich4/nodectl/recovery/immediately
 \end{tcolorbox}
 
+\section{监视存储池状态}
+
+由admin节点执行
+
 \section{删除卷}
 
 \section{删除快照}
@@ -152,16 +167,16 @@ md\_chunk\_check
 
 \section{flatten}
 
-\section{HSM}
+%\section{HSM}
 
-分层存储管理
-\begin{itemize}
-\item \verb|__volume_ctl_analysis_init|
-\item \verb|replica_hsm_init|
-\end{itemize}
+%分层存储管理
+%\begin{itemize}
+%\item \verb|__volume_ctl_analysis_init|
+%\item \verb|replica_hsm_init|
+%\end{itemize}
 
-\section{SSD Cache}
+%\section{SSD Cache}
 
-\begin{itemize}
-\item \verb|__flush_create|
-\end{itemize}
+%\begin{itemize}
+%\item \verb|__flush_create|
+%\end{itemize}
