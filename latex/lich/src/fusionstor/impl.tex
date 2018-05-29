@@ -7,6 +7,14 @@
     \item kernel bypass
 \end{compactitem}
 
+\section{编程注意事项}
+
+\begin{compactitem}
+\item goto之前，先设置ret
+\item 大多数情况下，需要检查函数的返回值
+\item 函数的可重入性
+\end{compactitem}
+
 \section{Protocol}
 
 Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
@@ -32,9 +40,9 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 
 生产者-消费者模型。
 
-\section{sqlite3}
+\subsection{sqlite3}
 
-异步sqlite3。
+异步sqlite3。etcd，RR也会采用该框架。
 
 \begin{compactitem}
     \item 共10个db，每个一个线程，每个线程管理一个队列
@@ -45,12 +53,6 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 \end{compactitem}
 
 消费者线程wait在sem上，生产者线程有消息的时候，调用\verb|sem_post|。
-
-\section{编程注意事项}
-
-\begin{compactitem}
-\item goto之前，先设置ret
-\end{compactitem}
 
 \section{Performance}
 
@@ -113,4 +115,3 @@ syslog
 日志过滤
 
 统计数据：准确性和实时性
-

@@ -326,6 +326,16 @@ tier是自动分层机制，默认行为是什么？ 优先落到SSD上，若SSD
 
 参考fence.c
 
+\section{高性能}
+
+网络层：iSER，NVMf
+
+设备层：libnvme/SPDK
+
+libiscsi
+
+tgt
+
 \section{关键过程}
 
 \subsection{启动集群}
@@ -410,23 +420,3 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 \end{compactenum}
 
 任何两个操作之间发生故障，都会导致问题。
-
-\subsection{异步过程:删除卷}
-
-\subsection{异步过程:删除快照}
-
-\subsection{异步过程:回滚快照}
-
-\subsection{异步过程:flat快照}
-
-\subsection{异步过程:数据恢复}
-
-\section{高性能}
-
-网络层：iSER，NVMf
-
-设备层：libnvme/SPDK
-
-libiscsi
-
-tgt
