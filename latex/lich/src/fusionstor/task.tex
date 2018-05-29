@@ -1,5 +1,11 @@
 \chapter{任务管理}
 
+后台任务处理，或事件驱动，或定时器驱动。
+线程或线程池按一定方式组织，采用actor或csp并发编程模型。
+
+为了在集群级别进行控制，采用主控、或定向策略，提供可控性和性能。
+Nutanix的Mapreduce并行执行模型。
+
 \section{平衡}
 
 \subsection{控制器平衡}
@@ -159,6 +165,12 @@ md\_chunk\_check
 
     手动触发：echo 1 > /dev/shm/lich4/nodectl/recovery/immediately
 \end{tcolorbox}
+
+\section{GC}
+
+chunk
+
+\section{Clock Merge}
 
 \section{监视存储池状态}
 

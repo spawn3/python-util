@@ -126,6 +126,10 @@ vol的parent是pool的chkid}，即parent都是可寻址的实体对象(具有控
 
 如果\verb|table1->table_count|和\verb|table2->chknum|比较大，会有扩展性和性能方面的问题，同时会消耗比较多的内存。
 
+\hl{raw chunk无法跨卷共享，每个chunk的chkid编码了卷id。是否引入对象层，对象由上层应用共享。}
+
+ROW3在raw卷之上实现快照与克隆，需要大卷支持，本质上chunk是共享的。
+
 \section{VIP}
 
 \section{微控制器}

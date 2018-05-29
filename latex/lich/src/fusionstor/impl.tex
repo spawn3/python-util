@@ -1,10 +1,10 @@
 \chapter{实现相关}
 
 \begin{compactitem}
-    \item polling \change{polling}
     \item coroutine and scheduler
-    \item mbuffer
+    \item polling \change{polling}
     \item kernel bypass
+    \item mbuffer
 \end{compactitem}
 
 \section{编程注意事项}
@@ -24,8 +24,8 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 
 \begin{compactitem}
     \item paxos/raft 选举admin和meta节点
-    \item vector clock 副本一致性
     \item lease controller的唯一性
+    \item vector clock 副本一致性
 \end{compactitem}
 
 \section{Coroutine}
