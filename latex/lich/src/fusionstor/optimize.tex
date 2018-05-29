@@ -2,33 +2,37 @@
 
 \section{时间优化}
 
+快
+
 \begin{enumbox}
 \item localize
-\item auto tier
 \item ssd cache
+\item auto tier
 \end{enumbox}
 
 \section{空间优化}
 
+省
+
 \begin{enumbox}
 \item 精简配置 (Thin provisioning)
 \item EC
-\item Dedup
+\item Dedup (VDO)
 \item Compress
 \end{enumbox}
 
 \section{架构优化}
 
-控制器采用更小的控制粒度，划分subvolume
+好、多
 
-控制器与iscsi target的关系
-
-副本一致性的等级和证明
-
-优化chunk allocate效率
-
-ROW3快照
-
-高性能架构
-
-恢复：磁盘故障：从哪里读，写到哪里？是否充分并行了？
+\begin{enumbox}
+\item 副本一致性的等级和证明
+\item 控制器采用更小的控制粒度，划分subvolume
+\item 控制器与iscsi target的关系
+\item ROW3快照
+\item 优化chunk allocate效率
+\item 恢复：磁盘故障：从哪里读，写到哪里？是否充分并行了？
+\item 高性能架构
+\item 数据安全(DR)
+\item 监控SSD
+\end{enumbox}

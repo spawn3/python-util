@@ -4,6 +4,11 @@
 
 \subsection{控制器平衡}
 
+每个卷到core的映射是可计算出来的，可按core逐个进行平衡。
+先处理core hash等于0的卷，依次类推，同时使迁移量尽量少。
+
+以上算法假定每个卷都是等价的。如果卷的大小和负载不同，目前方案难以做到真正的平衡。
+
 \subsection{数据平衡}
 
 \begin{enumbox}
@@ -160,6 +165,8 @@ md\_chunk\_check
 由admin节点执行
 
 \section{删除卷}
+
+任务规范放入etcd更合适，避免因为ENOSPC，导致删不了。
 
 \section{删除快照}
 

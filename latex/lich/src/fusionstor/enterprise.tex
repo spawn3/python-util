@@ -4,8 +4,6 @@
 
 iscsi CHAP认证
 
-\section{Multipath}
-
 \section{QOS}
 
 token bucket
@@ -92,10 +90,23 @@ tier考虑了热点数据，tier层容量计入总容量，cache层容量不计�
 \subsection{BUG}
 
 BUG: ssd cache假定io 512对齐。如果有非512对齐的IO，会产生core。
+
 \section{DR}
 
-snapshot
+同步RC，异步RC。先实现同步RC，同步RC是异步RC的极限情况。
+
+传输层采用标准协议，如libiscsi。
 
 io journalling
 
+snapshot \& consistency group
+
 % \section{CDP}
+
+\section{Multipath}
+
+\begin{enumbox}
+\item 客户端的行为，还是服务端的行为？
+\item 什么样的网络拓扑支持什么样的多路径策略？
+\item linux支持多路径模块，如何配置？
+\end{enumbox}
