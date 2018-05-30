@@ -34,7 +34,14 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 \begin{compactitem}
     \item \verb|schedule_task_get|和\verb|schedule_yield|要匹配
     \item task有数量上的限制：1024，超出后容易引起死锁
+    \item schedule\_self 与 schedule\_running不同
 \end{compactitem}
+
+首先进行一种区分，core线程内与外；线程内进一步分为下述两张情况。
+
+core调度器本身不同调用blocking操作，同样需要异步化。分两种情况：
+一、core调度器本身调用block op；二、core内协程调用block op。
+第二种情况可以用schedule\_yield（或core\_request），第一种则不可。如何保序？
 
 \section{AIO}
 
