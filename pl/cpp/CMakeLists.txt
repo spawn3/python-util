@@ -35,6 +35,7 @@ build_exe(hello "${HELLO_SOURCE_FILES}")
 
 set(BIT_SOURCE_FILES src/bit.cc)
 build_exe(bit "${BIT_SOURCE_FILES}")
+target_link_libraries(bit jemalloc)
 
 set(LDB_SOURCE_FILES src/ldb.cc)
 add_executable(ldb ${LDB_SOURCE_FILES})
@@ -44,3 +45,4 @@ target_link_libraries(ldb leveldb pthread snappy)
 set(ALGO_SOURCE_FILES src/algo.cc)
 build_exe(algo "${ALGO_SOURCE_FILES}")
 
+add_library(magic SHARED src/magic.cc)

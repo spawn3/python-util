@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cassert>
+#include <jemalloc/jemalloc.h>
 
 #define IS_POWER_OF_2(x) (!((x) & ((x) - 1)))
 
@@ -65,10 +66,19 @@ void test_array() {
     }
 }
 
+void test_jemalloc() {
+    for (int i=0 ;i < 10000; i++) {
+        malloc(i * 100);
+    }
+
+    malloc_stats_print(NULL, NULL, NULL);
+}
+
 
 int main() {
     test_bit();
     test_array();
+    test_jemalloc();
 
     return 0;
 }
