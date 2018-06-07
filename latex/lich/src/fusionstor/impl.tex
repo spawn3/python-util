@@ -67,6 +67,18 @@ core调度器本身不同调用blocking操作，同样需要异步化。分两�
 
 机械盘关闭localize
 
+IO路径优化
+\begin{enumbox}
+\item 调用深度
+\item DBUG/DINFO等日志
+\item 无关功能
+\item 代码体积大，导致cpu高速缓存失效: -g
+\item lock table用到了hash table
+\item hash table用到了ymalloc/yfree机制管理内存
+\item table2 subvol wrlock
+\item inline
+\end{enumbox}
+
 \subsection{Lease}
 
 利用lease机制来保证volume controller的唯一性。

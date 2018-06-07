@@ -21,32 +21,37 @@
 \item Compress
 \end{enumbox}
 
+\subsection{EC}
+
+\subsection{Dedup}
+
+VDO
+
+\subsection{Compress}
+
+Google snappy
+
 \section{架构优化}
 
 好、多
 
 \begin{enumbox}
-\item 副本一致性的等级和证明
-\item 控制器采用更小的控制粒度，划分subvolume
-\item 控制器与iscsi target的关系
 \item ROW3快照
-\item 优化chunk allocate效率
-\item 恢复：磁盘故障：从哪里读，写到哪里？是否充分并行了？
 \item 高性能架构
 \item 数据安全(DR)
+\item 副本一致性的等级和证明
+\item 优化chunk allocate效率
+\item 恢复：磁盘故障：从哪里读，写到哪里？是否充分并行了？
+\item 恢复：统一节点与磁盘两种故障下的输出
+\item balance：按pool组织
+\item balance：controller平衡内置到admin
+\item 控制器与iscsi target的关系
+\item 控制器采用更小的控制粒度，划分subvolume
 \item 监控SSD
 \end{enumbox}
 
 % \section{Security}
 % iscsi CHAP认证
-
-\section{QOS}
-
-token bucket
-
-\change{距离函数}
-
-% \section{Quota}
 
 \section{缓存}
 
