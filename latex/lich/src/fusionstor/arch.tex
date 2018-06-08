@@ -21,7 +21,7 @@ client可以和每个节点进行通信，推荐采用VIP机制，简化连接�
 \item{引入ROW3}
 \end{enumbox}
 
-\section{节点}
+\section{结构}
 
 两类服务器节点：
 \begin{compactenum}
@@ -90,7 +90,17 @@ admin上持久化的信息，\hl{是如何避免单点故障的，即如何同�
 \item status
 \end{itembox}
 
-\section{元数据管理}
+\section{命名}
+
+\section{映射}
+
+\subsection{VIP}
+
+\subsection{微控制器}
+
+每一个加载的卷，对应一个集群内唯一的卷控制器，负责卷的IO等操作。
+
+\subsection{元数据管理}
 
 元数据包括：
 \begin{enumbox}
@@ -130,13 +140,26 @@ vol的parent是pool的chkid}，即parent都是可寻址的实体对象(具有控
 
 ROW3在raw卷之上实现快照与克隆，需要大卷支持，本质上chunk是共享的。
 
-\section{VIP}
+\subsection{精简配置}
 
-\section{微控制器}
+每个raw chunk有三者状态：ENOENT，alloc，alloc and zero。第一种和第三种等价。
 
-每一个加载的卷，对应一个集群内唯一的卷控制器，负责卷的IO等操作。
+分配一个chunk，开销较大，影响到精简配置和快照的性能。
+分配一个chunk，涉及到更新元数据。
 
-\section{数据分布}
+快照、克隆卷天然就是精简配置的。
+
+磁盘空间分配器，db记录chkid到磁盘位置的映射(采用rocksdb？)。
+
+\section{认证}
+
+\section{定位}
+
+\subsection{数据分布}
+
+positioning是指将数据放置到存储器层级结构或者网络节点的不同层上，以保证系统具有更好的性能。
+
+高可用、高性能、负载均衡是几个主要设计目标。
 
 数据分布首先要满足规则要求，其次则需做到均衡和局部性。
 规则是强制的，极端条件下可能退化。均衡和局部性则影响系统性能。
@@ -161,13 +184,98 @@ controller在节点上的分布，controller在core上的分布
 
 各种任务的分布情况，如数据恢复。
 
-\subsection{负载均衡}
-
 \subsection{本地化}
 
 卷控制器所在节点，具有所有chunk的副本。
 
 当切换控制器的时候，需要控制本地化过程的QoS。
+
+\subsection{分层}
+
+卷的xattr，有目标分层设定：priority。默认是-1，即开启自动分层。先落入tier 0，根据数据热度，
+通过异步过程进行数据迁移(纵向的数据流动)。所以有两个异步任务：
+\begin{compactenum}
+\item 统计访问热度
+\item 按策略执行数据迁移(目标分层的偏离，数据热度)
+\end{compactenum}
+
+每个chunk有实际分层：tier，不是在副本级。
+
+\subsection{SSD缓存}
+
+SSD Cache实现了写缓存，没有实现读缓存, 通过内存实现读缓存。
+
+\subsubsection{配置项及系统行为}
+
+相关控制参数：
+\begin{enumbox}
+\item lich.conf/disk\_keep: 10G （废弃）
+\item lich.conf/disk\_cache: 10G
+\item 卷的xattr: writeback
+\item 卷的属性：priority (设定卷的目标存储分层）
+\end{enumbox}
+
+disk\_cache配置磁盘cache区，对新盘有效，若一个盘已经配置，就固定了，不再改变。
+此配置对SSD和HDD都起作用，预留磁盘末尾的空间。
+
+priority是手工分层机制，持久化到卷属性上。
+
+tier是自动分层机制，默认行为是什么？ 优先落到SSD上，若SSD满，落到HDD上。
+
+所以，分三种情况：
+\begin{compactenum}
+\item 自动分层，priority == -1，优先落盘到SSD上，如果SSD满，落盘到HDD上
+\item priority == 0, 同自动分层机制
+\item priority == 1，落盘到HDD上（此时根据writeback的设置，决定是否走SSD cache）
+\end{compactenum}
+
+写IO流程
+
+以下两种情况，会落盘到HDD上：
+\begin{compactenum}
+\item priority == 1
+\item SSD满
+\end{compactenum}
+
+落盘到HDD的写IO，\hl{其行为受xattr.writeback影响}，分两种情况：
+\begin{compactenum}
+\item xattr.writeback == 1，写入ssd的cache区+内存后，返回。
+\item xattr.writeback == 0, 写入HDD。
+\end{compactenum}
+
+落盘到SSD的写IO，不经过Cache, 走原来的IO路径。
+\begin{compactenum}
+\item 自动分层，会优先落到SSD上
+\item priority == 0, 会导致落盘到SSD上
+\end{compactenum}
+
+已知问题
+
+\begin{compactenum}
+\item 原来的分层机制，默认情况下，会写满SSD，导致后续写HDD（先快后慢）。
+\item 异步线程的工作机制 (周期性执行，20min执行一次, 最后才会置换proirity == 0的数据）
+\item disk cache区开启后，就不能再改变，空间无法回收，且不能关闭（不可逆过程）
+\end{compactenum}
+
+不确定的地方
+
+考虑以下问题，初次分配dispatch\_newdisk，等固定了分层后，后续的变更规则是什么？
+
+\subsection{高性能}
+
+网络层：iSER，NVMf
+
+设备层：libnvme/SPDK
+
+libiscsi
+
+tgt
+
+\subsection{分区容忍性}
+
+参考fence.c
+
+\subsection{负载均衡}
 
 \section{复制一致性}
 
@@ -243,102 +351,6 @@ clock丢失，会引起chunk sync过程，极大降低性能。
 如果core hash变化，则需要重建所有clock？
 
 评估内存占用量，load时间等性能指标。如何优化？nvdimm？
-
-\section{精简配置}
-
-每个raw chunk有三者状态：ENOENT，alloc，alloc and zero。第一种和第三种等价。
-
-分配一个chunk，开销较大，影响到精简配置和快照的性能。
-分配一个chunk，涉及到更新元数据。
-
-快照、克隆卷天然就是精简配置的。
-
-磁盘空间分配器，db记录chkid到磁盘位置的映射(采用rocksdb？)。
-
-\section{分层}
-
-卷的xattr，有目标分层设定：priority。默认是-1，即开启自动分层。先落入tier 0，根据数据热度，
-通过异步过程进行数据迁移(纵向的数据流动)。所以有两个异步任务：
-\begin{compactenum}
-\item 统计访问热度
-\item 按策略执行数据迁移(目标分层的偏离，数据热度)
-\end{compactenum}
-
-每个chunk有实际分层：tier，不是在副本级。
-
-\section{SSD缓存}
-
-SSD Cache实现了写缓存，没有实现读缓存, 通过内存实现读缓存。
-
-\subsection{配置项及系统行为}
-
-相关控制参数：
-\begin{enumbox}
-\item lich.conf/disk\_keep: 10G （废弃）
-\item lich.conf/disk\_cache: 10G
-\item 卷的xattr: writeback
-\item 卷的属性：priority (设定卷的目标存储分层）
-\end{enumbox}
-
-disk\_cache配置磁盘cache区，对新盘有效，若一个盘已经配置，就固定了，不再改变。
-此配置对SSD和HDD都起作用，预留磁盘末尾的空间。
-
-priority是手工分层机制，持久化到卷属性上。
-
-tier是自动分层机制，默认行为是什么？ 优先落到SSD上，若SSD满，落到HDD上。
-
-所以，分三种情况：
-\begin{compactenum}
-\item 自动分层，priority == -1，优先落盘到SSD上，如果SSD满，落盘到HDD上
-\item priority == 0, 同自动分层机制
-\item priority == 1，落盘到HDD上（此时根据writeback的设置，决定是否走SSD cache）
-\end{compactenum}
-
-写IO流程
-
-以下两种情况，会落盘到HDD上：
-\begin{compactenum}
-\item priority == 1
-\item SSD满
-\end{compactenum}
-
-落盘到HDD的写IO，\hl{其行为受xattr.writeback影响}，分两种情况：
-\begin{compactenum}
-\item xattr.writeback == 1，写入ssd的cache区+内存后，返回。
-\item xattr.writeback == 0, 写入HDD。
-\end{compactenum}
-
-落盘到SSD的写IO，不经过Cache, 走原来的IO路径。
-\begin{compactenum}
-\item 自动分层，会优先落到SSD上
-\item priority == 0, 会导致落盘到SSD上
-\end{compactenum}
-
-已知问题
-
-\begin{compactenum}
-\item 原来的分层机制，默认情况下，会写满SSD，导致后续写HDD（先快后慢）。
-\item 异步线程的工作机制 (周期性执行，20min执行一次, 最后才会置换proirity == 0的数据）
-\item disk cache区开启后，就不能再改变，空间无法回收，且不能关闭（不可逆过程）
-\end{compactenum}
-
-不确定的地方
-
-考虑以下问题，初次分配dispatch\_newdisk，等固定了分层后，后续的变更规则是什么？
-
-\section{分区容忍性}
-
-参考fence.c
-
-\section{高性能}
-
-网络层：iSER，NVMf
-
-设备层：libnvme/SPDK
-
-libiscsi
-
-tgt
 
 \section{关键过程}
 
