@@ -1,5 +1,27 @@
 #include <cstdio>
 #include <cassert>
+#include <jemalloc/jemalloc.h>
+
+#define IS_POWER_OF_2(x) (!((x) & ((x) - 1)))
+
+static inline int round_up_to_pow_of_2(int val) {
+    int x = 1;
+    while (x < val) {
+        x <<= 1;
+    }
+
+    return x;
+}
+
+static inline int round_down_to_pow_of_2(int val) {
+    int x = 1;
+    while (x <= val) {
+        x <<= 1;
+    }
+
+    x >>= 1;
+    return x;
+}
 
 // n & (n-1) 消去最后的1
 
@@ -22,6 +44,13 @@ void test_bit() {
     printf("%p %d\n", p, *p); p++;
     printf("%p %d\n", p, *p); p++;
     printf("%p %d\n", p, *p); p++;
+
+    for (int i=0; i < 7; i++) {
+        if (IS_POWER_OF_2(i)) {
+            printf("%d is power of 2!\n", i);
+        }
+    }
+
 }
 
 void test_array() {
@@ -37,10 +66,19 @@ void test_array() {
     }
 }
 
+void test_jemalloc() {
+    for (int i=0 ;i < 10000; i++) {
+        malloc(i * 100);
+    }
+
+    malloc_stats_print(NULL, NULL, NULL);
+}
+
 
 int main() {
     test_bit();
     test_array();
+    test_jemalloc();
 
     return 0;
 }

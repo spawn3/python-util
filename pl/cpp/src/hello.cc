@@ -156,6 +156,13 @@ int func_args_stack(int a, int b) {
     return 0;
 }
 
+void test_magic() {
+    test_header(__FUNCTION__);
+
+    void *p = malloc(4096);
+    printf("p = %p\n", p);
+}
+
 int f() {
     printf("f called\n");
     return 0;
@@ -193,6 +200,8 @@ int main(int argc, char *argv[]) {
     {
         func_args_stack(f(), g());
     }
+
+    // test_magic();
 
     return 0;
 }

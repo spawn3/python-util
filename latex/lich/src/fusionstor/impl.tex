@@ -1,10 +1,18 @@
 \chapter{实现相关}
 
 \begin{compactitem}
-    \item polling \change{polling}
     \item coroutine and scheduler
-    \item mbuffer
+    \item polling \change{polling}
     \item kernel bypass
+    \item mbuffer
+\end{compactitem}
+
+\section{编程注意事项}
+
+\begin{compactitem}
+\item goto之前，先设置ret
+\item 大多数情况下，需要检查函数的返回值
+\item 函数的可重入性
 \end{compactitem}
 
 \section{Protocol}
@@ -16,8 +24,8 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 
 \begin{compactitem}
     \item paxos/raft 选举admin和meta节点
-    \item vector clock 副本一致性
     \item lease controller的唯一性
+    \item vector clock 副本一致性
 \end{compactitem}
 
 \section{Coroutine}
@@ -26,15 +34,22 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 \begin{compactitem}
     \item \verb|schedule_task_get|和\verb|schedule_yield|要匹配
     \item task有数量上的限制：1024，超出后容易引起死锁
+    \item schedule\_self 与 schedule\_running不同
 \end{compactitem}
+
+首先进行一种区分，core线程内与外；线程内进一步分为下述两张情况。
+
+core调度器本身不同调用blocking操作，同样需要异步化。分两种情况：
+一、core调度器本身调用block op；二、core内协程调用block op。
+第二种情况可以用schedule\_yield（或core\_request），第一种则不可。如何保序？
 
 \section{AIO}
 
 生产者-消费者模型。
 
-\section{sqlite3}
+\subsection{sqlite3}
 
-异步sqlite3。
+异步sqlite3。etcd，RR也会采用该框架。
 
 \begin{compactitem}
     \item 共10个db，每个一个线程，每个线程管理一个队列
@@ -46,17 +61,23 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 
 消费者线程wait在sem上，生产者线程有消息的时候，调用\verb|sem_post|。
 
-\section{编程注意事项}
-
-\begin{compactitem}
-\item goto之前，先设置ret
-\end{compactitem}
-
 \section{Performance}
 
 4K+1M混合读写，极慢
 
 机械盘关闭localize
+
+IO路径优化
+\begin{enumbox}
+\item 调用深度
+\item DBUG/DINFO等日志
+\item 无关功能
+\item 代码体积大，导致cpu高速缓存失效: -g
+\item lock table用到了hash table
+\item hash table用到了ymalloc/yfree机制管理内存
+\item table2 subvol wrlock
+\item inline
+\end{enumbox}
 
 \subsection{Lease}
 
@@ -77,6 +98,8 @@ EREMCHG错误主要用于控制器发生切换的时候。
 \subsection{Hash}
 
 chkid如何选择hash函数？
+
+\subsection{分支预测}
 
 \subsection{Profile}
 
@@ -111,4 +134,3 @@ syslog
 日志过滤
 
 统计数据：准确性和实时性
-

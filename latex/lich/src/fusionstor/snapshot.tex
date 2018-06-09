@@ -283,3 +283,11 @@ revert的时候，rollback版本号表示目标快照的版本号，如有autosn
 /pool1/system/rollback/vol.32.0
 
 \section{ConsistencyGroup}
+
+使用场景：如一个分布式数据库，log写入一个卷，数据写入另一个卷，如何打快照才能不违反应用层的一致性？
+
+LVM的快照，涉及底层多个物理卷。clvm
+
+ceph组内各卷，共用一个journal，性能低、架构不灵活
+
+CG是一个独立实体，创建后为空，可以把一些卷加进来，按组进行快照操作。

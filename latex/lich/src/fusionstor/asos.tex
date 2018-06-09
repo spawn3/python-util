@@ -1,9 +1,29 @@
 \chapter{作为一个操作系统}
 
+\section{硬件}
+
+硬件特性： 一台服务器有多个NUMA节点，每个NUMA节点包含多个core。
+一个NUMA节点访问本地内存速度快、访问别的NUMA节点速度慢。
+NUMA节点的访问特性对编程意味着什么？
+
+\begin{enumbox}
+\item 列出所有CPU/core
+\item 如何把线程绑定到core上(设置处理器亲和性)
+\item core线程维护TLS和私有memory allocator
+\item core与memory存在什么样的关系，最终表现为访存latency
+\end{enumbox}
+
 \section{Scheduler}
 
 从操作系统的角度去理解协程。协程也意味着执行的不连续性，与上下午切换。
 协程有独立的调度器，负责从就绪队列里选出下一个要执行的任务。
+
+站在scheduler的角度看，coroutine并无大的不同，只是实现了yield和resume方法。
+通过任务队列进行调度，选出下一个要运行的协程。
+协程是非抢占的，没有yield的话，在执行完后返回。
+
+站在线程执行的角度看，scheduler和其它任务也无不同，看指令流顺序执行。
+这是回到执行过程本质的观点。
 
 \subsection{实现}
 
@@ -48,6 +68,70 @@ Actor编程模型，SEDA高并发架构。
 \item schedule\_task\_get和schedule\_yield1必须配对使用
 \end{compactenum}
 
+\section{内存}
+
+要解决的问题，一并发下的扩展性；二是碎片化。
+
+通过buddy allocator解决外部碎片，通过slab allocator解决内部碎片。
+在page allocator的基础上采用object pool模式。
+
+\begin{enumbox}
+\item page table
+\item TLB
+\item cache line
+\item false share
+\end{enumbox}
+
+每个core线程拥有私有内存，但不应静态分配一个固定值，而是动态按需分配。
+因为每个core线程所需内存量可能不均衡，出现总量够，而单个core内存不足的情况。
+
+malloc返回的是虚拟地址，还没有分配物理地址。
+
+预留、总量
+
+优化项：
+\begin{enumbox}
+\item 减少代码体积
+\item IO路径上的函数放入同一代码段
+\item O3编译选项
+\item inline
+\item 去掉debug和info信息
+\item variable\_t
+\item lock table
+\item hash table
+\item replica\_srv\_get
+\end{enumbox}
+
+分析工具：
+\begin{enumbox}
+\item perf
+\item lmbench
+\end{enumbox}
+
+\subsection{资源池模式}
+
+一次从OS申请固定数量的hugepage，用buddy算法管理其alloc、free过程。
+所谓buddy，就是管理一段连续内存单元，随着alloc、free的过程进行拆分与合并的规则。
+最开始的时候，整个区域是连续的、每个节点跟踪记录所能分配的最大连续内存单元。
+
+ring\_pool是固定大小的内存池，可以循环使用。
+
+\subsection{Mem\_Cache}
+
+两种分类
+\begin{enumbox}
+\item 分为两类：core线程私有与公共部分。
+\item slab，分类，每类固定大小，可以自如伸缩。
+\end{enumbox}
+
+\subsection{Others}
+
+\begin{enumbox}
+\item jemalloc
+\item tcmalloc
+\item boost::pool
+\end{enumbox}
+
 \section{控制器}
 
 目录和卷，都通过controller进行管理。目录controller的概念有待进一步完善。
@@ -65,16 +149,8 @@ md\_map是控制器位置缓存，如可以在cache里找到，直接返回。�
 
 控制器加载过程：第一副本非本节点，返回EREMCHG。加载成功后，用vctl缓存管理起来，缓存项带引用计数和删除标志。
 目前，采用lease机制保证vctl的唯一性。其必要性可进一步推演。
-加载过程需要保证并发下的唯一性，如果有多个task发起加载过程，只有一个实际执行，别的进入等待队列。加载完成后，唤醒等待队列里的任务。
-
-\section{内存}
-
-每个core线程拥有私有内存，但不应静态分配一个固定值，而是动态按需分配。
-因为每个core线程所需内存量可能不均衡，出现总量够，而单个core内存不足的情况。
-
-预留、总量
-
-资源池模式
+加载过程需要保证并发下的唯一性，如果有多个task发起加载过程，只有一个实际执行，别的进入等待队列。
+加载完成后，唤醒等待队列里的任务。
 
 \section{调度}
 
@@ -88,4 +164,22 @@ md\_map是控制器位置缓存，如可以在cache里找到，直接返回。�
 
 \subsection{SPDK}
 
+因为提交性能极高，不会block主线程，不需采用AIO。
+
+\section{通信}
+
+SCSI是节点与设备，节点与节点之间的通信协议。
+SCSI over TCP/IP就是iSCSI，即SCSI/iSCSI/TCP协议栈，iSCSI over RDMA是iSER。
+
+NVMe与SCSI是竞争协议，是演化方向。节点与设备：NVMe over PCIe。
+节点之间则是NVMe over fabric（NVMf）。fabric与PCIe是不同的连接通道，泛指节点之间的通信链路。
+
 \subsection{RPC}
+
+封装底层不同链路，如TCP、或RDMA，提供统一的通信入口。
+
+VM与target，可采用vhost方式，即IPC。
+
+\subsection{RDMA}
+
+一是initiator与target之间(SCSI或NVMe协议)；二是各节点的corenet之间(什么协议？)。
