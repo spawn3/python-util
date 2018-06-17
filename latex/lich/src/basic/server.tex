@@ -1,6 +1,10 @@
-\chapter{服务端编程架构}
+\chapter{服务端软件架构}
 
 从节点到集群，从本地到全局
+
+平衡利用各种资源。
+
+\section{引言：C1000K问题}
 
 \section{调度}
 
@@ -8,7 +12,11 @@
 
 controller类似actor概念。
 
+non-blocking IO。
+
 \subsection{CSP}
+
+显式channel
 
 \subsection{SEDA}
 
@@ -16,10 +24,21 @@ actor + pipeline
 
 \section{Memory}
 
+内存分配也是syscall，经过glib包装后，依然不能满足高性能要求。
+
 \begin{enumbox}
-\item actor私有内存
 \item hugepage
-\item buffer\_t
+\item 两层allocator，解决内外碎片问题；
+\item buffer\_t解决zero-copy。
+\item core thread拥有私有内存，解决共享/竞争问题。
 \end{enumbox}
 
 \section{EIT}
+
+\begin{itemize}
+    \item journalling
+    \item update many, commit one
+    \item double check
+    \item double/multi buffer
+    \item half sync, half async
+\end{itemize}

@@ -5,6 +5,40 @@
 
 actor编程模型，SEDA是一个特殊的actor架构。
 
+进程及其通信是基础模型。执行的代换模型与环境模型，事务的页模型与对象模型，
+由简单模型推导关键结论。
+
+并行有两种：竞争并行与协作并行。
+
+\section{PCAM设计方法学}
+
+\begin{enumbox}
+\item 划分 数据划分、任务划分
+\item 通信 任务之间的数据交换
+\item 聚合 合并任务，以提升性能
+\item 映射 任务调度，并符合负载均衡
+\end{enumbox}
+
+\subsection{Example：volume}
+
+volume是一个自然划分，把volume映射到一个core thread上。
+问题是这样做的话，粒度过大，无法有效进行负载均衡，受限于单core最大处理能力。
+
+如果一个subvol映射到一个core thread，粒度合适。但需要引入复杂的控制机制。
+最好是映射到一个节点的多个core上。
+
+以上分析过程用到了完整的PCAM方法。
+
+\subsection{Example：recovery}
+
+\subsection{Example：rmvol}
+
+无需通过controller去做这些事情，可以直接利用db信息。
+
+\subsection{Example：rollback}
+
+\subsection{Example：flatten}
+
 \section{同步原语}
 
 同步原语组成层次结构。并发原语，层层还原，层层构建
