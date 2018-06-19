@@ -282,6 +282,35 @@ revert的时候，rollback版本号表示目标快照的版本号，如有autosn
 
 /pool1/system/rollback/vol.32.0
 
+\section{Bitmap Cache}
+
+要解决的关键问题有：
+\begin{enumbox}
+\item cache一致性
+\item 并发与事务
+\end{enumbox}
+
+一个卷的多个快照，只有一个快照是可写的，其它快照都处于Read-only状态。
+
+每个快照对应一个bitmap，用于映射每个数据页的LBA到底层物理地址。bitmap分两层：第一层私有，第二层在各个快照之间共享。
+在写的时候，触发COW过程，从父快照copy对应的chunk，然后才能写入。
+
+为了提高bitmap的存取性能，引入bitmap cache，按页组织(可以类比于VFS的page cache，每个inode对应一个radix tree)。
+更新bitmap的粒度是bunit，通常为8B，对应一个底层物理位置，一次io可能对应多个bunit，甚至可能跨越page边界。
+
+任一bunit对应的物理位置有三种可能：
+\begin{enumbox}
+\item 本地
+\item 指向某快照
+\item 克隆卷，指向克隆卷的源快照
+\end{enumbox}
+
+需要维护什么序？哪些操作可以并发？
+
+如果是单页更新过程，
+
+如果是多页更新过程，
+
 \section{ConsistencyGroup}
 
 使用场景：如一个分布式数据库，log写入一个卷，数据写入另一个卷，如何打快照才能不违反应用层的一致性？
