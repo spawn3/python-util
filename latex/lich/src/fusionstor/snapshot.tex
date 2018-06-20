@@ -290,22 +290,48 @@ revert的时候，rollback版本号表示目标快照的版本号，如有autosn
 \item 并发与事务
 \end{enumbox}
 
-一个卷的多个快照，只有一个快照是可写的，其它快照都处于Read-only状态。
+问题导向
+\begin{enumbox}
+\item 这是最好的设计/实现吗？
+\item 需要维护什么序？哪些操作可以并发？
+\item chunk的is\_ref与bunit的ref什么关系？
+\item 怎么区分snapshot与clone两种情况？
+\end{enumbox}
 
-每个快照对应一个bitmap，用于映射每个数据页的LBA到底层物理地址。bitmap分两层：第一层私有，第二层在各个快照之间共享。
+chunk的is\_ref表示引用别的快照的L2 bitmap chunk。
+在创建snapshot时，设为1。发生COW后，设为0。
+
+如果chunk的is\_ref == 1，则读出的bunit.ref也等于1。
+(发生COW后)
+如果chunk的is\_ref == 0，则读出的bunit.ref可能有两种值。
+
+在COW后，chunk的is\_ref等于0，对应的所有bunit都等于1。随着卷上发生写操作，对应的bunit也变为0。
+所以两者的含义都是\hl{所指向的对象是否属于卷本身}，用于判断COW与数据写入过程是否需要分配数据块的条件，
+两者都需要持久化。
+
+每个快照对应一个bitmap，用于映射每个数据页的LBA到底层物理地址。
+bitmap分两层：第一层私有，第二层在各个快照之间共享。
 在写的时候，触发COW过程，从父快照copy对应的chunk，然后才能写入。
+
+一个卷的多个快照，只有一个快照是可写的，其它快照都处于Read-only状态。
+所有写的位置，必须是卷本身的数据空间。所以，对任一数据chunk，都是在可写快照时分配的，创建快照后冻结，产生新的写入点。
 
 为了提高bitmap的存取性能，引入bitmap cache，按页组织(可以类比于VFS的page cache，每个inode对应一个radix tree)。
 更新bitmap的粒度是bunit，通常为8B，对应一个底层物理位置，一次io可能对应多个bunit，甚至可能跨越page边界。
 
-任一bunit对应的物理位置有三种可能：
+\subsection{Read}
+
+\subsection{Write}
+
+IO写的时候，对应的每一个bunit，都存在四种状态：
 \begin{enumbox}
 \item 本地
+\item 没有分配
 \item 指向某快照
 \item 克隆卷，指向克隆卷的源快照
 \end{enumbox}
 
-需要维护什么序？哪些操作可以并发？
+后三种情况统一处理。
 
 如果是单页更新过程，
 

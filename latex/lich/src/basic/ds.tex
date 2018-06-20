@@ -22,7 +22,8 @@ scheduler
 
 \section{Hash}
 
-hash函数
+hash函数，hash局部性不佳(影响CPU高速缓存性能)，大的hash表最好分组，极限情况是radix tree。
+Linux Page Cache采用了radix tree，而不是hash。
 
 \section{Heap}
 
