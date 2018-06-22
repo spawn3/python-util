@@ -43,6 +43,22 @@ core调度器本身不同调用blocking操作，同样需要异步化。分两�
 一、core调度器本身调用block op；二、core内协程调用block op。
 第二种情况可以用schedule\_yield（或core\_request），第一种则不可。如何保序？
 
+\section{plock}
+
+一个task有两种状态：一、持有锁；二、等待。
+
+分为两种task：一、持有锁；二，等待。
+
+读操作与写操作不对称。
+
+序列：
+\begin{enumbox}
+\item rrrrrrrr
+\item wwwwwwww
+\item rrwwrrww
+\item wwrrwwrr
+\end{enumbox}
+
 \section{AIO}
 
 生产者-消费者模型。

@@ -109,6 +109,9 @@
     \end{tcolorbox}
 }
 
+\newcommand{\hl}{\bgroup\markoverwith
+  {\textcolor{yellow}{\rule[-.5ex]{2pt}{2.5ex}}}\ULon}
+
 \newcommand*\openquote{\makebox(25,-22){\scalebox{5}{``}}}
 \newcommand*\closequote{\makebox(25,-22){\scalebox{5}{''}}}
 \colorlet{shadecolor}{Azure}
@@ -123,7 +126,6 @@
 \@namedef{endshadequote*}{\endshadequote}
 \makeatother
 
-
 \title{成长}
 \author{炼金术士}
 \date{\today}
@@ -137,12 +139,12 @@
 \tableofcontents
 
 \include{intro}
-\include{daoism}
-\include{yinfu}
-\include{one}
-\include{algo}
-\include{principles}
-\include{strategy}
+\include{tao/daoism}
+\include{tao/one}
+\include{tao/strategy}
+\include{tao/yinfu}
+\include{tao/algo}
+% \include{tao/principles}
 
 \include{2017/11}
 \include{2017/12}
