@@ -1,0 +1,63 @@
+\chapter{Lich Master}
+
+\section{MM}
+
+两级内存管理
+
+\section{RDMA}
+
+RDMA是与TCP并列的一种网络传输方式，需要特定硬件支持，包括RDMA的NIC与交换机。
+网络设备不同于存储设备。
+
+ibverbs API屏蔽了链路层的不同，可以用一套API同时支持IB，RoCE、iWARP等。
+
+\subsection{ibverbs}
+
+分为几个层次：node、core/dev、conn、event。
+
+每个设备对应rdma\_info\_t结构，有ibv\_context属性，是唯一的key。rdma\_cm\_id具有该属性。
+
+\begin{itembox}
+\item pd
+\item cq （被所有连接共享）
+\item mr  (shared)
+\end{itembox}
+
+每个RDMA连接，qp关联到cq上。cq\_poll。iov\_mr
+
+\subsection{MM}
+
+RDMA通信包括两类：msg与数据读写，所需内存都需要register。
+
+向RNIC注册内存
+
+\subsection{建立连接}
+
+采用epoll机制
+
+\subsection{通信}
+
+采用ibv\_cq\_poll机制
+
+\section{iSCSI}
+
+\subsection{iSER}
+
+iSCSI over RDMA
+
+\section{NVMe}
+
+\subsection{SPDK}
+
+\subsection{NVMf}
+
+NVMe over Fabric
+
+\section{Performance}
+
+\subsection{Hash}
+
+\begin{enumbox}
+\item Lock table
+\item Replica srv
+\end{enumbox}
