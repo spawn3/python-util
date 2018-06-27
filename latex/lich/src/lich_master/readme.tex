@@ -6,8 +6,16 @@
 
 \section{RDMA}
 
+\begin{enumbox}
+\item RDMA的编程模型？
+\item RDMA的连接管理过程？
+\item RDMA的内存使用方式有什么不同？
+\item iSCSI/iSER conn是如何关联起来的？
+\item 更好的抽象？
+\end{enumbox}
+
 RDMA是与TCP并列的一种网络传输方式，需要特定硬件支持，包括RDMA的NIC与交换机。
-网络设备不同于存储设备。
+网络设备不同于存储设备，RDMA可以carry任意网络流量，包括iSCSI/iSER，自定义协议(corenet)等。
 
 ibverbs API屏蔽了链路层的不同，可以用一套API同时支持IB，RoCE、iWARP等。
 
@@ -23,7 +31,17 @@ ibverbs API屏蔽了链路层的不同，可以用一套API同时支持IB，RoCE
 \item mr  (shared)
 \end{itembox}
 
+深刻理解一个RDMA连接管理的过程，建立连接的每个阶段需要做哪些工作？
+
 每个RDMA连接，qp关联到cq上。cq\_poll。iov\_mr
+
+qp支持ibv\_post\_recv操作，peer的send操作会消耗这些buffer，
+在与远端建立之后，就应注册相关buffer，建立必要的关系，特别是指定wr\_id属性，并post，然后等待接受请求。
+
+在ibv\_cq\_poll之后，得到的ibv\_wc里，包含所需上下午信息(post之前建立的关系，初始化task时)。
+可以直接从buffer里recv到的数据。
+
+RDMA是异步通信机制。
 
 \subsection{MM}
 
@@ -42,6 +60,8 @@ RDMA通信包括两类：msg与数据读写，所需内存都需要register。
 \subsection{协议-iSER}
 
 iSCSI over RDMA
+
+iSCSI分多阶段，包括Login、Full Feature等。
 
 \subsection{协议-NVMf}
 
