@@ -2,7 +2,34 @@
 
 \section{MM}
 
+\subsection{问题}
+
+\begin{enumbox}
+\item 简单接口
+\item 便于调试
+\item 并发性能
+\item 内外碎片
+\item 动态化
+\item RDMA内存
+\item replica\_srv\_init不能利用core内存，模块依赖性
+\item Hash局部性不好，不利于CPU高速缓存
+\end{enumbox}
+
+\subsection{现状}
+
 两级内存管理
+
+分为core内外两种情况：core使用私有内存。
+
+源文件：
+\begin{enumbox}
+\item ylib/lib/mem.c
+\item ylib/lib/mem\_hugepage.c
+\item ylib/lib/mem\_cache.c
+\item ylib/lib/mem\_pool.c
+\item ylib/lib/buddy.c
+\item ylib/lib/buffer.c
+\end{enumbox}
 
 \section{RDMA}
 
@@ -23,7 +50,8 @@ ibverbs API屏蔽了链路层的不同，可以用一套API同时支持IB，RoCE
 
 分为几个层次：node、core/dev、conn、event。
 
-每个设备对应rdma\_info\_t结构，有ibv\_context属性，是唯一的key。rdma\_cm\_id具有该属性。
+每个设备对应rdma\_info\_t结构，有ibv\_context属性，是唯一的key。
+rdma\_cm\_id具有该属性。
 
 \begin{itembox}
 \item pd
