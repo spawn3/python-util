@@ -436,3 +436,19 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 \end{compactenum}
 
 任何两个操作之间发生故障，都会导致问题。
+
+\section{ETCD}
+
+依赖于服务器物理时间？
+
+\section{架构优化}
+
+\begin{enumbox}
+\item 统一内存管理
+\item Radix Tree
+\item pool下的目录结构
+\item lease是否必须
+\item Volume与snapshot位于同一节点内
+\item subvol控制器（负载均衡）
+\item 内置http server，导出状态数据
+\end{enumbox}

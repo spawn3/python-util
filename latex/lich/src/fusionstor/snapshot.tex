@@ -1,5 +1,9 @@
 \chapter{Snapshot}
 
+抽象出AbstractVolume，Volume、Snapshot、Clone都是其子类。
+
+\hl{卷或克隆卷扩容后，快照没有相应扩容，会返回ENOENT，需要填充0}。
+
 \section{问题}
 
 \begin{enumbox}
