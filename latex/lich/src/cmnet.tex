@@ -9,6 +9,11 @@
 
 对标\hl{移动集采测试规范}
 
+注意事项
+\begin{enumbox}
+\item 记录每一个任务的时长，完成所有任务的总时长
+\end{enumbox}
+
 \subsection{Hardware}
 
 同质化项：
@@ -16,6 +21,8 @@
 \item 开机Logo
 \item 贴标
 \item 开机卡，需断电源
+\item IPMI
+\item 万兆网卡双bond (交换机)
 \end{enumbox}
 
 \subsection{Software}
@@ -34,16 +41,6 @@ BUG
 \item bcache拔cache盘后需要重启服务器
 \end{enumbox}
 
-性能：
-\begin{enumbox}
-\item \hl{打开chunk parallel开关}
-\item \hl{禁用core}
-\item 优化Log
-\item O3编译
-\item -g
-\item 代码段
-\end{enumbox}
-
 功能：
 \begin{enumbox}
 \item IPv6
@@ -53,6 +50,24 @@ BUG
 \item Balance
 \item QoS
 \item QoS 1.1抖动幅度是否需要可配置
+\end{enumbox}
+
+性能：
+\begin{enumbox}
+\item \hl{打开chunk parallel开关}
+\item \hl{禁用core}
+\item 优化Log
+\item O3编译
+\item -g
+\item 代码段
+\item 恢复性能
+\end{enumbox}
+
+可靠性
+\begin{enumbox}
+\item 网络
+\item 节点
+\item 磁盘
 \end{enumbox}
 
 \section{LEFT}
