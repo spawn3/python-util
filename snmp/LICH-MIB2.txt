@@ -1,0 +1,16 @@
+LICH-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    -- MODULE-IDENTITY, OBJECT-TYPE, TimeTicks FROM SNMPv2-SMI
+    -- DisplayString FROM SNMPv2-TC
+    enterprises FROM RFC1155-SMI;
+
+hunyun OBJECT IDENTIFIER ::= { enterprises 31415926 }
+
+trapEvent NOTIFICATION-TYPE
+	OBJECTS { sysLocation }
+	STATUS current
+	DESCRIPTION "trap notification"
+	::= { hunyun 1 }
+
+END

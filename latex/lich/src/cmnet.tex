@@ -5,6 +5,45 @@
 性能不是一个值，而是不同场景下的特征曲线。性能是系统配置和负载的函数：$P=F(S, W)$。
 精简配置，快照，故障，实现机制等因素都会影响性能及其抖动。
 
+\section{CheckList}
+
+\subsection{Hardware}
+
+同质化项：
+\begin{enumbox}
+\item 开机Logo
+\item 贴标
+\end{enumbox}
+
+\subsection{Software}
+
+标前测试：
+\begin{enumbox}
+\item 管理系统相关Logo
+\item 安装
+\item 上架
+\item 性能测试
+\end{enumbox}
+
+性能：
+\begin{enumbox}
+\item \hl{打开chunk parallel开关}
+\item 禁用core
+\item 优化Log
+\item O3编译
+\item -g
+\item 代码段
+\end{enumbox}
+
+功能：
+\begin{enumbox}
+\item IPv6
+\item SNMP
+\item bcache
+\item 拔cache盘后需要重启服务器
+\item etcd依赖于物理时间
+\end{enumbox}
+
 \section{LEFT}
 
 \subsection{可靠性}
