@@ -7,12 +7,15 @@
 
 \section{CheckList}
 
+对标\hl{移动集采测试规范}
+
 \subsection{Hardware}
 
 同质化项：
 \begin{enumbox}
 \item 开机Logo
 \item 贴标
+\item 开机卡，需断电源
 \end{enumbox}
 
 \subsection{Software}
@@ -20,15 +23,21 @@
 标前测试：
 \begin{enumbox}
 \item 管理系统相关Logo
-\item 安装
 \item 上架
+\item 安装
 \item 性能测试
+\end{enumbox}
+
+BUG
+\begin{enumbox}
+\item etcd依赖于物理时间
+\item bcache拔cache盘后需要重启服务器
 \end{enumbox}
 
 性能：
 \begin{enumbox}
 \item \hl{打开chunk parallel开关}
-\item 禁用core
+\item \hl{禁用core}
 \item 优化Log
 \item O3编译
 \item -g
@@ -40,8 +49,10 @@
 \item IPv6
 \item SNMP
 \item bcache
-\item 拔cache盘后需要重启服务器
-\item etcd依赖于物理时间
+\item Recovery
+\item Balance
+\item QoS
+\item QoS 1.1抖动幅度是否需要可配置
 \end{enumbox}
 
 \section{LEFT}
@@ -59,6 +70,7 @@ disk bitmap无，而sqlite有。会导致什么结果？多个sqlite记录指向
 \subsection{性能}
 
 clock(副本一致性)
+
 msqqueue(操作日志)
 
 卷分为chunk，chunk有多副本。在独立的部分之间，尽量并发。
@@ -101,12 +113,11 @@ timer不工作，是堵塞还是其它？
 \item Volume size
 \item Volume mv and copy
 \item Volume IOPS QOS
-\item Row2 Snapshot
 \item Mapping
-\item Recovery
-\item Load Balance
-\item 可靠性 Robustness
-\item Performance
+%\item Recovery
+%\item 可靠性 Robustness
+%\item Load Balance
+%\item Performance
 \item extentability
 \end{enumbox}
 
@@ -169,6 +180,13 @@ timer不工作，是堵塞还是其它？
 \item 拔盘后，感知状态变化较慢。如\verb|md_chunk_set|不持久化meta，有无副作用？恢复时，也可不持久化。
 \end{enumbox}
 
+\subsection{负载均衡}
+
+均衡有数据均衡和负载均衡之分。
+
+单卷的负载均衡，因为FusionStor卷控制器绑定到core上，只能利用单核能力。
+CPU利用率上有瓶颈。同时，开启polling模式，会独占core cpu。
+
 \subsection{QoS算法}
 
 卷的IOPS和带宽，数据恢复的QoS，采用同一算法：令牌桶Token bucket。
@@ -183,12 +201,9 @@ fio队列深度过大，iscsi会有优化，进行IO聚合提交。这样一来�
 但是，各层观察到的带宽应该一致，保证流量守恒。
 \end{tcolorbox}
 
-\subsection{负载均衡}
+\subsection{Cache}
 
-均衡有数据均衡和负载均衡之分。
-
-单卷的负载均衡，因为FusionStor卷控制器绑定到core上，只能利用单核能力。
-CPU利用率上有瓶颈。同时，开启polling模式，会独占core cpu。
+BCache
 
 \subsection{Misc}
 
