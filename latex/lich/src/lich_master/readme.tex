@@ -17,10 +17,6 @@
 
 \subsection{现状}
 
-两级内存管理
-
-分为core内外两种情况：core使用私有内存。
-
 源文件：
 \begin{enumbox}
 \item ylib/lib/mem.c
@@ -30,6 +26,21 @@
 \item ylib/lib/buddy.c
 \item ylib/lib/buffer.c
 \end{enumbox}
+
+两级内存管理
+
+分为core内外两种情况：core使用私有内存。
+
+先生成hugepage，并置0。malloc后得到虚拟地址空间，把hugepage依次mmap到该虚拟地址空间。
+
+hugepage与numa物理内存的关系是怎么样的？什么时候建立起来的？
+
+底层hugepage不一定要用buddy，并且应可动态扩展。
+然后是pool层，可动态扩展，用buddy管理每个hugepage。
+其上是对象层slot，用于分配应用对象，用大小不等的多个队列管理。
+
+RDMA需要注册内存，目前是把整个core内存一次性注册了。
+每个core都调用注册函数？
 
 \section{RDMA}
 
