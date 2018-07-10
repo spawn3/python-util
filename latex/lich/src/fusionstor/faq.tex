@@ -12,6 +12,15 @@ P2: lsv\_gc\_check断言失败
 
 P3: Error Handling
 
+\section{约束}
+
+\subsection{最大副本数}
+
+6
+
+\subsection{单卷最大快照数}
+
+
 \section{Performance}
 
 \subsection{估算}
@@ -30,3 +39,9 @@ HDD：
 \item 磁盘
 \item 副本数
 \end{enumbox}
+
+\subsection{精简卷顺序1M写入性能低}
+
+subvol写锁，导致串行化
+
+用allocate命令先批量填充，性能有显著提升。
