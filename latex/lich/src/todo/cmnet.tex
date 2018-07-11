@@ -9,10 +9,21 @@
 
 对标\hl{移动集采测试规范}
 
+当前遇到的问题
+\begin{enumbox}
+\item 155 load过高
+\item vdbench提前退出(76, 77, Pipe broken，port 22)
+\item allocate、故障下coredump
+\item 其它方面的验证（QoS，Recovery）
+\item 标前测试的价值？
+\item 只参与一个标前测试
+\item 标前、标后的时间安排
+\end{enumbox}
+
 注意事项
 \begin{enumbox}
 \item 参考去年FS测试经验
-\item 演练
+\item 人员、演练
 \item 严控测试时长，记录每一任务的时长，所有任务的总时长
 \end{enumbox}
 
@@ -20,11 +31,13 @@
 
 \begin{enumbox}
 \item 预备工作
+\item 预备工作 - 文档
 \item 预备工作 - RAID1
 \item 进场
 \item 安装系统(测试机、压力机)
 \item 检测硬件
 \item 执行测试用例
+\item 预填充+vdbench 1M（串行 or 并行）
 \end{enumbox}
 
 \subsection{Hardware}
