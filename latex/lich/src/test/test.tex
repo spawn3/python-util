@@ -86,9 +86,23 @@ lichbd snap create p1/iscsi/v1@snap1
 
 省略...
 
+\subsection{iSCSI}
+
 \begin{lstlisting}[language=bash]
 iscsiadm -m discovery -t st -p 192.168.251.202
 \end{lstlisting}
+
+\subsection{fio}
+
+单机测试
+
+\subsection{vdbench}
+
+支持分布式测试。
+
+在master上配置和查看日志，master配置为可以免密登录slave节点。
+
+slave上需要提前把卷挂载好。
 
 \section{故障测试}
 
