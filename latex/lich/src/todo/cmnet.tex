@@ -67,21 +67,39 @@ BUG
 \item bcache拔cache盘后需要重启服务器
 \end{enumbox}
 
+配置
+\begin{enumbox}
+\item polling core的数量
+\item \hl{禁用coredump}
+\item cache开关
+\end{enumbox}
+
 功能：
 \begin{enumbox}
 \item IPv6
 \item SNMP
-\item bcache
+\item ...
 \item Recovery
+\item ...
 \item Balance
+\item Balance启用产生coredump
+\item ...
 \item QoS
 \item QoS 1.1抖动幅度是否需要可配置
+\item opt\_iops\_jitter，动态可配置
+\item ...
+\item 网卡bond，部分接口down
+\item 设置vip，netmask计算方法
+\item ...
+\item bcache dirty data, disk\_list
+\item bcache
+\item ...
+\item 连接管理，删除卷后
 \end{enumbox}
 
 性能：
 \begin{enumbox}
 \item \hl{打开chunk parallel开关}
-\item \hl{禁用core}
 \item 优化Log
 \item O3编译
 \item -g
