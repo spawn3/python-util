@@ -116,6 +116,18 @@ BUG
 
 \section{LEFT}
 
+\subsection{IPv6}
+
+配置
+\begin{enumbox}
+\item 在存储节点上配置IPv6网络地址
+\item 在测试机上配置IPv6网络地址
+\item 测试网络连通性：ping6
+\item iscsiadm -m discovery -t st -p [::1]
+\item iscsiadm -m discovery -t st -p [::1] -l
+\end{enumbox}
+
+
 \subsection{可靠性}
 
 诊断写错误效率太低，需要完善分析方法和工具。
