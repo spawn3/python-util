@@ -1,0 +1,98 @@
+\chapter{Bcache}
+
+\section{管理}
+
+与web管理系统配合，通过web能完成大部分操作
+
+disk list，返回json，不能有别的输出，比如调试信息等。
+
+\section{RAID}
+
+有坏盘，导致RAID进入保护模式，能列出物理设备(Foreign状态)，不能列出逻辑设备。
+
+RAID变成writethrough模式？\hl{writeback模式的RAID有丢失数据的风险}。
+
+拔的盘，重新加入raid阵列：
+\begin{enumbox}
+\item raid miss
+\item raid load？Foreign状态，Import 导致服务器hang住
+\item raid add？Foreign状态，Clear 导致服务器hang住
+\end{enumbox}
+
+\section{原理}
+
+二实一虚，2+1=3，两类物理设备，一类虚拟设备，虚拟设备是入口
+
+三种cache mode
+
+writeback的复杂性
+
+基本用法
+\begin{enumbox}
+\item 分别格式化cache盘与数据盘
+\item 数据盘绑定到cache盘
+\item 向kernel注册，每个数据盘出现一个/dev/bcacheXX虚拟设备
+\end{enumbox}
+
+\subsection{工具}
+
+\begin{enumbox}
+\item make-bcache
+\item wipefs
+\item lsblk
+\item bcache-super-show
+\item dmesg
+\item lsmod
+\item /sys/fs/bcache
+\item /sys/block
+\item dd if=/dev/zero of=/dev/sdb count=1 bs=1024 seek=4
+\end{enumbox}
+
+\section{可靠性}
+
+手动测试，无fusionstor的情况
+\begin{enumbox}
+\item 拔出数据盘
+\item 拔出cache盘
+\end{enumbox}
+
+一定需要重启服务器吗？
+
+单节点故障与单磁盘故障有很大不同，对应的恢复过程和性能也有很大不同。
+
+卷控制器rebalance后，不自动触发恢复过程
+
+RECOVERY\_RMQ\_MAX\_RECORD
+
+\subsection{RAID的影响}
+
+% 拔数据的状态机，恢复完成后会踢出该盘
+
+加入raid后，bcache导致kernel hangup。
+
+有什么办法在加入raid前，先禁用bcache。待raid ready后，再启用bcache？
+操作范围：cache set。
+
+重启节点，后导致clock丢失，如果一定会发生hangup，最好先stop lich，起到保存clock的目的。
+
+盘符变化后，需要重启lich，重建相关链接
+
+副本多的情况
+
+\section{性能}
+
+测试缓存命中率
+
+单节点故障下的性能
+\begin{enumbox}
+cache disk的性能
+bcache的各项配置 (cache mode, writeback percent, cutoff)
+\end{enumbox}
+
+\section{FAQ}
+
+readitems crc error
+
+btree head error
+
+/dev/sd*多出的设备是因为IPMI。
