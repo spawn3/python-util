@@ -73,6 +73,8 @@ RECOVERY\_RMQ\_MAX\_RECORD
 有什么办法在加入raid前，先禁用bcache。待raid ready后，再启用bcache？
 操作范围：cache set。
 
+cache disk不做成RAID0，做出JBOD模式如何？
+
 重启节点，后导致clock丢失，如果一定会发生hangup，最好先stop lich，起到保存clock的目的。
 
 盘符变化后，需要重启lich，重建相关链接
@@ -85,8 +87,8 @@ RECOVERY\_RMQ\_MAX\_RECORD
 
 单节点故障下的性能
 \begin{enumbox}
-cache disk的性能
-bcache的各项配置 (cache mode, writeback percent, cutoff)
+\item cache disk的性能
+\item bcache的各项配置 (cache mode, writeback percent, cutoff)
 \end{enumbox}
 
 \section{FAQ}
