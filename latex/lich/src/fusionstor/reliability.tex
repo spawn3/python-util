@@ -1,0 +1,35 @@
+\chapter{可靠性}
+
+\section{磁盘故障}
+
+拔盘，引起IO错误，或检测线程检测出磁盘不可写状态，此时，把磁盘的内存状态设为offline，并删除对应软链接。
+调度进行恢复操作。待恢复完成后，disk unload，才正式从集群中剔除。
+
+写过程中发生EIO，则会导致lichd进程重启。在退出之前，调用disklost过程，删除软链接。
+
+如果没有删除完成，重启了lichd，则会修复软链接，加载该盘。
+
+测试中，出现了无软链接，但有别的相关磁盘文件的情况，磁盘加载后进入offline状态，但因为数据库残存有该磁盘的相关记录，
+故进入不了完全删除的状态。lich health显示有offline磁盘。
+
+\subsection{磁盘元数据}
+
+磁盘文件：
+\begin{enumbox}
+\item /opt/fusionstack/data/disk/disk/\%.disk (soft link)
+\item /opt/fusionstack/data/disk/block/\%.block
+\item /opt/fusionstack/data/disk/bitmap/\%.bitmap
+\item /opt/fusionstack/data/disk/info/\%.info
+\item /opt/fusionstack/data/disk/tier/\%.tier
+\item /opt/fusionstack/data/disk/speed/\%.speed
+\end{enumbox}
+
+内存状态：
+\begin{enumbox}
+\item offline
+\item deleting
+\end{enumbox}
+
+\subsection{管理线程}
+
+\section{节点故障}

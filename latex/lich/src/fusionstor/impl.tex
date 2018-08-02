@@ -1,22 +1,26 @@
 \chapter{实现相关}
 
-问题集
-\begin{enumbox}
-\item lichd --init做了什么
-\item 每个节点的nid保存在哪儿，如何分配的？
-\item /opt/fusionstack/data目录布局
-\item /dev/shm/lich4目录布局
-\item cleanup
-\item clock机制
-\item hsm
-\end{enumbox}
+\section{目录结构}
 
-\begin{compactitem}
-\item coroutine and scheduler
-\item polling \change{polling}
-\item kernel bypass
-\item mbuffer
-\end{compactitem}
+\begin{enumbox}
+\item /opt/fusionstack/data
+\item /opt/fusionstack/data/etcd
+\item /opt/fusionstack/data/node
+\item /opt/fusionstack/data/disk
+\item /opt/fusionstack/data/chunk
+\item /opt/fusionstack/data/status
+\item /opt/fusionstack/data/recovery
+\item /opt/fusionstack/data/cleanup
+\item 
+\item /dev/shm/lich4
+\item /dev/shm/lich4/msgctl
+\item /dev/shm/lich4/nodectl/*
+\item /dev/shm/lich4/maping
+\item /dev/shm/lich4/clock
+\item /dev/shm/lich4/hb\_timeout
+%\item /dev/shm/lich4/recovery
+\item /dev/shm/lich4/volume
+\end{enumbox}
 
 \section{编程注意事项}
 
