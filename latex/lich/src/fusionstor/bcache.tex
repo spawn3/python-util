@@ -56,6 +56,14 @@ writeback的复杂性
 \item 拔出cache盘
 \end{enumbox}
 
+拔出cache disk，执行如下步骤进行修复：
+\begin{enumbox}
+\item 修复RAID
+\item 修复bcache的attach关系
+\item 修复lich 磁盘软链接（如果没有恢复完成，此时磁盘没有踢出集群）
+\item 如果恢复完成，则作为新盘加入
+\end{enumbox}
+
 一定需要重启服务器吗？
 
 单节点故障与单磁盘故障有很大不同，对应的恢复过程和性能也有很大不同。
