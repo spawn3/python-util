@@ -15,16 +15,18 @@
 
 \section{Disk}
 
+画出Disk的状态机
+
 \subsection{Tool}
 
 操作磁盘的工具
 \begin{enumbox}
 \item hdparm set/get hard disk parameters
-\item iostat
 \item lsscsi
 \item udevadm
 \item sg\_inq
-\item disk2lid
+\item disk2lid (自己实现的)
+\item iostat
 \end{enumbox}
 
 \subsection{Cache}
@@ -61,20 +63,36 @@ NVMe在不在RAID里，系统盘呢？看不到系统盘，是因为系统盘不
 
 磁盘管理元数据目录：/opt/fusionstack/data/disk：
 \begin{compactitem}
-\item disk
-\item \hl{bitmap}
-\item info
+\item disk (磁盘在线离线的开关)
+\item block (super block)
+\item info (diskinfo)
+\item \hl{bitmap} (不可丢)
 \item tier
+\item speed
 \end{compactitem}
 
 对每块磁盘，开头的1M是引导信息，通过bitmap来进行空间管理。
 引导信息包含了所在节点信息，所以只能在节点内进行磁盘漫游。
 
+\begin{figure}[h]
+    \centering
+    \caption{磁盘数据布局}
+    \includegraphics{../images/disk_layout.png}
+\end{figure}
+
+磁盘头的元数据布局：MBR(0)+SB(1024)+DISKINFO(4096)。
+其中SB包含定义的扩展属性：(cluster, node, type, disk, pool, cache, cached, cset)
+
+每块盘的disk id属性，可用来重建disk/disk目录下的软链接。
+block与info文件都可以通过读取磁盘头重建出来。bitmap文件则不可丢。
+
 所在源文件是\emph{diskmd.c}。调用fnotify\_register监控磁盘目录的变化，进而添加或移除相应磁盘。
+
+sqlite3划分为10个db文件，chkid信息hash到相应的db。每个db包含两个table：metadata和raw。
 
 每个节点最多可以添加256个磁盘。
 
-sqlite3划分为10个db文件，chkid信息hash到相应的db。每个db包含两个table：metadata和raw。
+通过lich.node添加磁盘后，创建软链接，触发lichd的相关处理过程。
 
 \begin{lstlisting}[frame=single]
 CREATE TABLE metadata (key text primary key, 
