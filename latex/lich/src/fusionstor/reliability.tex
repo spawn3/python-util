@@ -1,11 +1,26 @@
 \chapter{可靠性}
 
+\section{场景}
+
+追踪如下典型场景：
+\begin{enumbox}
+\item 添加盘
+\item 拔盘后插入
+\item 删除盘，删除pool，重用该盘
+\end{enumbox}
+
+磁盘的状态通过状态机来维护。每种状态下，其关联的资源项的明确规定。
+
+一个磁盘处在out/in状态的标志是什么？
+
+如何快速清除一个pool？
+
 \section{磁盘故障}
 
 拔盘，引起IO错误，或检测线程检测出磁盘不可写状态，此时，把磁盘的内存状态设为offline，并删除对应软链接。
 调度进行恢复操作。待恢复完成后，disk unload，才正式从集群中剔除。
 
-写过程中发生EIO，则会导致lichd进程重启。在退出之前，调用disklost过程，删除软链接。
+\hl{写过程中发生EIO，则会导致lichd进程重启}。在退出之前，调用disklost过程，删除软链接。
 
 如果没有删除完成，重启了lichd，则会修复软链接，加载该盘。
 
@@ -14,7 +29,16 @@
 
 \subsection{磁盘元数据}
 
-磁盘文件：
+一个磁盘的状态，依赖于其本身与关联元数据资源。约分为三级：
+\begin{enumbox}
+\item 物理磁盘+RAID
+\item + BCACHE
+\item LICH磁盘 (数据文件与内存状态)
+\end{enumbox}
+
+其他派生状态
+
+LICH磁盘文件：
 \begin{enumbox}
 \item /opt/fusionstack/data/disk/disk/\%.disk (soft link)
 \item /opt/fusionstack/data/disk/block/\%.block
@@ -24,7 +48,7 @@
 \item /opt/fusionstack/data/disk/speed/\%.speed
 \end{enumbox}
 
-内存状态：
+LICH内存状态：
 \begin{enumbox}
 \item offline
 \item deleting
