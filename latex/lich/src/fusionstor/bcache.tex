@@ -1,8 +1,17 @@
 \chapter{Bcache}
 
-bcache是一内置模块，用lsmod看不到。内核4.17版本的bcache符合预期。
+\section{已知问题}
+
+\begin{enumbox}
+\item disk管理的改动是否影响NVMe，需要测试
+\item 加新盘，如果bcache没有被重新格式化
+\item 如果触发disk load过程
+\item 停止恢复后，gc怎么做？
+\end{enumbox}
 
 \section{管理}
+
+bcache是一内置模块，用lsmod看不到。内核4.17版本的bcache符合预期。
 
 与web管理系统配合，通过web能完成大部分操作
 
