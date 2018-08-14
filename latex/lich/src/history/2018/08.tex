@@ -34,3 +34,36 @@
 常用标准、协议、算法等。
 
 以块为中心，慢慢过渡到统一存储，一个存储架构提供多个接口是否是合理选择？why not？
+
+今天要解决什么问题？
+\begin{enumbox}
+\item 无RAID卡时，调用RAID相关功能出现异常 [y]
+\item cron触发lich.node --disk\_load [y]
+\item 反思lich.node --start时重建symlink的合理性 (跳过标记为不可用的disk)
+\item \hl{如何验证是否影响到NVMe设备}
+\item \hl{bcache没有reformat，能否作为新盘加入}？
+\item 故障磁盘上线后，终止相应的磁盘恢复过程，是否需要独立的GC？
+\end{enumbox}
+
+需要管理几个层次上的事情：物理设备/RAID，bcache，lich。
+
+检测到磁盘故障，设置该盘进入offline状态，同时清除对应的disk文件，关闭文件描述符(否则bcache无法register)。
+待恢复完成后，清除其他的磁盘文件(block, info, bitmap等)。
+
+若在恢复的过程中，调用了lich.node --start，则会重建disk文件，再次触发检测过程。
+这个过程，可以模拟拔盘插盘后自动上线的场景。
+
+检测到磁盘故障时，做标记，一是是否能做上标记；二是即便能标记成功，何时清除该标记？
+在拔盘插盘的情况下，不清除标记，就无法自动加入。
+
+问题在于，write EIO会导致lichd进程退出，如果配置restart=on，会自动重启lichd。
+需要重新思考的是，\hl{write EIO为什么会导致lichd重启，如何才能做到不重启}？
+
+如果把lich.node --disk\_load做成周期性任务，则无非通过删除symlink来模拟磁盘故障。
+同时会干扰整个逻辑：\hl{处在恢复中的磁盘，会进入检测-删除软链接-软链接被修复的循环}。
+
+\hl{只load前后之差值}？即是通过修复raid与bcache之后，多出来的设备。不改变lich.node --start的语义。
+
+\begin{enumbox}
+\item Ceph是怎么处理这个问题的？其它系统呢？
+\end{enumbox}
