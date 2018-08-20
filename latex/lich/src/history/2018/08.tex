@@ -118,4 +118,61 @@ U形理论的核心就是沉下来，重为轻根，静为燥君。是以君子�
 \begin{enumbox}
 \item 评估bcache dirty data的影响
 \item 配合测试解决问题
+\item 拔cache盘，disable cache (做RAID1？)
+\item 下电节点，性能下降（vfm，clock）
+\item write EIO
+\item recovery when pool deleted
+\item 100G文件MD5sum需要多久
+\item 完善诊断工具
+\end{enumbox}
+
+vfm标记节点故障，可以简化部分检测工作。
+io带内恢复，会极大地降低性能。先标记，延迟恢复。
+
+clock不一致引发的恢复流量，对性能也有一定影响。
+
+延迟重建，故障发生后，按规则执行重建，如果只有一处故障，延迟一定时间进行重建。
+
+诊断工具的前提：
+\begin{enumbox}
+\item 本地、集群（汇总本地状态）
+\item lichd在线，lichd无法启动
+\item 分离MVC
+\end{enumbox}
+
+\subsection{0817}
+
+\begin{enumbox}
+\item bcache cache disk破坏后，重启服务器能否恢复正常？
+\item 对cache disk做RAID1，效果如何？
+\item bcache的dirty data在各种场景下是否行为一贯正确？
+\item 作为新盘加入，需要做什么？
+\end{enumbox}
+
+拔数据盘，盘符变化，如sda变成sdai，导致/sys/fs/bcache/<uuid>下的链接失效，如何校正？
+
+重启后，能恢复，其中一次出现readitems core，数据损坏。
+
+新盘sdai
+
+\subsection{0820}
+
+今天解决的问题：
+\begin{enumbox}
+\item 对disk的部分访问没有并发保护，导致close文件描述符时出错，应该还有别的并发问题。
+\item write EIO不再coredump，效果有待进一步观察。
+\end{enumbox}
+
+升级到kernel-4.18.3，bcache表现符合预期。升级方法：
+\begin{itembox}
+\item rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+\item yum --enablerepo=elrepo-kernel install -y kernel-ml
+\item grub2-set-default 0
+\item reboot
+\end{itembox}
+
+有待解决的问题：
+\begin{enumbox}
+\item \hl{进一步完善诊断工具，对系统运行状态了了分明}。
+\item 观察lich health的输出是否正确？
 \end{enumbox}
