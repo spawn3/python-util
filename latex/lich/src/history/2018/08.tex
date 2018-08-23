@@ -271,3 +271,37 @@ sync, async，direct IO区别是什么，dd，mount等命令可以指定这些�
 标准、协议、算法
 
 任何文件（包括设备文件）都可以格式化为文件系统，然后mount。
+
+按上下左右模式理解块存储的定位，下是硬件，上是应用场景，左是运维平台，右是云平台。
+这种思维方式也可以用来理解kernel的各个模块之间的关系。比如VFS。
+在Linux的世界里，一切皆文件。
+
+四面八方，立于中央。
+
+拔出一块数据盘，bcache会如何处理与该盘相关的dirty data呢？
+该数据盘不在线，故cache无法flush该盘相关的dirty data。\hl{理想的行为，应是一直保有该dirty data}。
+如果丢弃了部分dirty data，会导致数据不一致。cache disk的dirty data加上data disk的数据，才是完整数据。
+
+合并成一个分支，这是需要的，资源分散，重复劳动，效率极为底下。
+
+高性能版本通过配置文件启用。增加的模块主要有：
+\begin{enumbox}
+\item SPDK/NVMe
+\item RDMA
+\item \hl{DPDK}?
+\item iSCSI/iSER
+\item NVMf
+\end{enumbox}
+
+从存储+网络+计算三方面去加深理解，四面八方。
+
+介质上增加了NVMe支持，\hl{网络走RDMA，对应的网络协议变更：iSER, NVMf}。
+RDMA的支持有两处：一是target的RDMA支持，二是存储网络之间的RDMA通信。
+
+NVMe设备有两种使用方式：一是通过/dev/设备文件，采用aio方式； 二是通过pci号直接访问，与控制器直接通信。
+后者性能要好很多。
+
+kernel bypass，用户态代码直接与设备控制器通信，设备控制器具有独立的处理器（offload）。
+在上而言是target，导出服务的接口、协议，在下而言是driver，资源管理。
+
+介质、网络、协议的细节如何？
