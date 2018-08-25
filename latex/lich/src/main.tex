@@ -145,29 +145,39 @@
 
 \part{FusionStor}
 
-\include{fusionstor/deploy}
-\include{fusionstor/hardware}
-\include{fusionstor/arch}
-% \include{fusionstor/etcd}
+纵横交织，用视图和视角矩阵重新组织本部分的内容，软件架构、硬件架构、部署都作为特定视图来处理。
+
+每个视图有适用的受众，或利益干系人。视点集是创建视图的结构化模板库，每个视点对应有若干关注点。
+视角是看待任意系统的特定维度，主要与质量属性相关，在视图内应用视角来深化质量属性。
+
+根据视点创建视图，根据视角优化视图模型。
+
+% functional view
 \include{fusionstor/model}
+\include{fusionstor/arch}
 \include{fusionstor/pool}
 \include{fusionstor/volume}
 \include{fusionstor/snapshot}
 \include{fusionstor/task}
-
-\include{fusionstor/qos}
+\include{fusionstor/iscsi}
 \include{fusionstor/bcache}
 
-\include{fusionstor/optimize}
+% perspective
 \include{fusionstor/reliability}
 \include{fusionstor/perf}
+\include{fusionstor/qos}
+\include{fusionstor/optimize}
 
-% \include{fusionstor/enterprise}
-\include{fusionstor/iscsi}
-
+% development view
 \include{fusionstor/design}
 \include{fusionstor/impl}
 \include{fusionstor/asos}
+
+\include{fusionstor/deploy}
+% \include{fusionstor/hardware}
+% \include{fusionstor/etcd}
+
+% operational view
 \include{fusionstor/faq}
 \include{fusionstor/bug}
 
@@ -175,6 +185,7 @@
 % \include{fusionstor/schedule}
 
 \part{LichMaster}
+
 \include{lich_master/readme}
 \include{lich_master/lsv}
 
@@ -187,6 +198,11 @@
 %\include{sheepdog}
 %\include{openvstorage}
 %\include{VSAN}
+
+\part{PBL}
+
+\include{ask/os}
+\include{ask/lich}
 
 \part{理论基础}
 
@@ -213,8 +229,12 @@
 \part{历史}
 
 \include{history/2012}
+
 \include{history/2016}
+
 \include{history/2017}
+
 \include{history/2018}
+\include{history/2018/08}
 
 \end{document}

@@ -5,3 +5,6 @@
 节点故障对性能影响大，恢复和业务都慢。
 
 节点上线后，根据是否丢失clock，也会影响到实际性能。
+
+allocate的性能，在bcache下，写入cache盘，cache盘影响性能，SSD时JBOD不如RAID0。
+NVMe不经过RAID。
