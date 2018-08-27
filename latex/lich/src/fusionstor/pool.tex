@@ -12,6 +12,10 @@
 \item \hl{有足够的故障域，且不同故障域配置一致的资源量}
 \end{enumbox}
 
+相关类：disk、volume
+
+删除操作时，影响到相关类。
+
 \section{操作}
 
 \begin{enumbox}
@@ -44,6 +48,5 @@
 \end{lstlisting}
 
 基于快照实现存储池的迁移和复制。相当于clone了新卷，chunkid皆发生变化。
-
 
 \section{复制}

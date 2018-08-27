@@ -348,8 +348,6 @@ CPU要访问一个设备，向一个设备发送指令。CPU、内存、I/O设�
 
 企业存储的诸多特性，如数据安全、备份、容灾、二级存储等。
 
-\hl{disk\_load有顺序问题}，没有赋值dop的情况下，用到了dop。
-
 假设有一组disk，具有0-255之间的diskid。
 pool与disk具有1:m的关系。
 disk必然属于一个pool，一个pool可以包含多个disk。
@@ -359,3 +357,55 @@ disk必然属于一个pool，一个pool可以包含多个disk。
 一个pool具有独立的空间分配器，负责响应对应的空间分配请求。
 
 disk模块向上层replica提供了哪些接口？
+
+\subsection{0827}
+
+Week Plan:
+\begin{enumbox}
+\item SNMP
+\item 高速下的QoS
+\item \hl{disk\_load有顺序问题}，没有赋值dop的情况下，用到了dop。
+\item scan过程及时更新pool状态
+\end{enumbox}
+
+分布式全闪存架构，全闪存不同于混合存储或传统的全HDD。SSD的发展突飞猛进。
+架构上，从阵列到分布式也是一变革。分布式架构，相对于阵列控制器，有哪些要解决的关键问题？
+分布式、超融合HCI架构。
+
+关键问题：
+\begin{enumbox}
+\item 集群的数据一致性校验工具
+\item \hl{诊断工作工具化、自动化}
+\item 性价比
+\item 大家都在做什么？
+\item SolidFire
+\item Ceph
+\end{enumbox}
+
+采用\hl{上下左右四象分析法}，分析分布式块系统的相关模块。
+
+分为两层：分布式+节点级。分布式包括集群选主，定位控制器，节点间通信。
+节点级包括chkid到磁盘位置的映射，磁盘空间管理等。
+
+控制器相关逻辑包括：控制器的定位，chunk分配与回收，读写流程。
+因为一个卷相关的所有操作都经过控制器，同时控制器进行了core绑定。
+
+主要的抽象包括：\hl{target、controller、chunk、replica、disk}等。
+
+hazard无法写：
+\begin{enumbox}
+\item 卷控制器日志报: \_\_table2\_chunk\_newinfo ENOSPC。 (backtrace打开)
+\item admin节点 dispatch\_srv\_newdisk DBUG: need 2 got 1 (打开DBUG模式，level设为1)
+\item UMP观察到该pool空间不足
+\item 需要考虑disk keep的影响，默认保留20G。
+\end{enumbox}
+
+\hl{lich stat -v}可以看到pool的空间情况，lich health看到存储池状态。
+
+目前实现上的问题：
+\begin{enumbox}
+\item 空间分配没有考虑节点权重，如果某一节点配置了更多的磁盘空间，无法得到有效利用。(按pool组织)
+\item 数据平衡过程没有按pool进行处理。
+\item 跨pool的copy和migrate
+\item \hl{逻辑pool、物理pool各自的优缺点}
+\end{enumbox}
