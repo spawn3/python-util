@@ -448,7 +448,18 @@ RAID导出的是物理设备，LVM在物理设备之上，构建逻辑卷，可�
 
 \subsection{0829}
 
-多加DBUG，方便实时诊断问题，也包括命令行工具开发过程。
+模式：
+\begin{enumbox}
+\item 多加DBUG，方便实时诊断问题，也包括命令行工具开发过程。
+\item \hl{list要先del，然后才能free，否则有内存错误}。
+\end{enumbox}
 
 理解vfm的工作原理
 
+一个subvol维护一个vfm结构体，记录在chunk的info区。
+
+rack感知，三种状态。
+
+chunk有两种实现机制：rep and ec。
+
+\subsection{0829}
