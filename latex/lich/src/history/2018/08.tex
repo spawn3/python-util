@@ -458,8 +458,62 @@ RAID导出的是物理设备，LVM在物理设备之上，构建逻辑卷，可�
 
 一个subvol维护一个vfm结构体，记录在chunk的info区。
 
+恢复完成后，执行vfm\_cleanup操作。
+
 rack感知，三种状态。
 
 chunk有两种实现机制：rep and ec。
 
-\subsection{0829}
+\subsection{0830}
+
+问：
+\begin{enumbox}
+\item \hl{docker镜像的/etc/resolv.conf宜为空，否则会连接DNS，导致ssh变慢}
+\item diskmd\_recovery中加入正常的diskid，会有副作用吗？
+\item diskmd\_recovery的工作线程不主动退出，由外部monitor线程进行启停
+\item testing分支恢复性能慢，为什么？
+\item 因为是按比例进行QoS，\hl{一方过小会导致另一方也小，不合理}
+\item 删除快照有性能问题
+\item 支持\hl{多存储网}
+\end{enumbox}
+
+\hl{diskmd\_recovery的工作机制}：当检测到磁盘故障时，产生一事件，或发起一新线程组，
+或插入到线程组的故障磁盘队列里。
+
+线程组由\hl{一monitor线程以及若干工作线程}组成，工作线程数量按一定策略进行动态调节。
+工作线程不主动退出，由minitor线程进行控制。
+
+删除pool时，需要从故障磁盘队列里踢出相应磁盘，停止其对应的恢复过程。
+
+一个disk恢复完成后，也应从故障磁盘队列里剔除相应disk，否则会不会造成问题呢，遗留一条垃圾记录？
+\hl{如果diskid被重用了}，又会如何呢？
+
+\begin{enumbox}
+\item 给定一chkid，得到其各个副本位置，以及各节点上的状态(\hl{db、bitmap、数据, clock})，如此可以检查副本一致性以及垃圾副本
+\item 对一个卷的所有chunk执行以上步骤
+\end{enumbox}
+
+\subsection{0831}
+
+扎根分布式块存储，战略的要义就是舍九取一。
+什么是好存储？
+
+\begin{enumbox}
+\item QoS性能
+\item 如何查看哪些卷在恢复？
+\item 从工具层面思考调试的效率
+\item 卷或控制器具有检查并恢复功能，由外部事件触发
+\item 抽象线程使用模式
+\item 性能分析：init - target - storage分成两个部分，分别看其latency。
+\item 恢复与IO的关系，并发下的性能，采用\hl{RAFT来实现chunk副本一致性}？
+\end{enumbox}
+
+新思路
+\begin{enumbox}
+\item 控制器知道自己所在的存储池，存储池的拓扑结构，repnum等关键信息。
+\end{enumbox}
+
+三节点三副本，掉一节点，\hl{无法恢复，反复检查}？性能下降
+标记第三副本为stale，继续执行。
+
+一个volume建立有多个iscsi session会如何？
