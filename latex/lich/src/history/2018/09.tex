@@ -1,8 +1,28 @@
 \section{09}
 
-\subsection{0801}
-\subsection{0802}
-\subsection{0803}
-\subsection{0804}
+\subsection{0901}
 
+\subsection{0902}
 
+\subsection{0903}
+
+删除pool没有完成，此时重启lichd，会残留pool相关状态，如相关的disk文件，影响后续过程。
+
+\begin{enumbox}
+\item 显示disk依然处在使用状态，无法加入新的pool里。
+\item pool已经不存在，disk依然能够加载成功？
+\item 暂时控制恢复进程的命令行工具
+\item \hl{用RAFT实现副本一致性}？
+\end{enumbox}
+
+添加etcd task，用于处理pool remove过程中的异常中断。\hl{其它bh bask也可以切换到etcd方式}。
+因为pool name可能被reuse，会引起难以预料的问题。
+
+\hl{把数据结构、算法和架构的学习和思考放入内功修炼}，持续地不中断地打牢基础。
+
+反思recovery的线程与队列组织，有诸多不便之处，无法方便地\hl{hash不同的数据到不同的线程}。
+\hl{线程最好有自己的队列}，封装成SEDA模型，按策略分配不同的任务到不同的线程。
+
+在拔盘的时候，EIO要封装在底层(EGAIN)，不能返回给前端，目前已能正确处理。
+
+\subsection{0904}

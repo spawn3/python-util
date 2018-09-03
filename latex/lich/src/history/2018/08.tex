@@ -506,6 +506,7 @@ chunk有两种实现机制：rep and ec。
 \item 抽象线程使用模式
 \item 性能分析：init - target - storage分成两个部分，分别看其latency。
 \item 恢复与IO的关系，并发下的性能，采用\hl{RAFT来实现chunk副本一致性}？
+\item 模块化，最小化模块的外部接口
 \end{enumbox}
 
 新思路
@@ -517,3 +518,12 @@ chunk有两种实现机制：rep and ec。
 标记第三副本为stale，继续执行。
 
 一个volume建立有多个iscsi session会如何？
+
+物理盘、逻辑卷，存储虚拟化，对上层应用是一样的。\hl{RAID、LVM、VDO、Bcache、iSCSI}都可以看做存储虚拟化技术。
+入口是设备文件，可以格式化成文件系统，或者供上层应用直接使用。\hl{mount选项知多少}？
+
+PCI设备可以跳过kernel直接进行交互，是用户态driver的基础。用户态与kernel态的\hl{本质区别}是什么？
+
+\hl{系统盘}的分区原则，数据盘
+
+用描述性语言刻画系统特性
