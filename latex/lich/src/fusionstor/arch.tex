@@ -441,6 +441,8 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 
 依赖于服务器物理时间？
 
+可扩展性
+
 \section{架构优化}
 
 \begin{enumbox}
@@ -450,5 +452,17 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 \item lease是否必须
 \item Volume与snapshot位于同一节点内
 \item subvol控制器（负载均衡）
+\item 数据分配的权重、再平衡
+\item QoS
 \item 内置http server，导出状态数据
+\end{enumbox}
+
+\section{周期性任务知多少}
+
+\begin{enumbox}
+\item CRON (RAID)
+\item admin task (rmvol etc)
+\item diskmd writeable
+\item 分层已经去掉
+\item clock merge 引起io周期性抖动，70s左右的周期，iops下降4s左右，观察日志可知
 \end{enumbox}

@@ -25,4 +25,67 @@
 
 在拔盘的时候，EIO要封装在底层(EGAIN)，不能返回给前端，目前已能正确处理。
 
+问题集
+\begin{enumbox}
+\item 把chunk作为object layer，如何？其上构建统一存储。
+\item ceph架构: CRUSH pool、pg、object
+\item 节点内：RAID、LVM、Bcache、VDO等
+\item 分布式：RAFT
+\item iSCSI, tgt、spdk项目
+\item VFM
+\item 多存储网
+\item Sqlite/LevelDB/RocksDB
+\item 从阵列到分布式架构
+\item QoS
+\end{enumbox}
+
+多个\hl{索引}如果转化成LevelDB的KV模式？
+
+上下左右看，ABC
+
+往下看，看到操作系统乃至硬件，往上看，看到虚拟机、docker/k8s、\hl{企业存储、云存储、数据库、大数据}、乃至AI。
+右手螺旋法则，立体河图
+
+dd、mount、fio、vdbench、hazard
+
 \subsection{0904}
+
+分几个方面建立知识体系：
+\begin{enumbox}
+\item 项目：实战（立足手头工作）
+\item 架构：编程、架构(数据结构、算法、模式)
+\item 系统：\hl{操作系统、文件系统、数据库、网络}、分布式系统、缓存、MQ
+\item 四面八方延伸至ABC
+\item 要包含数学这个异常重要的基础
+\end{enumbox}
+
+数据模型即是访问层，如统一存储的对象、块、文件，NoSQL的KV、文档、列存、图、关系等。
+对块存储系统（SAN）而言，可分两层去思考，一是对象层，二是块层。
+
+大规模分布式存储系统一书的架构组织不错，从理论到实践、从下到上循序展开。
+
+基础知识分单机存储引擎和分布式架构，质量属性是自始至终都要考虑的要素，包括性能、可靠性、可用性与扩展性等(视角)。
+\hl{视图（来自视点，以视点为模板）+ 视角的架构描述方法}值得参考。
+
+\hl{事务}的观点、并发控制与恢复的观点、虚拟化和持久化的观点贯彻始终。
+
+单机存储系统需要考虑的要素有哪些？分布式系统增加了哪些复杂度？
+
+从上至下、从下至上双通路考察本地存储系统。
+
+不要受到当前实现方式的限制，从更基础的层面提出问题，并思索方案的可能性空间。
+先发散、后收敛。
+
+存在两类数学，一种是\hl{易经上、或神圣几何里的大衍之数}，一种就是数学学科，包括纯粹数学和应用数学。
+大衍之数体现了数学的艺术性、哲学性。
+
+TODO
+\begin{enumbox}
+\item \hl{高速pool的时候}，QoS机制本身带来的开销太大，导致IOPS严重地低于设定值。
+\item dbg模块会生成/dev/shm/lich4/msgctl目录下的若干文件
+\item bcache在docker内部不显示虚拟设备
+\end{enumbox}
+
+\subsection{0905}
+
+pci设备？通过pci设备号操作该设备，不经过kernel。
