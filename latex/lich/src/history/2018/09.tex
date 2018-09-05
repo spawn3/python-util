@@ -89,3 +89,42 @@ TODO
 \subsection{0905}
 
 pci设备？通过pci设备号操作该设备，不经过kernel。
+
+本地存储引擎，带索引的关系模式怎么转换为KV模式？
+磁盘空间管理、chkid到磁盘位置的映射关系。
+
+在allocate或discard时，会建立这些关系。读写时，只是访问这些关系。
+allocate过程或独立进行、或在使用的时候按需分配(精简配置)。
+
+chunk的metadata，记录了副本的位置信息。所以\hl{最小的故障域是节点}。
+
+副本或条带一致性是最困难的部分。
+
+数据分布（分配、再平衡、恢复、GC）的一般规则：
+\begin{enumbox}
+\item 按pool组织
+\item pool内满足故障域规则
+\item chunk满足副本数要求，且副本之间是一致的
+\item 容量和负载在节点之间尽量均衡分布
+\item 考虑节点的权重
+\end{enumbox}
+
+异常情况的处理，比如故障域小于副本数要求。
+
+pool资源组织成一树状结构，pool-rack-node\hl{-disk}。
+
+负责空间分配的admin在内存中维护着这样的结构，在节点启动之后，
+会周期性地向admin上报自己本地的pool拓扑信息。
+
+pool的ns，通过pool controller和volume controller跟踪维护。
+
+给定chkid，如何\hl{定位controller所在位置呢}？
+后续所有controller相关操作，都要调度到该controller去处理。
+
+已知问题：
+\begin{enumbox}
+\item controller在节点以及节点内core上的分布是否均匀？
+\item 大卷无法有效地进行负载均衡，瓶颈受限于一个core
+\end{enumbox}
+
+数据的复制、迁移。

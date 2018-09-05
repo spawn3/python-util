@@ -1,0 +1,15 @@
+\chapter{并发视图}
+
+\section{关键流程}
+
+target - controller - replica - disk
+
+\section{周期性任务知多少}
+
+\begin{enumbox}
+\item CRON (RAID)
+\item admin task (rmvol etc)
+\item diskmd writeable
+\item 分层已经去掉
+\item clock merge 引起io周期性抖动，70s左右的周期，iops下降4s左右，观察日志可知
+\end{enumbox}
