@@ -1,5 +1,11 @@
 \chapter{并发视图}
 
+后台任务处理，或事件驱动，或定时器驱动。
+线程或线程池按一定方式组织，采用actor或csp并发编程模型。
+
+为了在集群级别进行控制，采用主控、或定向策略，提供可控性和性能。
+Nutanix的Mapreduce并行执行模型。
+
 \section{关键流程}
 
 target - controller - replica - disk
@@ -16,3 +22,199 @@ target - controller - replica - disk
 \item GC?
 \item 分层已经去掉
 \end{enumbox}
+
+\section{平衡}
+
+\subsection{控制器平衡}
+
+每个卷到core的映射是可计算出来的，可按core逐个进行平衡。
+先处理core hash等于0的卷，依次类推，同时使迁移量尽量少。
+
+以上算法假定每个卷都是等价的。如果卷的大小和负载不同，目前方案难以做到真正的平衡。
+
+\subsection{数据平衡}
+
+\begin{enumbox}
+\item 按pool划分
+\item 每个pool，分布在多个节点上，每个节点可得其磁盘利用率
+\item 符合move条件的raw chunk，确定其新的副本位置集
+\item 迭代执行，重新评估
+\end{enumbox}
+
+\section{恢复}
+活动的可追踪性，比如scan阶段的时间，是分析系统行为至关重要的指标。
+做到重要事件有迹可查，可以审计。
+
+采用SEDA架构组织处理过程，分scan和recovery两阶段，边扫描，边恢复。
+pipeline
+
+QoS，参考操作系统的进程调度(MLFQ)，网络的流量控制，多级反馈队列等。
+
+采用强化学习的思路动态调整控制参数。
+
+区分节点故障和磁盘故障，磁盘故障时可以利用sqlite信息，直接扫描。
+
+移除磁盘时，调用\verb|md_chunk_set|，设置该磁盘上所有chunk的chkinfo的对应副本状态为\verb|_S_CHECK__|。
+恢复过程，根据chkinfo的副本状态，判断是否需要恢复。如果需要恢复，调用\verb|md_chunk_check|。
+
+\verb|md_chunk_set|过程开销较大，故感知磁盘故障的延时较长。\hl{把副本状态持久化到chkinfo里，是否真的必要}？
+
+\hl{节点下线}触发怎么样的过程？ \verb|network_connect1|。
+
+故障域规则
+
+单个磁盘
+
+单个节点
+
+单个机柜
+
+重建性能
+
+不中断IO
+
+\subsection{需求}
+
+恢复性能和Qos机制。
+
+控制系统后台数据恢复进程所占用的带宽和 IO 处理资源，提供多种数据恢复的优先级策略。
+
+至少提供优先前端应用或优先数据修复这两种优先级策略。在优先前端应用的策略中，数据
+修复仅在资源较空闲时进行；在优先数据修复策略中，后台恢复以最快速度完成，
+但卷仍然在线保持可用，仅性能有所降低。
+
+作为作业管理，展示恢复进度，关键参数和资源消耗情况。
+
+当有app io时，恢复性能变慢，原因是任务调度吗？
+
+故障恢复过程中，数据迁移和写入，遵循 tier或 cache策略，优先写SSD，每节点SSD数量有限，
+在同时承担业务访问情况下，极易成为瓶径，本次实测恢复数据每节点 10MB/s 以下，
+恢复QoS无法体现作用。节点中机械盘不能并发参与恢复。
+
+恢复QoS当前每节点分别命令处理，需要换一种全局可控的方式（例如带宽或网卡百分比，这部分产品先找资料进行参考）
+
+rebalance 是否也是优先写SSD？ 应与恢复相同策略，不设置QoS情况下，
+应最大限度利用全部机械盘进行并发数据恢复，减少或不占用SSD资源。
+
+\subsection{相关特性}
+
+恢复策略与磁盘热插拔，磁盘漫游相关。
+
+\subsection{设计}
+
+至少可以设定两个等级：恢复优先，或应用优先。至于恢复线程数，等待时间，更多是实现细节，用户很难自己设定。
+所以，需要更高级的控制语义。
+
+目标，偏离，反馈，调节，达到控制的目的。分析上下限，临界情况，执两用中。
+
+串行恢复一个chunk的性能，并发情况下的加速比(串行是基准)。
+
+在不受限制的情况下，先优化到最大性能，能否达到硬件瓶颈？
+
+需要有约束的机制和策略。控制并发度和等待时间。
+
+在每个节点上运行恢复线程，分两个阶段：
+\begin{itemize}
+\item 扫描，确定需要恢复的chunk
+\item 恢复，多线程执行
+\end{itemize}
+
+每个节点只处理属于本节点的数据，即主副本位于本地节点。从sqlite扫描chkid，逐个检查其repnum，
+是否与fileinfo一致，如果不一致，追加到一临时文件
+\begin{itemize}
+\item chkinfo.repnum是实际副本数（需要进一步查看各副本的真实状态）
+\item fileinfo.repnum是目标副本数
+\end{itemize}
+
+控制参数：
+\begin{itemize}
+\item 功能开关
+\item 数据恢复的最大带宽(\hl{token bucket 填充速率})
+\item 线程数
+\item 线程处理完一个chunk后的sleep时间
+\end{itemize}
+
+前端优先对应的控制参数是什么？恢复优先对应的控制参数是什么？自定义QoS？
+
+系统级别的配置信息存在哪儿？结构采用KV，有几种方案可供选择：
+\begin{itemize}
+\item etcd           增加了外部依赖性
+\item ZK             增加了外部依赖性
+\item /config/       lich运行后，方可访问
+\item /dev/shm/lich4 非持久化
+\end{itemize}
+
+单次扫描的条目不宜过多。
+
+\subsection{实现}
+
+配置目录：/dev/shm/lich4/nodectl/recovery
+
+\begin{itemize}
+\item immediately       功能开关
+\item interval          恢复任务的时间间隔
+\item thread            工作线程数
+\item suspend
+\item qos\_maxbandwidth 设置最大带宽
+\item qos\_sleep        设置sleep多少豪秒
+\item qos\_cycle        设置计算带宽的时间间隔
+\item info              输出结果
+\end{itemize}
+
+md\_chunk\_getinfo
+
+md\_chunk\_check
+
+\subsection{测评}
+
+从串行到并行
+
+\begin{itemize}
+\item 各阶段时间
+\item 磁盘利用率
+\item 并发度
+\end{itemize}
+
+为什么在有前台IO的情况下，性能严重下降？
+
+\subsection{运行}
+
+\begin{tcolorbox}
+    自动触发：Recover 每10分钟执行
+
+    手动触发：echo 1 > /dev/shm/lich4/nodectl/recovery/immediately
+\end{tcolorbox}
+
+\section{GC}
+
+chunk
+
+\section{Clock Merge}
+
+\section{监视存储池状态}
+
+由admin节点执行
+
+\section{删除卷}
+
+任务规范放入etcd更合适，避免因为ENOSPC，导致删不了。
+
+\section{删除快照}
+
+\section{回滚快照}
+
+\section{flatten}
+
+%\section{HSM}
+
+%分层存储管理
+%\begin{itemize}
+%\item \verb|__volume_ctl_analysis_init|
+%\item \verb|replica_hsm_init|
+%\end{itemize}
+
+%\section{SSD Cache}
+
+%\begin{itemize}
+%\item \verb|__flush_create|
+%\end{itemize}
