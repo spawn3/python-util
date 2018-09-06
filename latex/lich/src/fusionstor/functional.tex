@@ -157,8 +157,6 @@ consistency.
 
 卷对主机的可见性。一个卷只有映射给了某主机，才可以被该主机访问。
 
-\chapter{Pool}
-
 \section{属性}
 
 \begin{enumbox}
@@ -209,8 +207,6 @@ consistency.
 基于快照实现存储池的迁移和复制。相当于clone了新卷，chunkid皆发生变化。
 
 \section{复制}
-
-\chapter{Volume}
 
 卷可以建模为状态机，不同状态允许不同的操作，按条件在不同状态之间切换。
 
@@ -333,8 +329,6 @@ token bucket。IOPS与block size相关，两者乘积等于带宽。
 如果各层发生IO聚合，则在流量守恒的情况下，显示IOPS有所不同。
 
 IOPS必须假定一定的block size。
-
-\chapter{Snapshot}
 
 抽象出AbstractVolume，Volume、Snapshot、Clone都是其子类。
 
