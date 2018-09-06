@@ -79,11 +79,23 @@ dd、mount、fio、vdbench、hazard
 存在两类数学，一种是\hl{易经上、或神圣几何里的大衍之数}，一种就是数学学科，包括纯粹数学和应用数学。
 大衍之数体现了数学的艺术性、哲学性。
 
-TODO
+QoS是一个大问题
 \begin{enumbox}
+\item 控制目标：下限、上限、突发
+\item 集中式控制、分布式控制
+\item 优先级
 \item \hl{高速pool的时候}，QoS机制本身带来的开销太大，导致IOPS严重地低于设定值。
 \item dbg模块会生成/dev/shm/lich4/msgctl目录下的若干文件
 \item bcache在docker内部不显示虚拟设备
+\end{enumbox}
+
+QoS的参考资料：
+\begin{enumbox}
+\item Ceph的dmClock算法
+\item XSKY的漏桶与令牌桶结合的策略
+\item SolidFire
+\item NetApp
+\item SPDK bdev
 \end{enumbox}
 
 \subsection{0905}
@@ -128,3 +140,6 @@ pool的ns，通过pool controller和volume controller跟踪维护。
 \end{enumbox}
 
 数据的复制、迁移。
+
+一个系统可分解为基础结构kernel和高级特性，宏内核架构，尽量组织成模块化。
+宏内核方便模块之间的通信，但因隔离性差，也容易引入严重问题，影响到全局。
