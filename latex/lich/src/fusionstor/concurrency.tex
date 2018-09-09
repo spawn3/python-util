@@ -1,10 +1,27 @@
-\chapter{任务管理}
+\chapter{并发视图}
 
 后台任务处理，或事件驱动，或定时器驱动。
 线程或线程池按一定方式组织，采用actor或csp并发编程模型。
 
 为了在集群级别进行控制，采用主控、或定向策略，提供可控性和性能。
 Nutanix的Mapreduce并行执行模型。
+
+\section{关键流程}
+
+target - controller - replica - disk
+
+\section{周期性任务知多少}
+
+\begin{enumbox}
+\item CRON (RAID)
+\item admin task (rmvol etc)
+\item diskmd writeable
+\item clock merge 引起io周期性抖动，70s左右的周期，iops下降4s左右，观察日志可知
+\item 恢复 30min
+\item balance?
+\item GC?
+\item 分层已经去掉
+\end{enumbox}
 
 \section{平衡}
 

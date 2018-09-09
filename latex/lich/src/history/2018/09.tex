@@ -14,6 +14,153 @@
 夫道者，体常而应变，常是原则，随机应变，应变要随机。如带中心点的圆环，后顺得常。
 
 \subsection{0903}
+
+删除pool没有完成，此时重启lichd，会残留pool相关状态，如相关的disk文件，影响后续过程。
+
+\begin{enumbox}
+\item 显示disk依然处在使用状态，无法加入新的pool里。
+\item pool已经不存在，disk依然能够加载成功？
+\item 暂时控制恢复进程的命令行工具
+\item \hl{用RAFT实现副本一致性}？
+\end{enumbox}
+
+添加etcd task，用于处理pool remove过程中的异常中断。\hl{其它bh bask也可以切换到etcd方式}。
+因为pool name可能被reuse，会引起难以预料的问题。
+
+\hl{把数据结构、算法和架构的学习和思考放入内功修炼}，持续地不中断地打牢基础。
+
+反思recovery的线程与队列组织，有诸多不便之处，无法方便地\hl{hash不同的数据到不同的线程}。
+\hl{线程最好有自己的队列}，封装成SEDA模型，按策略分配不同的任务到不同的线程。
+
+在拔盘的时候，EIO要封装在底层(EGAIN)，不能返回给前端，目前已能正确处理。
+
+问题集
+\begin{enumbox}
+\item 把chunk作为object layer，如何？其上构建统一存储。
+\item ceph架构: CRUSH pool、pg、object
+\item 节点内：RAID、LVM、Bcache、VDO等
+\item 分布式：RAFT
+\item iSCSI, tgt、spdk项目
+\item VFM
+\item 多存储网
+\item Sqlite/LevelDB/RocksDB
+\item 从阵列到分布式架构
+\item QoS
+\end{enumbox}
+
+多个\hl{索引}如果转化成LevelDB的KV模式？
+
+上下左右看，ABC
+
+往下看，看到操作系统乃至硬件，往上看，看到虚拟机、docker/k8s、\hl{企业存储、云存储、数据库、大数据}、乃至AI。
+右手螺旋法则，立体河图
+
+dd、mount、fio、vdbench、hazard
+
 \subsection{0904}
 
+分几个方面建立知识体系：
+\begin{enumbox}
+\item 项目：实战（立足手头工作）
+\item 架构：编程、架构(数据结构、算法、模式)
+\item 系统：\hl{操作系统、文件系统、数据库、网络}、分布式系统、缓存、MQ
+\item 四面八方延伸至ABC
+\item 要包含数学这个异常重要的基础
+\end{enumbox}
 
+数据模型即是访问层，如统一存储的对象、块、文件，NoSQL的KV、文档、列存、图、关系等。
+对块存储系统（SAN）而言，可分两层去思考，一是对象层，二是块层。
+
+大规模分布式存储系统一书的架构组织不错，从理论到实践、从下到上循序展开。
+
+基础知识分单机存储引擎和分布式架构，质量属性是自始至终都要考虑的要素，包括性能、可靠性、可用性与扩展性等(视角)。
+\hl{视图（来自视点，以视点为模板）+ 视角的架构描述方法}值得参考。
+
+\hl{事务}的观点、并发控制与恢复的观点、虚拟化和持久化的观点贯彻始终。
+
+单机存储系统需要考虑的要素有哪些？分布式系统增加了哪些复杂度？
+
+从上至下、从下至上双通路考察本地存储系统。
+
+不要受到当前实现方式的限制，从更基础的层面提出问题，并思索方案的可能性空间。
+先发散、后收敛。
+
+存在两类数学，一种是\hl{易经上、或神圣几何里的大衍之数}，一种就是数学学科，包括纯粹数学和应用数学。
+大衍之数体现了数学的艺术性、哲学性。
+
+QoS是一个大问题
+\begin{enumbox}
+\item 控制目标：下限、上限、突发
+\item 集中式控制、分布式控制
+\item 优先级
+\item \hl{高速pool的时候}，QoS机制本身带来的开销太大，导致IOPS严重地低于设定值。
+\item dbg模块会生成/dev/shm/lich4/msgctl目录下的若干文件
+\item bcache在docker内部不显示虚拟设备
+\end{enumbox}
+
+QoS的参考资料：
+\begin{enumbox}
+\item Ceph的dmClock算法
+\item XSKY的漏桶与令牌桶结合的策略
+\item SolidFire
+\item NetApp
+\item SPDK bdev
+\end{enumbox}
+
+\subsection{0905}
+
+pci设备？通过pci设备号操作该设备，不经过kernel。
+
+本地存储引擎，带索引的关系模式怎么转换为KV模式？
+磁盘空间管理、chkid到磁盘位置的映射关系。
+
+在allocate或discard时，会建立这些关系。读写时，只是访问这些关系。
+allocate过程或独立进行、或在使用的时候按需分配(精简配置)。
+
+chunk的metadata，记录了副本的位置信息。所以\hl{最小的故障域是节点}。
+
+副本或条带一致性是最困难的部分。
+
+数据分布（分配、再平衡、恢复、GC）的一般规则：
+\begin{enumbox}
+\item 按pool组织
+\item pool内满足故障域规则
+\item chunk满足副本数要求，且副本之间是一致的
+\item 容量和负载在节点之间尽量均衡分布
+\item 考虑节点的权重
+\end{enumbox}
+
+异常情况的处理，比如故障域小于副本数要求。
+
+pool资源组织成一树状结构，pool-rack-node\hl{-disk}。
+
+负责空间分配的admin在内存中维护着这样的结构，在节点启动之后，
+会周期性地向admin上报自己本地的pool拓扑信息。
+
+pool的ns，通过pool controller和volume controller跟踪维护。
+
+给定chkid，如何\hl{定位controller所在位置呢}？
+后续所有controller相关操作，都要调度到该controller去处理。
+
+已知问题：
+\begin{enumbox}
+\item controller在节点以及节点内core上的分布是否均匀？
+\item 大卷无法有效地进行负载均衡，瓶颈受限于一个core
+\end{enumbox}
+
+数据的复制、迁移。
+
+一个系统可分解为基础结构kernel和高级特性，宏内核架构，尽量组织成模块化。
+宏内核方便模块之间的通信，但因隔离性差，也容易引入严重问题，影响到全局。
+
+\subsection{0906}
+
+把disk故障也纳入vfm，即不再使用check方法，而是按subvol进行标记，
+被标记的subvol就处在可疑状态，待全部确认后，再清除其上的标记。
+
+check标记的是副本，\hl{subvol标记的是一个subvol范围内的所有chunk在某节点上的所有副本}。
+
+subvol标记怎么做到io和恢复的隔离，从而提高性能的？
+
+\hl{扫描顺序的影响}：如果按顺序进行扫描，待扫描完成后，即可清理其上的标记。
+如果是在一个大的范围内随机扫描，则只有全部完成，才能清理每个subvol上的恢复标记。

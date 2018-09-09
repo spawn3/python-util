@@ -1,14 +1,18 @@
-\section{QOS}
+\chapter{QOS}
 
-\subsection{算法}
+\section{概述}
 
-采用了两种曲线
+参考网络QoS，存储QoS的核心算法与网络QoS相同。
 
-开放控制参数
+集中式控制、分布式控制
 
-比较指标：理论和实测值的距离，\hl{也可以考虑夹角的大小}。\change{距离函数} 
+排队论
 
-底层采用token bucket，需要能容忍一定的jitter。
+态势感知？
+
+在高IOPS的情况，QoS的开销过大，极大地拉低了性能，这是不可接受的。
+
+每次请求都要获取一次时间，是不是必要的？
 
 \subsection{参考}
 
@@ -16,6 +20,28 @@
 \item OS中进程、线程调度算法
 \item Disk IO调度算法
 \item VM IO调度算法
+\item SPDK QoS
+\item SolidFire QoS
 \end{enumbox}
+
+\section{算法}
+
+采用了两种曲线
+
+开放控制参数
+
+比较指标：理论和实测值的距离，\hl{也可以考虑夹角的大小}。\change{距离函数}
+
+底层采用token bucket，需要能容忍一定的jitter。
+
+在调度器内加入QoS控制逻辑的设想： 每个core调度器对应一个或若干卷控制器。基于优先级队列，由core线程处理队列(scheduler队列？)。
+每个卷控制器在对应的scheduler上注册自己的队列（IO任务、恢复任务）。 \hl{core上的每个卷，向scheduler注册自己，从而实现解耦}。
+调度器不仅可以处理单个卷的QoS，也可以处理多个卷的QoS。
+
+\hl{队列和控制线程}往往紧密结合为一体。
+
+\hl{多mode调度器}，根据实际负载条件动态地调整调度器策略。
+
+何时从请求队列移入调度队列是QoS调度器的中心任务。
 
 % \section{Quota}

@@ -1,4 +1,45 @@
-\chapter{Deploy}
+\chapter{部署视图}
+
+\section{物理资源}
+
+\subsection{添加节点}
+
+\subsection{删除节点}
+
+节点建模为有限状态机。
+
+删除条件：
+\begin{enumbox}
+\item \hl{在删除该节点后，数据是安全的}
+\item 为简化问题，一次只能删除一个节点
+\item lichd处在stop状态
+\item 节点上有哪些pool
+\item 每个pool的磁盘分布满足故障域规则
+\item pool下卷和快照的数据完整状态
+\end{enumbox}
+
+按pool检查，输出pool的故障域、节点、磁盘拓扑结构（开发工具）
+
+满足删除条件后，确保lichd处在stop状态，同时等待恢复完成后，正式从集群中剔除该节点。
+
+删除过程往往比添加过程要复杂。首先要从数据安全上考虑，任何操作下，都要保证数据是安全的。
+删除一个节点，要等全部恢复后，才能继续删除节点。
+
+一个节点进入维护模式意味着什么？
+
+基本流程：
+\begin{enumbox}
+\item 检测可删除条件，如果满足，注册任务到etcd上
+\item 区分force两种情况
+\item Force==False的过程
+\item Force==TRUE的过程
+\item *
+\item 节点不在线
+\item lichd进程状态
+\item pool (rack, node)
+\item 如果是pool的最后一个节点，则不允许删除
+\item 副本数 （pool的副本数不同于其中卷的副本数）
+\end{enumbox}
 
 \section{nohosts}
 

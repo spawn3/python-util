@@ -1,4 +1,4 @@
-\chapter{软件架构}
+\chapter{信息视图}
 
 meta管理采用对称的中心化架构。在节点中选举出admin节点，
 管理全局状态和数据分配工作。当admin节点发生故障时，会发生
@@ -20,6 +20,12 @@ client可以和每个节点进行通信，推荐采用VIP机制，简化连接�
 \item{引入VDO}
 \item{引入ROW3}
 \end{enumbox}
+
+\section{ETCD}
+
+依赖于服务器物理时间？
+
+可扩展性
 
 \section{结构}
 
@@ -437,10 +443,6 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 
 任何两个操作之间发生故障，都会导致问题。
 
-\section{ETCD}
-
-依赖于服务器物理时间？
-
 \section{架构优化}
 
 \begin{enumbox}
@@ -450,5 +452,7 @@ RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据
 \item lease是否必须
 \item Volume与snapshot位于同一节点内
 \item subvol控制器（负载均衡）
+\item 数据分配的权重、再平衡
+\item QoS
 \item 内置http server，导出状态数据
 \end{enumbox}

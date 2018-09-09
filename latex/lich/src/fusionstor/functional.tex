@@ -1,4 +1,334 @@
-\chapter{Snapshot}
+\chapter{功能视图}
+
+\begin{tikzpicture}[show background grid]
+    \begin{class}{Disk}{6, 0}
+    \end{class}
+    \begin{class}{Pool}{6, 2}
+    \end{class}
+    \begin{class}{Volume}{6, 4}
+    \end{class}
+    \begin{class}{Host}{6, 6}
+    \end{class}
+    \begin{class}{Cluster}{0, 2}
+    \end{class}
+    \begin{class}{Snapshot}{0, 4}
+    \end{class}
+
+    \composition{Cluster}{pools}{1..*}{Pool}
+    \composition{Pool}{disks}{1..*}{Disk}
+    \composition{Pool}{volumes}{1..*}{Volume}
+    \composition{Volume}{mapping}{*..*}{Host}
+    \composition{Volume}{snapshots}{1..*}{Snapshot}
+\end{tikzpicture}
+
+四面八方，对上导出iSCSI等服务，对下整个各种物理资源，左右对接运维平台和云平台。
+
+整体，集群按两个维度来理解，一是物理资源，二是逻辑资源。
+物理资源包括节点以及节点上的磁盘，逻辑资料包括存储池、目录、卷、快照等。
+
+\section{Pool}
+
+存储池是集群的物理划分。把物理节点划分为不同的保护域，一个卷的所有数据只出现在一个保护域内。卷可以跨保护域进行复制和迁移。
+
+默认一个，包括所有节点(显式创建，不默认)。
+
+\hl{与文件系统的类比}：存储池相当于磁盘分区，构成一个树，mount到根分区，多个pool构成chunk对象的森林。
+pool包括目录和卷，相当于文件系统包括目录与文件。卷和文件都是逻辑实体，需要跟踪其包含的数据块的详细信息。
+
+从文件系统出发去理解存储系统是一条可行途径。
+
+文件系统：先有分区或磁盘，格式化为文件系统，然后mount到系统的目录树之下。
+所谓格式化成文件系统就是在磁盘上建立文件系统的数据结构，包括superblock、索引结构、日志等。
+
+\hl{嵌套、分形、递归}。
+
+% 保护域是物理节点的划分，存储池是存储介质的划分。每块盘只能出现在一个存储池里。
+
+Pool: 逻辑容器
+
+故障域有粒度之分，如磁盘，节点，机架，机柜，数据中心。
+
+存储池内，要满足故障域规则：一个chunk的不同副本，分布在不同的故障域内。\label{rule:faultset}
+
+在所有的\hl{数据分布（初次分配、再平衡和恢复等）}过程中，都需遵循这些规则。
+
+\begin{tcolorbox}
+
+可以参考ceph的CRUSH实现。bucket和device定义了集群的物理拓扑结构，rule定义了数据存取规则，
+pool上关联rule，从而定义了pool中卷数据的放置规则。设备即OSD，对应一个物理磁盘。
+
+***
+
+存储池可以取代保护域，定义所有对象的存放位置是一个节点集。
+
+***
+
+存储池可以用来实现tier cache。重定向IO到cache pool。
+
+***
+
+统一概念：保护域，存储池，pool。Consistency Group不同于pool，与物理存取无关，
+而是卷的逻辑集合，卷可以来自不同的pool。
+
+\end{tcolorbox}
+
+与存储池有什么同和异？存储池可以看做关联了磁盘的pool，可以看做pool的子类。
+
+% 存储池是disk的集合，与节点无关。但disk所在的节点构成存储池的节点列表，不同存储池的节点可能覆盖。
+
+存储池下，可以创建volume。没有关联磁盘的存储池，不能创建卷。
+
+\hl{chunkid到磁盘物理位置有两级映射：chunk的副本节点列表，节点内chunkid到物理地址的映射}。
+
+在为卷分配chunk的时候，需要确定各个副本的物理存储位置。当前实现是返回不同副本的节点列表。
+如果指定了存储池，就需要在存储池所在的节点范围内进行分配，同时要满足故障域和数据均衡规则。
+
+\begin{tcolorbox}
+移动采集中存储池要求，相比于目前的逻辑pool，更多是一种设计上的退步。
+存储虚拟化的目标，是物理位置无关。我们可以基于逻辑容器，实现基于策略的管理。
+所以，\hl{从实现层面，要保留当前pool的功能，按照系统配置确定pool的类型}。
+但是，存储池关联磁盘，可以实现高速池等按物理特征划分的功能。
+\end{tcolorbox}
+
+% 存储池内，要满足故障域规则(\ref{rule:faultset})
+
+步骤：
+\begin{enumbox}
+\item 创建pool，但此时不能创建pool的元数据chunk，因为还没有绑定磁盘（需要一全局的地方，存储pool名字）
+\item 添加磁盘到pool，并上报给admin节点
+\item 当在pool下面创建卷的时候，前提条件是已准备好磁盘，生成pool元数据chunk(位于同一pool里)。
+\end{enumbox}
+
+pool元数据chunk必须位于自己的存储池内，如果分布在不同的存储池，不满足故障域条件。
+
+pool引导信息可以存在rootable里(用etcd取而代之)。
+
+原来的/的元数据chunk放置在哪儿？还是不再需要，每个pool有独立的树，多个pool构成森林。
+
+规则：存储池包括其下的所有卷和快照的元数据和数据，都必须存在该存储池关联的磁盘上。
+包括原来/system下的内容。
+
+\subsection{lookup}
+
+\begin{compactitem}
+\item 从path到id 拆分path，逐级查找(正向)
+\item 从id到path 遍历pool，找到即退出(反向)
+\end{compactitem}
+
+\section{Volume}
+
+属性：
+
+操作：
+\begin{compactenum}
+\item rename
+\item resize \info{在线扩容}
+\item mv
+\item copy \change{全量拷贝/增量拷贝} \change{跨存储池拷贝} % change不能出现在box里
+\end{compactenum}
+
+\section{Snapshot}
+
+snapshot隶属于卷，无卷则无快照，快照组织成快照树，其中有且只有一个快照是可写快照，即卷的写入点。
+
+\section{Consistency Group}
+
+一致性卷组 \change{Consistency Group}
+
+\begin{shadequote}
+Consistency Groups could be useful for Data Protection (snapshots, backups) and
+Remote Replication (Mirroring).
+
+The Mirroring support will allow to setup mirroring of multiple volumes in the
+same consistency group (i.e. attaching multiple RBD images to the same journal
+to ensure consistent replay).
+
+There is already an interest to implement this functionality as a part Mirroring feature:
+http://tracker.ceph.com/issues/13295
+
+The snapshot support will allow snapshots of multiple volumes in the same
+consistency group to be taken at the same point-in-time to ensure data
+consistency.
+\end{shadequote}
+
+\section{Mapping}
+
+数据隔离/ACL，数据保护
+
+卷对主机的可见性。一个卷只有映射给了某主机，才可以被该主机访问。
+
+\section{属性}
+
+\begin{enumbox}
+\item 副本数
+\item 故障级
+\item 精简池
+\item 磁盘列表
+\item 复制类型（复制，EC）
+\item 配额
+\item \hl{有足够的故障域，且不同故障域配置一致的资源量}
+\end{enumbox}
+
+相关类：disk、volume
+
+删除操作时，影响到相关类。
+
+\section{操作}
+
+\begin{enumbox}
+\item pool create
+\item pool rm
+\item pool info or stat
+\item pool list all
+\item pool add disk
+\item pool remove disk
+\item pool list disk
+\item 扩展（添加磁盘到\hl{已存在的存储池}，该映射关系持久化到本地，同步到admin节点）
+\item 缩容（从存储池中移除磁盘，引发数据重建过程）
+\item 不同存储池之间，卷的复制
+\item 不同存储池之间，卷的迁移，可在线或离线
+\item 存储池级别的统计信息
+\item \hl{自动或手动按磁盘速率进行存储池分级划分}
+\end{enumbox}
+
+\section{迁移}
+
+离线/在线迁移
+
+不改变卷ID。卷ID和chunkid集群内唯一，迁移过程中保持不变。
+
+怎么判断一个卷是离线还是在线？有无访问者。target上的链接数，
+每个卷的volume\_proto都有一个connect\_list。
+
+\begin{lstlisting}[language=bash,frame=single]
+# lich.inspect --connection /iscsi/p1/v1
+\end{lstlisting}
+
+基于快照实现存储池的迁移和复制。相当于clone了新卷，chunkid皆发生变化。
+
+\section{复制}
+
+卷可以建模为状态机，不同状态允许不同的操作，按条件在不同状态之间切换。
+
+\section{属性}
+
+\begin{lstlisting}[language=c,frame=single]
+typedef struct {
+        fileid_t id;
+        uint16_t magic;
+        uint16_t repnum;
+        uint64_t snap_rollback;
+        uint64_t snap_version;
+        uint64_t reference;         //clone reference
+        uint32_t attr;
+        int32_t  priority;
+        uint32_t __pad__[4];
+
+        uint64_t size;
+        uint32_t mode;
+        uint32_t uid;
+        uint32_t gid;
+        uint32_t ctime;
+        uint32_t mtime;
+        uint32_t btime;
+        uint32_t atime;
+} fileinfo_t;
+\end{lstlisting}
+
+卷是ServerSAN核心对象，是pool，snapshot，mapping和cg的中心。
+
+卷的属性记录在L1 chunk的fileinfo段。fileinfo段是vol info区的第一个段。
+
+\subsection{大小}
+
+目前，卷的元数据由两级组成：L1，L2。L1只有一个chunk，每个chunk有8000个槽位。每个槽位指向一个L2 chunk。
+L2 chunk有16000个槽位，每个槽位指向一个raw chunk。所以，最大卷大小约为$122TB = 8000 \times 16000 \times 1MB$。
+
+为了支持更大的卷，需要扩展此结构，把L1扩展到多个chunk。改变会影响到：
+\begin{compactitem}
+\item 加载table1 (加载多个chunk，记录每个chunk的chunkinfo信息)
+\item table1的各项操作
+\item 遍历卷的chunk
+\item 数据恢复过程
+\item migrate
+\item copy
+\item snapshot clone，需要copy L1 chunk
+\item ...
+\end{compactitem}
+
+L1 chunk：vol.xxx.0, vol.xxx.1, vol.xxx.2。其中，vol.xxx.0的chunkinfo记录在pool。
+\hl{vol.xxx.1等chunkinfo记录到vol.xxx.0里info区的第二个块，并需记录其个数}。动态加载。
+
+父：raw和subvol的父chkid为vol.xxx.0，vol.xxx.1的父chkid也为vol.xxx.0。vol.xxx.0的父chkid为所在pool的chkid。
+
+缺页中断：从上到下检查。创建chunk的时候，先检查L1 chunk是否存在，然后检查L2 chunk是否存在。
+不存在，则创建。在以下过程会改变卷的数据结构树：
+\begin{compactitem}
+\item \verb|__pool_proto_mkvol|
+\item \verb|volume_proto_load|
+\item \verb|volume_proto_chunk_pre_write|
+\item \verb|__volume_proto_chunk_allocate|
+\end{compactitem}
+
+\begin{lstlisting}[frame=single]
+lichbd write /iscsi/p1/v1 hello -o 280375465082880
+lichbd cat /iscsi/p1/v1 -o 280375465082880 -l 5
+\end{lstlisting}
+
+chunk allocate开销较大，即要申请磁盘空间，也涉及记录元数据到父节点。
+
+遗留问题：
+\begin{enumbox}
+\item lich.inspect --stat极慢 (统计，load)
+\item 分析内存占用量
+\item clone
+\item recovery
+\item balance
+\item 回收空间
+\end{enumbox}
+
+\subsection{副本数}
+
+\section{操作}
+
+\begin{enumbox}
+\item create
+\item rm
+\item ls
+\item info
+\item resize
+\item rename
+\item mv
+\item copy (read/write)
+\item migrate (move all chunk)
+\item duplicate (snapshot-based: clone/flatten)
+\item import
+\item export
+\item mapping
+\item \hl{IO}
+\end{enumbox}
+
+\subsection{create}
+
+\subsection{rm}
+
+显式回收空间
+
+分为两阶段：标记和回收。先把卷移入/system/unlink，有后台异步线程负责回收。
+
+相关源文件：
+\begin{compactitem}
+\item pool\_rmvol.c
+\item rmvol\_bh.c
+\end{compactitem}
+
+
+\subsection{QoS}
+
+token bucket。IOPS与block size相关，两者乘积等于带宽。
+如果各层发生IO聚合，则在流量守恒的情况下，显示IOPS有所不同。
+
+IOPS必须假定一定的block size。
 
 抽象出AbstractVolume，Volume、Snapshot、Clone都是其子类。
 
