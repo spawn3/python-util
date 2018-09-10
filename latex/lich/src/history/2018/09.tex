@@ -155,3 +155,39 @@ subvol标记怎么做到io和恢复的隔离，从而提高性能的？
 
 \hl{扫描顺序的影响}：如果按顺序进行扫描，待扫描完成后，即可清理其上的标记。
 如果是在一个大的范围内随机扫描，则只有全部完成，才能清理每个subvol上的恢复标记。
+
+\subsection{0908}
+
+两种故障要尽量统一处理。
+
+加班
+\begin{enumbox}
+\item disk recovery，增加控制逻辑，动态调节参数，包括开关、恢复速度(统一为disk\_fill\_rate)
+\item QoS，精确控制在高IOPS下难以实现，退而求其次，控制node recovery的fill\_rate
+\item 在scheduler层面，iops与recovery采用不同的队列
+\item fill rate == 0时，\hl{不退出恢复过程，循环等待}，scan过程及其结果要保留，此约定适用于两种故障
+\end{enumbox}
+
+恢复控制参数
+\begin{enumbox}
+\item 控制开关 (静态、动态)
+\item 带宽
+\item 线程数
+\item 每请求提交到控制器的chunk数 (最小最大)
+\end{enumbox}
+
+两个pool的隔离性，\hl{拔出一个pool的盘为什么会严重干扰另一个pool的iops}？
+\begin{enumbox}
+\item RAID (WT)
+\item DB
+\item schedule
+\end{enumbox}
+
+\subsection{0910}
+
+TODO list：
+\begin{enumbox}
+\item 被deleted的卷/快照导致recovery rescan
+\item 删除pool过程如果中断，残留下的垃圾影响到后续过程
+\item 没有IO的时候，限制recovery不合理(Q4)
+\end{enumbox}

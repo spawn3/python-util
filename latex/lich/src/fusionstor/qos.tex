@@ -2,6 +2,16 @@
 
 \section{概述}
 
+学习的方法：
+\begin{enumbox}
+\item \hl{对标}：行业的标准做法是什么？
+\item 如何才能更好地学习？
+\item *
+\item 先选出几篇经典论文，顺藤摸瓜，建立相关的知识体系。
+\item 与专业人士交流，获取有价值的线索。
+\item 还需要主动去悟，提问、消化、守破离，推陈出新
+\end{enumbox}
+
 参考网络QoS，存储QoS的核心算法与网络QoS相同。
 
 集中式控制、分布式控制
@@ -20,7 +30,11 @@
 \item OS中进程、线程调度算法
 \item Disk IO调度算法
 \item VM IO调度算法
+\item Network QoS and Storage QoS
+\item TCP/IP
+\item iSCSI
 \item SPDK QoS
+\item Ceph dmClock
 \item SolidFire QoS
 \end{enumbox}
 
@@ -38,7 +52,7 @@
 每个卷控制器在对应的scheduler上注册自己的队列（IO任务、恢复任务）。 \hl{core上的每个卷，向scheduler注册自己，从而实现解耦}。
 调度器不仅可以处理单个卷的QoS，也可以处理多个卷的QoS。
 
-\hl{队列和控制线程}往往紧密结合为一体。
+\hl{队列和线程}往往紧密结合为一体，参见SEDA、actor。
 
 \hl{多mode调度器}，根据实际负载条件动态地调整调度器策略。
 
