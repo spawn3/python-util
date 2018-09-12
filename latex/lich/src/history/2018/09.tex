@@ -196,7 +196,33 @@ subvol标记怎么做到io和恢复的隔离，从而提高性能的？
 
 TODO list：
 \begin{enumbox}
-\item 被deleted的卷/快照导致recovery rescan
-\item 删除pool过程如果中断，残留下的垃圾影响到后续过程
+\item \hl{被deleted的卷/快照导致recovery rescan}
+\item recovery 合并重复事件
 \item 没有IO的时候，限制recovery不合理(Q4)
+\item 删除pool过程如果中断，残留下的垃圾影响到后续过程
+\item fnotify
+\item qos schedule\_sleep delay是固定值，不合理
+\item recovery recover的并行化，多次RPC
+\item \hl{VFM机制有放大可疑区间的问题}
+\item 与节点启动时间变长有关？etcd lock？
+\item 验证VFM是否把写时恢复的流量给成功剥离出来了，启用background\_recovery配置选项
+\item VFM：IO时skip vfm存在的副本，解耦IO时恢复，交给外部恢复过程处理
 \end{enumbox}
+
+\subsection{0911}
+
+在整个recovery过程中，如果有卷/快照被删除，如何处理？
+目前的策略是退出recovery过程，然后重新扫描？但如果一直在删除快照，会导致频繁地重新扫描。
+
+李刚彬工作交接：
+\begin{enumbox}
+\item 数据布局
+\item 切换时间控制
+\item lookup过程，gc特性关，误删数据
+\item chunk check
+\item snapshot
+\item 功能模块：EC, cache
+\item 故障诊断 hazard
+\end{enumbox}
+
+\subsection{0912}

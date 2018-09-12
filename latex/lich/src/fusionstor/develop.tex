@@ -139,9 +139,9 @@ Protocol与存储卷是正交功能。protocol应该独立于卷进行扩展。
 \section{Algorithm}
 
 \begin{compactitem}
-    \item paxos/raft 选举admin和meta节点
-    \item lease controller的唯一性
-    \item vector clock 副本一致性
+\item paxos/raft 选举admin和meta节点
+\item lease controller的唯一性
+\item vector clock 副本一致性
 \end{compactitem}
 
 \section{Coroutine}
@@ -184,16 +184,40 @@ core调度器本身不同调用blocking操作，同样需要异步化。分两�
 异步sqlite3。etcd，RR也会采用该框架。
 
 \begin{compactitem}
-    \item 共10个db，每个一个线程，每个线程管理一个队列
-    \item 所有sqlite3操作，泛化为统一的结构，放入线程队列
-    \item 消费者线程批量处理队列中的任务
-    \item 生产者线程和消费者线程通过sem进行通信
-    \item 采用协程机制(yield/resume)同步任务执行顺序
+\item 共10个db，每个一个线程，每个线程管理一个队列
+\item 所有sqlite3操作，泛化为统一的结构，放入线程队列
+\item 消费者线程批量处理队列中的任务
+\item 生产者线程和消费者线程通过sem进行通信
+\item 采用协程机制(yield/resume)同步任务执行顺序
 \end{compactitem}
 
 消费者线程wait在sem上，生产者线程有消息的时候，调用\verb|sem_post|。
 
 \section{Performance}
+
+\subsection{排查性能问题的流程}
+
+\begin{enumbox}
+\item lich list -v 查看节点状态以及延迟
+\item lich health -v 查看集群健康状态，以及恢复过程
+\item 查看日志，必要的时候，打开backtrace
+\item 对性能有重要影响的特性列表：recovery, qos, clock merge, chunk parallel
+\item LOG
+\item lock
+\item hash
+\item scheduler
+\item
+\item *** 以下是微观方法：
+\item profile: analysis
+\end{enumbox}
+
+\subsection{Profile}
+
+lich.conf: performance\_analysis: on
+
+kill -USR1 <pid>
+
+tail -f /opt/fusionstack/log/lich.log |grep \_\_analysis
 
 4K+1M混合读写，极慢
 
@@ -233,19 +257,27 @@ chkid如何选择hash函数？
 
 \subsection{分支预测}
 
-\subsection{Profile}
-
-lich.conf: performance\_analysis: on
-
-kill -USR1 <pid>
-
-tail -f /opt/fusionstack/log/lich.log |grep analysis
-
 \section{故障}
 
 下电，感知有一定延迟，tcp timeout。
 
 重新选举admin
+
+拔盘故障：
+\begin{enumbox}
+\item RAID
+\item 跨池互相影响
+\item 本地pool性能下降严重
+\item clock merge
+\end{enumbox}
+
+恢复流程分为两种：带内、带外。
+
+原因分析5why：
+\begin{enumbox}
+\item 带内恢复引起\hl{同pool}性能下降？
+\item 恢复引起跨pool性能下降？
+\end{enumbox}
 
 \section{Safe Mode}
 
@@ -255,9 +287,13 @@ tail -f /opt/fusionstack/log/lich.log |grep analysis
 
 一个卷，加载成功，依赖于几个条件：
 \begin{compactitem}
-    \item raw/lsv
-    \item module load
+\item raw/lsv
+\item module load
 \end{compactitem}
+
+\section{QoS}
+
+节点内，多卷之间的QoS
 
 \section{Log}
 
