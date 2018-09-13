@@ -207,6 +207,8 @@ TODO list：
 \item 与节点启动时间变长有关？etcd lock？
 \item 验证VFM是否把写时恢复的流量给成功剥离出来了，启用background\_recovery配置选项
 \item VFM：IO时skip vfm存在的副本，解耦IO时恢复，交给外部恢复过程处理
+\item \hl{ENABLE_CHUNK_DEBUG 跟踪chunk的生命周期活动，在controller上捕获尽可能多的信息，条件、事件}
+\item 连接频繁断开，触发recovery过程
 \end{enumbox}
 
 \subsection{0911}
@@ -220,9 +222,39 @@ TODO list：
 \item 切换时间控制
 \item lookup过程，gc特性关，误删数据
 \item chunk check
-\item snapshot
-\item 功能模块：EC, cache
+\item snapshot, 数据view，树型快照
+\item snapshot，连续删除、标记删除
+\item EC 条带一致性，故障下的恢复，log，cache，或先写入临时区域
+\item cache
 \item 故障诊断 hazard
 \end{enumbox}
 
 \subsection{0912}
+
+理解VFM和clock机制
+\begin{enumbox}
+\item 解决了什么问题？
+\item 需要管理什么信息，粒度，这些信息需要持久化吗？
+\item 选择什么样的标记粒度？vol, subvol?
+\item CRUD 增删改查的条件
+\item 不正确设置VFM会带来什么后果？
+\item 更好的方案是什么？
+\item 可配置选项有哪些？
+\item \hl{恢复chunk集是扫描chunk集的子集}
+\item 动态重配置问题
+\item 一旦标记subvol，则该subvol的所有chunk皆处在可疑状态，需要确认。
+\item \hl{一致性分析：异步恢复违反副本的强一致性原则，会带来不可预期的影响}
+\item VFM失效，导致iops低
+\end{enumbox}
+
+\hl{故障下的写时恢复机制}极大地影响了IO性能，解耦IO与恢复两种活动。
+
+在检测到故障时，记录nid到VFM，在恢复完成后，清除相关标记。
+在读写的时候，skip VFM列表中的副本。处在vfm列表里的副本，可能处在\hl{stale状态}。
+如果按chunk标记该状态信息，因为需要持久化，成本比较高。
+
+\hl{在恢复的时候，如何确定scan和恢复的策略}？
+
+只对raw chunk采用vfm机制来实现异步恢复，meta chunk数量少，且更重要，最好同步恢复。
+
+vfm按subvol进行标记，有放大扫描范围的倾向。
