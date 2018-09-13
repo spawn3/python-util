@@ -245,6 +245,7 @@ TODO list：
 \item 一旦标记subvol，则该subvol的所有chunk皆处在可疑状态，需要确认。
 \item \hl{一致性分析：异步恢复违反副本的强一致性原则，会带来不可预期的影响}
 \item VFM失效，导致iops低
+%\item \hl{chunk check的core\_request影响到跨pool性能}？
 \end{enumbox}
 
 \hl{故障下的写时恢复机制}极大地影响了IO性能，解耦IO与恢复两种活动。
@@ -258,3 +259,19 @@ TODO list：
 只对raw chunk采用vfm机制来实现异步恢复，meta chunk数量少，且更重要，最好同步恢复。
 
 vfm按subvol进行标记，有放大扫描范围的倾向。
+
+\subsection{0913}
+
+%理解QoS
+%\begin{enumbox}
+%\item QoS: 分层分类控制。分层：节点、core、controller，分类：IO、Recovery。
+%\item QoS尽量部署在上游，靠近输入端，什么是end-to-end？
+%\item 基于类是最佳实践
+%\item 所有算法都是基于token bucket。token bucket有很多种实现形式
+%\item 测量：依赖于高精度的定时器，且测量干扰性能(\hl{测不准原理})
+%\item 调度：network scheduler，基于队列(显式或隐式)
+%\end{enumbox}
+
+高IOPS就类似于进入了从牛顿力学进入了量子世界。
+
+性能、可用性、QoS三特性一起考虑。故障分两种：节点故障和磁盘故障。
