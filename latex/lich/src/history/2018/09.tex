@@ -207,7 +207,7 @@ TODO list：
 \item 与节点启动时间变长有关？etcd lock？
 \item 验证VFM是否把写时恢复的流量给成功剥离出来了，启用background\_recovery配置选项
 \item VFM：IO时skip vfm存在的副本，解耦IO时恢复，交给外部恢复过程处理
-\item \hl{ENABLE_CHUNK_DEBUG 跟踪chunk的生命周期活动，在controller上捕获尽可能多的信息，条件、事件}
+\item \hl{ENABLE\_CHUNK\_DEBUG 跟踪chunk的生命周期活动，在controller上捕获尽可能多的信息、条件、事件}
 \item 连接频繁断开，触发recovery过程
 \end{enumbox}
 
@@ -262,16 +262,43 @@ vfm按subvol进行标记，有放大扫描范围的倾向。
 
 \subsection{0913}
 
-%理解QoS
-%\begin{enumbox}
-%\item QoS: 分层分类控制。分层：节点、core、controller，分类：IO、Recovery。
-%\item QoS尽量部署在上游，靠近输入端，什么是end-to-end？
-%\item 基于类是最佳实践
-%\item 所有算法都是基于token bucket。token bucket有很多种实现形式
-%\item 测量：依赖于高精度的定时器，且测量干扰性能(\hl{测不准原理})
-%\item 调度：network scheduler，基于队列(显式或隐式)
-%\end{enumbox}
+理解QoS
+\begin{enumbox}
+\item QoS: 分层分类控制。分层：节点、core、controller，分类：IO、Recovery。
+\item QoS尽量部署在上游，靠近输入端，什么是end-to-end？
+\item 基于类是最佳实践
+\item 所有算法都是基于token bucket。token bucket有很多种实现形式
+\item 测量：依赖于高精度的定时器，且测量干扰性能(\hl{测不准原理})
+\item 调度：network scheduler，基于队列(显式或隐式)
+\end{enumbox}
 
-高IOPS就类似于进入了从牛顿力学进入了量子世界。
+高IOPS就类似于从牛顿力学进入了量子世界。
 
 性能、可用性、QoS三特性一起考虑。故障分两种：节点故障和磁盘故障。
+
+先分析跨pool影响，再分析pool内影响。
+
+从资源使用的角度分析故障的跨pool影响，故障下，恢复流量会用到内存、网络资源，sqlite?
+磁盘是隔离的，core也是隔离的。
+
+节点之间的corerpc只有一个连接。两个卷映射到不同的core hash上。
+
+简化测试环境：\hl{两个pool，每个pool一个卷(映射到不同的core hash上)，做故障}。
+从简单到复杂，先确定简单情况下没有问题，然后再推广到更复杂情况。
+
+\begin{enumbox}
+\item background recovery off
+\item \hl{确认是否有带内恢复流量}，统计chunk\_push被调用的次数，按pool/vol分组
+\item clock merge带来的性能抖动
+\item chunk bh是干什么的
+\end{enumbox}
+
+\subsection{0914}
+
+问题集
+\begin{enumbox}
+\item getnode返回estale
+\item disk故障，没有加入vfm，导致带内恢复
+\item recv/send是block操作，堵塞scheduler主循环
+\item qos disable overflow
+\end{enumbox}
