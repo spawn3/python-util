@@ -226,7 +226,17 @@ TODO list：
 \item snapshot，连续删除、标记删除
 \item EC 条带一致性，故障下的恢复，log，cache，或先写入临时区域
 \item cache
+\item etcd选主依赖于物理时间，容易引发问题
+\item admin的切换过程，ctl的切换过程，两者可能有叠加。
+\item ***
 \item 故障诊断 hazard
+\item iscsi session切换，原session的IO还在继续处理
+\item clock
+\item chunk check
+\item chunk tree里parent的chkinfo的rep set变了，沿着chunk tree向上跟踪
+\item mbuffer不配对，忘了free，导致内存泄露
+\item \hl{诊断方法见: 192.168.1.7 文档}
+\item 常见问题：可在git仓库里搜索write failure
 \end{enumbox}
 
 \subsection{0912}
@@ -301,4 +311,24 @@ vfm按subvol进行标记，有放大扫描范围的倾向。
 \item disk故障，没有加入vfm，导致带内恢复
 \item recv/send是block操作，堵塞scheduler主循环
 \item qos disable overflow
+\end{enumbox}
+
+\subsection{0917}
+
+\begin{enumbox}
+\item 对标ceph，如何体现竞争力？
+\item AFA是大势所趋，如何把握机会窗？
+\item 客户在哪里？
+\end{enumbox}
+
+为平滑删除资源，采用垃圾桶、skip、维护模式等\hl{设计模式}进行。
+本质上是设计资源的状态机，不同的状态允许不同的操作，通过区分不同的状态来达到目的。
+
+问题是如何持久化资源的状态，以满足ACID等基本属性？
+
+\subsection{0918}
+
+\begin{enumbox}
+\item volume\_lease use 3s
+\item recovery immediately
 \end{enumbox}

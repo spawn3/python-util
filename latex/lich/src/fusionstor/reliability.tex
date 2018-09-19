@@ -97,3 +97,21 @@ lsblk依然能看到虚实数据盘之间的映射关系。
 \subsection{管理线程}
 
 \section{节点故障}
+
+\section{工具}
+
+\subsection{Hazard}
+
+hazard的IO模式：对同一IO extent，先写入，再读取。如果两者不一致，则再次读取。
+写和读分两次，每次的大小是随机的。但两次加起来代表一个完整的IO extent。
+只有写入与第一次读取不一致时，才有第二次读取进一步验证。故结果分为几种情况：
+\begin{enumbox}
+\item w != r1, w == r2，为读错误
+\item w != r1, r1 == r2，为写错误
+\item w != r1, w != r2，为unknown
+\end{enumbox}
+
+绘成三角形，如w为顶点，r1、r2为两底点，能更形象地去表示三者的关系。
+
+\hl{定位对应的chunk}，区分两种情况：raw和fs。raw的情况容易定位，\hl{(LBA-1) * 512}即可计算出对应的chunk，一个LBA对应512B。
+fs需要借助辅助手段来定位。模拟一io，通过底层FusionStor的log来定位。
