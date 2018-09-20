@@ -13,6 +13,21 @@ client可以和每个节点进行通信，推荐采用VIP机制，简化连接�
 
 \section{架构演化}
 
+关键问题：
+\begin{enumbox}
+\item 数据分布与数据平衡
+\item 复制及其一致性
+\item 容错设计
+\item 性能分析
+\item 扩展性设计
+\end{enumbox}
+
+问题与评估形成V型。CAP和ACID是两套主要的指标体系，一致性居于中心地位。
+\hl{把两套体系融合为一体}，故障、并发、持久化都是现实的需求。
+
+用Paxos解决C问题，用2PC解决分布式A问题。lease是时间的授权机制，比如心跳方法去检测节点A是否在线，\hl{NAS的cache一致性}。
+
+架构演进：
 \begin{enumbox}
 \item{引入etcd}
 \item{引入存储池}
