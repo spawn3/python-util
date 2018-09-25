@@ -60,3 +60,44 @@ O 合
 \end{lstlisting}
 
 \section{阅读}
+
+大问题
+\begin{enumbox}
+\item Chunk副本一致性
+\item 事务管理：并发控制与故障恢复
+\item QoS
+\end{enumbox}
+
+架构设计
+\begin{enumbox}
+\item 软件系统架构
+\end{enumbox}
+
+数据结构与算法
+\begin{enumbox}
+\item 算法导论
+\end{enumbox}
+
+存储
+\begin{enumbox}
+\item 大规模分布式存储系统
+\item 数据存储技术与实战
+\item 操作系统 (IO层)
+\end{enumbox}
+
+从客户端来看，设备文件对应分布式存储系统中的逻辑卷。
+逻辑卷与物理卷具有相同的控制参数。
+
+在分布式存储系统内部(单机存储引擎)，NVMe有两种访问模式：设备文件、通过pci号直接访问。
+后一种访问方式性能高。若经过设备文件，则通过kernel IO栈。
+
+Ceph导出了\hl{对象层API}，在其上构建统一存储：block，fs，object。fs具有最复杂的语义，block则对latency要求高。
+
+系统
+\begin{enumbox}
+\item Ceph
+\item SheepDog
+\item GlusterFS
+\item Lustre
+\item LevelDB/RocksDB
+\end{enumbox}
