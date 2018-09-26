@@ -26,6 +26,12 @@
 整体，集群按两个维度来理解，一是物理资源，二是逻辑资源。
 物理资源包括节点以及节点上的磁盘，逻辑资料包括存储池、目录、卷、快照等。
 
+\section{资源管理}
+
+集群、故障域、节点
+
+存储池、磁盘
+
 \section{Pool}
 
 存储池是集群的物理划分。把物理节点划分为不同的保护域，一个卷的所有数据只出现在一个保护域内。卷可以跨保护域进行复制和迁移。
@@ -115,49 +121,7 @@ pool引导信息可以存在rootable里(用etcd取而代之)。
 \item 从id到path 遍历pool，找到即退出(反向)
 \end{compactitem}
 
-\section{Volume}
-
-属性：
-
-操作：
-\begin{compactenum}
-\item rename
-\item resize \info{在线扩容}
-\item mv
-\item copy \change{全量拷贝/增量拷贝} \change{跨存储池拷贝} % change不能出现在box里
-\end{compactenum}
-
-\section{Snapshot}
-
-snapshot隶属于卷，无卷则无快照，快照组织成快照树，其中有且只有一个快照是可写快照，即卷的写入点。
-
-\section{Consistency Group}
-
-一致性卷组 \change{Consistency Group}
-
-\begin{shadequote}
-Consistency Groups could be useful for Data Protection (snapshots, backups) and
-Remote Replication (Mirroring).
-
-The Mirroring support will allow to setup mirroring of multiple volumes in the
-same consistency group (i.e. attaching multiple RBD images to the same journal
-to ensure consistent replay).
-
-There is already an interest to implement this functionality as a part Mirroring feature:
-http://tracker.ceph.com/issues/13295
-
-The snapshot support will allow snapshots of multiple volumes in the same
-consistency group to be taken at the same point-in-time to ensure data
-consistency.
-\end{shadequote}
-
-\section{Mapping}
-
-数据隔离/ACL，数据保护
-
-卷对主机的可见性。一个卷只有映射给了某主机，才可以被该主机访问。
-
-\section{属性}
+\subsection{属性}
 
 \begin{enumbox}
 \item 副本数
@@ -173,7 +137,7 @@ consistency.
 
 删除操作时，影响到相关类。
 
-\section{操作}
+\subsection{操作}
 
 \begin{enumbox}
 \item pool create
@@ -191,26 +155,19 @@ consistency.
 \item \hl{自动或手动按磁盘速率进行存储池分级划分}
 \end{enumbox}
 
-\section{迁移}
+\section{Volume}
 
-离线/在线迁移
+属性：
 
-不改变卷ID。卷ID和chunkid集群内唯一，迁移过程中保持不变。
+操作：
+\begin{compactenum}
+\item rename
+\item resize \info{在线扩容}
+\item mv
+\item copy \change{全量拷贝/增量拷贝} \change{跨存储池拷贝} % change不能出现在box里
+\end{compactenum}
 
-怎么判断一个卷是离线还是在线？有无访问者。target上的链接数，
-每个卷的volume\_proto都有一个connect\_list。
-
-\begin{lstlisting}[language=bash,frame=single]
-# lich.inspect --connection /iscsi/p1/v1
-\end{lstlisting}
-
-基于快照实现存储池的迁移和复制。相当于clone了新卷，chunkid皆发生变化。
-
-\section{复制}
-
-卷可以建模为状态机，不同状态允许不同的操作，按条件在不同状态之间切换。
-
-\section{属性}
+\subsection{属性}
 
 \begin{lstlisting}[language=c,frame=single]
 typedef struct {
@@ -289,7 +246,7 @@ chunk allocate开销较大，即要申请磁盘空间，也涉及记录元数据
 
 \subsection{副本数}
 
-\section{操作}
+\subsection{操作}
 
 \begin{enumbox}
 \item create
@@ -323,27 +280,11 @@ chunk allocate开销较大，即要申请磁盘空间，也涉及记录元数据
 \end{compactitem}
 
 
-\subsection{QoS}
+\section{Snapshot}
 
-token bucket。IOPS与block size相关，两者乘积等于带宽。
-如果各层发生IO聚合，则在流量守恒的情况下，显示IOPS有所不同。
+snapshot隶属于卷，无卷则无快照，快照组织成快照树，其中有且只有一个快照是可写快照，即卷的写入点。
 
-IOPS必须假定一定的block size。
-
-抽象出AbstractVolume，Volume、Snapshot、Clone都是其子类。
-
-\hl{卷或克隆卷扩容后，快照没有相应扩容，会返回ENOENT，需要填充0}。
-
-\section{问题}
-
-\begin{enumbox}
-\item session方式，无commit
-\item 随机IO，小cache，频繁swap，有问题
-\item 如果标记dirty，会出现all dirty的情况
-\item 如果有COW，需要pin住源
-\end{enumbox}
-
-\section{操作}
+\subsection{操作}
 
 需要支持的快照操作：
 \begin{enumbox}
@@ -404,7 +345,7 @@ IO粒度和数据项粒度的关系，如果IO粒度大于数据项粒度
 
 这条规则是否永远成立：\textcolor{red}{快照树的任一路径，都需要具有完整的索引结构和数据项集，可以有冗余和共享}。
 
-\section{COW}
+\subsection{COW}
 
 为了支持快照树，需要分析rollback和读快照的过程。
 
@@ -448,7 +389,7 @@ rollback过程依赖于两个快照路径：
 \end{compactenum}
 
 
-\section{ROW}
+\subsection{ROW}
 
 % ROW与LSV的不同，在于同一LBA，只对应一个数据项，而不是对应多个版本的数据项。
 % 但这个数据项的引用计数，可以为0，1，或多个。
@@ -515,7 +456,7 @@ IO锁最好是区间锁。bitmap单元的提交操作。
 
 \end{tcolorbox}
 
-\section{ROW2}
+\subsection{ROW2}
 
 \subsection{快照树}
 
@@ -616,7 +557,7 @@ revert的时候，rollback版本号表示目标快照的版本号，如有autosn
 
 /pool1/system/rollback/vol.32.0
 
-\section{Bitmap Cache}
+\subsection{Bitmap Cache}
 
 要解决的关键问题有：
 \begin{enumbox}
@@ -673,6 +614,25 @@ IO写的时候，对应的每一个bunit，都存在四种状态：
 
 \section{ConsistencyGroup}
 
+一致性卷组 \change{Consistency Group}
+
+\begin{shadequote}
+
+Consistency Groups could be useful for Data Protection (snapshots, backups) and
+Remote Replication (Mirroring).
+
+The Mirroring support will allow to setup mirroring of multiple volumes in the
+same consistency group (i.e. attaching multiple RBD images to the same journal
+to ensure consistent replay).
+
+There is already an interest to implement this functionality as a part Mirroring feature:
+http://tracker.ceph.com/issues/13295
+
+The snapshot support will allow snapshots of multiple volumes in the same
+consistency group to be taken at the same point-in-time to ensure data
+consistency.
+\end{shadequote}
+
 使用场景：如一个分布式数据库，log写入一个卷，数据写入另一个卷，如何打快照才能不违反应用层的一致性？
 
 LVM的快照，涉及底层多个物理卷。clvm
@@ -680,3 +640,62 @@ LVM的快照，涉及底层多个物理卷。clvm
 ceph组内各卷，共用一个journal，性能低、架构不灵活
 
 CG是一个独立实体，创建后为空，可以把一些卷加进来，按组进行快照操作。
+
+\section{Mapping}
+
+数据隔离/ACL，数据保护
+
+卷对主机的可见性。一个卷只有映射给了某主机，才可以被该主机访问。
+
+\section{迁移}
+
+离线/在线迁移
+
+不改变卷ID。卷ID和chunkid集群内唯一，迁移过程中保持不变。
+
+怎么判断一个卷是离线还是在线？有无访问者。target上的链接数，
+每个卷的volume\_proto都有一个connect\_list。
+
+\begin{lstlisting}[language=bash,frame=single]
+# lich.inspect --connection /iscsi/p1/v1
+\end{lstlisting}
+
+基于快照实现存储池的迁移和复制。相当于clone了新卷，chunkid皆发生变化。
+
+\section{复制}
+
+卷可以建模为状态机，不同状态允许不同的操作，按条件在不同状态之间切换。
+
+\section{问题}
+
+\begin{enumbox}
+\item session方式，无commit
+\item 随机IO，小cache，频繁swap，有问题
+\item 如果标记dirty，会出现all dirty的情况
+\item 如果有COW，需要pin住源
+\end{enumbox}
+
+\section{精简配置}
+
+\section{缓存}
+
+\section{存储分级}
+
+\section{QoS}
+
+\subsection{QoS}
+
+token bucket。IOPS与block size相关，两者乘积等于带宽。
+如果各层发生IO聚合，则在流量守恒的情况下，显示IOPS有所不同。
+
+IOPS必须假定一定的block size。
+
+抽象出AbstractVolume，Volume、Snapshot、Clone都是其子类。
+
+\hl{卷或克隆卷扩容后，快照没有相应扩容，会返回ENOENT，需要填充0}。
+
+\section{远程复制}
+
+\section{删重}
+
+\section{压缩}

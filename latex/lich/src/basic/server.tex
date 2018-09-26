@@ -1,5 +1,7 @@
 \chapter{软件架构}
 
+冰山模型，事件-模式-结构，结构最稳定。
+
 从节点到集群，从本地到全局
 
 平衡利用各种资源。
@@ -10,22 +12,37 @@
 
 \subsection{Actor}
 
+带队列的线程是一个强大的结构，即有执行单元，又有调度单元。一些复杂的任务，比如恢复过程中的并行执行，就最好组织成带队列的线程池。
+至于队列是线程私有，还是公共队列，是一个需要进一步探讨的问题。
+
+比如在扫描卷的过程中，扫描结果是放入公共队列，还是放入线程私有队列？放入公共队列难于控制一个卷上扫描结果的处理顺序，
+而放入线程私有队列，既可以在多线程之间进行\hl{负载均衡}，又容易控制处理顺序。
+
+由此可以推论，\hl{私有优先于公有}。在core绑定的设计思路中，也体现了这种理念。
+
+再比如，协程调度本质上也是一个带队列的线程，队列不止一个，可以组合成相对强大的调度模型。
+
+生产者、消费者模型，值得进一步研究。排队论是理论武器。
+
+队列的结构，不仅与线程结构有关，也与应用逻辑有关。
+
 controller类似actor概念。
 
 non-blocking IO。
 
-带队列的线程是一个强大的结构，即有执行单元，又有调度单元。一些复杂的任务，比如恢复过程中的并行执行，就最好组织成带队列的线程池。
-至于队列是线程私有，还是公共队列，是一个需要进一步探讨的问题。
+\subsection{SEDA}
 
-再比如，协程调度本质上也是一个带队列的线程，队列不止一个，可以组合成相对强大的调度模型。
+actor + pipeline，多个actor构成SEDA架构。
 
 \subsection{CSP}
 
 显式channel
 
-\subsection{SEDA}
+\subsection{Map Redule}
 
-actor + pipeline，多个actor构成SEDA架构。
+\subsection{Lambda架构}
+
+\section{EIT}
 
 \section{Memory}
 
@@ -38,12 +55,17 @@ actor + pipeline，多个actor构成SEDA架构。
 \item core thread拥有私有内存，解决共享/竞争问题。
 \end{enumbox}
 
-\section{EIT}
+\section{场景模式}
 
 \begin{itemize}
-    \item journalling
-    \item update many, commit one
-    \item double check
-    \item double/multi buffer
-    \item half sync, half async
+\item journalling
+\item update many, commit one
+\item double check
+\item double/multi buffer
+\item half sync, half async
 \end{itemize}
+
+\section{QoS}
+
+卷QoS实现了局部目标，全局QoS控制更难。系统存在多种活动，活动有优先级控制，比如业务IO和恢复流量之间如何平衡？
+QoS也与系统拓扑结构有关，即控制粒度，分层。
