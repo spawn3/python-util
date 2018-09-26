@@ -537,7 +537,7 @@ GC过程和引用计数。每个记录的is\_ref记录是否写入了数据。�
 
 LSV: 逐个扫描每个log。
 
-\section{实现}
+\subsection{实现}
 
 快照列表信息记录在卷table\_proto的smap和sinfo区，info区的每一项包括name和chkinfo，还包括snap\_attr\_t。
 smap用bit标记该位置是否有效。卷上的所有快照，构成快照树。
@@ -641,6 +641,15 @@ ceph组内各卷，共用一个journal，性能低、架构不灵活
 
 CG是一个独立实体，创建后为空，可以把一些卷加进来，按组进行快照操作。
 
+\subsection{问题}
+
+\begin{enumbox}
+\item session方式，无commit
+\item 随机IO，小cache，频繁swap，有问题
+\item 如果标记dirty，会出现all dirty的情况
+\item 如果有COW，需要pin住源
+\end{enumbox}
+
 \section{Mapping}
 
 数据隔离/ACL，数据保护
@@ -666,16 +675,11 @@ CG是一个独立实体，创建后为空，可以把一些卷加进来，按组
 
 卷可以建模为状态机，不同状态允许不同的操作，按条件在不同状态之间切换。
 
-\section{问题}
-
-\begin{enumbox}
-\item session方式，无commit
-\item 随机IO，小cache，频繁swap，有问题
-\item 如果标记dirty，会出现all dirty的情况
-\item 如果有COW，需要pin住源
-\end{enumbox}
-
 \section{精简配置}
+
+\section{数据管理}
+
+恢复、平衡、GC
 
 \section{缓存}
 
@@ -694,8 +698,18 @@ IOPS必须假定一定的block size。
 
 \hl{卷或克隆卷扩容后，快照没有相应扩容，会返回ENOENT，需要填充0}。
 
-\section{远程复制}
+\section{IPv6}
 
-\section{删重}
+\section{EC}
+
+与副本机制在同一架构层面上。
+
+\section{重删}
+
+VDO
 
 \section{压缩}
+
+\section{远程复制}
+
+在iscsi层做？
