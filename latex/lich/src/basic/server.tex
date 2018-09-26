@@ -14,13 +14,18 @@ controller类似actor概念。
 
 non-blocking IO。
 
+带队列的线程是一个强大的结构，即有执行单元，又有调度单元。一些复杂的任务，比如恢复过程中的并行执行，就最好组织成带队列的线程池。
+至于队列是线程私有，还是公共队列，是一个需要进一步探讨的问题。
+
+再比如，协程调度本质上也是一个带队列的线程，队列不止一个，可以组合成相对强大的调度模型。
+
 \subsection{CSP}
 
 显式channel
 
 \subsection{SEDA}
 
-actor + pipeline
+actor + pipeline，多个actor构成SEDA架构。
 
 \section{Memory}
 
