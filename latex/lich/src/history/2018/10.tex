@@ -76,8 +76,24 @@ pool有两重含义：物理(与节点的关系)和逻辑(与卷的关系)。区
 
 跟踪vfm的标记和清除标记过程。为什么vfm没有清理成功？与load有关？
 
-按vol跟踪iscsi，包括target、connection等。\hl{iSCSI和iSER采用了不同的代码，也共用了一部分代码。有些逻辑需要两处都处理}。
-
 单独提出config，管理/dev/shm/lich4、/opt/fusionstack/data等目录下的文件。
 接口比较简单，复杂一点的是fnotify相关功能，支持注册。
 \hl{写入配置文件时，采用了rename方式，会触发多个fnotify事件}。
+
+按vol跟踪iscsi，包括target、connection等。\hl{iSCSI和iSER采用了不同的代码，也共用了一部分代码。有些逻辑需要两处都处理}。
+对一个vol而言，iSCSI一个session可以有多个connection，否则不能支持multipath？
+
+\hl{协议}：每个iscsid服务可以有多个target，按target名字指定。每个target下包括若干lun。从访问来看，conn/session等概念。
+协议交互过程，包括了登录、重定向等过程。
+
+login后，session才正式建立，\hl{存在sess为NULL的conn}。
+
+clock没有写入journal是设计选择。clock丢失是低频事件。
+
+\subsection{15}
+
+TODOList
+\begin{enumbox}
+\item data balancer
+\item vfm cleanup
+\end{enumbox}
