@@ -1,5 +1,9 @@
 \chapter{阅读}
 
+\section{方法}
+
+以五行为中心
+
 道
 \begin{enumbox}
 \item 道德经
@@ -13,6 +17,65 @@
 \item 大臣之道
 \end{enumbox}
 
+\section{专业}
+
+存储
+\begin{enumbox}
+\item 大规模分布式存储系统
+\item 数据存储技术与实战
+\item 操作系统 (IO层)
+\end{enumbox}
+
+大问题
+\begin{enumbox}
+\item Chunk副本一致性
+\item 事务管理：并发控制与故障恢复
+\item QoS
+\end{enumbox}
+
+架构设计
+\begin{enumbox}
+\item 软件系统架构
+\end{enumbox}
+
+数据结构与算法
+\begin{enumbox}
+\item 算法导论
+\end{enumbox}
+
+Linux
+\begin{enumbox}
+\item Linux/Unix系统编程手册
+\item Linux性能优化
+\item Linux内核分析及应用
+\end{enumbox}
+
+Big Data
+\begin{enumbox}
+\item 精通数据科学
+\end{enumbox}
+
+系统
+\begin{enumbox}
+\item Ceph
+\item SheepDog
+\item GlusterFS
+\item Lustre
+\item LevelDB/RocksDB
+\end{enumbox}
+
+从客户端来看，设备文件对应分布式存储系统中的逻辑卷。
+逻辑卷与物理卷具有相同的控制参数。
+
+在分布式存储系统内部(单机存储引擎)，NVMe有两种访问模式：设备文件、通过pci号直接访问。
+后一种访问方式性能高。若经过设备文件，则通过kernel IO栈。
+
+Ceph导出了\hl{对象层API}，在其上构建统一存储：block，fs，object。fs具有最复杂的语义，block则对latency要求高。
+
+\section{领导力}
+
+\section{知识}
+
 战略
 \begin{enumbox}
 \item 战略罗盘
@@ -23,9 +86,3 @@
 \begin{enumbox}
 \item 投资最重要的事
 \end{enumbox}
-
-ABC
-\begin{enumbox}
-\item 精通数据科学
-\end{enumbox}
-
