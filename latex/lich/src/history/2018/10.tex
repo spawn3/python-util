@@ -97,3 +97,14 @@ TODOList
 \item data balancer
 \item vfm cleanup
 \end{enumbox}
+
+顺序IO，QoS不起作用，因为\hl{上层进行了IO聚合}？
+
+\subsection{17}
+
+关于数据分布的思考：用一个更高的视野去看恢复、平衡、gc等过程。
+
+引入存储池后，诸过程都按pool进行，在pool内满足故障域、平衡等约束条件。
+需要开发相关校验工具，以简化该过程。
+
+控制参数的设定不够灵活，如何更自动、更智能地去满足业务需求？

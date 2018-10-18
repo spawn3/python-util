@@ -1,101 +1,123 @@
 \chapter{learning}
 
-\section{学习计划}
+五行结构：中心是心道物三合，外围是PDCA环。
 
-知识体系：编程语言、数据结构和算法、架构和系统。
-最重要的系统有：操作系统、编译原理和数据库。
+学习目的、学习方法都属于心道物三合。三合有更深刻的内涵。
+三合是定义环节，PDCA是实现、落地环节。
 
-分布式存储系统能把这些知识点贯通起来。
+通常说来，物定义了运转PDCA的目的。五行分解为1+4。一分为三、三生万物。
 
-\subsection{理论知识}
+有点类似人生算法的逻辑。一个内核、认知闭环、一个外环。认知闭环仅仅是PDCA的部分环节。
+引入外环的用意不明？
 
-怎么学习理论知识：书籍，论文，网站，与人讨论等。道心物三者融合无间，方好。
+\section{学习目的}
 
-常常琢磨一些重要问题，心态开放。由手头工作延伸开来
+更上一层楼
 
-及时把问题、思考的进展、与人讨论的结果等一切新知记录下来，留出一定的时间进行反思，整理出知识体系来。
+\subsection{面试题}
 
+\hl{围绕工作、面试进行学习}
 
-工作相关：
+编程
 \begin{enumbox}
-\item LICH架构，以及关键问题
-\item NVMe
+\item Open函数的参数，flag选项
+\item C++
 \end{enumbox}
 
-重要专业知识
+数据结构、算法
 \begin{enumbox}
-\item 存储基础知识
-\item RAID
-\item LVM
-\item udev
-\item iSCSI
+\item list的del
+\item B+ tree、Bcache
+\item Radix tree
+\item 用数组来保存二叉树，在disk上如何存储tree结构
+\item quick sort
 \end{enumbox}
 
-基础知识
+设计模式、架构
 \begin{enumbox}
-\item 编程语言
-\item 数据结构与算法
-\item 操作系统
-\item 数据库
-\item 网络
-\item 分布式算法
+\item decorator
 \end{enumbox}
 
-\subsection{常用工具}
-
+操作系统
 \begin{enumbox}
-\item Clion/VIM
-\item GIT
-\item CMake
-\item gdb
-\item perf
-\item valgrind
-\item stap
+\item 用户态和内核态的区别
+\item syscall
+\item mmap
+\item \hl{Select和epoll的区别}
+\item stdio, stdout, stderr
+\item 生产者-消费者模型 (队列、排队论)
+\item 读者-写者模型
+\item 哲学家就餐问题
 \end{enumbox}
 
-\subsection{流行技术}
-
-存储系统
+存储
 \begin{enumbox}
-\item SheepDog
-\item Ceph
-\item GlusterFS
-\item ZFS
-\item SPDK
-\item tgt
+\item 如何实现NFS cache一致性？
+\item mount流程
+\item IO流程
+\item Fuse
+\item MDS/CDS分离
 \end{enumbox}
 
-计算与虚拟化
+分布式系统
 \begin{enumbox}
-\item Linux
-\item KVM
-\item VMWare
-\item Docker
+\item 集群架构
+\item CAP理论
+\item 多副本一致性
+\item Paxos与RAFT的区别
 \end{enumbox}
 
-网站架构
+系统
 \begin{enumbox}
-\item Nginx/Envoy
-\item MySQL
-\item Redis
-\item MongoDB
-\item MQ
-\item Oracle RAC
+\item LevelDB的原理
+\item lustre 论文（提及如何处理NFS cache一致性）
+\item OneFS
 \end{enumbox}
 
-大数据计算平台
+\subsection{公司}
+
 \begin{enumbox}
-\item Kafka
-\item Hadoop
-\item Spark
-\item ElasticSearch
+\item 阿里
+\item 腾讯
+\item 百度
+\item 华为
+\item 京东
+\item 小米
+\item XSKY
+\item 同友
+\item 衫岩
+\item 浪潮
+\item 曙光
+\item 联想
+\item 迅雷
+\item 大道云行
+\item 首都在线
+\item 谷数科技
+\end{enumbox}
+
+HCI
+\begin{enumbox}
+\item SmartX
+\item ZStack
+\item 深信服
+\item UCloud
+\item EasyStack
+\item Zetta云
+\end{enumbox}
+
+外国公司
+\begin{enumbox}
+\item EMC
+\item HDS
+\item NetApp
+\item Nutanix
 \end{enumbox}
 
 \section{学习方法}
 
 查理芒格的模型：学科的重要模型。
 
-数学概观：现实-模型-理论三元组。模型是对现实的抽象，把逻辑运用到模型推演出理论体系。
+数学概观：\hl{现实-模型-理论}三元组。模型是对现实的抽象，把逻辑运用到模型推演出理论体系。
 通过一问一答解决现实问题。模型的验证，一是事实，而是逻辑。
 
 找到某些基础模型、或如高焕堂老师说的：form。作为构建更复杂系统的基本单元，
@@ -153,6 +175,96 @@ E=K/I，温故知新，通过包围式学习构建知识网络。这是主动的
 
 % https://en.wikipedia.org/wiki/Algorithm#Informal\_definition
 
+\section{学习计划}
+
+知识体系：编程语言、数据结构和算法、架构和系统。
+最重要的系统有：操作系统、编译原理和数据库。
+
+分布式存储系统能把这些知识点贯通起来。
+
+\subsection{理论知识}
+
+怎么学习理论知识：\hl{书籍，论文，网站，与人讨论}等。道心物三者融合无间，方好。
+
+常常琢磨一些重要问题，心态开放。由手头工作延伸开来
+
+及时把问题、思考的进展、与人讨论的结果等一切新知记录下来，留出一定的时间进行反思，整理出知识体系来。
+
+工作相关：
+\begin{enumbox}
+\item LICH架构，以及关键问题
+\item NVMe
+\end{enumbox}
+
+重要专业知识
+\begin{enumbox}
+\item 存储基础知识
+\item RAID
+\item LVM
+\item udev
+\item iSCSI
+\end{enumbox}
+
+基础知识
+\begin{enumbox}
+\item 编程语言
+\item 数据结构与算法
+\item 分布式算法
+\item 操作系统
+\item 数据库
+\item 网络
+\end{enumbox}
+
+\subsection{常用工具}
+
+\begin{enumbox}
+\item Clion/VIM
+\item GIT
+\item CMake
+\item gdb
+\item perf
+\item valgrind
+\item stap
+\end{enumbox}
+
+\subsection{流行技术}
+
+存储系统
+\begin{enumbox}
+\item SheepDog
+\item Ceph
+\item GlusterFS
+\item ZFS
+\item SPDK
+\item tgt
+\end{enumbox}
+
+计算与虚拟化
+\begin{enumbox}
+\item Linux
+\item Docker
+\item KVM
+\item VMWare
+\end{enumbox}
+
+网站架构
+\begin{enumbox}
+\item Nginx/Envoy
+\item MySQL
+\item Redis
+\item MongoDB
+\item MQ
+\item Oracle RAC
+\end{enumbox}
+
+大数据计算平台
+\begin{enumbox}
+\item Hadoop
+\item Spark
+\item ElasticSearch
+\item Kafka
+\end{enumbox}
+
 \section{Site}
 
 \begin{enumbox}
@@ -201,104 +313,3 @@ E=K/I，温故知新，通过包围式学习构建知识网络。这是主动的
 \subsection{设计原本}
 
 \subsection{计算机程序的构造与解释}
-
-\section{技术面试}
-
-\subsection{公司}
-
-\begin{enumbox}
-\item 阿里
-\item 腾讯
-\item 百度
-\item 华为
-\item 京东
-\item 小米
-\item XSKY
-\item 同友
-\item 衫岩
-\item 浪潮
-\item 曙光
-\item 联想
-\item 迅雷
-\item 大道云行
-\item 首都在线
-\item 谷数科技
-\end{enumbox}
-
-HCI
-\begin{enumbox}
-\item SmartX
-\item ZStack
-\item 深信服
-\item UCloud
-\item EasyStack
-\item Zetta云
-\end{enumbox}
-
-外国公司
-\begin{enumbox}
-\item EMC
-\item HDS
-\item NetApp
-\item Nutanix
-\end{enumbox}
-
-\subsection{面试题}
-
-\hl{围绕工作、面试进行学习}
-
-编程
-\begin{enumbox}
-\item Open函数的参数，flag选项
-\item C++
-\end{enumbox}
-
-数据结构、算法
-\begin{enumbox}
-\item list的del
-\item B+ tree、Bcache
-\item Radix tree
-\item 用数组来保存二叉树，在disk上如何存储tree结构
-\item quick sort
-\end{enumbox}
-
-设计模式、架构
-\begin{enumbox}
-\item decorator
-\end{enumbox}
-
-操作系统
-\begin{enumbox}
-\item 用户态和内核态的区别
-\item syscall
-\item mmap
-\item \hl{Select和epoll的区别}
-\item stdio, stdout, stderr
-\item 生产者-消费者模型 (队列、排队论)
-\item 读者-写者模型
-\item 哲学家就餐问题
-\end{enumbox}
-
-分布式系统
-\begin{enumbox}
-\item 集群架构
-\item CAP理论
-\item 多副本一致性
-\item Paxos与RAFT的区别
-\end{enumbox}
-
-存储
-\begin{enumbox}
-\item 如何实现NFS cache一致性？
-\item mount流程
-\item IO流程
-\item Fuse
-\item MDS/CDS分离
-\end{enumbox}
-
-系统
-\begin{enumbox}
-\item LevelDB的原理
-\item lustre 论文（提及如何处理NFS cache一致性）
-\item OneFS
-\end{enumbox}
