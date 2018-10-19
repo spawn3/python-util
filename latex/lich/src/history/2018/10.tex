@@ -121,4 +121,30 @@ TODOLIST
 \item 删除卷导致重新开始
 \end{enumbox}
 
+\subsection{19}
+
+\hl{两点取speed法}：保持p1不动，p2代表当前点，随时间而运动。到达时间差时，可以得出速度。
+此时，p1跳变，与p2重合。周而复始。
+
+rethink VFM机制本身！
+
 恢复QoS放在客户端还是服务端？ 目前的token机制是放在发送端的，控制器端的QoS实现的有问题。
+
+进入\hl{修复模式}后，才执行相关策略。如果只有io，或只有recovery，则不需限制。
+
+应在\hl{控制器端/目标端}控制恢复带宽！
+
+如果策略放在pool上，会横跨多个节点，是一个分布式算法。
+如果策略放在pool的各个节点上，是一个局部策略。
+如果策略放在单个的vctl上。策略的粒度通常有以下几种：
+\begin{enumbox}
+\item pool distributed
+\item pool node
+\item pool node vctl
+\end{enumbox}
+
+支持多粒度，如何？不是非此即彼，而是综合治理，分层设定。
+
+场景：一个节点多个磁盘故障，恢复过程中，发生二次故障。
+
+\hl{分离check速度和恢复速度}，限制限制的是恢复速度，而不能按check速度进行。
