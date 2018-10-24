@@ -152,3 +152,47 @@ rethink VFM机制本身！
 \subsection{21}
 
 如果需要总控，可先写入etcd，每个节点轮询该任务。
+
+Balancer TODOList
+\begin{enumbox}
+\item 每个pool的状态，在有恢复的情况下
+\item 已放入actor队列的任务，如返回ESTALE，ECANCELD等返回值
+\item vol\_pop，如返回ESTALE，ECANCELD等返回值
+\item \_\_chunk\_read\_getnode返回ESTALE，该分支没有调用check(调用stat时也遇到了该问题)？
+\item chunk\_push导致hugepage OOM
+\item 策略问题
+\item 没有处在允许中的平衡过程，无法发现vctl。
+\item \hl{卷控制器分布不均匀}
+\end{enumbox}
+
+Recovery TODOList
+\begin{enumbox}
+\item 区分check、success和fail等计数器
+\item 恢复QoS
+\item 动态暂停、停止恢复？
+\end{enumbox}
+
+资源管理
+
+性能优化
+\begin{enumbox}
+\item Redis代替Sqlite
+\item U-TCP
+\item ucache?
+\item 内存管理、按需分配
+\end{enumbox}
+
+\subsection{24}
+
+恢复、QoS、平衡做一小结。几种活动都与一致性、性能有关，性能抖动。
+
+恢复、平衡都是基于pool进行控制。每个节点上，每个pool有零个或多个卷控制器，恢复、平衡过程处理的就是本节点内pool内的非删除卷/快照。
+对每一个卷分布进行处理。
+
+\hl{线程结构受SEDA架构的启发}，分模块主线程，每个pool分主线程、工作线程，工作线程可以进一步细分(如扫描、恢复阶段采用不同的线程池)。
+线程之间通过mq进行通信。需要注意的是，要能灵活地进行任务调度，以满足一定的顺序性要求。由此可知，采用工作线程私有队列会更灵活。
+若采用一个总的任务队列，则不方便调度。\hl{线程结构决定了数据流的节点和方向}。
+
+卷级的QoS采用令牌桶和漏桶结合的方式，可以控制带宽及其波动。这是本地化的算法。
+
+更高层次的QoS控制策略难以实现，如pool内，需要分布式QoS算法。
