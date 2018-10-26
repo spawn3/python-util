@@ -192,6 +192,8 @@ chunk
 
 \section{Clock Merge}
 
+造成性能抖动
+
 \section{监视存储池状态}
 
 由admin节点执行
@@ -199,6 +201,8 @@ chunk
 \section{删除卷}
 
 任务规范放入etcd更合适，避免因为ENOSPC，导致删不了。
+
+删除卷还会影响到恢复、平衡等过程。需要按卷的状态机进行思考！
 
 \section{删除快照}
 
