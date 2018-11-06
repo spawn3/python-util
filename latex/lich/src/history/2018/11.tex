@@ -1,0 +1,31 @@
+\section{11}
+
+\subsection{01}
+
+编程注意事项
+\begin{enumbox}
+\item long time操作之前与之后，需要renew lease，防止lease失效，导致vctl切换
+\item 读写、vfm\_get、vfm\_stat、stat等操作之前，必须chunk check。\hl{如果不检查，可能会返回ESTALE, see \_\_chunk\_read\_getnode}
+\item chunk组织成tree，就意味着依赖性，需要从上到下依次保护,check
+\item chunk上有lock保护
+\item alloc/discard与io分离，故io加rdlock
+\item \hl{困难之处在并发，tree结构上的并发，并且涉及到持久化、lease}
+\end{enumbox}
+
+诊断工具
+\begin{enumbox}
+\item 怎么快速得到各个controller的状态，包括pool、volume、snapshot等？
+\item 怎么检查底层数据一致性？
+\item 打印集群chunk tree，以及每个chunk的详细信息
+\end{enumbox}
+
+写到LUN结尾处，会自动扩容。ROW3这里有问题？
+
+垃圾数据，干扰恢复，gc replica目前不能打开？
+
+\subsection{02}
+
+尽可能通过\hl{DBUG、GOTO}保留可跟踪线索，以方便线上调试。
+
+mellanox交换机编程：SDK？
+
