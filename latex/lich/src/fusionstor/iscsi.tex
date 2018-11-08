@@ -59,3 +59,21 @@ iscsiadm -m discovery -t st -p 192.168.110.219 -l
 看日志
 
 VIP与普通方式有别
+
+\section{与vctl之间的连接}
+
+以vctl的日志为中心，target在建立连接和断开连接的时候会在vctl上注册。
+并且，target有定时任务，每隔30s，尝试向vctl上注册活动连接。
+
+vctl上的记录发生错误，必然是因为建立注册和注销不对称造成的。
+\hl{这种不对称有可能是周期性任务导致的}。
+
+if-what
+\begin{enumbox}
+\item 如果注销之后，又触发了周期性任务，必然就存在该问题。
+\item 如果target发生故障，会如何？
+\end{enumbox}
+
+如何识别非活动连接的相关记录，并及时清理？
+
+怎么验证以上假设？
