@@ -33,6 +33,9 @@ mellanox交换机编程：SDK？
 
 交换机的任务告一段落，遗留的部分问题：授权，不知如何获取部分信息。
 
+\hl{交换机类似于一个host}，如果配置ip地址后，就可以通过SNMP等用户接口进行访问。
+不同的是它具有的交换、端口管理能力。
+
 \subsection{09}
 
 session，网站的session，在服务器端维护，记录某用户的相关信息，比如login状态。
@@ -43,3 +46,5 @@ iscsi的session什么约定？一个session包含一个或多个连接。
 target有多义：一指target server，二指init连接到的某个具体的LUN（portal）
 
 多网段，vip，multipath。
+
+支持\hl{存储多网段}，就是有多个存储网段，通过bond机制管理的，只能看做是一个网段。
