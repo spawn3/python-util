@@ -108,3 +108,13 @@ etcd里与pool有关的状态：
 \end{enumbox}
 
 删除pool也影响到数据恢复、平衡任务。
+
+lich网络配置，检查netmask，\hl{一个网段不能出现多个网络接口}？
+
+两个存储交换机，每个节点双链路做bond，如果自己实现支持多存储网段，改动会比较大。
+
+\subsection{26}
+
+vfm cleanup必须在成功恢复后才能执行。check vfm
+如果scan阶段没有标上vfm，也是有问题的。
+
