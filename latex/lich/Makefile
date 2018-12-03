@@ -1,8 +1,6 @@
 all:
 	cd src && xelatex main.tex && mv -f main.pdf ../lich.pdf
 
-r: r11
-
 r8:
 	vim src/history/2018/08.tex
 
@@ -17,3 +15,5 @@ r11:
 
 r12:
 	vim src/history/2018/12.tex
+
+r: r12
