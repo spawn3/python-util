@@ -1,0 +1,27 @@
+\chapter{RDMA}
+
+注意事件循环，消息派遣机制，同步操作。
+注意内存使用。
+
+C/S，S端收到RDMA\_READ请求时，push数据到客户端的内存。
+S端收到RDMA\_WRITE请求时，从客户端pull数据到本地。
+
+以stor\_rpc\_read和stor\_rpc\_write为例，理解RDMA通信机制。
+post、commit和poll分别对应wr队列和wc队列。wr队列又分为发送和接收队列。
+
+rpc构建于RDMA verbs之上，是同步机制。rpc客户端通过post send发送协议参数，
+分为读、写两种情况。\hl{RDMA read和write都是由RPC server-side完成的}。
+
+ibv\_post\_recv若干内存区块，以接收ibv\_post\_send消息。处理完一个，再次调用。
+就好比有若干空槽，来一个send msg，填充一个，处理完后，reset进入可用状态。
+这是不同于tcp send/recv的地方，\hl{send/recv基于字节流，post send/recv基于msg}。
+send/recv都不涉及rkey，不需要知道peer的内存地址。
+
+rdma write相当于push本地内存数据到远端应用内存，rdma read相当于从远端应用内存pull数据到本地内存。
+
+通过send/recv交换双方内存信息，或其它方式进行交换。\hl{在接收端，要先准备post recv}。
+
+首先要掌握连接管理，采用c/s架构。
+
+为什么理解epoll机制不够顺利？原因在于这是一个双层结构的东东。理解RDMA面临同样问题。
+rdma\_cm\_id约等于一个tcp连接，也需要区分listen socket和connection socket，与客户端共同构成三角形结构。
