@@ -1,5 +1,7 @@
 \chapter{RDMA}
 
+\section{编程模型}
+
 注意事件循环，消息派遣机制，同步操作。
 注意内存使用。
 
@@ -25,3 +27,15 @@ rdma write相当于push本地内存数据到远端应用内存，rdma read相当
 
 为什么理解epoll机制不够顺利？原因在于这是一个双层结构的东东。理解RDMA面临同样问题。
 rdma\_cm\_id约等于一个tcp连接，也需要区分listen socket和connection socket，与客户端共同构成三角形结构。
+
+\section{iSER}
+
+iscsi initiator和target之间的RDMA，与lich实现类似，由三个transfer接口组成：send、read、write。
+target端负责RDMA read/write。\hl{iSER是iscsi over RDMA}，payload协议是scsi。
+
+回到网络的基本模型去理解，上层的协议和接口通常不变，新的硬件和transfer，通常引入了新的协议层去适配。
+由此可见，整个\hl{网络协议栈}的设计非常强大，具有很好的扩展性和适应性。
+
+交换机并不是什么神秘的东西，可以理解为一台计算机，导出了网络服务，主要功能是port的交换和路由。
+
+\section{NVMf}
