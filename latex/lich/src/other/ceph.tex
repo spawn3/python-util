@@ -1,5 +1,17 @@
 \chapter{CEPH}
 
+\section{问题集}
+
+\begin{enumbox}
+\item 故障下的io中断
+\item 降级模式
+\item bluestore是osd粒度的吗？
+\item kernel space和user space之划分
+\item ceph的数据位置计算而来，如何保证平衡是一个重点。
+\end{enumbox}
+
+\section{架构}
+
 从硬件，存储引擎，存储服务，接口，管理等层次分析一款存储产品。评价指标：多快好省。
 多是空间，是扩展性，快是性能，是时间。好是品质，可靠性，高可用等；省，在标准下的优化措施。
 两个维度，构成纵横交错的矩阵结构。任何一项功能，都服务于一个或多个指标，
@@ -19,11 +31,8 @@
 
 osd对应到磁盘设备，bucket是容器，构成分层的物理拓扑结构。
 
-kernel space和user space之划分
-
-ceph的数据位置计算而来，如何保证平衡是一个重点。
-
-按x型结构理解ceph，ceph突出了object层，在object层之上构建块、文件、对象的统一存储系统。
+按x型结构理解ceph，ceph突出了object层(RADOS)，在object层之上构建块、文件、对象的统一存储系统(\hl{1+3架构})。
+对比lich：chunk分为五种类型，构成一树状结构，增加了实现复杂度。
 
 集群由node组成，node上运行monitor和osd服务，一个节点一般有多个osd进程。
 monitor维护集群全局信息，如cluster map。
@@ -39,3 +48,12 @@ monitor维护集群全局信息，如cluster map。
 
 理解对象及其关系后，就要重点分析关键过程，如写、读、恢复、平衡等。
 副本和EC处理上有何异同？
+
+\section{PG}
+
+pg是一个枢纽，沟通了object和osd。\hl{pool-pg-osd构成一拓扑结构}，object的位置由CRUSH算法计算而来。
+
+对象一致性和恢复都是基于PG进行的，包括四个关键过程：\hl{peer, recovery, fallback, scrub}。
+
+若变更一个pool的pg num，需要平衡数据，如何使数据迁移量最小，如何管理迁移过程？
+什么情况才需要变更pg num？
