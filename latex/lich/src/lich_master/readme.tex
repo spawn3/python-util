@@ -170,12 +170,20 @@ RDMA需要注册内存，目前是把整个core内存一次性注册了。
 
 \section{Performance}
 
+性能优化，需要考虑CPU cache的行为，内存管理的效率等等因素。
+
 \subsection{Hash}
 
 \begin{enumbox}
 \item Lock table
 \item Replica srv
 \end{enumbox}
+
+\subsection{NUMA}
+
+内存、网卡的本地化
+
+多个RDMA、多个NVMe均匀分布之NUMA节点上（服务器通常有两个NUMA节点）
 
 \subsection{Queue Pair}
 
@@ -197,3 +205,15 @@ block和非block的区别，block是事件/中断驱动，非block是polling mod
 在epoll等multiplexing机制里，可以同时处理。
 
 aio通过事件抽象后，也纳入事件驱动的方式，其它如定时器等。
+
+\subsection{对齐}
+
+内存缓冲区对齐
+
+offset对齐道sector边界，NVMe对齐到4K，否则性能会非常差
+
+\subsection{知识体系}
+
+ABC，从google三论文开始，hadoop大数据分析平台，spark, openstack+ceph的演进。
+
+分为几类：\hl{协作、存储、计算、缓存}等。存储是最底层，可以把诸多领域贯通起来。

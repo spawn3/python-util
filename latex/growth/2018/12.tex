@@ -181,6 +181,115 @@ HY下一步会很艰难，是否陪着走下去是一个重要的抉择。是否
 全用户态SDS，就照着这个目标努力。把握好AFA这个风口。
 怎么建立相关知识体系呢？
 
+运用心的综合能力，不要被细枝末节所遮蔽。
+
 \subsection{19}
 
 \subsection{20}
+
+数据为王，存储是关键，必须坚持深入，建立完整的知识体系，同时有一门深入的定力和决心。
+致广大而尽精微。
+
+领域
+\begin{enumbox}
+\item 操作系统
+\item 数据结构和算法
+\item C/C++
+\item RDMA
+\item DPDK/SPDK
+\item NVMe
+\item FusionStor/Ceph
+\item 其它分布式存储系统 (FS and DB etc)
+\end{enumbox}
+
+现在是一个重要的发展阶段。静下心来，好好转动PDCA循环。
+
+linux io path非常重要，direct io绕过page cache，故需要对齐。aio依赖于direct io，也需要对齐。
+
+块设备驱动的分层架构：\hl{vfs，page cache，general block，scsi}，主机通过scsi协议连接到磁盘。
+主机通过pcie的NVMe连接到NVMe SSD。
+
+为什么1M块的读写如此慢？
+
+latency和iops的关系：拿行驶在路上的车为例，没有饱和时，latency不受iops的影响；达到饱和后，如何维持稳定的iops就是一个大问题。
+另外，故障对iops的影响也是设计上的大问题。故障后，进入降级运行状态，需要标记，以利恢复。\hl{论述并发和故障对iops的影响}。
+
+\hl{理解异步操作}，异步操作不同于非阻塞操作，依赖于非阻塞操作。aio、NVMe、RDMA、DPDK都采用了异步通信机制。
+提交任务到队列，在polling线程里处理完成事件：
+\begin{enumbox}
+\item 提交
+\item 完成（事件驱动、或PMD, callback）
+\item 保持上下文
+\end{enumbox}
+
+提交和完成可以在同一线程里。
+
+在异步操作之上可以构建同步操作。如rpc，提交请求后，进入yield状态；完成请求后，resume。
+用状态机、或协程实现，原理都一样。
+
+\hl{线程+队列}是中异常强大的模型。
+
+\begin{enumbox}
+\item aio syscall与eventfd结合，可以纳入epool/pool/select机制之中。
+\item NUMA/cpuset和hugepage
+\item 增删节点（异步化）
+\end{enumbox}
+
+其它如timerfd，signalfd都可以纳入epool机制，提供事件等待和通知机制。
+
+启动若干aio polling线程，提交或检查完成状态。在aio api之上，用poll作为事件通知机制。
+用到了两个eventfd，一个用于提交请求的通知，一个用于检查完成状态。
+
+线程加一控制对象，对象包括上下文信息、队列等。
+
+sqlite操作采用了类似机制。
+
+\subsection{21}
+
+linux内核分析和应用、大规模分布式存储系统是两本好书，按此知识体系按图索骥，\hl{致广大而尽精微}。
+但这里的主题不够全面、深刻，更新更深的主题和知识点通过微信公众号、论文、blog等加以补充。
+
+把握行动学习两原则和刻意练习、PDCA、黄金圈发展等基本理念，来指导自己的学习过程。
+
+怎么高效地利用资源？
+
+NUMA架构的cpu资源如何利用？线程core binding，私有hugepage分配器。
+上层网络连接等任务hash到不同的core thread里。在一个core thread里处理提交、完成检查等基本操作。
+同步操作，如io、网络、数据库访问，派生独立的线程池去处理。
+如何做到内存本地化？如何做到thread均匀地映射到NUMA节点上。
+
+如何减少上下文切换和数据copy的开销。
+
+可抽象出独立的内存分配器，每个core有一个内存分配器的实例。
+
+从线程的角度看，分为事件循环线程和工作线程，通过队列把各个线程连接起来，actor and channel模式、csp模型。
+
+分析烧开水这个过程。打开开关后，我就可以走开去处理别的事情。由电水壶独立处理烧开水这个事，等它处理完成后，会鸣笛通知。
+我得到通知，就可以使用其中的开水了。如果有多个电水壶，它们就可以并行工作。（\hl{用UML序列图来描述}）
+
+领导安排任务也遵循同样的逻辑。通过比类取象的方法去理解，并不难。
+
+\hl{网中网}：主机与磁盘的连接，也可以看作是网络。如NVMe SSD，就是NVMe over PCIe，运行在PCIe上的NVMe。
+普通的disk也是如此。PCIe采用串口技术，比并口更快是因为具有更高的频率。
+从协议上看，NVMe对SCSI的优化体现在哪些地方？ NVMe标准依然在快速演进。
+
+与网络连接不同的是，主机与设备的连接是本地的，不是远程跨主机的。
+
+从架构上，本地存储引擎这部分代码应该是简单的。本地磁盘管理：
+\begin{enumbox}
+\item pool与disk具有一对多的映射关系
+\item 每个盘是个状态机
+\item 磁盘多态：支持normal and NVMe disks
+\item 分配磁盘位置，首先选择盘，再选择盘上的某个位置
+\item 检查磁盘故障，并修复数据
+\item 引用计数技术
+\end{enumbox}
+
+每个盘有属性和方法，包括分配、读写。每个disk有独立的分配工作线程。
+一次分配请求，大部分情况下，是一块盘去满足。如果一块盘空间不足，就需要多盘。
+要能够表达非连续的离散空间。请求端是同步操作，用一个lock来实现。由工作线程unlock。wuw序列。
+
+normal disks采用aio方式，NVMe才有自己的方式(kernel bypass)。
+
+chunk位置映射，有cache，读多写少。数量大，cache采用LRU置换算法。
+\hl{要充分理解各种各样cache的重要性。作为一个重要的主题去掌握}。
