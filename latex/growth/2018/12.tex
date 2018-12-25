@@ -355,3 +355,107 @@ transfer，tcp和rdma，是可以共存的，都可以理解为条条大路通�
 中庸是一部经典。
 
 易经、道德经、中庸统摄黄帝内经、四经，一内一外，内圣外王之道备。
+
+先从单机和分布式开始。
+
+不应该开启超线程，会降低单个core的性能。NUMA节点内多核与内存是同一距离。在malloc时，可以注册RDMA。
+
+完成一个任务可以有多种多样的方式。自己处理，或委托给别的线程处理。
+自己处理比较简单，就是block，或非block的同步调用。
+
+引入\hl{io multiplexing}的意义：监听多个描述符，只处理ready的描述符。
+这就多了一层，成为两层，带来了非常强大的能力。
+
+\subsection{24}
+
+总是太乐观，HY处境一至于此。内忧外患，真是举步维艰。
+抓紧呀，抓紧，真是危在旦夕，不能不做最坏打算。
+
+下一步学习重点：\hl{操作系统、编程语言、算法和数据结构}。
+这是最基础的，从这里引申出来，如存储、网络、文件系统、数据库等等。
+CBA也离不开这个基础。勤练基本功，是做好任何事情的秘诀。
+
+进程、地址空间、文件是OS的重要抽象，务必深入去理解。
+磁盘等外设也是文件。io路径是个重点。ioctl能做什么？
+
+线程是可调度的最小单元，同一进程的多个线程共享\hl{进程地址空间}。
+
+外设中断cpu执行，进入中断处理程序，重新调度。
+调度器具有最高权限，所以进程是可抢占的。
+
+外设具有控制器，包括寄存器、数据缓冲器和调度算法。主机与外设如何通信？外设的数据缓冲器独立于进程地址空间。
+direct io是越过page cache层，直接进入设备缓冲器，所以需要对齐到块边界。
+
+删除卷或快照，分摊到各个节点上并行执行，如果引入回收站的功能则最好。
+在存在离线节点的情况下，不应该违反\hl{safety和liveness}性质。
+
+timer如何实现？
+
+提交：直接提交，或提交到队列，然后通知负责提交队列的线程。所有的事件，都可以\hl{统一到epoll}框架内，
+如enentfd,signalfd,timerfd，以及aio、socket fd等。
+
+分解事件检查和实际处理过程。
+
+线程
+\begin{enumbox}
+\item 一个core对应若干aio线程，
+\item 一个disk对应一个allocator线程，
+\item 一个sqlite db对应一个线程。
+\end{enumbox}
+
+都涉及到队列和多线程同步。队列的位置有所不同，有的归工作线程，有的归提交线程。
+这存在非常大的灵活性。两种模式：\hl{hash到工作线程，工作线程polling task}。
+
+协程是用户空间线程，依托于内核线程对象，不可被抢占。
+因为OS感知不到，内核线程对象才是调度的最小单元。
+
+协程维护1+N个上下文对象，N是协程的上下文。
+
+\subsection{25}
+
+VM failover，源vm自杀，目标vm才能启动，lease机制。
+
+着重\hl{思考痛点和难点}。lich的难点在于故障下io无中断，数据副本一致性。
+
+虚拟化和容器，都是需要探索的技术领域。要在\hl{操作系统、编程语言、算法和数据结构}的基础上，做出技术的Y型知识结构。
+
+smartx的技术要求：分布式paxos、raft、etcd、zookeeper等。本地存储、存储协议（iSCSI、NVMf、SPDK等）。
+
+基本功
+\begin{enumbox}
+\item 操作系统：io path, vfs、aio
+\item 编程语言：c/c++，python、go、erlang等。
+\item ext2/3/4, xfs, btrfs, f2fs, block layer
+\item LevelDB/RocksDB
+\item iSCSI, NFS, samba以及其它存储协议
+\item HDFS/Ceph/Sheepdog/GlusterFS
+\item SSD IO性能优化，有FTL开发经验
+\end{enumbox}
+
+每个core thread有线程本地变量，指向aio指针数组，共4个，前两个用于direct io，后两个用于元数据的sync io。
+同一磁盘设备文件，以不同模式打开多次。这是fd与inode的多对一的关系。fd对应的对象一定存有状态信息。
+
+redis的数据模式：每节点若干redis实例，每个实例保存：disk，metadata，raw记录。raw记录按vol组织成hash。
+支持的操作：
+\begin{enumbox}
+\item 分配chunk
+\item 回收chunk
+\item 删除卷
+\end{enumbox}
+
+\hl{NUMA架构的拓扑结构}，如何分配core和aio线程，如何分配内存？
+接着看polling线程如何管理私有内存。
+
+cat /proc/cpuinfo, cores与sibling相等，则没有开启hyper threading。若sibling是cores的二倍，则开启了超线程。
+还有别的可能吗？
+
+polling线程在NUMA节点之间均匀分布，aio线程优先选取超线程，其次选取同一物理cpu上的其它core。总的原则是局部性。
+
+\hl{从core的初始化过程看起，接着重点关注polling线程的工作}。
+外部线程如何与core线程通信，各类事件如何注册到core线程的？
+
+统计内存使用量，统计各类资源的用法
+
+怎么理解syscall，怎么理解内核空间和用户态？上下文切换和内存copy。如read过程，如何分析？如何优化？
+
+\subsection{26}
