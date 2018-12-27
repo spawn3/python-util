@@ -459,3 +459,143 @@ polling线程在NUMA节点之间均匀分布，aio线程优先选取超线程，
 怎么理解syscall，怎么理解内核空间和用户态？上下文切换和内存copy。如read过程，如何分析？如何优化？
 
 \subsection{26}
+
+从主体出发，从进程出发。进程调度、内存、文件和IO等。中断，异步机制。
+
+每个cpu都有自己的线程队列，亲和力是进程的一个属性，指定可以运行在哪些cpu上。就是可以对应cpu的调度队列。
+
+NUMA节点对应的内存，\hl{内存条应该在NUMA节点上对称插入}。否则，没有内存的NUMA节点需要访问远程内存，影响性能。
+
+cpu拓扑是一棵树，叶子节点是逻辑cpu。polling线程binding到逻辑cpu上，
+相应的aio线程选择与polling线程\hl{所在cpu最近的那个逻辑cpu}。
+\hl{NUMA节点，多处理器，多core，超线程}会增加这棵树的层次。
+
+NVMe设备自动发现会成为一个设备文件，通过kernel io路径进行存取。unbind设备驱动程序后，可以通过pci进行访问。
+设备接入bus，通过port空间或内存映射访问设备。
+
+在第一阶段，从各个NUMA节点上平均分配hugepage(mbind)。 hugepage与NUMA节点的这种关系得到保持。
+mmap: posix\_memalign虚拟地址空间，然后mmap到对应的hugepage。然后初始化管理元数据，包括pages和buddy。
+这个地方的代码可以优化，用统一方式管理global和private内存区。
+
+为什么要用虚拟地址获取物理地址？方法是什么？物理地址在什么情况下被用到？
+
+可以抽象出hugepage region这样的概念，用于管理多个hugepage，需要处理如下需求：
+\begin{enumbox}
+\item 指定NUMA节点
+\item 用buddy算法管理多个hugepage的分配
+\item 管理虚拟地址到物理地址的映射
+\item 用统一方式管理global和private内存区
+\item 统计内存区使用情况
+\item 不需要借助hugetlbfs
+\end{enumbox}
+
+恢复策略：需要增加维护模式，在此期间，不进行数据修复。
+
+学习路线图：
+\begin{enumbox}
+\item core
+\item mm
+\item rpc (tcp and rdma)
+\item aio and nvme
+\item iscsi/iser
+\item NVMf
+\item etcd
+\item ***
+\item snapshot
+\item tier
+\item bcache
+\item EC
+\end{enumbox}
+
+还有什么可以改进的？
+
+epoll机制的通用性
+\begin{enumbox}
+\item fd and socket
+\item eventfd
+\item signalfd
+\item timerfd
+\item pipe
+\end{enumbox}
+
+作为\hl{异步事件的监听机制}，具有广泛的适用性。其它类似sem wait and post, \hl{wuw加锁机制}等。都可以用epoll来实现。
+真正体现了event driven的特征。
+
+\subsection{27}
+
+六种同步方法：\hl{mutex, cond, sem, flock, spin, rwlock}。sem可以用于共享内存的同步，flock用于文件同步。
+mutex, cond, spin, rwlock多多于多线程的同步。注意它们自己的不同。
+
+mutex, spin, rwlock使用场景相似，性能有差别。涉及临界区和对共享变量的访问。
+cond与mutex结合起来使用，是否一定要结合mutex？wait在一个外部条件上，这个外部条件/变量被多线程改变。
+sem的使用场景又有所不同。如同步线程创建过程。串行化多个线程的创建过程等等。另外\hl{支持timedwait和try语义}。
+至于文件锁，使用场景易于确认。
+
+sem的wait和post是由不同线程执行的，一般的mutex、spin、rwlock则最好是由同一线程执行。否则会复杂化执行流。
+
+简单的同步比较容易实施，比如多线程下保护一个全局变量。但要保护一个大型的数据结构，就比较困难，需要遵循一定的加锁、解锁协议/约定。
+\hl{2PL，tree protocol}都是这样的协议。
+
+场景一，一线程wait，另一线程需要唤醒它。用sem wait and post可以实现。
+
+场景二，\hl{生产者在队列满时block，消费者在队列空时block}。队列满是一个条件，队列空是一个条件，所以需要两个sem。
+同时对于队列长度的变化，需要加以并发同步。
+
+\hl{所谓条件，只是可能性，而不是确定性的}。收到通知后，再次检查条件，进行相应处理。所以，这里通常是一个循环。
+
+卷chunk树的cc比较复杂，每一个chunk都是一个cc的保护单元，又形成了层次结构。
+
+\hrulefill
+
+WAL和db共同构成完成的数据。这是大数据的alpha架构，什么是完整数据？如何构建完整数据。
+为什么要先写入WAL？因为写入WAL相对性能高。WAL要支持UNDO和REDO操作。\hl{ARIES事务过程}。
+
+fusionstor是没有commit log的，如何保障事务性？需要保障事务性吗？什么是顺序一致性。
+严格\hl{区分提交的数据和未提交的数据}，对两者的要求截然不同。
+采用的clock机制，带来了系列问题，如周期性合并clock导致iops抖动，掉电情况下clock丢失，引起大量的恢复流量。unsafe\_clock机制的不自然。
+
+\dotfill
+
+一旦理解\hl{线程+队列}这种模型的强大威力，则scheduler、SEDA、alpha都比较容易理解了。
+本质上是线程以及线程通信方式，有很多种组合情况。
+
+线程模型有多种：M/1，1/1，M/N。按线程与KSE的比例。\hl{协程是M/1实现，pthread是1/1模型}。
+
+scheduler resume当然可以由外部线程调用，只需要传入taskid参数、返回值和返回数据即可。
+所谓resume就是重新加入runnable队列，进行重新调度。
+被调度器选中后，继续执行schedule\_yield1的后半部分代码，返回值和数据也跟着传出。
+
+\hl{scheduler和task的关系是1+N的关系。task可以用状态机来描述}。\hl{现代操作系统}一书对进程的描述，采用了这种方式。
+
+\dotfill
+
+用户和组是个正交的话题，留待最后再看。
+
+进程和线程是活动的实体，即主体。内存分配、文件io等等都是在进程内执行的。
+从一个到多个主体，引入了\hl{并发情况下通信和同步}的需求。
+
+先理解同步机制，再理解IPC机制。最重要的IPC机制包括file和socket。
+通信有\hl{共享内存和消息传递}两种基本形式。结合\hl{erlang和go语言的运行时模型}去理解这些概念。
+
+服务端编程不能不深入理解epoll、aio等高级io特性。进一步理解其kernel实现原理。
+
+\hrulefill
+
+\hl{md5sum的计算}，要合理安排\hl{存储和计算的位置}。计算放在控制器上去做是否更高效？
+md5sum的计算是一个序列化的过程，只能一个完成后，进行下一个。如果vc切换，能否接着算？
+
+按SEDA架构，组织成流水线计算，分两阶段：读取、计算，第一阶段可以并行，第二节点需要串行处理。
+即fork and join并行模式。无法采用MapReduce计算框架。
+
+\hl{卷在存储池间的离线复制和迁移}，在线方式呢？会更复杂。
+如果卷上有快照呢？从产品角度如何定义？
+
+\hrulefill
+
+\hl{研究nutanix的产品和技术}。
+
+\subsection{28}
+
+\subsection{29}
+
+\subsection{30}
