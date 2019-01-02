@@ -45,4 +45,8 @@ target_link_libraries(ldb leveldb pthread snappy)
 set(ALGO_SOURCE_FILES src/algo.cc)
 build_exe(algo "${ALGO_SOURCE_FILES}")
 
+set(TH_SOURCE_FILES src/th.cc)
+add_executable(th ${TH_SOURCE_FILES})
+target_link_libraries(th pthread)
+
 add_library(magic SHARED src/magic.cc)
