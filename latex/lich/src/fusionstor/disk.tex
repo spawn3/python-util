@@ -1,0 +1,6 @@
+\chapter{磁盘管理}
+
+后台存储引擎支持：sqlite3, redis。
+
+redis，采用若干redis-server实例，每个实例管理的数据格式：metadata, raw:vol.10.0, disk:<disk_id>。
+disk用于磁盘空间管理，记录已用的chunk块偏移，在启动后构造bitmap，用于空间分配。
