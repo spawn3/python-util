@@ -1,6 +1,71 @@
 \chapter{磁盘管理}
 
+作为一个独立的模块，应该导出什么API呢？
+
+disk状态机怎么画？
+
+\section{持久化数据}
+
+磁盘文件
+\begin{enumbox}
+\item disk
+\item bitmap
+\item ***
+\item block
+\item info
+\item speed
+\item tier
+\item rotation
+\item ***
+\item /dev/shm/lich4/nodectl/diskstat （删盘完成后，才会清除与disk相关的各种文件）
+\end{enumbox}
+
+以上文件，以disk文件和bitmap最重要。disk文件指向实际的物理设备，bitmap用于磁盘空间管理。
+其它的可以没有，基本信息记录disk头即可，用checksum来检查一致性。
+
+可以把磁盘头备份出来
+
+disk idx记录在disk head元数据区。disk头部包括哪些元数据？
+
+每个节点维护有虚拟磁盘slot，pool通过disk idx引用这些disk slot，形成两级tree结构。
+
+pool的identity是name，disk的identity是idx。\hl{pool有disk\_array成员，与disk slot同构}。即大小相同，位置相同。
+
+\section{Local Storage Engine}
+
 后台存储引擎支持：sqlite3, redis。
+
+\subsection{Sqlite3 Mode}
+
+\subsection{Redis Mode}
 
 redis，采用若干redis-server实例，每个实例管理的数据格式：metadata, raw:vol.10.0, disk:<disk_id>。
 disk用于磁盘空间管理，记录已用的chunk块偏移，在启动后构造bitmap，用于空间分配。
+
+\section{Add Disk}
+
+加一块盘，先选出disk idx，通过info、block、bitmap等磁盘文件推导而来。
+lichd inotify方式监听到该事件后，处理加盘逻辑。由python脚本和lichd进程共同完成。
+
+\section{Delete Disk}
+
+\section{Recover Disk}
+
+若删除pool，则可终止本过程。
+
+\section{Load Disks}
+
+前置条件检查
+
+多线程执行
+
+\section{malloc}
+
+空间分配：每个pool有一个任务队列，每个disk有一个allocator，这些allocator从任务队列里面取任务。
+
+维护bitmap用于free空间管理。
+
+\section{free}
+
+删除pool、删除vol，回滚垃圾chunk，都会涉及到磁盘空间回收。
+且不同任务可能并发执行，多次回收一个disk loc。可重入性，终态一致。
