@@ -39,7 +39,7 @@ pool的identity是name，disk的identity是idx。\hl{pool有disk\_array成员，
 
 \subsection{Redis Mode}
 
-redis，采用若干redis-server实例，每个实例管理的数据格式：metadata, raw:vol.10.0, disk:<disk_id>。
+redis，采用若干redis-server实例，每个实例管理的数据格式：metadata, raw:vol.10.0, disk:<disk\_id>。
 disk用于磁盘空间管理，记录已用的chunk块偏移，在启动后构造bitmap，用于空间分配。
 
 \section{Add Disk}

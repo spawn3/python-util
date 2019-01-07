@@ -9,6 +9,7 @@
 #include <functional>
 
 #include "hello.h"
+#include "useless.h"
 
 typedef std::vector<int> int_vector;
 
@@ -183,8 +184,8 @@ int main(int argc, char *argv[]) {
         std::cout << i << ": " << &argv[i] << " " << argv[i] << std::endl;
     }
 
+#if 0
     int a[] = {1, 2, 3, 4, 5};
-
     for (auto& i : a) {
         std::cout << i << std::endl;
     }
@@ -200,12 +201,21 @@ int main(int argc, char *argv[]) {
     {
         func_args_stack(f(), g());
     }
+#endif
 
     // test_magic();
+    Useless zero;
+    Useless one(10, 'x');
+    Useless two(one);
+    Useless three(20, 'o');
+    Useless four(one + three);
 
+    // std::cout << "exit main\n";
+    std::cout << "***\n\n";
     return 0;
 }
 
+#if 0
 /**
  * @see spdk
  */
@@ -216,3 +226,4 @@ __attribute__((constructor(102))) static void register_trace_log_flag() {
 __attribute__((constructor(101))) static void register_trace_log_flag_2() {
     printf("%s\n", __FUNCTION__);
 }
+#endif

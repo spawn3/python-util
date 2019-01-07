@@ -30,7 +30,9 @@ function(build_exe name source_files)
     add_executable(${name} ${source_files})
 endfunction()
 
-set(HELLO_SOURCE_FILES src/hello.cc)
+set(HELLO_SOURCE_FILES
+    src/hello.cc
+    src/useless.cc)
 build_exe(hello "${HELLO_SOURCE_FILES}")
 
 set(BIT_SOURCE_FILES src/bit.cc)
