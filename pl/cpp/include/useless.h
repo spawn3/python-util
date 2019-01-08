@@ -11,8 +11,10 @@ public:
     Useless();
     explicit Useless(int k);
     Useless(int k, char ch);
-    Useless(const Useless& f);
     ~Useless();
+
+    Useless(const Useless& f);
+    Useless(Useless&& f);
 
     Useless operator+(const Useless& f) const;
 };

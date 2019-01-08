@@ -209,6 +209,7 @@ int main(int argc, char *argv[]) {
     Useless two(one);
     Useless three(20, 'o');
     Useless four(one + three);
+    Useless five(std::move(one + three));
 
     // std::cout << "exit main\n";
     std::cout << "***\n\n";

@@ -52,6 +52,18 @@ Useless::Useless(const Useless& f): n(f.n) {
     ShowObject();
 }
 
+Useless::Useless(Useless&& f): n(f.n) {
+    ++ct;
+    std::cout << "move constructor called; number of objects: " << ct << std::endl;
+
+    pc = f.pc;
+
+    f.n = 0;
+    f.pc = nullptr;
+
+    ShowObject();
+}
+
 void Useless::ShowObject() const {
     std::cout << "\tNumber of elements: " << n;
     std::cout << " Data address: " << (void *)pc << std::endl;
