@@ -279,10 +279,11 @@ chunk allocate开销较大，即要申请磁盘空间，也涉及记录元数据
 \item rmvol\_bh.c
 \end{compactitem}
 
-
 \section{Snapshot}
 
 snapshot隶属于卷，无卷则无快照，快照组织成快照树，其中有且只有一个快照是可写快照，即卷的写入点。
+
+基本操作，对IO path的影响。区分数据平面和控制平面。
 
 \subsection{操作}
 
@@ -291,9 +292,9 @@ snapshot隶属于卷，无卷则无快照，快照组织成快照树，其中有
 \item create
 \item rm
 \item list
+\item read
 \item rollback
 \item clone(跨卷read)
-\item read
 \item flatten(存储池迁移和复制，需要实现该接口)
 \item protect/unprotect
 \end{enumbox}
@@ -349,6 +350,10 @@ IO粒度和数据项粒度的关系，如果IO粒度大于数据项粒度
 
 为了支持快照树，需要分析rollback和读快照的过程。
 
+刚刚revert到某一快照，此后会发生COW吗？
+
+COW，\hl{io size与cow发生的粒度不一样}，如果是小块数据的大量随机写，写放大会非常严重。
+
 \subsection{Create}
 
 卷，clone卷，快照具有相同的索引结构，不同在于fileinfo的attr。
@@ -356,10 +361,46 @@ IO粒度和数据项粒度的关系，如果IO粒度大于数据项粒度
 卷和快照的所有chunk，都是私有的，无法通过索引结构有效地定位chunk的位置。
 
 创建快照是相当简单的过程，创建索引结构，设置正确的fileinfo，同时复制xattr。
-卷的snap\_from指向其挂载的快照。
+卷的snap\_from指向其挂载的快照。\hl{新建快照不包含指向卷的索引结构}。快照头部也不包含其它快照的信息。
+所以，读快照是通过所在卷控制器进行的。
+
+每创建一个快照，快照取得当前卷的snap\_version，卷的snap\_version则更新为当前可用的最小值，snap\_from正确设置。
+
+快照本身不包含\hl{完整的snapshot-tree结构信息}，只是知道其parent。
 
 在写入卷的时候，发生COW过程，被修改的chunk先复制到卷的最近一个快照的私有存储空间里，
 然后在卷上进行in place写。
+
+有两种快照读，一种是读单个快照本身；另一种读快照，\hl{如果快照上没有对应数据，则回溯}。
+如clone卷的快照读行为，即是后者。
+
+所以，卷和快照的元数据项，只有私有数据，没有交叉引用关系。
+
+快照采用独立控制器的方式，快照只保存增量数据，读快照涉及大量的跨卷访问(相同节点、或不同节点)，会影响到性能。
+
+\hrulefill
+
+卷级(version,from,rollback)和chunk级(version)的snap相关属性，就有怎么样的规则？
+
+f.version总是具有最大值，在刚创建snapshot的过程中，f.version=s.version，s表示新建snapshot。
+
+稳定态，一个卷的version,rollback相等，from用来跟踪记录父节点。
+发生rollback时，version,rollback不等。
+
+f.version和c.version用来管理cow和rollback过程。cow完成后，c.version=f.version，rollback完成后，c.version=f.rollback。
+cow和rollback过程，只能发生一次。
+
+rollback时，依然可以进行rw，但须先rollback对应chunk。这与cow过程是相反的。
+cow是chunk从vol流向snapshot。rollback是从snapshot流向vol。
+
+\hrulefill
+
+长时操作的异步处理，以及\hl{操作之间的兼容性}。
+
+ROW采用了快照和卷共用一个底层卷的方式，受底层卷大小的限制较大。
+ROW的卷和快照带有索引结构，故可以交叉引用。简化了rm和rollback等操作。
+
+\hl{qemu和vmware}怎么管理快照的？有哪些限制？
 
 \subsection{Rollback}
 
@@ -372,7 +413,7 @@ rollback，卷为源，以目标快照的内容覆盖源卷的内容。同时，
 \begin{compactenum}
 \item 自身
 \item 下游
-\item 回溯至卷(先回溯至公共父节点，然后到卷)
+\item 回溯至卷(先回溯至快照与卷upstream first公共父节点，然后下沉到卷)
 \end{compactenum}
 
 前两步是为了读取修改过的chunk，后一步是为了读取所在分支上从来没有修改过的chunk。
