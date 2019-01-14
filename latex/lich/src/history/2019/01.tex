@@ -227,4 +227,72 @@ SSD FTL中心任务是映射管理，与OS的页表、LSV的快照管理是一�
 可以是一级，也可以是多级。\hl{伟大的计算原理}里面，讨论存储的时候提到四点：\hl{命名，映射，定位，授权}。
 可以按此四个维度去思考林林总总的存储系统。
 
+\hl{按主体-对象模型，授权有两种}：CL和ACL。CL以主体为中心，ACL以对象为中心（如文件系统的ACL）。
+
 \hl{全力投入AFA}，大量阅读，深度思考。知识就是力量，这点认识还是不够深刻。
+
+地址空间管理，抽象成了一切皆文件。内存、磁盘、文件都是地址空间。文件系统的设计需要充分地认识到这一点。
+SSD最核心的功能也是这一点。SSD FTL很类似于LSV，很多可类比的地方，如映射、GC。
+
+数据结构主要也是映射，如hash、map、graph，graph是最通用的映射关系。
+再如，函数也是映射。lambda架构也提及此，map-reduce更成了并行计算模式之一。
+
+\hrulefill
+
+多快好省，快和好是当前重点，多和省在此基础上，迭代优化。\hl{性能、负载、高可用}是几种集群形式，
+bonding，多网卡支持。bonding具有什么特征？只是HA？而不能同时工作，聚合性能和均分负载？
+
+\subsection{14}
+
+\hl{化繁为简，打破学科边界}，从实际问题及其方案开始理解。深入理解计算机系统即是采用这种叙述法。
+
+计算机系统可分为cpu、memory、io子系统等，按此结构循序展开。io又分存储和网络等，组成tree架构。
+关键组件：\hl{调度器(thread、io)，空间分配器（cache、memory、disk）}。
+
+采用流一元论(flow dynamics)的描述框架，cpu居中调度，上下文切换和内存copy，可称为指令分配器。
+\hl{flow由节点和边组成}，节点是处理单元或节流阀，边是管道。处理方式可以有多种：转发、映射、压缩、消重等。
+
+衡量流效率的指标是latency、iops、throughput等。流的平衡态由平衡方程描述，输入过多，会导致处理不过来，
+发生拥塞、溢出等故障，故需要限流/节流。
+
+memory copy消耗总线带宽，bus是如何利用的？
+
+先理解一般case，加入cc和故障恢复，系统就变得复杂了。虚拟化、cc、持久性是操作系统研究的三大块。
+
+cpu亲和性需要通盘考虑，不仅仅是内存，还有disk、network，读设计线程和buffer，是否与core线程处于一个NUMA节点？
+还是跨NUMA节点进行内存copy？ aio线程尽量与core线程距离近。\hl{如果只要一块网卡，则网卡属于哪个NUMA节点呢}？
+
+\hrulefill
+
+\hl{数据结构的内存layout}，比如一个int应该怎么存？大端序、还是小端序？浮点数呢？结构体呢？
+什么是补码表示？
+
+任何一个变量、常量都占据一定的内存区域（addr,len）。代码也是，cpu从内存中取指、解码后执行。
+一个函数是一个代码端，微观上是一个指令序列，符号表。一个对象呢？也是如此。内存布局，成员函数指向函数代码的指针。
+模板在编译阶段实例化，用具体类型代替。最后都转化为变量和过程。\hl{class引入了对象作用域和类作用域}。构成了符号的层次结构。
+可以假设最外层有一个global namespace，作为ns树的根。
+
+把内存看做一维向量空间，就容易理解这个问题了。
+最小地址单元是byte。指针运算，与数据类型有关，void *以byte为单元。
+
+磁盘空间也是一维向量空间，分区、文件系统、文件就构成了层次结构，靠mapping建立虚拟地址到物理地址的映射，完成\hl{存储虚拟化}的功能。
+RAID/LVM都是映射，需要\hl{计算或metadata}去实现这种映射。
+
+snapshot、LSV也是meta+data，通过引入mapping实现特性。
+
+\hrulefill
+
+梳理lich中用到的数据结构和算法
+\begin{enumbox}
+\item array
+\item list
+\item skiplist
+\item hash
+\item bitmap
+\item string
+\item ***
+\item token bucket and leaky bucket
+\end{enumbox}
+
+页表、inode address space，都是trie（radix tree）结构。与邮政编码、url、dns域名类似。
+name是有结构的，构成prefix tree。
