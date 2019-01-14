@@ -328,9 +328,6 @@ array and list是基础存储结构，其它结构都是建立在此二者之上
 \hl{墨菲法则}，事情总比想象的要坏，真的不能再嘚瑟，认真考虑下一站是当务之急，损失什么的可以不用考虑太多。
 重要的是，把握当下，面向未来。
 
-io路径上\hl{page和block dismatch}，page cache和buffer cache，buffer用指针引用page的区域。
-故\hl{不经过page cache的io需要block对齐，包括direct io和aio}。
-
 可以参考的开源软件：
 \begin{enumbox}
 \item nginx
@@ -346,4 +343,40 @@ io路径上\hl{page和block dismatch}，page cache和buffer cache，buffer用指
 \item SPDK
 \item DPDK
 \item RDMA
+\end{enumbox}
+
+\hrulefill
+
+由设备文件，可以\hl{分区、格式化、mount}。NVMe采用pci号实现kernel bypass。
+读写设备文件和普通文件，采用同一套接口和语义。
+
+io路径上\hl{page和block dismatch}，page cache和buffer cache，buffer用指针引用page的区域。
+故\hl{不经过page cache的io需要block对齐，包括direct io和aio}。
+
+bcache? \hl{1+N虚拟出N个设备}。
+
+bit + context，要深刻理解这一点。
+
+\hrulefill
+
+调度器：cpu调度器和io调度。多队列。
+
+分配器：内存allocator和fs 空间管理，\hl{命名、映射}。
+
+定位包括replication和cache。流动的数据。
+
+\subsection{15}
+
+\hl{行路难，行路难，多歧路，今安在}？好好沉淀一下吧，路真的不好走，一不留神就万劫不复。
+
+忠于专业，这是安身立命之本。进一步的学习计划：
+\begin{enumbox}
+\item 数据结构和算法
+\item *** 系统
+\item \hl{操作系统（包括体系结构、OS和编程语言）}
+\item 网络
+\item 文件系统
+\item 数据库系统
+\item 分布式系统
+\item *** 应用
 \end{enumbox}
