@@ -465,7 +465,7 @@ virtio, IOMMU，安装在client端，感知虚拟化。
 调度器是一个函数，从队列或多队列里取出一个或多个要处理的元素。调度器有控制线程，控制线程可以做其它的事情。
 从这个角度说，把调度器理解为一个函数为合适。线程调度、io调度和事务调度，都是这种方式。
 
-调度包括队列、调度entity和class。用class
+调度包括队列、调度entity和class。用class定制调度策略。
 
 LICH中的coroutine调度，采用了简单的FIFO方式，有优化空间。
 
@@ -476,3 +476,10 @@ LICH中的coroutine调度，采用了简单的FIFO方式，有优化空间。
 block用物理disk作为backing device，就是\hl{利用disk的物理特性}，而不是虚拟分区。
 
 \hl{时间片，优先级，可抢占}是内核线程调度的几大特征。
+
+协程与状态机方式，都需要分两层看。调度器和状态推进。状态机选出下一个要处理的任务，执行任务状态机一步或多步后退出。
+
+调度器相当于软件pipelines中的分配器。按epoll，需要把fd加入epoll的兴趣列表，
+同时维护分离表/routor：fd到node(event handler以及context)的映射关系。
+
+RDMA用了两层分离机制：epoll用于连接管理，自身的polling机制。
