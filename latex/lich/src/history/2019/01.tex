@@ -363,7 +363,7 @@ bit + context，要深刻理解这一点。
 
 分配器：内存allocator和fs 空间管理，\hl{命名、映射}。
 
-定位包括replication和cache。流动的数据。
+定位包括cache和replication。流动的数据。
 
 \subsection{15}
 
@@ -372,11 +372,107 @@ bit + context，要深刻理解这一点。
 忠于专业，这是安身立命之本。进一步的学习计划：
 \begin{enumbox}
 \item 数据结构和算法
+\item software pipelines
+\item SEDA and actor
+\item lambda
+\item queueing theory
+\item network flow
 \item *** 系统
 \item \hl{操作系统（包括体系结构、OS和编程语言）}
-\item 网络
 \item 文件系统
-\item 数据库系统
+\item 网络
 \item 分布式系统
+\item 数据库系统
 \item *** 应用
 \end{enumbox}
+
+从\hl{scheduler、allocator和cache}几个维度去研究。
+
+先研究scheduler，有\hl{线程调度、协程调度、io调度、事务调度器}，甚至k8s一样的全局资源调度。
+比如erlang、go的调度也很有特点。
+
+\hl{任务状态，任务队列}。引入任务优先级，就是多队列。进程调度的任务就是选出下一个要运行的进程、线程。
+
+任务上下文切换，scheduler和tasks之间是1+N的关系，交错执行。
+
+调度分抢占式和非抢占式。线程相对于协程，多了中断方式的切换，包括硬中断和软中断。
+
+\hl{调度器就是software pipelines里的分配器}，影响系统整体性能。
+
+scheduler采用什么数据结构来组织任务队列呢？
+
+scheduler采用什么QoS策略？
+
+多调度器下的任务漂移/窃取
+
+调度器自身是不能有长时的block任务的，对这类任务采用异步方式处理。
+线程调度是抢占式，\hl{协程任务是非抢占式，要杜绝出现block操作}，由CQ来完成。
+
+oracle asm架构
+
+三层：\hl{并行、polling、事件处理}，并行线程的cache、memory、pci bus要local。
+尽量避免并发访问共享资源。share nothing是最好的，但有时共享、通信难以避免。
+
+polling和事件处理研究单个scheduler的情况，并行研究多个scheduler的情况。
+
+\hrulefill
+
+所谓异步就是不等待任务处理结果，当任务完成时，会触发事件，进入cq。
+
+\hl{以FusionStor为例}，io有两种情况，\hl{普通disk方式和NVMe方式}。
+普通disk采用aio，NVMe采用其自身的异步机制。
+
+网络也有两种方式：TCP and RDMA。采用epoll多路机制，polling请求或完成事件。
+
+\hl{RDMA和NVMe都是基于事件和多队列}的异步通信方式。
+
+NVMe也很简单，用pci打开后，可以异步读写，\hl{poll时执行callback}。
+Lich里主要处理了core线程和buffer的适配性。
+
+NVMe没有使用aio线程，自身的异步机制，与coroutine结合很好。
+aio还需要结合thread+epoll机制。
+
+allocate时考虑数据块与disk的对应关系。
+NVMe disk需要考虑NUMA亲和性？
+普通盘连接南桥，不需要考虑？
+
+sqlite3、redis相关的block操作，用工作线程pool。\hl{不同于aio，没有CQ这种机制}。
+可以聚合起来进行批处理。因为缺少异步原生支持，可以称之为模拟aio。
+
+网络io怎么做的？\hl{TCP和RDMA不同}，RDMA是异步机制，TCP用得是recv和send。
+
+统一的polling框架，包括aio and NVMe，TCP and RDMA，scheduler等。
+通过eventfd block到一个block点上。
+
+\hrulefill
+
+状态机相对协程，是否更高效？对象的队列是少不了的，也需要schedule。
+每个对象的状态与task不同，需要按每种类型进行分解。而task则与进程一样，有三种基本状态。
+
+\hrulefill
+
+\hl{总结性能优化方法}：NUMA和CPU亲和性，Hugepage，并行、流水线、聚合等方法。
+locality考虑。
+
+virtio, IOMMU，安装在client端，感知虚拟化。
+
+\hl{硬件虚拟化}是指处理器支持虚拟化相关指令集，
+\hl{VAAI}扩展了SCSI语义，加速数据copy速度，与sendfile类似。
+
+\subsection{16}
+
+每个逻辑Core有一个调度队列（RBtree），所谓NUMA和CPU亲和性，就是通过mask，指定线程可以进入的队列。
+调度器是一个函数，从队列或多队列里取出一个或多个要处理的元素。调度器有控制线程，控制线程可以做其它的事情。
+从这个角度说，把调度器理解为一个函数为合适。线程调度、io调度和事务调度，都是这种方式。
+
+调度包括队列、调度entity和class。用class
+
+LICH中的coroutine调度，采用了简单的FIFO方式，有优化空间。
+
+\hl{从底层物理资源去考虑}，kernel起到资源管理的作用，即资源虚拟化。cpu、memory、devices。理解devices更复杂，
+接入bus，被scan到，加载driver，然后就可以通过一定的方式进行通信，有外部事件时也可以中断方式通知cpu。
+中断通知，必然是先准备好上下文。这个上下文的切换是个重点。
+
+block用物理disk作为backing device，就是\hl{利用disk的物理特性}，而不是虚拟分区。
+
+\hl{时间片，优先级，可抢占}是内核线程调度的几大特征。
