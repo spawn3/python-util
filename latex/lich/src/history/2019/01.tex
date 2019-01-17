@@ -515,3 +515,90 @@ block用物理disk作为backing device，就是\hl{利用disk的物理特性}，
 同时维护分离表/routor：fd到node(event handler以及context)的映射关系。
 
 RDMA用了两层分离机制：epoll用于连接管理，自身的polling机制。
+
+\subsection{17}
+
+\hl{在lich里引入pg如何}？object-pg-osd的关系由两级映射完成，一是降低了metadata量，二是恢复平衡更容易做。
+这融合了ceph和lich两者的优点。
+
+如osd故障，pg处在降级状态。与lich引入vfm要解决的问题类似。\hl{引入最小副本数}，会使得方案更优雅。
+从osd故障到数据恢复，可以定制恢复策略，如时长等。
+
+lich的chunk和replication，类似于RAID的条带化和mirroring。
+
+传统盘阵的控制器结构，有双控、多控。双控关系有A/A，A/P。横向扩展。LUN的归属。
+\hl{理解MPIO在多控架构下的工作原理}。
+
+单处理器的false sharing。\hl{同一cache line}上有多个数据项，被不同线程更新。
+
+多处理器的缓存一致性（同一存储位置），存储一致性（不同存储位置）。NAS的client 缓存一致性
+
+ABA问题
+
+本地文件系统
+\begin{enumbox}
+\item \hl{RAID/LVM}
+\item ext2/3/4
+\item XFS
+\item ZFS
+\item btrfs
+\item ReiserFS
+\item ***
+\item Fuse
+\end{enumbox}
+
+分布式文件系统
+\begin{enumbox}
+\item GFS/HDFS
+\item GlusterFS
+\item Lustre
+\end{enumbox}
+
+与ceph对比
+\begin{enumbox}
+\item 数据分布(元数据管理)
+\item 副本分布(节点为最小故障域粒度)
+\item 卷控（无日志，顺序一致性语义）
+\item 恢复、平衡、流控
+\item ***
+\item TP
+\item QoS
+\item ***
+\item \hl{RDMA/DPDK/SPDK}
+\item \hl{iSER/NVMf}
+\item Cache
+\item Tier
+\item ***
+\item Snapshot
+\item Remote Replication
+\item ***
+\item EC
+\item Dedup/Compress
+\end{enumbox}
+
+Lich优化项
+\begin{enumbox}
+\item pool下flat namespace，不需要支持多级目录
+\item 引入类似pg的结构，二级映射
+\item Node内管理磁盘，而没有把disk暴露
+\item ***
+\item 卷控平衡
+\item 查找卷控位置采用了multicast机制，为何不去admin上根据lease情况找？
+\item 数据访问需要vctl中转，client不能存取chunk (与array的双控架构做对比)
+\item 卷控拆分成子卷，支持大容量卷
+\item 恢复可以由卷控自己执行(智能卷控)
+\item 停止恢复
+\end{enumbox}
+
+Amazon EBS挂载到一个EC2实例上，EBS可以打快照，快照保存到S3上。
+第一个快照是全量的，后续快照是增量的。
+
+对一个pool，容错级别与副本数有关。故障域要大于等于副本数。\hl{EC能改进这个问题}。
+同等品质的硬件配置，pool越大，硬件发生故障的概率就越高。所以pool的规模也有上限。
+
+ceph数据一致性检测和恢复是以PG为基本单元进行的。PG是对象的集合，PG对应的OSD存储了对象的副本。
+副本一致性检测：\hl{peering, recovery, backfill, scrub}等过程。
+
+PG上所有对象的写入，有primary OSD调度，串行化并记录有日志。
+
+故障情况下，OSD(include primary and replica OSD)出现降级对象。
