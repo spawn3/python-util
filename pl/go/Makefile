@@ -1,6 +1,5 @@
 all:
-	go install github.com/user/hello
-	go install github.com/user/stringutil
+	go install hello
 
 test:
 	go test github.com/user/stringutil

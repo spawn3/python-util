@@ -558,18 +558,16 @@ ABA问题
 \begin{enumbox}
 \item 数据分布(元数据管理)
 \item 副本分布(节点为最小故障域粒度)
+\item TP
 \item 卷控（无日志，顺序一致性语义）
 \item 恢复、平衡、流控
-\item ***
-\item TP
-\item QoS
 \item ***
 \item \hl{RDMA/DPDK/SPDK}
 \item \hl{iSER/NVMf}
 \item Cache
 \item Tier
 \item ***
-\item Snapshot
+\item \hl{Snapshot}
 \item Remote Replication
 \item ***
 \item EC
@@ -590,10 +588,13 @@ Lich优化项
 \item 停止恢复
 \end{enumbox}
 
+\hrulefill
+
 Amazon EBS挂载到一个EC2实例上，EBS可以打快照，快照保存到S3上。
 第一个快照是全量的，后续快照是增量的。
 
 对一个pool，容错级别与副本数有关。故障域要大于等于副本数。\hl{EC能改进这个问题}。
+降低同等或更高容错等级下的成本。
 同等品质的硬件配置，pool越大，硬件发生故障的概率就越高。所以pool的规模也有上限。
 
 ceph数据一致性检测和恢复是以PG为基本单元进行的。PG是对象的集合，PG对应的OSD存储了对象的副本。
@@ -602,3 +603,17 @@ ceph数据一致性检测和恢复是以PG为基本单元进行的。PG是对象
 PG上所有对象的写入，有primary OSD调度，串行化并记录有日志。
 
 故障情况下，OSD(include primary and replica OSD)出现降级对象。
+
+\hrulefill
+
+RAID、副本、EC放在一块去理解。RAID有条带化、镜像、RAID5，在分布式系统中，对应\hl{分块，每块数据做副本orEC等机制}。
+一是数据分块，放到多个节点上，提升并行度。再一个是容错等级，副本、EC是两种标准方式。
+\hl{副本一致性和条带一致性是难点}。副本一致性通过RAFT协议去保障。
+
+scrub可以发现静默错误，依赖的是checksum。
+
+存储处在新旧之交，在快速演进。硬件和软件架构都在变革之中。
+硬件引入了RDMA、SPDK、DPDK、NVMe等快速网络和存储介质、协议。
+软件架构从传统阵列的SCSI、SAN、NAS到新的分布式架构。
+
+新型存储SDS，包括Ceph、Amazon EC2、阿里的盘古等。
