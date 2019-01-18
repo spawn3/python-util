@@ -46,6 +46,10 @@ monitor维护集群全局信息，如cluster map。
 从pg角度来看，一个pg对应有若干osd，primary osd负责它以其为主的各有pg的写入请求。
 与协程方式处理的优缺点？
 
+pg维护有eversion，epoch+version，version规定了该pg的写的顺序？
+why not object？\hl{是一个全序，而不是偏序关系}，降级了并发度。
+能否执行乱序写入？
+
 理解对象及其关系后，就要重点分析关键过程，如写、读、恢复、平衡等。
 副本和EC处理上有何异同？
 
@@ -53,7 +57,24 @@ monitor维护集群全局信息，如cluster map。
 
 pg是一个枢纽，沟通了object和osd。\hl{pool-pg-osd构成一拓扑结构}，object的位置由CRUSH算法计算而来。
 
-对象一致性和恢复都是基于PG进行的，包括四个关键过程：\hl{peer, recovery, fallback, scrub}。
+对象一致性和恢复都是基于PG进行的，包括四个关键过程：\hl{peer, recovery, backfill, scrub}。
 
 若变更一个pool的pg num，需要平衡数据，如何使数据迁移量最小，如何管理迁移过程？
 什么情况才需要变更pg num？
+
+pool/object, pg/osd。二级映射
+
+引入pg意味着什么？二级映射。读写流程，故障恢复，副本一致性。
+引入最小副本数，进行异步恢复，以减少恢复对正常业务的影响。
+
+每次写入都有一序号，用于串行化，eversion。\hl{RAFT协议}？分区故障的影响？
+
+本地读写经过bluestore，包括日志和数据。
+pg upset是计算的osds，pg activeset是当前在用的osds？
+
+client与primary osd建立连接，直接进行数据存取，连接数过多？
+如果建立cpu binding，引入core hash一维度，是否可以共用连接？
+在primary osd上，按pg映射到不同的core上进行处理。
+
+资源消耗：\hl{线程、连接、内存}等
+

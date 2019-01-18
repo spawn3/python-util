@@ -652,3 +652,47 @@ ROW3在新写入时不发生COW，但导致更严重的碎片化，影响读性�
 
 AFA是方向，相关技术包括\hl{RDMA/DPDK/SPDK，NVMe、iSER、NVMf}等。
 这些方面应该是下一步的重中之重，道不远人，如果舍近求远，恐有缘木求鱼的危害。
+
+\subsection{18}
+
+cache一致性与副本一致性存在很大的不同。cache一致性出现在共享内存多处理器、分布式文件系统client cache等场景。
+副本一致性出现在replication和EC等场景。
+
+cache一致性关注的是一个数据源，多个cache时的行为。副本一致性表示多个副本之间的一致性。
+cache一致性可以用lease、oplock，可靠多播，MESI协议解决，副本一致性用RAFT协议解决。
+
+\hl{完善性能分析和故障诊断toolbox}。
+
+按\hl{主体-对象模型}，一致性可分为观测一致性和数据一致性。
+
+\hl{CAP和ACID}，深入理解种种细分情形。
+
+\hrulefill
+
+lich meta里记录的是chkid到nids的映射，每个nid通过db查询到实际的disk loc。
+相当于两级映射。
+
+\hl{chunk tree过于复杂}，难以做到事务性的要求。
+allocate的时候，有可能会连续更新多级chunk。
+迁移或故障的时候，也会引发级联更新。
+
+lich无日志，如何保证一致性的？
+
+\hl{lich chunk内并发}，chunk内非覆盖区域，clock的连续性，理论上可以或并发或批量写入。
+有一次排序、精简、聚合、并发的机会。覆盖区域，按fifo顺序提交。
+如clock不连续，则需要等待。（\hl{paxos的日志写入，放松了该要求}）
+
+每个term包括\hl{选举、恢复、正常操作}诸阶段。
+
+\hl{如何减少故障下的io中断时长}？admin、vctl可能发生切换、或reload。需要case by case分析。
+
+实现LSV时采用了该方案。\hl{如果io size不规则，当如何}？
+log和bitmap的写入，采用了pipeline模式。以确保log的并发提交，bitmap的顺序提交。
+
+rcache比较复杂，开始按不同size建立多个cache是不明智的，应统一采用page cache，易于管理。
+不过可以加入readahead等策略。
+
+EC/dedup/compress/都需要建立新的映射。share底层数据块，但造成严重的碎片，对顺序读不友好。
+
+\hl{回顾open vstorage的映射关系}。zerocopy snapshot？索引、共享、多版本？
+多版本比共享有更复杂的引用关系。
