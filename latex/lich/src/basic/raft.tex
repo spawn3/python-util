@@ -1,0 +1,47 @@
+\chapter{Consensus}
+
+理解共识算法并没那么困难，一点点推展开来。化整为零，要善于识别要解决的问题和通用的设计模式。
+
+\hl{2PC and 3PC}解决提交原子性的问题，Paxos解决了xx？
+
+lease
+
+\hl{问题：RSM}。所有日志项构成一个total order的序列。采用WAL+Data。
+每个server上的状态机：先写入log，再执行状态机。
+\hl{apply状态机必须是连续的}，提交日志则可以不连续。
+
+问题集
+\begin{enumbox}
+\item 如何选主？client如何发现leader？
+\item 日志提交方式
+\item 如何论证\hl{safety and liveness}
+\end{enumbox}
+
+异常
+\begin{enumbox}
+\item 节点故障
+\item 成员变化
+\end{enumbox}
+
+\section{Paxos}
+
+微信paxosstore
+
+paxos一个实例确定一个值。多个实例确定多个值。
+
+multi paxos，通过paxos protocol进行选主？
+
+\section{RAFT}
+
+已提交的判定条件特别重要。不能仅仅靠统计同一<term, index>的repnum来决定。
+
+本地Log包括两部分：\hl{提交的和没提交的}。如何判断？RAFT论文似乎采用了最大提交的原则？会不会出现幽灵复现现象？
+
+\subsection{幽灵复现问题}
+
+ABA时，查询不到的记录，再次切回A时，能查询到了。
+
+本质上是上层应用逻辑问题，对没有提交成功的记录如何处理？
+没有提交成功，为什么允许读呢？ \hl{client retry，要做到幂等性}。
+
+每个leader上任的开始，就在日志里添加一条内容为当前term的记录，没有提交的日志采取discard策略。

@@ -717,3 +717,26 @@ EC/dedup/compress/都需要建立新的映射。share底层数据块，但造成
 回归专业是正确选择，一直知道、一直不能很好执行，知行不能合一。这次不能再偏离。
 
 从分布式存储开始，建立问题和知识联动的体系，以助力其后的职业发展。
+
+\subsection{21}
+
+怎么查看cs和中断信息？
+
+如何处理slow disk？
+
+性能之颠：\hl{可观测指标=f（资源，workload）}。资源有使用率，基于时间(排队论？)、或容量。
+在software pipelines里，workload是上游，可观测指标是下游，架构影响性能(化学)。
+
+资源：\hl{CPU,memory,fs,disk and network}。
+
+多网卡，MPIO。
+
+面试经验谈
+\begin{enumbox}
+\item BAT，TMD，浪潮，联想等。
+\item 仔细整理做过的东西，要更深入。不熟悉的东西宁可不写。要非常严谨
+\item 用的什么型号的设备，测试的性能。
+\item RDMA是重点，建立连接的流程，遇到的坑。
+\item 基础编程题，本质上都是工程师
+\item 要知道lich的不足之处
+\end{enumbox}
