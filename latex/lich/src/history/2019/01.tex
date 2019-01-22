@@ -740,3 +740,13 @@ EC/dedup/compress/都需要建立新的映射。share底层数据块，但造成
 \item 基础编程题，本质上都是工程师
 \item 要知道lich的不足之处
 \end{enumbox}
+
+引入kv用于元数据管理，加强client功能，client可以与object直接通信，更大的chunksize。
+rich client，目前vctl就好像是这样的rich client。
+
+恢复和数据平衡都依赖于控制器平衡，才能有更好的并发度？
+
+\subsection{22}
+
+CAP平衡ACID和BASE，进而引入单副本一致性问题，RSM的解决引入paxos、raft。
+

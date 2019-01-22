@@ -23,19 +23,38 @@ lease
 \item 成员变化
 \end{enumbox}
 
-\section{Paxos}
+\section{CAP}
 
-微信paxosstore
+CAP定理是理解分布式系统的起点。在十二年后的改进为PACELC theorem。
+P是必然发生的，C是一定要保证的（safety），A涉及用户体验。在P时，A是可用性；在非P时，A是性能。
 
-paxos一个实例确定一个值。多个实例确定多个值。
+CAP是分布式系统设计的指导原则，引入replication后，也带来了CA系统的固有复杂度。
+\hl{paxos是解决RSM的标准方案}。
 
-multi paxos，通过paxos protocol进行选主？
+\hrulefill
+
+如FusionStor里降级写的情况分析：一个副本故障，如果选择同步恢复，则性能下降严重，
+选择降级写，则牺牲了C，提高了性能。按\hl{C=A+补偿措施}。
+牺牲的C，后期需要通过一定措施加以补偿（异步恢复）。
+控制C的级别，即引入\hl{最小副本数}一概念。
+
+分析P对恢复、平衡等过程的影响。
+
+\section{一致性}
+
+CPA => PACELC
 
 \section{RAFT}
 
 已提交的判定条件特别重要。不能仅仅靠统计同一<term, index>的repnum来决定。
 
-本地Log包括两部分：\hl{提交的和没提交的}。如何判断？RAFT论文似乎采用了最大提交的原则？会不会出现幽灵复现现象？
+日志的结构：本地Log包括两部分：\hl{提交的和没提交的}。如何判断？RAFT论文似乎采用了最大提交的原则？会不会出现幽灵复现现象？
+
+分为两阶段：election and normal case。
+\begin{enumbox}
+\item 选举阶段：满足什么条件的候选者可以成为leader？
+\item normal case: 怎么才算是已提交？
+\end{enumbox}
 
 \subsection{幽灵复现问题}
 
@@ -45,3 +64,11 @@ ABA时，查询不到的记录，再次切回A时，能查询到了。
 没有提交成功，为什么允许读呢？ \hl{client retry，要做到幂等性}。
 
 每个leader上任的开始，就在日志里添加一条内容为当前term的记录，没有提交的日志采取discard策略。
+
+\section{Paxos}
+
+paxos一个实例确定一个值。多个实例确定多个值。
+
+multi paxos，通过paxos protocol进行选主？
+
+微信paxosstore
