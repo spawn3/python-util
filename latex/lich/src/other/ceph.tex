@@ -25,6 +25,16 @@
 \item 硬件层：
 \end{enumbox}
 
+对象模型：\hl{pool/pg/osd}，object存入pool/pg的对应osd上，关键过程：
+\begin{enumbox}
+\item io path
+\item recovery
+\item balance
+\item QoS
+\end{enumbox}
+
+进程结构
+
 存储池，统一了保护域，故障域，pool, 缓存，EC等，都是通过灵活的存储池配置实现的。
 
 存储池关联到ruleset，ruleset指定了bucket和设备的存取规则。
@@ -38,8 +48,7 @@ osd对应到磁盘设备，bucket是容器，构成分层的物理拓扑结构�
 monitor维护集群全局信息，如cluster map。
 
 逻辑资源由pool、pg、对象构成，在pg和osd之间是多对多的映射，所以对象的存储位置由pg决定。
-位置计算成本低，但如何保证数据平衡，是一个需要深入论证的课题。
-如何管理再平衡过程?
+位置计算成本低，但如何保证数据平衡，是一个需要深入论证的课题。如何管理再平衡过程?
 
 三层架构：target driver、core、storage driver。每层的性能和扩展性如何？
 
@@ -50,7 +59,7 @@ pg维护有eversion，epoch+version，version规定了该pg的写的顺序？
 why not object？\hl{是一个全序，而不是偏序关系}，降级了并发度。
 能否执行乱序写入？
 
-理解对象及其关系后，就要重点分析关键过程，如写、读、恢复、平衡等。
+理解对象及其关系后，就要重点分析关键过程，如IO、恢复、平衡等。
 副本和EC处理上有何异同？
 
 \section{PG}
@@ -77,4 +86,3 @@ client与primary osd建立连接，直接进行数据存取，连接数过多？
 在primary osd上，按pg映射到不同的core上进行处理。
 
 资源消耗：\hl{线程、连接、内存}等
-

@@ -729,7 +729,7 @@ EC/dedup/compress/都需要建立新的映射。share底层数据块，但造成
 
 资源：\hl{CPU,memory,fs,disk and network}。
 
-多网卡，MPIO。
+多网卡，MPIO。如何利用多块网卡？
 
 面试经验谈
 \begin{enumbox}
@@ -750,3 +750,161 @@ rich client，目前vctl就好像是这样的rich client。
 
 CAP平衡ACID和BASE，进而引入单副本一致性问题，RSM的解决引入paxos、raft。
 
+独立出metadata(KV)后，rich client，相当于controller前移到client，
+如果允许多个client并发open一个LUN，会涉及一致性问题。
+
+sheepdog采用DHT，不方便scan，所以recovery不好弄？
+
+\subsection{24}
+
+偏爱非对称架构，如有元数据服务器。再如SMP和NUMA。
+
+控制器的粒度，从传统array、卷控制器，到primary osd。
+
+io size影响到怎么处理，如果两个并发io发生了覆盖，则必须排序，然后在多个副本上按同一顺序apply。
+\hl{如果不发生覆盖，则怎么执行都不会影响到最终结果}？元数据更新的io size通常较小，如64B。
+
+ceph中pool不能过大，\hl{把pool限定在一个较小的节点集}，避免过多的节点导致故障概率增加。
+
+存储索引结构，\hl{btree，lsm}，hash，bitmap、bloom filter。
+bloom filter用在允许误判的情况下判定一个元素的存在性。
+
+bcache用btree做什么？
+bLSM是LSM和btree的组合体。
+
+学习数据结构和算法，要自己动手推导，三部曲：\hl{猜想、重建、证实}。
+
+\hrulefill
+
+\hl{edog架构}。通过mnesia数据库管理vm和用户数据。
+libvirt用于控制qemu-img，可以用xml配置文件。云管理平台通过libvirt来创建、启动、关闭、销毁vm。
+qemu通过driver请求各种后台存储，如\hl{rbd、sheepdog、fusionstor}等。
+
+\hrulefill
+
+vfs不仅对理解文件系统有帮助，对理解任何存储系统都是有帮助的，包括对象、块等。
+superblock是引导信息。inode维护着dir/file/volume到数据块的映射，dentry建立了global namespace。
+
+zfs的pool化，\hl{FS/Volume}共存的架构令人耳目一新。传统的\hl{Volume/FS架构}。
+
+存储有几级映射：
+\begin{enumbox}
+\item namespace (tree)
+\item file to object mapping
+\item object to location mapping
+\end{enumbox}
+
+比如ceph引入了pg，又加入了一层。bcache虚拟地址到物理地址的mapping。
+
+ext2/3/4的间接块、extent tree数据结构。ext4区分inode为dir和file，
+分别用htree和extent btree来实现。由此可见\hl{btree作为通用index结构}的强大之处。
+
+\hrulefill
+
+现在可认为建立了相对完善的知识体系。接下来就要围绕几个核心问题，
+查漏补缺，\hl{致广大而尽精微}，打造T型知识结构
+\begin{enumbox}
+\item 体系结构、操作系统、编程语言、数据结构和算法
+\item 网络和分布式系统
+\item 存储
+\item TRIZ
+\end{enumbox}
+
+Lich需要进一步加入理解的地方
+\begin{enumbox}
+\item 数据模型
+\item 数据分布
+\item \hl{IO PATH}
+\item 控制器架构
+\item 本地磁盘空间管理
+\item 副本一致性协议 (vctl, clock)
+\item 恢复( +VFM )
+\item 平衡
+\item QoS(token bucket and leaky bucket)
+\item 快照：COW、ROW、LSV
+\item Slow and Broken Disk Detecter
+\item ***
+\item Redis Engine
+\item BCache
+\item Tier
+\item EC
+\item VDO
+\item RR (sync and async)
+\item ***
+\item SCSI/iSCSI/iSER
+\item NVMf
+\item ***
+\item Scheduler
+\item Memory Allocator and Hugepage
+\item RPC and corerpc (over TCP or RDMA)
+\item RDMA/DPDK/SPDK
+\item Multi NIC
+\item MPIO
+\end{enumbox}
+
+\hrulefill
+
+\hl{把操作系统作为主要隐喻}，按操作系统的视角去看待形形色色的系统。
+操作系统管理物理资源，提供syscall供上层应用使用。
+在操作系统的层面有最好的抽象，如file、virtual memory and process。
+
+\hl{分布式操作系统}会更强大，在OS之上加入分布式，则形成\hl{两层的知识体系}，有分有总。
+网络流，节点和边构成分布式，细化节点形成现代OS的设计。
+
+\hl{分布式操作系统，简称操作系统}，是看待世界的系统方法。
+
+\hl{深耕操作系统这块良田}，\hl{一分耕耘一分收获}。
+这里的OS，既指实际的操作系统，也是一个更为广泛的隐喻。
+坎贝尔神话隐喻予人以重大启示，终于找到了现阶段最重要的隐喻。
+任正非是管道，OS是虚实结合的产物。
+
+\hl{操作系统是软硬件协同设计的典范}，体系结构、编程语言、存储、数据库和网络都是这个生态的积极参与者。
+数据结构和算法。
+
+用OS这个隐喻具有最大的开放性，同时又是专注的。
+\hl{炼金术士手中的操作系统}整合了资源，且有着预定价值输出。
+\hl{OS具有一即一切一切即一的大气魄}。
+
+\subsection{25}
+
+操作系统包括\hl{计算、存储、网络、协作}。从协作的视角来看，分布式系统算法。
+
+卷管理 disk, raid and LVM，ZFS
+
+卷的两种使用方式，一是Filesystem，二是iSCSI，分别对应NAS和SAN。
+NAS文件系统在内部，SAN文件系统在外部。\hl{SAN通过NAS网关即可把NAS包含在内}。
+
+体系结构、编程语言都是OS应有之义。OS封装体系结构供PL使用它的服务，OS又是PL构建的，\hl{Arch、OS、PL构成三连环}。
+OS提供了最有用的抽象，File、Virtual Memory、Process and VM。
+
+\hrulefill
+
+\hl{删除卷}不同于一个一个free object，整体删除应有更便捷的方式。
+在etcd上产生一个删除卷的JOB，包括每个节点上的task。由每个节点调度执行。
+
+每个节点上，周期性地polling相关任务，加入本地任务队列。由独立线程或线程池处理该队列。
+\hl{每个task建模为状态机}。处理完一个task后，从etcd上删除该task。
+
+从replica cache、db和disk里删除vol相关记录。
+注意操作顺序，应先解除ref关系，再回收disk空间。
+
+\hl{删除pool}也应采用batch方式。保证后置条件，执行后不再有该pool数据。
+因为pool id采用了name，\hl{what if}如果在此过程中，又创建了同名pool，会如何？
+最简单的做法是禁止这样的行为。
+
+\hrulefill
+
+能用int表示的，会方便很多，如nid、diskid，需要保证在作用域内的唯一性。
+
+CAS lock?
+
+抽象，庄子齐物论
+
+\hrulefill
+
+bcache，拔盘后虚拟盘依然可写？
+
+\hl{EIO下踢盘}，这样做会引起什么问题？合适吗？
+踢盘后，如果引起部分对象副本不可用，应该如何处理？
+
+画草图，保留自己的笔记！
