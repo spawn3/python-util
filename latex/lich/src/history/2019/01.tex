@@ -923,4 +923,91 @@ coroutine虽然是非抢占式的，但可以通过\hl{yield和resume机制}主�
 
 allocator包括内存管理、磁盘、卷管理，乃至文件系统。
 
+\subsection{28}
+
+协议了解少，包括\hl{SCSI、NFS、CIFS}等，须强化。
+RDMA/DPDK/SPDK、NVMe等慢慢成为主流
+
+\hrulefill
+
+分布式系统概念与设计。
+
+分布式系统和操作系统是基础，需要专精。\hl{一门深入、长时薰修}。
+
 理解分布式系统的起点是CAP定理，为了HA，引入副本，为了性能、引入cache。如此就要进一步解决带来的一致性问题。
+
+\hl{CAP是思考原点}，引入一致性、容错、可用性、性能，弹性、可伸缩性等等。
+引入safety and liveness、ACID and BASE。
+引入replication and cache，进而引入consensus （zk、etcd等）。paxos是核心算法。
+
+分布式系统的很多手段在RAID里已经采用，如条带化、镜像、校验码。分别对应\hl{分块、复制/EC}。
+
+Erlang/OTP在解决分布式系统的痛点上是怎么做的？如何拥抱失败？
+协程调度，适应MP体系结构，同时把mm和io纳入考虑。进程有mailbox，异步通信。
+\hl{go与此有所不同，采用了csp范式}，把channel显式地提了出来，增加了灵活性(Q)。
+
+分析磁盘故障的处理策略：如何检测？恢复和io策略？
+\begin{enumbox}
+\item 出现EIO应该马上踢盘吗？
+\item 检测慢盘坏盘的方式是什么？
+\item 无clean副本时，下一步该如何处理？
+\item 一次恢复失败，接下来怎么办？ retry, redo(all of disk)
+\end{enumbox}
+
+两种模式：强一致性和降级。如果采用强一致性，会堵塞io直到恢复完成，iops下降严重。
+如果指定最小副本数，\hl{运行于降级模式，采用异步恢复策略}。就影响一致性，无法容忍连续故障。
+\hl{性能是可用性的一个体现，这是CAP认识的深化}。
+何况CA不是铁板一块，而是分层分模块有结构的，每个接口都需要单独分析，
+在总的指导思想下，case by case地去处理。
+
+节点故障：不同于磁盘故障，需要全面scan发现待修复的chunk。
+
+两层：分布式和节点。
+
+熟悉lich模块
+\begin{enumbox}
+\item scheduler
+\item memory
+\item io (normal, nvme, spdk)
+\item rpc (including \hl{TCP/IP/RDMA/DPDK} etc)
+\item ***
+\item application protocols, iSCSI/NFS/CIFS
+\end{enumbox}
+
+每个core线程整合了scheduler和io，统一用epoll方式驱动(eventfd, timerfd)。
+不同core线程通过corerpc进行通信。
+
+为什么要依赖于物理时间戳？每个host时间相差要在5s以内？
+
+知识体系：
+\begin{enumbox}
+\item 横（\hl{编程语言、算法、设计模式、架构}）
+\item 存储协议
+\item 分布式系统
+\item 本地引擎
+\end{enumbox}
+
+\subsection{29}
+
+\hl{RDMA对NIC或switch有要求}。
+
+DPDK是用户态TCP，用在以太网环境下。SPDK也是用户态NVMe驱动，并提供了NVMf。
+如果不引入支持RDMA的交换机，在all以太网环境下，可以用SPDK/DPDK分别实现\hl{全用户态的存储和网络}。
+
+输出价值的能力是最重要的能力。
+
+没有时间深入研读DPDK/SPDK，只能做大体上的把握。
+第一个问题就是\hl{如何在用户空间实现设备驱动}？
+
+每个进程的地址空间分两部分：用户态和内核态。内核态只有一个地址空间，映射到不同的进程。
+\hl{不同进程share一份内核空间}，多进程trap后并发执行。
+
+pci设备，通过mmap可以让用户态代码访问。\hl{每个pci设备都是映射到内核的一块内存区域}，可以把该内存区域映射到进程地址空间。
+
+能否在polling模式和中断模式之间动态切换？\hl{用户态接收不到中断，由uio接管}。polling模式检查状态寄存器的值。
+
+缓冲区溢出攻击
+
+\subsection{30}
+
+\subsection{31}
