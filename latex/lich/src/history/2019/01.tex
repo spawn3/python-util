@@ -1010,4 +1010,85 @@ pci设备，通过mmap可以让用户态代码访问。\hl{每个pci设备都是
 
 \subsection{30}
 
+pacelc，引入replication，RSM（paxos、raft）。副本一致性考虑几个因素：
+\begin{enumbox}
+\item 有无控制节点，控制节点在哪儿？
+\item 更新传播策略，同步还是异步
+\item 是否读写分离
+\end{enumbox}
+
+以上多个策略的组合，定义了不同的tradeoff between consistency and latency。
+从强一致性到最终一致性。
+
+副本一致性本质上是一个paxos/raft问题
+\begin{enumbox}
+\item 谁能当选leader (最低限度要包含所有提交日志)
+\item 如何处理committed and uncommitted日志条目
+\item what if no log？
+\item member change
+\end{enumbox}
+
+难以处理的问题
+\begin{enumbox}
+\item 均衡性和并发度
+\item slow disk
+\item 故障下的io中断
+\end{enumbox}
+
+故障涉及admin、controller的切换、涉及降级模式和异步恢复，如何隔离故障、最小化带来的不良影响？
+
+数据库的隔离级别，与一致性的对应关系。read uncommitted？
+
+retry的幂等性要求。
+
+对比ceph：ceph采用crush算法，如何做到计算结构的均衡性和稳定性？
+如果计算结果总是指向固定的osd，则如何处理慢盘问题？
+
+用latency进行空间分配，没有考虑容量，导致各节点数据分布不均匀，3节点的情况下，两节点full，一节点可用。
+recovery一直rescan，balance无法启动。整个系统无法进一步进行liveness。
+
+过早优化是万恶之源。
+
+\hrulefill
+
+\hl{用户态驱动}意味着什么呢？
+
+\hl{用类比思维}，发挥想象力，触类旁通，有利于知识的迁移和融通。
+象喻、譬喻、数喻等。
+
+kernel的io path，\hl{vfs-pagecache-block-driver-scsi控制器}等。
+管理粒度有page和block之分别，需要处理dismatch带来的问题。
+
+DPDK/SPDK分别看作\hl{用户态的网络和存储driver}，这是设计的初心。
+DPDK已经有十年以上的历史，广泛用于数据中心的交换机和路由设备中。
+
+DPDK是以太网的用户态驱动，采用了PMD，基于DPDK可以重写TCP/IP协议栈。
+DPDK无法直接在现有应用中使用，要借助ULP。
+SPDK采用DPDK的理念，扩展到storage，重写kernel io path。
+
+CPU与外设的通信方式，包括networking and storage。
+\hl{网卡也是pci设备}。网卡的多对列，NVMe的多队列究竟是什么？
+
+如果只用单线程访问一个设备，就无需加锁。
+libc的malloc/free内存管理太低效，所以先从OS申请hugepage，然后定制memory allocator。
+
+DPDK不同于RDMA。但也采用了很多相同的模式，如异步io、PMD。
+运行于IB上的RDMA性能要更卓越一点，\hl{用户态TCP}性能直追了上来，且不依赖于NIC和switch设备，具有更大的普适性。
+
+SPDK：application是采用了SPDK模式实现的任何应用。driver是相对backing device来说的，不同的device需要不同的driver。
+target导出device。\hl{guest os使用virtio driver与后端设备通信}。
+one of major vhost use cases is networking/DPDK or storage/SPDK offload in QEMU。
+QEMU是虚拟设备，前端需要driver，虚拟设备要映射到物理设备上。
+vhost target再与后端存储通信，export出device。
+\hl{vhost-user/vhost-target直接bypass Guest OS/QEMU}。
+
+在NVMe driver之上，实现blobstore。这可以与kernel的io stack做比较。
+\hl{上层应用要么使用raw device，要么使用某种类似filesystem的东西}。
+这里的上层应用指的是rocksdb等应用层的应用。
+
+virtio是在VM领域解决IO path问题的一个方案。
+
+在bdev下对接分布式存储，bdev以上由target导出volume或blobfs接口。
+\hl{Lich采用什么方式访问的NVMe设备}？直接打开pci？通过bdev可以访问吗？
+
 \subsection{31}
