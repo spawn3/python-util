@@ -558,21 +558,34 @@ ABA问题
 \begin{enumbox}
 \item 数据分布(元数据管理)
 \item 副本分布(节点为最小故障域粒度)
-\item TP
 \item 卷控（无日志，顺序一致性语义）
-\item 恢复、平衡、流控
+\item IO path (\hl{是否直连})
+\item 恢复
+\item 平衡
+\item QoS
 \item ***
-\item \hl{RDMA/DPDK/SPDK}
-\item \hl{iSER/NVMf}
 \item Cache
 \item Tier
 \item ***
-\item \hl{Snapshot}
-\item Remote Replication
+\item md5sum
+\item copy and migrate (online and offline)
+\item *** access control
+\item CHAP
 \item ***
+\item TP
 \item EC
 \item Dedup/Compress
+\item ***
+\item checksum
+\item \hl{Snapshot}
+\item backup
+\item Remote Replication
+\item ***
+\item \hl{RDMA/DPDK/SPDK}
+\item \hl{iSER/NVMf}
 \end{enumbox}
+
+VDI场景下的优化：多重智能cache、write bypass
 
 Lich优化项
 \begin{enumbox}
@@ -1082,13 +1095,62 @@ QEMU是虚拟设备，前端需要driver，虚拟设备要映射到物理设备�
 vhost target再与后端存储通信，export出device。
 \hl{vhost-user/vhost-target直接bypass Guest OS/QEMU}。
 
-在NVMe driver之上，实现blobstore。这可以与kernel的io stack做比较。
-\hl{上层应用要么使用raw device，要么使用某种类似filesystem的东西}。
-这里的上层应用指的是rocksdb等应用层的应用。
-
 virtio是在VM领域解决IO path问题的一个方案。
+
+\hrulefill
 
 在bdev下对接分布式存储，bdev以上由target导出volume或blobfs接口。
 \hl{Lich采用什么方式访问的NVMe设备}？直接打开pci？通过bdev可以访问吗？
 
+The SPDK block device layer, often simply called bdev, is a C library intended to be equivalent to the operating system block storage layer
+that often sits immediately \hl{above the device drivers} in a traditional kernel storage stack.
+
+Bdevs can be layered, such that some bdevs service I/O by routing requests to other bdevs.
+This can be used to implement \hl{caching, RAID, logical volume management, and more}.
+Bdevs that route I/O to other bdevs are often referred to as virtual bdevs, or vbdevs for short.
+
+在NVMe driver之上，实现\hl{blobstore/rocksdb}。这可以与kernel的io stack做比较。
+\hl{上层应用要么使用raw device，要么使用某种类似filesystem的东西}。
+这里的上层应用指的是rocksdb等应用层的应用。
+
 \subsection{31}
+
+diskmd的共享锁改进了，用software pipelines去理解共享锁导致的串行化会影响性能。
+
+\hl{bonding起到LB和容错的多重功能}。
+多网卡，连接映射到不同的网卡，在corenet mapping层维护。
+
+阿里面试的技术细节，由此可窥探到他们的关注点何在：
+\begin{enumbox}
+\item EC条带更新，如何更新比条带小的数据块呢
+\item SCSI的某个重要tag的用途？
+\item 掉电？
+\item 测试用的设备型号
+\end{enumbox}
+
+\hrulefill
+
+全闪：全闪的dedup和compress是必选项，怎么做好？对性能影响有多大？
+
+数据保护方面，\hl{snapshot、backup和RR}都非常重要。
+checksum怎么做？nvme提供了相关接口？
+
+\hl{open vstorage}只有ls volume，实现了dedup、compress？
+
+\hrulefill
+
+连点成线：edog、lich以及在adesk的TI devops，构成了相对完整的技术体系，包括\hl{存储、虚拟化、运维平台和云平台}。
+反复复盘，以深化对已有经验的理解，提炼出更多普适的知识。
+
+storage: 稳定可靠高性能。
+
+vm生命周期管理，放置policy、存储policy、HA、冷热迁移等。
+调度策略，自动或人工指定。
+
+HA: lease or lock? 自杀条件？不能出现多个vm并发访问一个image。
+
+\hrulefill
+
+RDMA连接如何bind到某个具体的设备？
+
+如何把RDMA连接加入epoll体系？
