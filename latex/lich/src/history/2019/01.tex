@@ -1117,9 +1117,6 @@ Bdevs that route I/O to other bdevs are often referred to as virtual bdevs, or v
 
 diskmd的共享锁改进了，用software pipelines去理解共享锁导致的串行化会影响性能。
 
-\hl{bonding起到LB和容错的多重功能}。
-多网卡，连接映射到不同的网卡，在corenet mapping层维护。
-
 阿里面试的技术细节，由此可窥探到他们的关注点何在：
 \begin{enumbox}
 \item EC条带更新，如何更新比条带小的数据块呢
@@ -1151,6 +1148,11 @@ HA: lease or lock? 自杀条件？不能出现多个vm并发访问一个image。
 
 \hrulefill
 
-RDMA连接如何bind到某个具体的设备？
+\hl{bonding起到LB和容错的多重功能}。
+多网卡，连接映射到不同的网卡，在corenet mapping层维护。
 
+ip地址转化为RDMA地址，然后才能建立连接。
+RDMA连接如何bind到某个具体的设备？
 如何把RDMA连接加入epoll体系？
+
+看文档，理解每个api的含义。把RDMA作为一个重点。
