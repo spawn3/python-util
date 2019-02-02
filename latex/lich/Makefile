@@ -1,7 +1,7 @@
 all:
 	cd src && xelatex main.tex && mv -f main.pdf ../lich.pdf
 
-r: r1
+r: r2
 
 r1:
 	vim src/history/2019/01.tex
