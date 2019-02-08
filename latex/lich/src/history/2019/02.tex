@@ -69,8 +69,74 @@ DB引擎，意索引。先考虑CC(隔离性，事务调度器)，次考虑提�
 
 \hrulefill
 
-把以上理论进一步落实到Lich和Ceph的设计中。
+\hl{CAS/ABA，时间戳，向量时钟}。
 
-更新chunk时递增info version？\hl{CAS，时间戳，向量时钟}。
+MVCC里对每行记录增加两个隐藏version。
 
 除了IO之外，还有并发的其他任务，如replica cleanup。
+
+有多种CC方法，主流的是lock，\hl{TO、MVCC都是基于版本号/timestamp}。
+
+\hrulefill
+
+把以上理论进一步落实到Lich和Ceph的设计中。
+\begin{enumbox}
+\item 更新chunk时递增info version？
+\item 在snapshot也实用了version。
+\end{enumbox}
+
+\subsection{05}
+
+同心圆模型，最核心的是设计心法，从内往外以此是硬件，软件(OS、FS、DB、PL/Compiler)，网络，分布式系统。
+设计和算法是两大重点和难点，可放入最内圈。
+
+可靠性、可用性，容错、resilient，可伸缩性、elastic，可扩展性等概念有着细微的差别。
+
+性能\&故障诊断分析方法：
+\begin{enumbox}
+\item Pipeline
+\item Queuing
+\item ***
+\item PAT
+\end{enumbox}
+
+数据存在的几种形态：
+\begin{enumbox}
+\item Storage
+\item Cache
+\item MQ (stream)
+\end{enumbox}
+
+Storage和Cache具有极大的相似性。
+
+至于async更多是一种架构思想。Reactive Programming强调了MQ的重要性，\hl{message-driven是实现RRE的良方}。
+
+动静分离的静，最适合应用多级cache，御敌于国门之外，最终到达源站。
+无状态的业务逻辑层与有状态的数据层，如何进行伸缩是有很大不同。
+
+\subsection{07}
+
+数据层面：复制(EC、dedup、compress)、snapshot、cache等等。
+
+卷的snapshot，cc中快照隔离，日志的检查点技术
+
+\hrulefill
+
+adesk架构演进之路:
+\begin{enumbox}
+\item 单库无拆分->动静分离->master/slave的replication架构。
+\item 加入ElasticSearch，支持全文搜索功能。
+\item 采集行为日志，进行数据分析。google analysis，umeng等。
+\item 对接广告平台进行变现
+\item \hl{上云}：不再自己运维。采用了阿里云和七牛的云平台。
+\end{enumbox}
+
+性能：索引，cache(CDN etc)、负载均衡
+
+可伸缩性：动静分离、增加磁盘。
+
+推送
+
+监控：第三方监控、nagios、zabbix
+
+增长黑客

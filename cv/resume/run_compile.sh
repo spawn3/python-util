@@ -1,0 +1,2 @@
+xelatex *.tex
+xelatex *.tex
