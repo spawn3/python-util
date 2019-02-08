@@ -2,9 +2,9 @@
   \begin{itemize}[leftmargin=*]
     \item \textbf{分布式块存储系统}: 研发分布式块存储系统，包括数据恢复、平衡、QoS、快照等功能。数据恢复采用SEDA架构实现数据恢复、平衡等特性。
 
-    \item \textbf{APP后端基础架构开发和运维}: 分层（接入层/业务层/数据层），业务层(Python/Tornado)无状态可横向扩展，
+    \item \textbf{安卓壁纸和动态壁纸APP后端基础架构开发和运维}: 分层（接入层/业务层/数据层），业务层(Python/Tornado)无状态可横向扩展，
         数据层采用MongoDB集群，各层充分利用index/cache提升性能。
-        采用动静分离策略，图片等静态资源分离出来。采用ElasticSearch支持网站全文检索。
+        采用动静分离策略，把图片等静态资源分离出来。采用ElasticSearch支持网站全文检索。
 
     \item \textbf{用户行为日志分析}: 采集用户行为数据，经由Redis导入Hadoop集群。
 
