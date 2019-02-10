@@ -6,7 +6,7 @@
               \item 采用SEDA(Staged Event-Driven Architecture)实现恢复、平衡等特性。引入最小副本数的概念，
                   支持降级写/异步恢复策略，以平衡一致性和性能(CAP/PACELC)
               \item 基于token bucket和lecky bucket算法，实现卷QoS和恢复QoS
-              \item 实现批量allocate，以改进精简配置卷的性能
+              \item 实现批量\&并行allocate，以改进精简配置卷的性能
               \item 支持大容量卷
               %\item 优化故障下的IO中断时间
               \item 延迟加载subvol数据块，以提升卷加载速度
@@ -17,11 +17,11 @@
           \end{itemize}
           }
 
-      \item \textbf{2017.08-2017.11: 实现COW树型快照:} 回滚至线性快照的某一快照后，所有后续快照(如果有的话)都将被删除，
+      \item \textbf{2017.08-2017.11: 实现COW树型快照:} 当回滚至线性快照的某一快照后，所有后续快照(如果有的话)都将被删除，
           故引入树型快照，卷及其快照构成单根树型结构，支持create、rm、revert、clone、flatten等操作。
 
-      \item \textbf{2017.02-2017.06: LSV原型:} 调研并原型化Log-structured Volume（LSV）格式，
-          以改进随机写性能，并支持ROW快照。
+      \item \textbf{2017.02-2017.06: LSV原型:} 调研并原型化Log-structured Volume（LSV）格式，聚合写入，
+          以改进随机写性能，并在此基础上支持read cache和ROW快照。
 
       \item \textbf{用户行为日志分析:} 采集用户行为数据，经由Redis异步导入Hadoop集群。
           后端采用MapReduce计算框架计算关键指标，分析结果存入MongoDB供前端可视化使用。
