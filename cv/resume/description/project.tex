@@ -17,7 +17,7 @@
           }
 
       \item \textbf{2017.08-2017.11: 实现COW树型快照:} 删除线性快照的某一快照后，所有后续快照(如果有的话)都将被删除，
-          故引入树型快照，卷及其快照构成单根树型结构。
+          故引入树型快照，卷及其快照构成单根树型结构，支持create、rm、revert、clone、flatten等操作。
 
       \item \textbf{2017.02-2017.06: Log Structure Volume原型:} 调研并原型化Log structured Volume（LSV）格式，
           以改进随机写性能，并支持ROW快照。
