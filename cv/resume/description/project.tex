@@ -3,20 +3,20 @@
       \item \textbf{2017.11: 维护分布式块存储引擎FusionStor:} FusionStor是采用协程调度机制、PMD方式驱动的分布式块存储系统，Linux/C。
           {\small
           \begin{itemize}
-              \item 实现批量allocate，以改进精简配置卷的性能
+              \item 采用SEDA(Stage Event Drivern Arch)实现恢复、平衡等特性。引入最小副本数的概念，支持降级写/异步恢复策略，以平衡一致性和性能
               \item 基于token bucket和lecky bucket算法，实现卷QoS和恢复QoS
-              \item 采用SEDA(Stage Event Drivern Arch)实现恢复、平衡等特性。引入最小副本数的概念，支持降级写/异步恢复策略，平衡一致性和性能
+              \item 实现批量allocate，以改进精简配置卷的性能
+              \item 支持大容量卷
               %\item 优化故障下的IO中断时间
               \item 延迟加载subvol数据块，以提升卷加载速度
               \item 改进创建快照操作的事务性语义
-              \item 支持大容量卷
-              \item 实现异步任务管理框架，支持删除卷、快照、revert、flatten等操作
+              \item 实现异步任务管理框架，支持删除卷、删除快照、revert、flatten等长时操作
               \item 重构本地磁盘管理代码，支持NVMe内核态/用户态两种驱动方式
               \item 调研本地bcache缓存方案
           \end{itemize}
           }
 
-      \item \textbf{2017.08-2017.11: 实现COW树型快照:} 删除线性快照的某一快照后，所有后续快照(如果有的话)都将被删除，
+      \item \textbf{2017.08-2017.11: 实现COW树型快照:} 回滚至线性快照的某一快照后，所有后续快照(如果有的话)都将被删除，
           故引入树型快照，卷及其快照构成单根树型结构，支持create、rm、revert、clone、flatten等操作。
 
       \item \textbf{2017.02-2017.06: Log Structure Volume原型:} 调研并原型化Log structured Volume（LSV）格式，
