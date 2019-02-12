@@ -39,6 +39,20 @@ int bisearch1(int arr[], int n, int x) {
     return -1;
 }
 
+int bisearch2(int arr[], int left, int right, int x) {
+    if (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (x == arr[mid])
+            return mid;
+        else if (x < arr[mid])
+            return bisearch2(arr, left, mid - 1, x);
+        else
+            return bisearch2(arr, mid + 1, right, x);
+    }
+
+    return -1;
+}
+
 int quicksort_partition(int arr[], int low, int high) {
     int r = low + rand() % (high - low + 1);
     swap(&arr[low], &arr[r]);
@@ -63,12 +77,18 @@ int quicksort_partition(int arr[], int low, int high) {
     return right;
 }
 
-void quicksort(int arr[], int low, int high) {
+void quick_sort(int arr[], int low, int high) {
     if (low < high) {
         int pivot = quicksort_partition(arr, low, high);
-        quicksort(arr, low, pivot - 1);
-        quicksort(arr, pivot + 1, high);
+        quick_sort(arr, low, pivot - 1);
+        quick_sort(arr, pivot + 1, high);
     }
+}
+
+void merge_sort(int arr[], int left, int right) {
+    (void) arr;
+    (void) left;
+    (void) right;
 }
 
 typedef struct __single_list {
@@ -155,15 +175,15 @@ int sum1(int arr[], int n) {
     return sum;
 }
 
-int __sum2(int arr[], int idx, int len, int sum) {
+int __sum2(int arr[], int len, int sum) {
     if (len == 0)
         return sum;
 
-    return __sum2(arr, idx + 1, len - 1, sum + arr[idx]);
+    return __sum2(arr, len - 1, sum + arr[len - 1]);
 }
 
 int sum2(int arr[], int n) {
-    return __sum2(arr, 0, n, 0);
+    return __sum2(arr, n, 0);
 }
 
 int __sum3(int arr[], int idx, int len, int sum) {
@@ -447,7 +467,7 @@ void test_array() {
         assert(fab1(i) == fab2(i));
     }
 
-    quicksort(arr, 0, 4);
+    quick_sort(arr, 0, 4);
     array_print(arr, arr_size);
 
     assert(bisearch1(arr, arr_size, 1) == 0);
@@ -458,7 +478,13 @@ void test_array() {
     assert(bisearch1(arr, arr_size, 8) == -1);
     assert(bisearch1(arr, arr_size, 50) == -1);
 
-
+    assert(bisearch2(arr, 0, arr_size - 1, 1) == 0);
+    assert(bisearch2(arr, 0, arr_size - 1, 10) == 1);
+    assert(bisearch2(arr, 0, arr_size - 1, 20) == 2);
+    assert(bisearch2(arr, 0, arr_size - 1, 30) == 3);
+    assert(bisearch2(arr, 0, arr_size - 1, 40) == 4);
+    assert(bisearch2(arr, 0, arr_size - 1, 8) == -1);
+    assert(bisearch2(arr, 0, arr_size - 1, 50) == -1);
 }
 
 void test_slist() {
