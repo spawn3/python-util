@@ -1,3 +1,5 @@
+% STAR model
+
 \resheading{项目经验}
   \begin{itemize}[leftmargin=*]
       \item \textbf{2017.11: 维护分布式块存储引擎FusionStor:} FusionStor是采用协程调度机制、PMD方式驱动的分布式块存储系统，Linux/C。
@@ -8,12 +10,12 @@
               \item 基于token bucket和leaky bucket算法，实现卷QoS和恢复QoS
               \item 实现异步任务管理框架，支持删除卷(TRIM)、删除快照、revert、flatten等长时操作
               \item 实现批量\&并行allocate，以改进精简配置卷的性能
-              \item 支持大容量卷
               %\item 优化故障下的IO中断时间
               \item 延迟加载subvol数据块，以提升卷加载速度
+              \item 支持大容量卷
               \item 改进创建快照操作的事务性语义
               \item 重构本地磁盘管理代码，支持NVMe内核态/用户态两种驱动方式
-              \item 调研本地bcache缓存方案
+              %\item 调研本地bcache缓存方案
           \end{itemize}
           }
 

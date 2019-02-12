@@ -9,6 +9,13 @@
 
 #define ARRSIZE(arr) (sizeof(arr)/ sizeof(arr[0]))
 
+void FatalError(int condition, const char *msg) {
+    if (!condition) {
+        printf("%s\n", msg);
+        assert(0);
+    }
+}
+
 static inline void swap(int *x, int *y) {
     int tmp = *x;
     *x = *y;
@@ -91,15 +98,15 @@ void merge_sort(int arr[], int left, int right) {
     (void) right;
 }
 
-typedef struct __single_list {
+typedef struct __single_node {
     int value;
-    struct __single_list *next;
-} single_list;
+    struct __single_node *next;
+} slist_node_t;
 
-typedef void (*single_list_scan_fn)(single_list *node);
+typedef void (*single_list_scan_fn)(slist_node_t *node);
 
-single_list *single_list_malloc(int value) {
-    single_list *p = malloc(sizeof(single_list));
+slist_node_t *single_list_malloc(int value) {
+    slist_node_t *p = malloc(sizeof(slist_node_t));
     if (p == NULL)
         assert(0);
 
@@ -108,9 +115,9 @@ single_list *single_list_malloc(int value) {
     return p;
 }
 
-void single_list_insert(single_list **head, int position, int value) {
-    single_list *p = *head, *q;
-    single_list *new_node = single_list_malloc(value);
+void single_list_insert(slist_node_t **head, int position, int value) {
+    slist_node_t *p = *head, *q;
+    slist_node_t *new_node = single_list_malloc(value);
     if (position == 1) {
         new_node->next = p;
         *head = new_node;
@@ -127,11 +134,11 @@ void single_list_insert(single_list **head, int position, int value) {
     }
 }
 
-single_list *__single_list_reverse(single_list *node, single_list *prev, single_list *new_head) {
+slist_node_t *__single_list_reverse(slist_node_t *node, slist_node_t *prev, slist_node_t *new_head) {
     if (node == NULL)
         return new_head;
 
-    single_list *next = node->next;
+    slist_node_t *next = node->next;
     if (next == NULL)
         new_head = node;
 
@@ -141,17 +148,17 @@ single_list *__single_list_reverse(single_list *node, single_list *prev, single_
     return __single_list_reverse(next, node, new_head);
 }
 
-single_list *single_list_reverse(single_list *node) {
+slist_node_t *single_list_reverse(slist_node_t *node) {
     return __single_list_reverse(node, NULL, NULL);
 }
 
-void single_list_print(single_list *node) {
+void single_list_print(slist_node_t *node) {
     printf("node %p %d\n", node, node->value);
 }
 
-void single_list_scan(single_list *head, single_list_scan_fn fn) {
+void single_list_scan(slist_node_t *head, single_list_scan_fn fn) {
     printf("single_list_scan:\n");
-    single_list *p = head;
+    slist_node_t *p = head;
     while (p != NULL) {
         fn(p);
         p = p->next;
@@ -297,10 +304,14 @@ typedef struct __bintree_node {
     struct __bintree_node *left, *right;
 } bintree_node;
 
-bintree_node *bintree_node_new(int value) {
-    bintree_node *p;
+// typedef bintree_node *bintree_t;
+typedef bintree_node *bintree_node_t;
+
+bintree_node_t bintree_node_new(int value) {
+    bintree_node_t p;
 
     p = (bintree_node *)malloc(sizeof(bintree_node));
+    FatalError(p != NULL, "OOM");
 
     p->value = value;
     p->left = NULL;
@@ -308,34 +319,99 @@ bintree_node *bintree_node_new(int value) {
     return p;
 }
 
-bintree_node *bintree_insert(bintree_node *root, int value) {
-    if (root == NULL) {
-        root = bintree_node_new(value);
-        return root;
+bintree_node *bintree_find(bintree_node *root, int x) {
+    bintree_node *curr = root;
+
+    while (curr) {
+        if (x == curr->value)
+            return curr;
+        else if (x < curr->value)
+            curr = curr->left;
+        else
+            curr = curr->right;
     }
 
-    bintree_node *tmp = root;
-    bintree_node *p = bintree_node_new(value);
+    return NULL;
+}
 
-    while (tmp != NULL) {
-        if (value <= tmp->value) {
-            if (tmp->left == NULL) {
-                tmp->left = p;
-                break;
-            } else {
-                tmp = tmp->left;
-            }
+bintree_node *bintree_find_for_insert(bintree_node *root, int x) {
+    bintree_node *prev = NULL;
+    bintree_node *curr = root;
+
+    while (curr) {
+        if (x == curr->value)
+            return NULL;
+        else if (x < curr->value) {
+            prev = curr;
+            curr = curr->left;
         } else {
-            if (tmp->right == NULL) {
-                tmp->right = p;
-                break;
-            } else {
-                tmp = tmp->right;
-            }
+            prev = curr;
+            curr = curr->right;
         }
     }
 
-    return root;
+    return prev;
+}
+
+void bintree_insert(bintree_node **root, int value) {
+    bintree_node *root2 = *root;
+    if (root2 == NULL) {
+        bintree_node *new_node = bintree_node_new(value);
+        *root = new_node;
+        return;
+    }
+
+    bintree_node *p = bintree_find_for_insert(root2, value);
+    if (p != NULL) {
+        bintree_node *new_node = bintree_node_new(value);
+        if (value < p->value)
+            p->left = new_node;
+        else
+            p->right = new_node;
+    }
+
+    /*
+    bintree_node *curr = root;
+    while (curr != NULL) {
+        if (value <= curr->value) {
+            if (curr->left == NULL) {
+                curr->left = p;
+                break;
+            } else {
+                curr = curr->left;
+            }
+        } else {
+            if (curr->right == NULL) {
+                curr->right = p;
+                break;
+            } else {
+                curr = curr->right;
+            }
+        }
+    }
+    */
+}
+
+bintree_node *bintree_min(bintree_node *root) {
+    bintree_node *curr = root;
+    while (curr) {
+        if (curr->left == NULL)
+            break;
+        curr = curr->left;
+    }
+
+    return curr;
+}
+
+bintree_node *bintree_max(bintree_node *root) {
+    bintree_node *curr = root;
+    while (curr) {
+        if (curr->right == NULL)
+            break;
+        curr = curr->right;
+    }
+
+    return curr;
 }
 
 int bintree_depth(bintree_node *root) {
@@ -400,7 +476,7 @@ void bintree_dfs_stack(bintree_node *root) {
     bintree_dfs_stack_2(root, 0);
 }
 
-typedef bintree_node *bintree_t;
+// typedef bintree_node *bintree_t;
 
 typedef void (*visit_fn)(bintree_node *node);
 
@@ -488,7 +564,7 @@ void test_array() {
 }
 
 void test_slist() {
-    single_list *head = NULL;
+    slist_node_t *head = NULL;
     single_list_insert(&head, 1, 1);
     single_list_insert(&head, 100, 2);
     single_list_insert(&head, 100, 3);
@@ -503,11 +579,22 @@ void test_slist() {
 void test_bintree() {
     bintree_node *root = NULL;
 
-    root = bintree_insert(root, 5);
-    root = bintree_insert(root, 3);
-    root = bintree_insert(root, 4);
-    root = bintree_insert(root, 6);
-    root = bintree_insert(root, 2);
+    bintree_insert(&root, 5);
+    bintree_insert(&root, 3);
+    bintree_insert(&root, 4);
+    bintree_insert(&root, 6);
+    bintree_insert(&root, 2);
+
+    bintree_node *p;
+    p = bintree_find(root, 5); assert(p->value == 5);
+    p = bintree_find(root, 3); assert(p->value == 3);
+    p = bintree_find(root, 4); assert(p->value == 4);
+    p = bintree_find(root, 6); assert(p->value == 6);
+    p = bintree_find(root, 2); assert(p->value == 2);
+    p = bintree_find(root, 1); assert(p == NULL);
+
+    p = bintree_min(root); assert(p->value == 2);
+    p = bintree_max(root); assert(p->value == 6);
 
     // bintree_dfs(root);
     bintree_dfs_stack(root);
