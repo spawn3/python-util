@@ -56,3 +56,8 @@ build_exe(val "${VALGRIND_SOURCE_FILES}")
 #set(RBTREE_SOURCE_FILES src/rbtree.c)
 #build_exe(rbtree "${RBTREE_SOURCE_FILES}")
 #target_link_libraries(rbtree gdsl)
+
+set(BINTREE_SOURCE_FILES
+    src/bintree.c
+    )
+build_exe(bintree "${BINTREE_SOURCE_FILES}")
