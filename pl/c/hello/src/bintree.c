@@ -7,6 +7,8 @@
 #define MAX_SIZE 100
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
+#define ARRSIZE(arr) (sizeof(arr)/ sizeof(arr[0]))
+
 static inline void swap(int *x, int *y) {
     int tmp = *x;
     *x = *y;
@@ -17,6 +19,24 @@ void array_print(int arr[], int n) {
     for (int i=0; i < n; i++) {
         printf("%4d %d\n", i, arr[i]);
     }
+}
+
+int bisearch1(int arr[], int n, int x) {
+    int left = 0;
+    int right = n - 1;
+    int mid = 0;
+
+    while (left <= right) {
+        mid = left + (right - left) / 2;
+        if (x == arr[mid])
+            return mid;
+        else if (x < arr[mid])
+            right = mid - 1;
+        else
+            left = mid + 1;
+    }
+
+    return -1;
 }
 
 int quicksort_partition(int arr[], int low, int high) {
@@ -87,11 +107,30 @@ void single_list_insert(single_list **head, int position, int value) {
     }
 }
 
+single_list *__single_list_reverse(single_list *node, single_list *prev, single_list *new_head) {
+    if (node == NULL)
+        return new_head;
+
+    single_list *next = node->next;
+    if (next == NULL)
+        new_head = node;
+
+    // printf("%p %p %p new %p %d\n", prev, node, next, new_head, node->value);
+
+    node->next = prev;
+    return __single_list_reverse(next, node, new_head);
+}
+
+single_list *single_list_reverse(single_list *node) {
+    return __single_list_reverse(node, NULL, NULL);
+}
+
 void single_list_print(single_list *node) {
     printf("node %p %d\n", node, node->value);
 }
 
 void single_list_scan(single_list *head, single_list_scan_fn fn) {
+    printf("single_list_scan:\n");
     single_list *p = head;
     while (p != NULL) {
         fn(p);
@@ -395,9 +434,34 @@ void bst_levelorder(bintree_node *root, visit_fn fn) {
     }
 }
 
-int main() {
-    printf("hello, world!\n");
+void test_array() {
+    int arr[] = {20, 10, 30, 40, 1};
 
+    int arr_size = ARRSIZE(arr);
+
+    assert(sum1(arr, arr_size) == 101);
+    assert(sum2(arr, arr_size) == 101);
+    assert(sum3(arr, arr_size) == 101);
+
+    for (int i=0; i < 10; i++) {
+        assert(fab1(i) == fab2(i));
+    }
+
+    quicksort(arr, 0, 4);
+    array_print(arr, arr_size);
+
+    assert(bisearch1(arr, arr_size, 1) == 0);
+    assert(bisearch1(arr, arr_size, 10) == 1);
+    assert(bisearch1(arr, arr_size, 20) == 2);
+    assert(bisearch1(arr, arr_size, 30) == 3);
+    assert(bisearch1(arr, arr_size, 40) == 4);
+    assert(bisearch1(arr, arr_size, 8) == -1);
+    assert(bisearch1(arr, arr_size, 50) == -1);
+
+
+}
+
+void test_slist() {
     single_list *head = NULL;
     single_list_insert(&head, 1, 1);
     single_list_insert(&head, 100, 2);
@@ -406,19 +470,11 @@ int main() {
     single_list_insert(&head, 100, 5);
     single_list_scan(head, single_list_print);
 
-    int arr[] = {10, 20, 30, 40, 1};
+    head = single_list_reverse(head);
+    single_list_scan(head, single_list_print);
+}
 
-    assert(sum1(arr, 5) == 101);
-    assert(sum2(arr, 5) == 101);
-    assert(sum3(arr, 5) == 101);
-
-    for (int i=0; i < 10; i++) {
-        assert(fab1(i) == fab2(i));
-    }
-
-    quicksort(arr, 0, 4);
-    array_print(arr, 5);
-
+void test_bintree() {
     bintree_node *root = NULL;
 
     root = bintree_insert(root, 5);
@@ -440,6 +496,14 @@ int main() {
     bst_postorder(root, visit_fn_print);
     printf("levelorder:\n");
     bst_levelorder(root, visit_fn_print);
+}
+
+int main() {
+    printf("hello, world!\n");
+
+    test_array();
+    test_slist();
+    test_bintree();
 
     return 0;
 }
