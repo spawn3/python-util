@@ -33,10 +33,24 @@ void *stack_pop(mystack_t *stack) {
     return p;
 }
 
-void myqueue_init(myqueue_t *q) {
-    memset(q->arr, 0x0, sizeof(void *) * MAX_SIZE);
+void myqueue_init(myqueue_t *q, int capacity) {
+    q->capacity = capacity;
+    q->arr = malloc(sizeof(void *) & q->capacity);
+    FatalError(q->arr != NULL, "OOM");
+
+    memset(q->arr, 0x0, sizeof(void *) * q->capacity);
     q->front = -1;
     q->rear = 0;
+}
+
+void myqueue_destroy(myqueue_t *q) {
+    if (q->arr) {
+        free(q->arr);
+        q->arr = NULL;
+    }
+    q->capacity = 0;
+    q->front = -1;
+    q->rear = -1;
 }
 
 int myqueue_empty(myqueue_t *q) {
@@ -47,7 +61,7 @@ void myqueue_push(myqueue_t *q, void *p) {
     q->arr[q->rear] = p;
     if (q->front == -1)
         q->front = q->rear;
-    q->rear = (q->rear + 1 ) % MAX_SIZE;
+    q->rear = (q->rear + 1 ) % q->capacity;
 }
 
 void *myqueue_pop(myqueue_t *q) {
@@ -57,11 +71,11 @@ void *myqueue_pop(myqueue_t *q) {
 
     if (q->front != -1) {
         p = q->arr[q->front];
-        if ((q->front + 1) % MAX_SIZE == q->rear) {
+        if ((q->front + 1) % q->capacity == q->rear) {
             q->front = -1;
             q->rear = 0;
         } else {
-            q->front = (q->front + 1) % MAX_SIZE;
+            q->front = (q->front + 1) % q->capacity;
         }
     }
 

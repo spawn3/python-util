@@ -36,11 +36,14 @@ typedef struct {
 } mystack_t;
 
 typedef struct {
-    void *arr[MAX_SIZE];
-    int front, rear;
+    int capacity;
+    int front;
+    int rear;
+    void **arr;
 } myqueue_t;
 
-void myqueue_init(myqueue_t *q);
+void myqueue_init(myqueue_t *q, int capacity);
+void myqueue_destroy(myqueue_t *q);
 int myqueue_empty(myqueue_t *q);
 void myqueue_push(myqueue_t *q, void *p);
 void *myqueue_pop(myqueue_t *q);

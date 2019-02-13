@@ -138,7 +138,7 @@ int bintree_depth_nr(bintree_node *root) {
         return 0;
 
     myqueue_t q;
-    myqueue_init(&q);
+    myqueue_init(&q, MAX_SIZE);
 
     bintree_node *curr = root;
     myqueue_push(&q, curr);
@@ -163,6 +163,7 @@ int bintree_depth_nr(bintree_node *root) {
         }
     }
 
+    myqueue_destroy(&q);
     return level;
 }
 
@@ -171,7 +172,7 @@ int bintree_levelsum_nr(bintree_node *root) {
         return 0;
 
     myqueue_t q;
-    myqueue_init(&q);
+    myqueue_init(&q, MAX_SIZE);
 
     bintree_node *curr = root;
     myqueue_push(&q, curr);
@@ -206,6 +207,7 @@ int bintree_levelsum_nr(bintree_node *root) {
         }
     }
 
+    myqueue_destroy(&q);
     printf("level %d sum %d\n", max_level, max_sum);
 
     return level;
@@ -318,7 +320,7 @@ void bst_levelorder(bintree_node *root, visit_fn fn) {
         return;
 
     myqueue_t q;
-    myqueue_init(&q);
+    myqueue_init(&q, MAX_SIZE);
 
     bintree_node *p;
 
@@ -333,6 +335,8 @@ void bst_levelorder(bintree_node *root, visit_fn fn) {
         if (p->right)
             myqueue_push(&q, p->right);
     }
+
+    myqueue_destroy(&q);
 }
 
 void test_bintree() {
