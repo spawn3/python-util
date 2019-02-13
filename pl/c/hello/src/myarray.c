@@ -113,3 +113,61 @@ int __sum3(int arr[], int len, int sum) {
 int sum3(int arr[], int n) {
     return __sum3(arr, n, 0);
 }
+
+void test_array() {
+    array_print_nr(10);
+
+    int arr[] = {20, 10, 30, 40, 1};
+    int arr_size = ARRSIZE(arr);
+
+    assert(array_is_asc(arr, arr_size) == 0);
+
+    assert(sum1(arr, arr_size) == 101);
+    assert(sum2(arr, arr_size) == 101);
+    assert(sum3(arr, arr_size) == 101);
+
+    assert(myarray_sum(arr, 0, arr_size) == 101);
+
+    for (int i=0; i < 10; i++) {
+        assert(fab1(i) == fab2(i));
+    }
+
+    quick_sort(arr, 0, 4);
+    // merge_sort(arr, 0, 4);
+    array_print(arr, arr_size);
+
+    assert(bisearch1(arr, arr_size, 1) == 0);
+    assert(bisearch1(arr, arr_size, 10) == 1);
+    assert(bisearch1(arr, arr_size, 20) == 2);
+    assert(bisearch1(arr, arr_size, 30) == 3);
+    assert(bisearch1(arr, arr_size, 40) == 4);
+    assert(bisearch1(arr, arr_size, 8) == -1);
+    assert(bisearch1(arr, arr_size, 50) == -1);
+
+    assert(bisearch2(arr, 0, arr_size - 1, 1) == 0);
+    assert(bisearch2(arr, 0, arr_size - 1, 10) == 1);
+    assert(bisearch2(arr, 0, arr_size - 1, 20) == 2);
+    assert(bisearch2(arr, 0, arr_size - 1, 30) == 3);
+    assert(bisearch2(arr, 0, arr_size - 1, 40) == 4);
+    assert(bisearch2(arr, 0, arr_size - 1, 8) == -1);
+    assert(bisearch2(arr, 0, arr_size - 1, 50) == -1);
+
+    int arr2[] = {1, 10, 20, 30, 40};
+    int arr_size2 = ARRSIZE(arr2);
+    assert(array_is_asc(arr2, arr_size2) == 1);
+
+    array_reverse(arr2, arr_size2);
+    assert(arr2[0] == 40);
+    assert(arr2[1] == 30);
+    assert(arr2[2] == 20);
+    assert(arr2[3] == 10);
+    assert(arr2[4] == 1);
+
+    array_reverse(arr2, arr_size2);
+    assert(arr2[0] == 1);
+    assert(arr2[1] == 10);
+    assert(arr2[2] == 20);
+    assert(arr2[3] == 30);
+    assert(arr2[4] == 40);
+}
+

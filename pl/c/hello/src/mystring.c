@@ -80,3 +80,24 @@ void string_perm(char *s) {
         return;
     string_perm_impl(s, 0, n);
 }
+
+void test_string() {
+    char *src = "abcd";
+    char dst[256];
+
+    printf("src %s dst %s\n", src, my_strcpy(dst, src));
+
+    assert(strlen("\0") == 0);
+
+    printf("sizeof %ld\n", sizeof("\0"));
+    assert(sizeof("\0") == 2);
+
+    assert(string_palindrome("abcdcba") == 1);
+    assert(string_palindrome("abcdba") == 0);
+
+    // string_perm("abc");
+
+    char s[256] = "abc";
+    string_perm(s);
+}
+

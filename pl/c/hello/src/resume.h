@@ -68,6 +68,9 @@ int gcd(int m, int n);
 int fab1(int n);
 int fab2(int n);
 
+void test_array();
+void test_string();
 void test_slist();
+void test_bintree();
 
 #endif

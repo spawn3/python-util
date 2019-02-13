@@ -335,83 +335,6 @@ void bst_levelorder(bintree_node *root, visit_fn fn) {
     }
 }
 
-void test_array() {
-    array_print_nr(10);
-
-    int arr[] = {20, 10, 30, 40, 1};
-    int arr_size = ARRSIZE(arr);
-
-    assert(array_is_asc(arr, arr_size) == 0);
-
-    assert(sum1(arr, arr_size) == 101);
-    assert(sum2(arr, arr_size) == 101);
-    assert(sum3(arr, arr_size) == 101);
-
-    assert(myarray_sum(arr, 0, arr_size) == 101);
-
-    for (int i=0; i < 10; i++) {
-        assert(fab1(i) == fab2(i));
-    }
-
-    quick_sort(arr, 0, 4);
-    // merge_sort(arr, 0, 4);
-    array_print(arr, arr_size);
-
-    assert(bisearch1(arr, arr_size, 1) == 0);
-    assert(bisearch1(arr, arr_size, 10) == 1);
-    assert(bisearch1(arr, arr_size, 20) == 2);
-    assert(bisearch1(arr, arr_size, 30) == 3);
-    assert(bisearch1(arr, arr_size, 40) == 4);
-    assert(bisearch1(arr, arr_size, 8) == -1);
-    assert(bisearch1(arr, arr_size, 50) == -1);
-
-    assert(bisearch2(arr, 0, arr_size - 1, 1) == 0);
-    assert(bisearch2(arr, 0, arr_size - 1, 10) == 1);
-    assert(bisearch2(arr, 0, arr_size - 1, 20) == 2);
-    assert(bisearch2(arr, 0, arr_size - 1, 30) == 3);
-    assert(bisearch2(arr, 0, arr_size - 1, 40) == 4);
-    assert(bisearch2(arr, 0, arr_size - 1, 8) == -1);
-    assert(bisearch2(arr, 0, arr_size - 1, 50) == -1);
-
-    int arr2[] = {1, 10, 20, 30, 40};
-    int arr_size2 = ARRSIZE(arr2);
-    assert(array_is_asc(arr2, arr_size2) == 1);
-
-    array_reverse(arr2, arr_size2);
-    assert(arr2[0] == 40);
-    assert(arr2[1] == 30);
-    assert(arr2[2] == 20);
-    assert(arr2[3] == 10);
-    assert(arr2[4] == 1);
-
-    array_reverse(arr2, arr_size2);
-    assert(arr2[0] == 1);
-    assert(arr2[1] == 10);
-    assert(arr2[2] == 20);
-    assert(arr2[3] == 30);
-    assert(arr2[4] == 40);
-}
-
-void test_string() {
-    char *src = "abcd";
-    char dst[256];
-
-    printf("src %s dst %s\n", src, my_strcpy(dst, src));
-
-    assert(strlen("\0") == 0);
-
-    printf("sizeof %ld\n", sizeof("\0"));
-    assert(sizeof("\0") == 2);
-
-    assert(string_palindrome("abcdcba") == 1);
-    assert(string_palindrome("abcdba") == 0);
-
-    // string_perm("abc");
-
-    char s[256] = "abc";
-    string_perm(s);
-}
-
 void test_bintree() {
     bintree_node *root = NULL;
 
@@ -452,22 +375,4 @@ void test_bintree() {
     bst_postorder(root, visit_fn_print);
     printf("levelorder:\n");
     bst_levelorder(root, visit_fn_print);
-}
-
-int main() {
-    printf("hello, world!\n");
-
-    printf("test array:\n");
-    test_array();
-
-    printf("test string:\n");
-    test_string();
-
-    printf("\ntest single list:\n");
-    test_slist();
-
-    printf("\ntest binary tree:\n");
-    test_bintree();
-
-    return 0;
 }
