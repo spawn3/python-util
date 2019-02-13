@@ -28,6 +28,20 @@ void array_print(int arr[], int n) {
     }
 }
 
+int array_is_asc_core(int arr[], int start, int len) {
+    if (len < 2)
+        return 1;
+
+    if (arr[start] >= arr[start+1])
+        return 0;
+
+    return array_is_asc_core(arr, start + 1, len - 1);
+}
+
+int array_is_asc(int arr[], int n) {
+    return array_is_asc_core(arr, 0, n);
+}
+
 int bisearch1(int arr[], int n, int x) {
     int left = 0;
     int right = n - 1;
@@ -79,8 +93,9 @@ int quicksort_partition(int arr[], int low, int high) {
         }
     }
 
-    arr[low] = arr[right];
-    arr[right] = pivot_value;
+    // arr[low] = arr[right];
+    // arr[right] = pivot_value;
+    swap(&arr[low], &arr[right]);
     return right;
 }
 
@@ -92,32 +107,73 @@ void quick_sort(int arr[], int low, int high) {
     }
 }
 
+void merge_core(int arr[], int tmp[], int left, int mid, int right) {
+    int size = right - left + 1;
+    int right_idx = mid + 1;
+    int tmp_idx = left;
+
+    while (left <= mid && right_idx <= right) {
+        if (arr[left] <= arr[right_idx]) {
+            tmp[tmp_idx++] = arr[left++];
+        } else {
+            tmp[tmp_idx++] = arr[right_idx++];
+        }
+    }
+
+    while (left <= mid) {
+        tmp[tmp_idx++] = arr[left++];
+    }
+
+    while (right_idx <= right) {
+        tmp[tmp_idx++] = arr[right_idx++];
+    }
+
+    for (int i=0; i < size; i++) {
+        arr[right] = tmp[right];
+        right--;
+    }
+}
+
+void merge_sort_core(int arr[], int tmp[], int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        merge_sort_core(arr, tmp, left, mid);
+        merge_sort_core(arr, tmp, mid + 1, right);
+        merge_core(arr, tmp, left, mid, right);
+    }
+}
+
 void merge_sort(int arr[], int left, int right) {
-    (void) arr;
-    (void) left;
-    (void) right;
+    if (left >= 0 && left < right) {
+        int *tmp = malloc(sizeof(int) * (right - left + 1));
+        FatalError(tmp != NULL, "OOM");
+
+        merge_sort_core(arr, tmp, left, right);
+
+        free(tmp);
+    }
 }
 
 typedef struct __single_node {
-    int value;
+    int key;
     struct __single_node *next;
 } slist_node_t;
 
 typedef void (*single_list_scan_fn)(slist_node_t *node);
 
-slist_node_t *single_list_malloc(int value) {
+slist_node_t *single_list_malloc(int key) {
     slist_node_t *p = malloc(sizeof(slist_node_t));
     if (p == NULL)
         assert(0);
 
     p->next = NULL;
-    p->value = value;
+    p->key = key;
     return p;
 }
 
-void single_list_insert(slist_node_t **head, int position, int value) {
+void single_list_insert(slist_node_t **head, int position, int key) {
     slist_node_t *p = *head, *q;
-    slist_node_t *new_node = single_list_malloc(value);
+    slist_node_t *new_node = single_list_malloc(key);
     if (position == 1) {
         new_node->next = p;
         *head = new_node;
@@ -142,7 +198,7 @@ slist_node_t *__single_list_reverse(slist_node_t *node, slist_node_t *prev, slis
     if (next == NULL)
         new_head = node;
 
-    // printf("%p %p %p new %p %d\n", prev, node, next, new_head, node->value);
+    // printf("%p %p %p new %p %d\n", prev, node, next, new_head, node->key);
 
     node->next = prev;
     return __single_list_reverse(next, node, new_head);
@@ -153,7 +209,7 @@ slist_node_t *single_list_reverse(slist_node_t *node) {
 }
 
 void single_list_print(slist_node_t *node) {
-    printf("node %p %d\n", node, node->value);
+    printf("node %p %d\n", node, node->key);
 }
 
 void single_list_scan(slist_node_t *head, single_list_scan_fn fn) {
@@ -300,20 +356,20 @@ void *myqueue_pop(myqueue_t *q) {
 }
 
 typedef struct __bintree_node {
-    int value;
+    int key;
     struct __bintree_node *left, *right;
 } bintree_node;
 
 // typedef bintree_node *bintree_t;
 typedef bintree_node *bintree_node_t;
 
-bintree_node_t bintree_node_new(int value) {
+bintree_node_t bintree_node_new(int key) {
     bintree_node_t p;
 
     p = (bintree_node *)malloc(sizeof(bintree_node));
     FatalError(p != NULL, "OOM");
 
-    p->value = value;
+    p->key = key;
     p->left = NULL;
     p->right = NULL;
     return p;
@@ -323,9 +379,9 @@ bintree_node *bintree_find(bintree_node *root, int x) {
     bintree_node *curr = root;
 
     while (curr) {
-        if (x == curr->value)
+        if (x == curr->key)
             return curr;
-        else if (x < curr->value)
+        else if (x < curr->key)
             curr = curr->left;
         else
             curr = curr->right;
@@ -339,9 +395,9 @@ bintree_node *bintree_find_for_insert(bintree_node *root, int x) {
     bintree_node *curr = root;
 
     while (curr) {
-        if (x == curr->value)
+        if (x == curr->key)
             return NULL;
-        else if (x < curr->value) {
+        else if (x < curr->key) {
             prev = curr;
             curr = curr->left;
         } else {
@@ -353,18 +409,18 @@ bintree_node *bintree_find_for_insert(bintree_node *root, int x) {
     return prev;
 }
 
-void bintree_insert(bintree_node **root, int value) {
+void bintree_insert(bintree_node **root, int key) {
     bintree_node *root2 = *root;
     if (root2 == NULL) {
-        bintree_node *new_node = bintree_node_new(value);
+        bintree_node *new_node = bintree_node_new(key);
         *root = new_node;
         return;
     }
 
-    bintree_node *p = bintree_find_for_insert(root2, value);
+    bintree_node *p = bintree_find_for_insert(root2, key);
     if (p != NULL) {
-        bintree_node *new_node = bintree_node_new(value);
-        if (value < p->value)
+        bintree_node *new_node = bintree_node_new(key);
+        if (key < p->key)
             p->left = new_node;
         else
             p->right = new_node;
@@ -373,7 +429,7 @@ void bintree_insert(bintree_node **root, int value) {
     /*
     bintree_node *curr = root;
     while (curr != NULL) {
-        if (value <= curr->value) {
+        if (key <= curr->key) {
             if (curr->left == NULL) {
                 curr->left = p;
                 break;
@@ -424,11 +480,29 @@ int bintree_depth(bintree_node *root) {
     return MAX(left, right) + 1;
 }
 
+void bintree_level_core(bintree_node *root, int level) {
+    if (root == NULL)
+        return;
+
+    printf("node %d level %d\n", root->key, level);
+
+    if (root->left)
+        bintree_level_core(root->left, level + 1);
+
+    if (root->right)
+        bintree_level_core(root->right, level + 1);
+}
+
+// print node and its level/depth
+void bintree_level(bintree_node *root) {
+    bintree_level_core(root, 0);
+}
+
 void bintree_dfs(bintree_node *root) {
     if (root == NULL) {
         return;
     }
-    printf("%d\n", root->value);
+    printf("%d\n", root->key);
     bintree_dfs(root->left);
     bintree_dfs(root->right);
 }
@@ -436,7 +510,7 @@ void bintree_dfs(bintree_node *root) {
 int bintree_sum(bintree_node *arr[], int count) {
         int sum = 0;
         for (int i=0; i < count; ++i) {
-            sum += arr[i]->value;
+            sum += arr[i]->key;
         }
         return sum;
 }
@@ -459,10 +533,10 @@ void bintree_dfs_stack_2(bintree_node *root, int sum) {
     if (root == NULL)
         return;
 
-    sum += root->value;
+    sum += root->key;
 
     if (root->left == NULL && root->right == NULL) {
-        printf("sum %d\n", sum);
+        printf("node %d sum %d\n", root->key, sum);
     } else {
         bintree_dfs_stack_2(root->left, sum);
         bintree_dfs_stack_2(root->right, sum);
@@ -481,7 +555,7 @@ void bintree_dfs_stack(bintree_node *root) {
 typedef void (*visit_fn)(bintree_node *node);
 
 void visit_fn_print(bintree_node *node) {
-    printf("node %p %d\n", node, node->value);
+    printf("node %p %d\n", node, node->key);
 }
 
 void bst_preorder(bintree_node *root, visit_fn fn) {
@@ -532,8 +606,9 @@ void bst_levelorder(bintree_node *root, visit_fn fn) {
 
 void test_array() {
     int arr[] = {20, 10, 30, 40, 1};
-
     int arr_size = ARRSIZE(arr);
+
+    assert(array_is_asc(arr, arr_size) == 0);
 
     assert(sum1(arr, arr_size) == 101);
     assert(sum2(arr, arr_size) == 101);
@@ -544,6 +619,7 @@ void test_array() {
     }
 
     quick_sort(arr, 0, 4);
+    // merge_sort(arr, 0, 4);
     array_print(arr, arr_size);
 
     assert(bisearch1(arr, arr_size, 1) == 0);
@@ -561,6 +637,11 @@ void test_array() {
     assert(bisearch2(arr, 0, arr_size - 1, 40) == 4);
     assert(bisearch2(arr, 0, arr_size - 1, 8) == -1);
     assert(bisearch2(arr, 0, arr_size - 1, 50) == -1);
+
+    int arr2[] = {1, 10, 20, 30, 40};
+    int arr_size2 = ARRSIZE(arr2);
+    assert(array_is_asc(arr2, arr_size2) == 1);
+
 }
 
 void test_slist() {
@@ -586,15 +667,17 @@ void test_bintree() {
     bintree_insert(&root, 2);
 
     bintree_node *p;
-    p = bintree_find(root, 5); assert(p->value == 5);
-    p = bintree_find(root, 3); assert(p->value == 3);
-    p = bintree_find(root, 4); assert(p->value == 4);
-    p = bintree_find(root, 6); assert(p->value == 6);
-    p = bintree_find(root, 2); assert(p->value == 2);
+    p = bintree_find(root, 5); assert(p->key == 5);
+    p = bintree_find(root, 3); assert(p->key == 3);
+    p = bintree_find(root, 4); assert(p->key == 4);
+    p = bintree_find(root, 6); assert(p->key == 6);
+    p = bintree_find(root, 2); assert(p->key == 2);
     p = bintree_find(root, 1); assert(p == NULL);
 
-    p = bintree_min(root); assert(p->value == 2);
-    p = bintree_max(root); assert(p->value == 6);
+    p = bintree_min(root); assert(p->key == 2);
+    p = bintree_max(root); assert(p->key == 6);
+
+    bintree_level(root);
 
     // bintree_dfs(root);
     bintree_dfs_stack(root);
@@ -614,8 +697,13 @@ void test_bintree() {
 int main() {
     printf("hello, world!\n");
 
+    printf("test array:\n");
     test_array();
+
+    printf("\ntest single list:\n");
     test_slist();
+
+    printf("\ntest binary tree:\n");
     test_bintree();
 
     return 0;
