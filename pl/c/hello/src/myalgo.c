@@ -117,3 +117,33 @@ void merge_sort(int arr[], int left, int right) {
         free(tmp);
     }
 }
+
+int gcd(int m, int n) {
+    int r = m % n;
+    if (r == 0)
+        return n;
+    else
+        return gcd(n, r);
+}
+
+int fab1(int n) {
+    if (n == 0 || n == 1)
+        return n;
+    return fab1(n - 2) + fab1(n - 1);
+}
+
+int fab2(int n) {
+    if (n == 0 || n == 1)
+        return n;
+
+    int twoback = 0;
+    int oneback = 1;
+    int current;
+    for (int i=2; i <= n; i++) {
+        current = twoback + oneback;
+        twoback = oneback;
+        oneback = current;
+    }
+
+    return current;
+}

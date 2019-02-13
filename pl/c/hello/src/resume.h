@@ -30,6 +30,21 @@ static inline void FatalError(int condition, const char *msg) {
     }
 }
 
+typedef struct {
+    void *arr[MAX_SIZE];
+    int count;
+} mystack_t;
+
+typedef struct {
+    void *arr[MAX_SIZE];
+    int front, rear;
+} myqueue_t;
+
+void myqueue_init(myqueue_t *q);
+int myqueue_empty(myqueue_t *q);
+void myqueue_push(myqueue_t *q, void *p);
+void *myqueue_pop(myqueue_t *q);
+
 void array_print(int arr[], int n);
 void array_print_nr(int n);
 int array_is_asc(int arr[], int n);
@@ -49,5 +64,10 @@ int bisearch1(int arr[], int n, int x);
 int bisearch2(int arr[], int left, int right, int x);
 void quick_sort(int arr[], int low, int high);
 void merge_sort(int arr[], int left, int right);
+int gcd(int m, int n);
+int fab1(int n);
+int fab2(int n);
+
+void test_slist();
 
 #endif

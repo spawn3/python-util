@@ -61,6 +61,8 @@ set(BINTREE_SOURCE_FILES
     src/myalgo.c
     src/myarray.c
     src/mystring.c
+    src/mylist.c
+    src/mystack.c
     src/bintree.c
     )
 build_exe(bintree "${BINTREE_SOURCE_FILES}")
