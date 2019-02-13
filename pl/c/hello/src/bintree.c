@@ -4,155 +4,7 @@
 #include "assert.h"
 #include "math.h"
 
-#define MAX_SIZE 100
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-
-#define ARRSIZE(arr) (sizeof(arr)/ sizeof(arr[0]))
-
-void FatalError(int condition, const char *msg) {
-    if (!condition) {
-        printf("%s\n", msg);
-        assert(0);
-    }
-}
-
-static inline void swap(int *x, int *y) {
-    int tmp = *x;
-    *x = *y;
-    *y = tmp;
-}
-
-void array_print(int arr[], int n) {
-    for (int i=0; i < n; i++) {
-        printf("%4d %d\n", i, arr[i]);
-    }
-}
-
-int array_is_asc_core(int arr[], int start, int len) {
-    if (len < 2)
-        return 1;
-
-    if (arr[start] >= arr[start+1])
-        return 0;
-
-    return array_is_asc_core(arr, start + 1, len - 1);
-}
-
-int array_is_asc(int arr[], int n) {
-    return array_is_asc_core(arr, 0, n);
-}
-
-int bisearch1(int arr[], int n, int x) {
-    int left = 0;
-    int right = n - 1;
-    int mid = 0;
-
-    while (left <= right) {
-        mid = left + (right - left) / 2;
-        if (x == arr[mid])
-            return mid;
-        else if (x < arr[mid])
-            right = mid - 1;
-        else
-            left = mid + 1;
-    }
-
-    return -1;
-}
-
-int bisearch2(int arr[], int left, int right, int x) {
-    if (left <= right) {
-        int mid = left + (right - left) / 2;
-        if (x == arr[mid])
-            return mid;
-        else if (x < arr[mid])
-            return bisearch2(arr, left, mid - 1, x);
-        else
-            return bisearch2(arr, mid + 1, right, x);
-    }
-
-    return -1;
-}
-
-int quicksort_partition(int arr[], int low, int high) {
-    int r = low + rand() % (high - low + 1);
-    swap(&arr[low], &arr[r]);
-
-    // printf("r %d\n", r);
-
-    int left = low, right = high, pivot_value = arr[low];
-
-    while (left < right) {
-        while (arr[left] <= pivot_value)
-            left++;
-        while (arr[right] > pivot_value)
-            right --;
-
-        if (left < right) {
-            swap(&arr[left], &arr[right]);
-        }
-    }
-
-    // arr[low] = arr[right];
-    // arr[right] = pivot_value;
-    swap(&arr[low], &arr[right]);
-    return right;
-}
-
-void quick_sort(int arr[], int low, int high) {
-    if (low < high) {
-        int pivot = quicksort_partition(arr, low, high);
-        quick_sort(arr, low, pivot - 1);
-        quick_sort(arr, pivot + 1, high);
-    }
-}
-
-void merge_core(int arr[], int tmp[], int left, int mid, int right) {
-    int size = right - left + 1;
-    int right_idx = mid + 1;
-    int tmp_idx = left;
-
-    while (left <= mid && right_idx <= right) {
-        if (arr[left] <= arr[right_idx]) {
-            tmp[tmp_idx++] = arr[left++];
-        } else {
-            tmp[tmp_idx++] = arr[right_idx++];
-        }
-    }
-
-    while (left <= mid) {
-        tmp[tmp_idx++] = arr[left++];
-    }
-
-    while (right_idx <= right) {
-        tmp[tmp_idx++] = arr[right_idx++];
-    }
-
-    for (int i=0; i < size; i++) {
-        arr[right] = tmp[right];
-        right--;
-    }
-}
-
-void merge_sort_core(int arr[], int tmp[], int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-        merge_sort_core(arr, tmp, left, mid);
-        merge_sort_core(arr, tmp, mid + 1, right);
-        merge_core(arr, tmp, left, mid, right);
-    }
-}
-
-void merge_sort(int arr[], int left, int right) {
-    if (left >= 0 && left < right) {
-        int *tmp = malloc(sizeof(int) * (right - left + 1));
-        FatalError(tmp != NULL, "OOM");
-
-        merge_sort_core(arr, tmp, left, right);
-
-        free(tmp);
-    }
-}
+#include "resume.h"
 
 typedef struct __single_node {
     int key;
@@ -221,6 +73,16 @@ void single_list_scan(slist_node_t *head, single_list_scan_fn fn) {
     }
 }
 
+int slist_getsize(slist_node_t *head) {
+    int count = 0;
+    slist_node_t *curr = head;
+    while (curr) {
+        count ++;
+        curr = curr->next;
+    }
+    return count;
+}
+
 int gcd(int m, int n) {
     int r = m % n;
     if (r == 0)
@@ -228,38 +90,6 @@ int gcd(int m, int n) {
     else
         return gcd(n, r);
 }
-
-int sum1(int arr[], int n) {
-    int sum = 0;
-    for (int i=0; i < n; i++)
-        sum += arr[i];
-
-    // printf("sum %d\n", sum);
-    return sum;
-}
-
-int __sum2(int arr[], int len, int sum) {
-    if (len == 0)
-        return sum;
-
-    return __sum2(arr, len - 1, sum + arr[len - 1]);
-}
-
-int sum2(int arr[], int n) {
-    return __sum2(arr, n, 0);
-}
-
-int __sum3(int arr[], int idx, int len, int sum) {
-    if (idx == len)
-        return sum;
-
-    return __sum3(arr, idx + 1, len, sum + arr[idx]);
-}
-
-int sum3(int arr[], int n) {
-    return __sum3(arr, 0, n, 0);
-}
-
 
 int fab1(int n) {
     if (n == 0 || n == 1)
@@ -477,7 +307,87 @@ int bintree_depth(bintree_node *root) {
 
     int left = bintree_depth(root->left);
     int right = bintree_depth(root->right);
+
+    // post order
     return MAX(left, right) + 1;
+}
+
+int bintree_depth_nr(bintree_node *root) {
+    if (root == NULL)
+        return 0;
+
+    myqueue_t q;
+    myqueue_init(&q);
+
+    bintree_node *curr = root;
+    myqueue_push(&q, curr);
+    myqueue_push(&q, NULL);
+
+    int level = 0;
+
+    while (!myqueue_empty(&q)) {
+        curr = myqueue_pop(&q);
+        if (curr == NULL) {
+            level ++;
+
+            if (!myqueue_empty(&q)) {
+                myqueue_push(&q, NULL);
+            }
+
+        } else {
+            if (curr->left != NULL)
+                myqueue_push(&q, curr->left);
+            if (curr->right != NULL)
+                myqueue_push(&q, curr->right);
+        }
+    }
+
+    return level;
+}
+
+int bintree_levelsum_nr(bintree_node *root) {
+    if (root == NULL)
+        return 0;
+
+    myqueue_t q;
+    myqueue_init(&q);
+
+    bintree_node *curr = root;
+    myqueue_push(&q, curr);
+    myqueue_push(&q, NULL);
+
+    int level = 0;
+    int level_sum = 0;
+    int max_sum = 0;
+    int max_level = 0;
+
+    while (!myqueue_empty(&q)) {
+        curr = myqueue_pop(&q);
+        if (curr == NULL) {
+            if (level_sum > max_sum) {
+                max_sum = level_sum;
+                max_level = level;
+            }
+
+            level ++;
+            level_sum = 0;
+
+            if (!myqueue_empty(&q)) {
+                myqueue_push(&q, NULL);
+            }
+        } else {
+            level_sum += curr->key;
+
+            if (curr->left != NULL)
+                myqueue_push(&q, curr->left);
+            if (curr->right != NULL)
+                myqueue_push(&q, curr->right);
+        }
+    }
+
+    printf("level %d sum %d\n", max_level, max_sum);
+
+    return level;
 }
 
 void bintree_level_core(bintree_node *root, int level) {
@@ -605,6 +515,8 @@ void bst_levelorder(bintree_node *root, visit_fn fn) {
 }
 
 void test_array() {
+    array_print_nr(10);
+
     int arr[] = {20, 10, 30, 40, 1};
     int arr_size = ARRSIZE(arr);
 
@@ -613,6 +525,8 @@ void test_array() {
     assert(sum1(arr, arr_size) == 101);
     assert(sum2(arr, arr_size) == 101);
     assert(sum3(arr, arr_size) == 101);
+
+    assert(myarray_sum(arr, 0, arr_size) == 101);
 
     for (int i=0; i < 10; i++) {
         assert(fab1(i) == fab2(i));
@@ -642,6 +556,39 @@ void test_array() {
     int arr_size2 = ARRSIZE(arr2);
     assert(array_is_asc(arr2, arr_size2) == 1);
 
+    array_reverse(arr2, arr_size2);
+    assert(arr2[0] == 40);
+    assert(arr2[1] == 30);
+    assert(arr2[2] == 20);
+    assert(arr2[3] == 10);
+    assert(arr2[4] == 1);
+
+    array_reverse(arr2, arr_size2);
+    assert(arr2[0] == 1);
+    assert(arr2[1] == 10);
+    assert(arr2[2] == 20);
+    assert(arr2[3] == 30);
+    assert(arr2[4] == 40);
+}
+
+void test_string() {
+    char *src = "abcd";
+    char dst[256];
+
+    printf("src %s dst %s\n", src, my_strcpy(dst, src));
+
+    assert(strlen("\0") == 0);
+
+    printf("sizeof %ld\n", sizeof("\0"));
+    assert(sizeof("\0") == 2);
+
+    assert(string_palindrome("abcdcba") == 1);
+    assert(string_palindrome("abcdba") == 0);
+
+    // string_perm("abc");
+
+    char s[256] = "abc";
+    string_perm(s);
 }
 
 void test_slist() {
@@ -651,9 +598,12 @@ void test_slist() {
     single_list_insert(&head, 100, 3);
     single_list_insert(&head, 100, 4);
     single_list_insert(&head, 100, 5);
+
+    assert(slist_getsize(head) == 5);
     single_list_scan(head, single_list_print);
 
     head = single_list_reverse(head);
+    assert(slist_getsize(head) == 5);
     single_list_scan(head, single_list_print);
 }
 
@@ -679,10 +629,15 @@ void test_bintree() {
 
     bintree_level(root);
 
+    printf("depth %d\n", bintree_depth(root));
+    printf("depth %d\n", bintree_depth_nr(root));
+    assert(bintree_depth(root) == bintree_depth_nr(root));
+
+    bintree_levelsum_nr(root);
+
     // bintree_dfs(root);
     bintree_dfs_stack(root);
     //
-    printf("depth %d\n", bintree_depth(root));
 
     printf("preorder:\n");
     bst_preorder(root, visit_fn_print);
@@ -699,6 +654,9 @@ int main() {
 
     printf("test array:\n");
     test_array();
+
+    printf("test string:\n");
+    test_string();
 
     printf("\ntest single list:\n");
     test_slist();

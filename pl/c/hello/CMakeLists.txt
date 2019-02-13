@@ -58,6 +58,9 @@ build_exe(val "${VALGRIND_SOURCE_FILES}")
 #target_link_libraries(rbtree gdsl)
 
 set(BINTREE_SOURCE_FILES
+    src/myalgo.c
+    src/myarray.c
+    src/mystring.c
     src/bintree.c
     )
 build_exe(bintree "${BINTREE_SOURCE_FILES}")
