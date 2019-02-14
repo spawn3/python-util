@@ -6,6 +6,10 @@
 
 #include "resume.h"
 
+#define BISEARCH_EXACT 0
+#define BISEARCH_FIRST 1
+#define BISEARCH_LAST  2
+
 int bisearch1(int arr[], int n, int x) {
     int left = 0;
     int right = n - 1;
@@ -33,6 +37,39 @@ int bisearch2(int arr[], int left, int right, int x) {
             return bisearch2(arr, left, mid - 1, x);
         else
             return bisearch2(arr, mid + 1, right, x);
+    }
+
+    return -1;
+}
+
+int bisearch3(int arr[], int left, int right, int x, int flag) {
+    if (arr == NULL)
+        return -1;
+
+    int mid = -1;
+    while (left <= right) {
+        mid = left + (right - left) / 2;
+
+        if (x == arr[mid]) {
+            if (flag == BISEARCH_EXACT) {
+                return mid;
+            } else if (flag == BISEARCH_FIRST) { // first
+                // TODO
+                if (mid == left || arr[mid - 1] != x)
+                    return mid;
+                else
+                    right = mid - 1;
+            } else { // last
+                if (mid == right || arr[mid + 1] != x)
+                    return mid;
+                else
+                    left = mid + 1;
+            }
+        } else if (x < arr[mid]) {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
     }
 
     return -1;
@@ -146,4 +183,21 @@ int fab2(int n) {
     }
 
     return current;
+}
+
+void test_algo() {
+    int arr[] = {1, 3, 5, 7, 7, 7, 9};
+    int arr_size = ARRSIZE(arr);
+
+    ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 1, BISEARCH_FIRST), 0);
+    ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 1, BISEARCH_LAST), 0);
+
+    ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 5, BISEARCH_FIRST), 2);
+    ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 5, BISEARCH_LAST), 2);
+
+    ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 7, BISEARCH_FIRST), 3);
+    ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 7, BISEARCH_LAST), 5);
+
+    ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 10, BISEARCH_FIRST), -1);
+    ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 10, BISEARCH_LAST), -1);
 }

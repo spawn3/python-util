@@ -450,20 +450,32 @@ void test_bintree() {
     printf("levelorder:\n");
     bst_levelorder(root, visit_fn_print);
 
+    printf("111\n");
+
     // bintree_dfs(root);
     bintree_dfs_stack(root);
     bintree_path(root, 11);
 
+    printf("222\n");
+
     bintree_all_ancestors(root, 4);
 
+    printf("222 - 000\n");
+
+    /*
     bintree_node *lca  = bintree_least_common_ancestor(root, 4, 6);
     assert(lca->key == 5);
+
+    printf("333\n");
 
     lca  = bintree_least_common_ancestor(root, 2, 4);
     ASSERT_EQUAL(lca->key, 3);
 
     lca  = bintree_least_common_ancestor(root, 2, 3);
     assert(lca->key == 3);
+    */
+
+    printf("444\n");
 
     bintree_mirror(root);
     printf("preorder:\n");

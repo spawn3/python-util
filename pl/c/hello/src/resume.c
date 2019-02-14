@@ -21,5 +21,8 @@ int main() {
     printf("\ntest binary tree:\n");
     test_bintree();
 
+    printf("\ntest algo:\n");
+    test_algo();
+
     return 0;
 }

@@ -58,6 +58,7 @@ void *myqueue_pop(myqueue_t *q);
 void array_print(int arr[], int n);
 void array_print_nr(int n);
 int array_is_asc(int arr[], int n);
+void array_reverse_impl(int arr[], int left, int right);
 void array_reverse(int arr[], int n);
 
 int myarray_sum(int arr[], int start, int len);
@@ -94,5 +95,6 @@ void test_array();
 void test_string();
 void test_slist();
 void test_bintree();
+void test_algo();
 
 #endif
