@@ -11,19 +11,19 @@
     } while(0)
 
 static inline void swap(int *x, int *y) {
-    /*
     int tmp = *x;
     *x = *y;
     *y = tmp;
 
+    /*
     *x = *x + *y;
     *y = *x - *y;
     *x = *x - *y;
-    */
 
     *x = *x ^ *y;
     *y = *x ^ *y;
     *x = *x ^ *y;
+    */
 }
 
 // array
