@@ -19,12 +19,48 @@ slist_node_t *slist_malloc(int key) {
     if (p == NULL)
         assert(0);
 
-    p->next = NULL;
     p->key = key;
+    p->next = NULL;
     return p;
 }
 
+slist_node_t *slist_find(slist_node_t *head, int k) {
+    if (head == NULL)
+        return NULL;
+
+    slist_node_t *curr = head;
+    for (int i=0; i < k; i++) {
+        if (curr->next == NULL) {
+            return curr;
+        } else {
+            curr = curr->next;
+        }
+    }
+    return curr;
+}
+
 void slist_insert(slist_node_t **head, int position, int key) {
+    assert(position >= 0);
+
+    slist_node_t *new_node = slist_malloc(key);
+    FatalError(new_node != NULL, "OOM");
+
+    if (*head == NULL) {
+        *head = new_node;
+        printf("empty position %d key %d\n", position, key);
+    } else {
+        printf("position %d key %d\n", position, key);
+        if (position == 0) {
+            new_node->next = (*head);
+            *head = new_node;
+        } else {
+            slist_node_t *prev = slist_find(*head, position - 1);
+            new_node->next = prev->next;
+            prev->next = new_node;
+        }
+    }
+
+    /*
     slist_node_t *p = *head, *q;
     slist_node_t *new_node = slist_malloc(key);
     if (position == 1) {
@@ -41,6 +77,7 @@ void slist_insert(slist_node_t **head, int position, int key) {
         new_node->next = p;
         q->next = new_node;
     }
+    */
 }
 
 slist_node_t *slist_reverse_impl1(slist_node_t *node, slist_node_t *prev, slist_node_t *new_head) {
@@ -198,17 +235,16 @@ slist_node_t *slist_merge(slist_node_t *head1, slist_node_t *head2) {
 
 void test_slist() {
     slist_node_t *head = NULL;
-    slist_insert(&head, 1, 1);
-    slist_insert(&head, 100, 2);
-    slist_insert(&head, 100, 3);
-    slist_insert(&head, 100, 4);
-    slist_insert(&head, 100, 5);
+    slist_insert(&head, 0, 1);
+    slist_insert(&head, 1, 2);
+    slist_insert(&head, 2, 3);
+    slist_insert(&head, 3, 4);
+    slist_insert(&head, 4, 5);
 
     assert(slist_getsize(head) == 5);
     slist_scan(head, slist_print);
 
     slist_node_t *p;
-
     p = slist_kth(head, 1); ASSERT_EQUAL(p->key, 1);
     p = slist_kth(head, 2); ASSERT_EQUAL(p->key, 2);
     p = slist_kth(head, 3); ASSERT_EQUAL(p->key, 3);
@@ -232,10 +268,9 @@ void test_slist() {
     slist_insert(&head1, 4, 7);
     slist_insert(&head1, 5, 9);
 
-    assert(slist_getsize(head1) == 5);
+    // assert(slist_getsize(head1) == 10);
     slist_scan(head1, slist_print);
 
-    /*
     slist_node_t *head2 = NULL;
     slist_insert(&head2, 1, 2);
     slist_insert(&head2, 2, 4);
@@ -249,5 +284,4 @@ void test_slist() {
     slist_node_t *merged = slist_merge(head1, head2);
     assert(slist_getsize(merged) == 10);
     slist_scan(merged, slist_print);
-    */
 }
