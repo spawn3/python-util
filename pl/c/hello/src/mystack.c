@@ -35,7 +35,7 @@ void *stack_pop(mystack_t *stack) {
 
 void myqueue_init(myqueue_t *q, int capacity) {
     q->capacity = capacity;
-    q->arr = malloc(sizeof(void *) & q->capacity);
+    q->arr = malloc(sizeof(void *) * q->capacity);
     FatalError(q->arr != NULL, "OOM");
 
     memset(q->arr, 0x0, sizeof(void *) * q->capacity);
