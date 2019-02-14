@@ -262,33 +262,12 @@ void bintree_dfs_stack_1(bintree_node *root, bintree_node *stack[], int count) {
     }
 }
 
-void bintree_dfs_stack_2(bintree_node *root, int sum) {
-    if (root == NULL)
-        return;
-
-    sum += root->key;
-
-    if (root->left == NULL && root->right == NULL) {
-        printf("node %d sum %d\n", root->key, sum);
-    } else {
-        bintree_dfs_stack_2(root->left, sum);
-        bintree_dfs_stack_2(root->right, sum);
-    }
-}
-
-void bintree_dfs_stack(bintree_node *root) {
-    // bintree_node *stack[100];
-    // int count = 0;
-
-    bintree_dfs_stack_2(root, 0);
-}
-
 // typedef bintree_node *bintree_t;
 
 typedef void (*visit_fn)(bintree_node *node);
 
 void visit_fn_print(bintree_node *node) {
-    printf("node %p %d\n", node, node->key);
+    printf("\tnode %p %d\n", node, node->key);
 }
 
 void bst_preorder(bintree_node *root, visit_fn fn) {
@@ -297,6 +276,101 @@ void bst_preorder(bintree_node *root, visit_fn fn) {
         bst_preorder(root->left, fn);
         bst_preorder(root->right, fn);
     }
+}
+
+void bintree_dfs_stack_2(bintree_node *root, bintree_node *path[], int count, int sum) {
+    if (root == NULL)
+        return;
+
+    path[count++] = root;
+    sum += root->key;
+
+    if (root->left == NULL && root->right == NULL) {
+        printf("sum %d node %d\n", sum, root->key);
+        for (int i=0; i < count; i++) {
+            printf("\tsum %d node %d\n", sum, path[i]->key);
+        }
+    } else {
+        bintree_dfs_stack_2(root->left, path, count, sum);
+        bintree_dfs_stack_2(root->right, path, count, sum);
+    }
+}
+
+void bintree_dfs_stack(bintree_node *root) {
+    // bintree_node *stack[100];
+    // int count = 0;
+    bintree_node *path[MAX_SIZE];
+    int count = 0;
+
+    bintree_dfs_stack_2(root, path, count, 0);
+}
+
+// path and path sum
+void bintree_path_impl(bintree_node *root, int expected_sum, int current_sum) {
+    if (root == NULL)
+        return;
+
+    current_sum += root->key;
+
+    int leaf = (root->left == NULL && root->right == NULL);
+    if (leaf && current_sum == expected_sum) {
+        printf("find node %d\n", root->key);
+    }
+
+    if (root->left)
+        bintree_path_impl(root->left, expected_sum, current_sum);
+    if (root->right)
+        bintree_path_impl(root->right, expected_sum, current_sum);
+}
+
+void bintree_path(bintree_node *root, int expected_sum) {
+    bintree_path_impl(root, expected_sum, 0);
+}
+
+// preorder, postorder and inorder have different results
+void bintree_mirror(bintree_node *root) {
+    if (root == NULL)
+        return;
+
+    if (root->left)
+        bintree_mirror(root->left);
+
+    if (root->right)
+        bintree_mirror(root->right);
+
+    bintree_node *tmp = root->left;
+    root->left = root->right;
+    root->right = tmp;
+}
+
+int bintree_all_ancestors(bintree_node *root, int key) {
+    if (root == NULL)
+        return 0;
+
+    // int cond1 = (root->key == key);
+    int cond2 = (root->left && root->left->key == key);
+    int cond3 = (root->right && root->right->key == key);
+    if (cond2 || cond3 || bintree_all_ancestors(root->left, key) || bintree_all_ancestors(root->right, key)) {
+        printf("\tnode %p %d\n", root, root->key);
+        return 1;
+    }
+
+    return 0;
+}
+
+bintree_node *bintree_least_common_ancestor(bintree_node *root, int key1, int key2) {
+    if (root == NULL)
+        return NULL;
+
+    if (root->key == key1 || root->key == key2)
+        return root;
+
+    bintree_node *left = bintree_least_common_ancestor(root->left, key1, key2);
+    bintree_node *right = bintree_least_common_ancestor(root->right, key1, key2);
+    if (left && right)
+        return root;
+
+    return left ? left : right;
 }
 
 void bst_inorder(bintree_node *root, visit_fn fn) {
@@ -367,10 +441,6 @@ void test_bintree() {
 
     bintree_levelsum_nr(root);
 
-    // bintree_dfs(root);
-    bintree_dfs_stack(root);
-    //
-
     printf("preorder:\n");
     bst_preorder(root, visit_fn_print);
     printf("inorder:\n");
@@ -379,4 +449,27 @@ void test_bintree() {
     bst_postorder(root, visit_fn_print);
     printf("levelorder:\n");
     bst_levelorder(root, visit_fn_print);
+
+    // bintree_dfs(root);
+    bintree_dfs_stack(root);
+    bintree_path(root, 11);
+
+    bintree_all_ancestors(root, 4);
+
+    bintree_node *lca  = bintree_least_common_ancestor(root, 4, 6);
+    assert(lca->key == 5);
+
+    lca  = bintree_least_common_ancestor(root, 2, 4);
+    ASSERT_EQUAL(lca->key, 3);
+
+    lca  = bintree_least_common_ancestor(root, 2, 3);
+    assert(lca->key == 3);
+
+    bintree_mirror(root);
+    printf("preorder:\n");
+    bst_preorder(root, visit_fn_print);
+
+    bintree_mirror(root);
+    printf("preorder:\n");
+    bst_preorder(root, visit_fn_print);
 }

@@ -114,6 +114,21 @@ int sum3(int arr[], int n) {
     return __sum3(arr, n, 0);
 }
 
+void array_partition(int arr[], int left, int right, partation_fn fn) {
+    while (left < right) {
+        while (fn(arr[left])) {
+            left++;
+        }
+
+        while (!fn(arr[right])) {
+            right--;
+        }
+
+        if (left < right)
+            swap(&arr[left], &arr[right]);
+    }
+}
+
 void test_array() {
     array_print_nr(10);
 
@@ -169,5 +184,12 @@ void test_array() {
     assert(arr2[2] == 20);
     assert(arr2[3] == 30);
     assert(arr2[4] == 40);
+
+    int arr3[] = {1,2,3,4,5};
+    int arr_size3 = ARRSIZE(arr3);
+
+    printf("test partation:\n");
+    array_partition(arr3, 0, arr_size3 - 1, greater_partation_fn);
+    array_print(arr3, arr_size3);
 }
 

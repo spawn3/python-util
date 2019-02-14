@@ -3,6 +3,13 @@
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
+#define ASSERT_EQUAL(a, b) do { \
+        if ((a) != (b)) { \
+            printf("WARN NOT EUQAL: a %d b %d\n", (a), (b)); \
+            assert((a) == (b)); \
+         } \
+    } while(0)
+
 static inline void swap(int *x, int *y) {
     /*
     int tmp = *x;
@@ -57,6 +64,18 @@ int myarray_sum(int arr[], int start, int len);
 int sum1(int arr[], int n);
 int sum2(int arr[], int n);
 int sum3(int arr[], int n);
+
+typedef int (*partation_fn)(int value);
+
+static inline int odd_partation_fn(int value) {
+    return value % 2 == 1;
+}
+
+static inline int greater_partation_fn(int value) {
+    return value > 3;
+}
+
+void array_partition(int arr[], int left, int right, partation_fn fn);
 
 char *my_strcpy(char *dst, const char *src);
 void *my_memcpy(void *dst, const void *src, int n);
