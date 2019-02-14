@@ -96,5 +96,28 @@ void test_string();
 void test_slist();
 void test_bintree();
 void test_algo();
+void test_queue();
+
+typedef int ElementType;
+
+typedef struct __slist_item {
+    void *key;
+    struct __slist_item *next;
+} slist_item_t;
+
+typedef struct __queue {
+    slist_item_t *head, *tail;
+    int count;
+} queue_t;
+
+void queue_init(queue_t *q);
+void queue_release(queue_t *q);
+
+int queue_size(queue_t *q);
+int queue_empty(queue_t *q);
+
+void queue_push(queue_t *q, void *key);
+void *queue_pop(queue_t *q);
+void *queue_top(queue_t *q);
 
 #endif

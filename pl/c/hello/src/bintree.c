@@ -137,33 +137,33 @@ int bintree_depth_nr(bintree_node *root) {
     if (root == NULL)
         return 0;
 
-    myqueue_t q;
-    myqueue_init(&q, MAX_SIZE);
+    queue_t q;
+    queue_init(&q);
 
     bintree_node *curr = root;
-    myqueue_push(&q, curr);
-    myqueue_push(&q, NULL);
+    queue_push(&q, curr);
+    queue_push(&q, NULL);
 
     int level = 0;
 
-    while (!myqueue_empty(&q)) {
-        curr = myqueue_pop(&q);
+    while (!queue_empty(&q)) {
+        curr = queue_pop(&q);
         if (curr == NULL) {
             level ++;
 
-            if (!myqueue_empty(&q)) {
-                myqueue_push(&q, NULL);
+            if (!queue_empty(&q)) {
+                queue_push(&q, NULL);
             }
 
         } else {
             if (curr->left != NULL)
-                myqueue_push(&q, curr->left);
+                queue_push(&q, curr->left);
             if (curr->right != NULL)
-                myqueue_push(&q, curr->right);
+                queue_push(&q, curr->right);
         }
     }
 
-    myqueue_destroy(&q);
+    queue_release(&q);
     return level;
 }
 
@@ -171,20 +171,20 @@ int bintree_levelsum_nr(bintree_node *root) {
     if (root == NULL)
         return 0;
 
-    myqueue_t q;
-    myqueue_init(&q, MAX_SIZE);
+    queue_t q;
+    queue_init(&q);
 
     bintree_node *curr = root;
-    myqueue_push(&q, curr);
-    myqueue_push(&q, NULL);
+    queue_push(&q, curr);
+    queue_push(&q, NULL);
 
     int level = 0;
     int level_sum = 0;
     int max_sum = 0;
     int max_level = 0;
 
-    while (!myqueue_empty(&q)) {
-        curr = myqueue_pop(&q);
+    while (!queue_empty(&q)) {
+        curr = queue_pop(&q);
         if (curr == NULL) {
             if (level_sum > max_sum) {
                 max_sum = level_sum;
@@ -194,20 +194,20 @@ int bintree_levelsum_nr(bintree_node *root) {
             level ++;
             level_sum = 0;
 
-            if (!myqueue_empty(&q)) {
-                myqueue_push(&q, NULL);
+            if (!queue_empty(&q)) {
+                queue_push(&q, NULL);
             }
         } else {
             level_sum += curr->key;
 
             if (curr->left != NULL)
-                myqueue_push(&q, curr->left);
+                queue_push(&q, curr->left);
             if (curr->right != NULL)
-                myqueue_push(&q, curr->right);
+                queue_push(&q, curr->right);
         }
     }
 
-    myqueue_destroy(&q);
+    queue_release(&q);
     printf("level %d sum %d\n", max_level, max_sum);
 
     return level;
@@ -395,24 +395,24 @@ void bst_levelorder(bintree_node *root, visit_fn fn) {
     if (root == NULL)
         return;
 
-    myqueue_t q;
-    myqueue_init(&q, MAX_SIZE);
+    queue_t q;
+    queue_init(&q);
 
     bintree_node *p;
 
-    myqueue_push(&q, root);
-    while (!myqueue_empty(&q)) {
-        p = myqueue_pop(&q);
+    queue_push(&q, root);
+    while (!queue_empty(&q)) {
+        p = queue_pop(&q);
         fn(p);
 
         if (p->left)
-            myqueue_push(&q, p->left);
+            queue_push(&q, p->left);
 
         if (p->right)
-            myqueue_push(&q, p->right);
+            queue_push(&q, p->right);
     }
 
-    myqueue_destroy(&q);
+    queue_release(&q);
 }
 
 void test_bintree() {

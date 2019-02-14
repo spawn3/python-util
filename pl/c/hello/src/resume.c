@@ -24,5 +24,8 @@ int main() {
     printf("\ntest algo:\n");
     test_algo();
 
+    printf("\ntest queue:\n");
+    test_queue();
+
     return 0;
 }

@@ -64,6 +64,7 @@ set(BINTREE_SOURCE_FILES
     src/mylist.c
     src/mystack.c
     src/bintree.c
+    src/myqueue.c
     src/resume.c
     )
 build_exe(resume "${BINTREE_SOURCE_FILES}")

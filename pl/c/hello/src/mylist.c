@@ -24,7 +24,9 @@ slist_node_t *slist_malloc(int key) {
     return p;
 }
 
-slist_node_t *slist_find(slist_node_t *head, int k) {
+// the previous of 0th if head
+// the previous of tail NULL is tail
+slist_node_t *slist_find_prev(slist_node_t *head, int k) {
     if (head == NULL)
         return NULL;
 
@@ -54,7 +56,7 @@ void slist_insert(slist_node_t **head, int position, int key) {
             new_node->next = (*head);
             *head = new_node;
         } else {
-            slist_node_t *prev = slist_find(*head, position - 1);
+            slist_node_t *prev = slist_find_prev(*head, position - 1);
             new_node->next = prev->next;
             prev->next = new_node;
         }
@@ -114,7 +116,7 @@ slist_node_t *slist_reverse_impl2(slist_node_t *head) {
     return new_head;
 }
 
-slist_node_t *single_list_reverse(slist_node_t *head) {
+slist_node_t *slist_reverse(slist_node_t *head) {
     if (head == NULL)
         return NULL;
     // return slist_reverse_impl1(head, NULL, NULL);
@@ -251,7 +253,8 @@ void test_slist() {
     p = slist_kth(head, 4); ASSERT_EQUAL(p->key, 4);
     p = slist_kth(head, 5); ASSERT_EQUAL(p->key, 5);
 
-    head = single_list_reverse(head);
+    // test reverse
+    head = slist_reverse(head);
     assert(slist_getsize(head) == 5);
     slist_scan(head, slist_print);
 
@@ -261,6 +264,7 @@ void test_slist() {
     p = slist_kth(head, -4); ASSERT_EQUAL(p->key, 4);
     p = slist_kth(head, -5); ASSERT_EQUAL(p->key, 5);
 
+    //test merge
     slist_node_t *head1 = NULL;
     slist_insert(&head1, 1, 1);
     slist_insert(&head1, 2, 3);
@@ -268,7 +272,7 @@ void test_slist() {
     slist_insert(&head1, 4, 7);
     slist_insert(&head1, 5, 9);
 
-    // assert(slist_getsize(head1) == 10);
+    assert(slist_getsize(head1) == 5);
     slist_scan(head1, slist_print);
 
     slist_node_t *head2 = NULL;
