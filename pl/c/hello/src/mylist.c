@@ -225,6 +225,7 @@ void test_slist() {
     p = slist_kth(head, -4); ASSERT_EQUAL(p->key, 4);
     p = slist_kth(head, -5); ASSERT_EQUAL(p->key, 5);
 
+    /*
     slist_node_t *head1 = NULL;
     single_list_insert(&head1, 1, 1);
     single_list_insert(&head1, 2, 3);
@@ -242,4 +243,5 @@ void test_slist() {
     slist_node_t *merged = slist_merge(head1, head2);
     assert(slist_getsize(merged) == 10);
     single_list_scan(merged, single_list_print);
+    */
 }

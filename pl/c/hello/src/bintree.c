@@ -362,6 +362,8 @@ bintree_node *bintree_least_common_ancestor(bintree_node *root, int key1, int ke
     if (root == NULL)
         return NULL;
 
+    // printf("key %d\n", root->key);
+
     if (root->key == key1 || root->key == key2)
         return root;
 
@@ -462,7 +464,6 @@ void test_bintree() {
 
     printf("222 - 000\n");
 
-    /*
     bintree_node *lca  = bintree_least_common_ancestor(root, 4, 6);
     assert(lca->key == 5);
 
@@ -473,7 +474,6 @@ void test_bintree() {
 
     lca  = bintree_least_common_ancestor(root, 2, 3);
     assert(lca->key == 3);
-    */
 
     printf("444\n");
 
