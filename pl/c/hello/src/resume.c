@@ -27,5 +27,8 @@ int main() {
     printf("\ntest queue:\n");
     test_queue();
 
+    printf("\ntest bit:\n");
+    test_bit();
+
     return 0;
 }

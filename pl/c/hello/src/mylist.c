@@ -6,6 +6,12 @@
 
 #include "resume.h"
 
+/**
+ * binary search:
+ * quick sort: partition
+ * merge sort: merge
+ */
+
 
 typedef struct __single_node {
     int key;

@@ -91,13 +91,6 @@ int gcd(int m, int n);
 int fab1(int n);
 int fab2(int n);
 
-void test_array();
-void test_string();
-void test_slist();
-void test_bintree();
-void test_algo();
-void test_queue();
-
 typedef int ElementType;
 
 typedef struct __slist_item {
@@ -119,5 +112,13 @@ int queue_empty(queue_t *q);
 void queue_push(queue_t *q, void *key);
 void *queue_pop(queue_t *q);
 void *queue_top(queue_t *q);
+
+void test_array();
+void test_string();
+void test_slist();
+void test_bintree();
+void test_algo();
+void test_queue();
+void test_bit();
 
 #endif
