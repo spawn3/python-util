@@ -30,5 +30,8 @@ int main() {
     printf("\ntest bit:\n");
     test_bit();
 
+    printf("\ntest graph:\n");
+    test_graph();
+
     return 0;
 }

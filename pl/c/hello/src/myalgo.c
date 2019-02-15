@@ -163,13 +163,13 @@ int gcd(int m, int n) {
         return gcd(n, r);
 }
 
-int fab1(int n) {
+int fib1(int n) {
     if (n == 0 || n == 1)
         return n;
-    return fab1(n - 2) + fab1(n - 1);
+    return fib1(n - 2) + fib1(n - 1);
 }
 
-int fab2(int n) {
+int fib2(int n) {
     if (n == 0 || n == 1)
         return n;
 
@@ -183,6 +183,32 @@ int fab2(int n) {
     }
 
     return current;
+}
+
+int fib3_impl(int n, int a, int b) {
+    if (n == 0)
+        return a + b;
+
+    return fib3_impl(n - 1, b, a + b);
+}
+
+int fib3(int n) {
+    if (n == 1)
+        return 0;
+    else if (n == 2)
+        return 1;
+
+    return fib3_impl(n - 2, 0, 1);
+}
+
+int __sum1_impl(int arr[], int n, int sum) {
+    if (n == 0)
+        return sum;
+    return __sum1_impl(arr, n - 1, arr[n-1] + sum);
+}
+
+int __sum1(int arr[], int n) {
+    return __sum1_impl(arr, n, 0);
 }
 
 void test_algo() {
@@ -200,4 +226,11 @@ void test_algo() {
 
     ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 10, BISEARCH_FIRST), -1);
     ASSERT_EQUAL(bisearch3(arr, 0, arr_size - 1, 10, BISEARCH_LAST), -1);
+
+    for (int i=3; i < 10; i++) {
+        ASSERT_EQUAL(fib1(i), fib2(i));
+        ASSERT_EQUAL(fib1(i), fib3(i));
+    }
+
+    ASSERT_EQUAL(__sum1(arr, arr_size), sum1(arr, arr_size));
 }

@@ -143,10 +143,6 @@ void test_array() {
 
     assert(myarray_sum(arr, 0, arr_size) == 101);
 
-    for (int i=0; i < 10; i++) {
-        assert(fab1(i) == fab2(i));
-    }
-
     quick_sort(arr, 0, 4);
     // merge_sort(arr, 0, 4);
     array_print(arr, arr_size);

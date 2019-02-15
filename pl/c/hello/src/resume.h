@@ -120,5 +120,6 @@ void test_bintree();
 void test_algo();
 void test_queue();
 void test_bit();
+void test_graph();
 
 #endif
