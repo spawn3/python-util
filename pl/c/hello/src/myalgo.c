@@ -155,6 +155,91 @@ void merge_sort(int arr[], int left, int right) {
     }
 }
 
+void bubble_sort(int arr[], int n) {
+    int swapped = 1;
+    for (int pass=0; pass < n - 1 && swapped; pass++) {
+        swapped = 0;
+        for (int i=0; i < n - pass - 1; i++) {
+            if (arr[i] > arr[i+1]) {
+                swap(&arr[i], &arr[i+1]);
+                swapped = 1;
+            }
+        }
+    }
+}
+
+void bubble_sort2(int arr[], int start, int n) {
+    if (start >= n - 1) {
+        return;
+    }
+
+    int swapped = 0;
+    for (int i=0; i < n - start - 1; i++) {
+        if (arr[i] > arr[i+1]) {
+            swap(&arr[i], &arr[i+1]);
+            swapped = 1;
+        }
+    }
+
+    if (swapped)
+        bubble_sort2(arr, start + 1, n);
+}
+
+void selection_sort(int arr[], int n) {
+    int min;
+    for (int i=0; i < n - 2; i++) {
+        min = i;
+        for (int j=i+1; j < n; j++) {
+            if (arr[j] < arr[min])
+                min = j;
+        }
+        if (i != min) {
+            swap(&arr[i], &arr[min]);
+        }
+    }
+}
+
+void selection_sort2(int arr[], int i, int n) {
+    if (i >= n - 2) {
+        return;
+    }
+
+    int min = i;
+    for (int j=i+1; j < n; j++) {
+        if (arr[j] < arr[min])
+            min = j;
+    }
+    if (i != min) {
+        swap(&arr[i], &arr[min]);
+    }
+
+    selection_sort2(arr, i+1, n);
+}
+
+void insert_sort(int arr[], int n) {
+    int j, v;
+    for (int i=1; i < n; i++) {
+        v = arr[i];
+        j = i;
+        while (arr[j-1] > v && j >= 1) {
+            arr[j] = arr[j-1];
+            j--;
+        }
+        arr[j] = v;
+    }
+}
+
+int check_duplicated(int arr[], int n) {
+    for (int i=0; i < n - 1; i++) {
+        for (int j=i+1; j < n; j++) {
+            if (arr[i] == arr[j])
+                return 1;
+        }
+    }
+    return 0;
+}
+
+
 int gcd(int m, int n) {
     int r = m % n;
     if (r == 0)
@@ -233,4 +318,22 @@ void test_algo() {
     }
 
     ASSERT_EQUAL(__sum1(arr, arr_size), sum1(arr, arr_size));
+
+    int x = 199;
+    for (int i=0; i < 100; i++) {
+        ASSERT_EQUAL(x ^ i ^ i, i ^ x ^ i);
+        ASSERT_EQUAL(x ^ i ^ i, i ^ i ^ x);
+    }
+
+    int arr2[] = {8, 7, 5, 3, 7, 7, 1};
+    int arr_size2 = ARRSIZE(arr2);
+
+    ASSERT_EQUAL(check_duplicated(arr2, arr_size2), 1);
+
+    printf("test bubble_sort:\n");
+    // bubble_sort(arr2, arr_size2);
+    bubble_sort2(arr2, 0, arr_size2);
+    // selection_sort2(arr2, 0, arr_size2);
+    // insert_sort(arr2, arr_size2);
+    array_print(arr2, arr_size2);
 }

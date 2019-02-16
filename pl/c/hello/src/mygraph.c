@@ -13,6 +13,8 @@ typedef struct __graph_node {
     glist_node *head, *tail;
     int vnumber;
     int visit;
+    int weight;
+    int prev;
     // other properties
 } graph_node;
 
@@ -69,6 +71,8 @@ void graph_clear_visit(graph_t *g) {
     for (int i=0; i < g->V; i++) {
         v = &g->nodes[i];
         v->visit = 0;
+        v->weight = 0;
+        v->prev = -1;
     }
 }
 
@@ -76,6 +80,7 @@ void graph_dfs_impl(graph_t *g, int x) {
     printf("dfs %d\n", x);
 
     graph_node *v = &g->nodes[x];
+    assert(v->vnumber != -1);
     v->visit = 1;
 
     glist_node *adj = v->head;
@@ -100,6 +105,54 @@ void graph_dfs(graph_t *g, int x) {
     graph_dfs_impl(g, x);
 }
 
+void graph_bfs_impl(graph_t *g, int x) {
+    queue_t q;
+    queue_init(&q);
+
+    graph_node *v = &g->nodes[x];
+    queue_push(&q, v);
+    v->weight = 0;
+    v->prev = -1;
+    v->visit = 1;
+
+    graph_node *adjv;
+    while (!queue_empty(&q)) {
+        v = queue_pop(&q);
+        assert(v->vnumber != -1);
+        // !!!required
+        // if (v->visit)
+        //     continue;
+
+        printf("bfs %d prev %d weight %d\n", v->vnumber, v->prev, v->weight);
+
+        glist_node *adj = v->head;
+        while (adj != NULL) {
+            adjv = &g->nodes[adj->vnumber];
+            if (!adjv->visit) {
+                printf("-- %d %d\n", v->vnumber, adj->vnumber);
+                adjv->prev = v->vnumber;
+                adjv->weight = v->weight + 1;
+                adjv->visit = 1;
+                queue_push(&q, adjv);
+            }
+            adj = adj->next;
+        }
+    }
+}
+
+void graph_bfs(graph_t *g, int x) {
+    assert(x >= 0 && x < g->V);
+
+    graph_node *start = &g->nodes[x];
+    if (start->vnumber == -1) {
+        printf("node %d not found\n", x);
+        assert(0);
+    }
+
+    graph_clear_visit(g);
+    graph_bfs_impl(g, x);
+}
+
 void test_graph() {
     graph_t g;
     graph_create(&g, 100);
@@ -113,4 +166,5 @@ void test_graph() {
 
 
     graph_dfs(&g, 0);
+    graph_bfs(&g, 0);
 }
