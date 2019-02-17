@@ -296,6 +296,18 @@ int __sum1(int arr[], int n) {
     return __sum1_impl(arr, n, 0);
 }
 
+void call_stack(int a, int b, int c) {
+    int d = 0;
+    int e = 0;
+
+    printf("call_stack %p\n", call_stack);
+    printf("a %p\n", &a);
+    printf("b %p\n", &b);
+    printf("c %p\n", &c);
+    printf("d %p\n", &d);
+    printf("e %p\n", &e);
+}
+
 void test_algo() {
     int arr[] = {1, 3, 5, 7, 7, 7, 9};
     int arr_size = ARRSIZE(arr);
@@ -336,4 +348,7 @@ void test_algo() {
     // selection_sort2(arr2, 0, arr_size2);
     // insert_sort(arr2, arr_size2);
     array_print(arr2, arr_size2);
+
+    printf("test call stack:\n");
+    call_stack(1, 2, 3);
 }
