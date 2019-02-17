@@ -140,3 +140,134 @@ adesk架构演进之路:
 监控：第三方监控、nagios、zabbix
 
 增长黑客
+
+\subsection{17}
+
+进入刷题模式，有的放矢、定量有恒地刻意练习，以刻意练习的理念概括之。
+
+由CAP定量出发，来理解分布式系统的复杂性。CAP/PACELC过渡到Reactive Manifesto。
+
+pipeline、SEDA、lambda，软件管道三原则。
+
+分布式一致性至关重要，相关协议有:
+\begin{enumbox}
+\item 2PC/3PC
+\item paxos
+\item pacificA
+\item raft
+\end{enumbox}
+
+可以数据库的事务管理来类比：\hl{cc和故障恢复}。cc有2pl和基于时间戳的多版本机制。
+故障恢复基于log/journal，支持redo和undo操作。
+
+ACID的A/D关乎故障恢复，I关乎并发控制。事务的隔离级别，最少要read committed。因为可以undo，不加控制的话，会出现read uncommitted。
+
+提交不变性：
+
+最大提交原则：提交的一定满足A/D，未提交的如何处理？
+
+所谓顺序一致性就是可以交叉，但要看到共同的交叉顺序。\hl{意味着并不需要UNDO操作？只要原子写入}？
+\hl{顺序一致性}，lich支持顺序一致性，可能读到uncommitted数据，由上层应用来保障完整性。
+
+分布式计算：在分布式环境中，强一致性因全局时钟限制很难实现。程序员开始寻找条件不那么严苛的模型，
+lamport利用逻辑时钟代替全局时钟提出顺序一致性，其定义如下：
+\begin{enumbox}
+\item 所有执行结果相同，就像处理器的所有操作是在一定的顺序下执行的一样。
+\item 在本地时钟下，本地操作顺序为本地程序的执行顺序。
+\end{enumbox}
+
+不同处理器之间的操作出现重叠是可能的，但顺序一致性要求所有处理器看得的重叠相同。
+
+paxos的二阶段可用温故知新概括之。
+
+membership change比较复杂，joint联合共治，多数派原则？
+
+\hrulefill
+
+快照：COW、ROW 1/2/3、LSV。
+
+快照不变式，由快照读定义。
+
+先理解当前实现的COW快照树。主要问题有几个：
+\begin{enumbox}
+\item 维护快照树
+\item 卷和快照如何组织，与底层裸卷是什么关系？1:1，还是n：1?
+\item 快照头有无完整索引？索引采用什么结构？
+\item 如果有索引，索引的管理粒度是多大？page？
+\item 如何保障\hl{读的不变性}？ how to read
+\item 每种操作的性能和复杂度
+\item 支持的快照数量
+\end{enumbox}
+
+分析写和读过程。新create的快照无数据，后续也只是存储私有数据。
+所以没有完整索引，会有读(快照读，而不是卷读)放大现象。
+
+快照读由卷控执行，用在\hl{revert和clone}的场景下。快照读按一定顺序读取多个快照乃至卷。
+
+revert最复杂，是个两阶段过程：既需要保留一部分卷上的数据到snap from或auto snap上(vol -> auto snap)，
+然后用读取目标快照，覆盖卷上数据(target snap -> vol)。
+
+几个相关属性
+\begin{enumbox}
+\item fileinfo.snap version
+\item fileinfo.snap from
+\item fileinfo.snap rollback
+\item chkinfo.snap version
+\end{enumbox}
+
+\hrulefill
+
+ROW1是LSV项目开始时的设计方案，Btree实现索性，但是只记录写入卷的私有数据，而没有完整copy快照头。
+所以对读操作而言，需要一个回溯过程。
+
+ROW2采用了完整的快照头做索引，采用了类似内存页表的数据结构。这是因为LBA是非常规则的线性地址空间。
+内存、inode、ext3的间接块都采用了类似结构。
+
+ROW 2/3的不同：一个chunk逻辑上多个LBA（以页为管理粒度），是否对应一个裸卷的chunk。
+分析不同读写模式下性能和空间的影响。读写/顺序、随机可有四种组合。ROW2在随机写的情况下，会导致大量空间浪费。
+ROW3则碎片化严重，顺序读性能需要补偿。
+
+ROW2保留chunk内的相对顺序，随机写会浪费大量空间。ROW3以append方式写入，碎片化问题严重。
+
+bitmap cache，有点类似页表的TLB。
+
+bitmap记录LBA到PBA的映射关系。PBA引用到本卷或别的卷的一个物理页（chkid,chkoff, chk内页偏移）
+clone时候需要指向外部卷，跨卷访问。
+
+LBA如何映射到PBA？连续的LBA是否映射到连续的PBA上？
+
+bitmap组织成二级索引结构。L1 bitmap私有，L2bitmap共享，发生COW。
+
+\hrulefill
+
+LSV的why、how和what？
+
+LSV适用于什么场景？对标的系统有:
+\begin{enumbox}
+\item HDFS/HBase
+\item LevelDB/RocksDB
+\item NOVA文件系统
+\item Open Vstorage
+\item SSD/FTL（磨损均衡）
+\item LSMT
+\end{enumbox}
+
+\hrulefill
+
+数据结构和算法
+\begin{enumbox}
+\item buddy algorithm
+\item graph dfs/bfs采用三色标记
+\item radix tree/radix sort, bst/quick sort
+\item trie tree, prefix用于压缩，postfix用于匹配
+\item DPDK的lock free ring
+\item DPDK/SPDK生态：
+    \begin{enumbox}
+    \item oracle RAC/ASM
+    \item QEMU virtio/vhost
+    \end{enumbox}
+\item QoS
+\item snapshot
+\end{enumbox}
+
+为什么说FP适合于并发编程？
