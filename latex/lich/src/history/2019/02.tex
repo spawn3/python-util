@@ -143,11 +143,15 @@ adesk架构演进之路:
 
 \subsection{17}
 
-进入刷题模式，有的放矢、定量有恒地刻意练习，以刻意练习的理念概括之。
+\hrulefill
+
+进入\hl{刷题模式}，有的放矢、定量有恒地刻意练习，以刻意练习的理念概括之。
+
+paxos的二阶段可用温故知新概括之。
+
+membership change比较复杂，joint联合共治，多数派原则？
 
 由CAP定量出发，来理解分布式系统的复杂性。CAP/PACELC过渡到Reactive Manifesto。
-
-pipeline、SEDA、lambda，软件管道三原则。
 
 分布式一致性至关重要，相关协议有:
 \begin{enumbox}
@@ -156,6 +160,8 @@ pipeline、SEDA、lambda，软件管道三原则。
 \item pacificA
 \item raft
 \end{enumbox}
+
+pipeline、SEDA、lambda，软件管道三原则。
 
 可以数据库的事务管理来类比：\hl{cc和故障恢复}。cc有2pl和基于时间戳的多版本机制。
 故障恢复基于log/journal，支持redo和undo操作。
@@ -178,9 +184,43 @@ lamport利用逻辑时钟代替全局时钟提出顺序一致性，其定义如�
 
 不同处理器之间的操作出现重叠是可能的，但顺序一致性要求所有处理器看得的重叠相同。
 
-paxos的二阶段可用温故知新概括之。
+顺序一致性需要客户端的补偿措施。如并发访问文件的一个区域时，由client自己进行同步。这对块来说是合理的。
+对不带journal的文件系统是否有问题？
 
-membership change比较复杂，joint联合共治，多数派原则？
+顺序一致性和read uncommitted的事务隔离级别是两个不同概念，宜分开说。
+先考虑顺序一致性(分布式系统的顺序一致性如何实现)，即便实现了顺序一致性，还需考虑整体故障情况下会发生read uncommitted的问题。
+\begin{enumbox}
+\item 分布式系统如何实现顺序一致性
+\item 如何处理整体故障情况下的read uncommitted问题？
+\end{enumbox}
+
+lich采用了单控和clock，无journal，clock没有持久化。通过lease机制来保障卷控的唯一性。
+vip机制用来寻址iscsi target。(iscsi targt和卷控通常在一个节点上)
+
+保序：iscsi initiator生成一个序号，或者根据session？这里有什么问题？
+提交到一个卷控，然后该\hl{卷控failover}，然后呢？
+
+换个角度来看，lich卷提供了类似裸盘的东东，操作系统等上层应用对裸盘有什么要求和保障，
+需要做什么才能保障业务数据完整性？ lich的client端与lich卷之间的关系也是如此。
+(RMI：关系映射反演，是化归原则的进一步抽象？)
+
+io大小对一致性的影响？就地写，而不是多版本下的shadow page、或COW写。会带来什么样的问题？
+
+多控会把顺序一致性问题变得复杂。用单控和clock可以实现顺序一致性（vector clock）。所有元数据和数据都有卷控集中处理。
+卷控的存在，把问题简单化了，但会引入心新的问题，如读写局部性/本地化。Ceph rbd(rich client)如何处理该问题？
+\hl{什么场景下多个rbd client会访问一个卷的相同区间}？
+
+如果把这个问题推到多控场景呢？ 引入KV之后，元数据/数据缓存面临一样的问题，共同构成共享状态。
+多控下如何考虑Multipath。或者说配置multipath会导致多控问题。multipath下的多各卷控什么关系？是主备还是双活？
+仅仅是容错，还是可以聚合带宽？ 用lease、cas机制能实现多控吗？
+
+\hl{多控下如何实现顺序一致性}？ vector clock、paxos？
+
+\hl{应用场景}：orache rac、asm是什么样的架构？多个qemu实例会不会有共享卷？
+
+CAP、质量三角形都体现了\hl{递弱代偿原理}。一致性的下降需要补偿措施。
+ROW2/3提高了write操作的性能，可增加了元数据，来补偿Read操作。
+写和读也是平衡关系，特别是\hl{随机写、顺序读}两者之间。
 
 \hrulefill
 
@@ -188,16 +228,29 @@ membership change比较复杂，joint联合共治，多数派原则？
 
 快照不变式，由快照读定义。
 
+vmware如何实现快照？每个卷/快照对一个一个或多个文件，粒度更细，更易均衡管理。
+
+open vstorage打快照非常容易，how to read，问题依然是读操作的性能，如引入快照头的开销如何？
+
+如果卷和快照按1:1映射关系，还有必要堆叠在裸卷之上吗？直接实现一种与COW同级的ROW1/2的卷格式如何？
+这样管理粒度更小，更易于灵活组织。采用非堆叠方式，只需要一层元数据即可。
+
 先理解当前实现的COW快照树。主要问题有几个：
 \begin{enumbox}
-\item 维护快照树
 \item 卷和快照如何组织，与底层裸卷是什么关系？1:1，还是n：1?
+\item 维护快照树
 \item 快照头有无完整索引？索引采用什么结构？
 \item 如果有索引，索引的管理粒度是多大？page？
 \item 如何保障\hl{读的不变性}？ how to read
 \item 每种操作的性能和复杂度
 \item 支持的快照数量
 \end{enumbox}
+
+在混合存储里，两层元数据最好都落到高速层上。由底层空间分配器进行管理。
+
+ROW3相对于ROW2的管理粒度更小（从chunk到page），ROW2的chunk内偏移是可以通过计算获得的。
+这也显示了一种管理映射关系的设计模式，{是通过元数据还是通过计算}？
+sheepdog、ceph都是基于DHT进行计算的。
 
 分析写和读过程。新create的快照无数据，后续也只是存储私有数据。
 所以没有完整索引，会有读(快照读，而不是卷读)放大现象。
@@ -271,3 +324,30 @@ LSV适用于什么场景？对标的系统有:
 \end{enumbox}
 
 为什么说FP适合于并发编程？
+
+\subsection{18}
+
+ceph的pg也是一种分区机制。从sharding/replication的组合看分布式系统的选择。
+
+小米开源了pegasus键值存储系统，table/partition/replica，table隔离。
+
+lich的最基础单元是卷，卷没有做分区处理。iscsi target和卷控绑定到同一个core上。非iscsi的场景呢？
+
+lich的pool采用name作为id，无法rename，无法保障唯一性。
+如果删除/再创建，无法判定是否是同一个pool（ABA问题）。
+
+公有云很难采用单一卷控方式，如果在client端直接访问chunk层（此时client即相当于卷控）。如果有多个client并发访问呢？
+就多卷控并发访问。如果做并发控制？如果client端有cache，如何做到cache一致性？(CAS/lease)。
+
+聚合边界：\hl{kv、列存、mongodb，都采用了聚合的概念，聚合内部保障原子性}，如kv的一条记录、列存的一行、mongodb的一个document。
+聚合之间难以处理原子性问题。为了计算某些统计量，适合用MR计算框架。
+
+cassadra采用了hbase和dynamo的混合。底层存储用列存、用DHT实现分区扩展性。
+
+SQL-on-Hadoop，这种\hl{NewSQl设计范式}在进一步发展，如Spanner、OceanBase、TiDB等。大多基于列存？
+
+\hl{全闪新架构}：C/M/D，client，Meta and data。Meta采用分布式键值存储。
+带来的好处是： 剥离vol元数据道M，无table1、table2了，且client可直连data，无需target/卷控转发。
+
+cinder是控制平面的事，无关IO。
+
