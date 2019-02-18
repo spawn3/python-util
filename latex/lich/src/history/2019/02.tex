@@ -194,6 +194,12 @@ lamport利用逻辑时钟代替全局时钟提出顺序一致性，其定义如�
 \item 如何处理整体故障情况下的read uncommitted问题？
 \end{enumbox}
 
+事件因果序由逻辑时钟、向量时钟、矩阵时钟定义。分为两部分：本地所见的全局时间、本地逻辑时钟。
+在逻辑时钟里，两部分压缩为了一个变量，所以逻辑时钟并非强一致性的，即由逻辑时钟推导不出事件的前后顺序。
+
+分布式计算：顺序一致性不如线性那么严格，相比线性更容易实现。虽然存在全局顺序，但是本地处理器执行操作顺序未必一定要严格遵守全局时间顺序，
+\hl{整个过程只需要对写操作使用全序广播机制}，并不需要对读操作使用全序广播。
+
 lich采用了单控和clock，无journal，clock没有持久化。通过lease机制来保障卷控的唯一性。
 vip机制用来寻址iscsi target。(iscsi targt和卷控通常在一个节点上)
 
@@ -206,8 +212,8 @@ vip机制用来寻址iscsi target。(iscsi targt和卷控通常在一个节点�
 
 io大小对一致性的影响？就地写，而不是多版本下的shadow page、或COW写。会带来什么样的问题？
 
-多控会把顺序一致性问题变得复杂。用单控和clock可以实现顺序一致性（vector clock）。所有元数据和数据都有卷控集中处理。
-卷控的存在，把问题简单化了，但会引入心新的问题，如读写局部性/本地化。Ceph rbd(rich client)如何处理该问题？
+多控会把顺序一致性问题变得复杂。用单控和clock可以实现顺序一致性（logical clock）。所有元数据和数据都有卷控集中处理。
+卷控的存在，把问题简单化了，但会引入新问题，如读写局部性/本地化。Ceph rbd(rich client)如何处理该问题？
 \hl{什么场景下多个rbd client会访问一个卷的相同区间}？
 
 如果把这个问题推到多控场景呢？ 引入KV之后，元数据/数据缓存面临一样的问题，共同构成共享状态。
@@ -221,6 +227,13 @@ io大小对一致性的影响？就地写，而不是多版本下的shadow page�
 CAP、质量三角形都体现了\hl{递弱代偿原理}。一致性的下降需要补偿措施。
 ROW2/3提高了write操作的性能，可增加了元数据，来补偿Read操作。
 写和读也是平衡关系，特别是\hl{随机写、顺序读}两者之间。
+
+引申到事务管理，顺序一致性更多是前端并发控制的问题，而read uncommitted则是事务本身面临的问题，
+需要与client结合在一起作为一个整体来考虑。
+也可以\hl{用RMI原则来分析}：原领域（lich）- 映射到事务管理（cc和recovery）。
+
+没必要说lich是什么顺序一致性，从复制状态机的角度去描述更好。
+用raft协议去说明写是如何提交的，又如何读。
 
 \hrulefill
 
@@ -351,3 +364,40 @@ SQL-on-Hadoop，这种\hl{NewSQl设计范式}在进一步发展，如Spanner、O
 
 cinder是控制平面的事，无关IO。
 
+\hrulefill
+
+RMI是一种高度抽象的原则，有利于知识的迁移和类比。同样的问题和模式发生在不同的领域，
+如果能这样\hl{触类旁通}，极大地提高了学习效率。
+
+盘阵-分布式-数据中心，双活或多活方案，双控有三种模式：\hl{主备、双活（ALUA、SLUA）}。
+双控都甩出同一个物理LUN，host端通过多路径软件连到两个LUN上，盘符删除、路径选优。
+
+\hrulefill
+
+遗留问题
+\begin{enumbox}
+\item RAFT/paxos
+\item Lich一致性、恢复和平衡
+\item COW snap tree
+\item ROW1/2/3
+\item LSV
+\item lich架构
+\item RDMA/DPDK/SPDK
+\end{enumbox}
+
+数据结构和算法
+\begin{enumbox}
+\item QoS token bucket and leaky bucket
+\item hash
+\item skiplist
+\item heap
+\item buddy algorithm
+\end{enumbox}
+
+其它
+\begin{enumbox}
+\item 多控和多路径
+\item Orache ASM
+\item Orache RAC
+\item Qemu virtio/vhost
+\end{enumbox}

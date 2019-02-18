@@ -4,6 +4,12 @@
 
 #include "resume.h"
 
+enum {
+    COLOR_WHITE = 0,
+    COLOR_GRAY = 1,
+    COLOR_BLACK = 2,
+} ThreeColor;
+
 typedef struct __glist_node {
     int vnumber;
     struct __glist_node *next;
@@ -70,7 +76,7 @@ void graph_clear_visit(graph_t *g) {
     graph_node *v;
     for (int i=0; i < g->V; i++) {
         v = &g->nodes[i];
-        v->visit = 0;
+        v->visit = COLOR_WHITE;
         v->weight = 0;
         v->prev = -1;
     }
@@ -81,11 +87,11 @@ void graph_dfs_impl(graph_t *g, int x) {
 
     graph_node *v = &g->nodes[x];
     assert(v->vnumber != -1);
-    v->visit = 1;
+    v->visit = COLOR_GRAY;
 
     glist_node *adj = v->head;
     while (adj != NULL) {
-        if (!g->nodes[adj->vnumber].visit) {
+        if (g->nodes[adj->vnumber].visit == COLOR_WHITE) {
             graph_dfs_impl(g, adj->vnumber);
         }
         adj = adj->next;
@@ -113,7 +119,7 @@ void graph_bfs_impl(graph_t *g, int x) {
     queue_push(&q, v);
     v->weight = 0;
     v->prev = -1;
-    v->visit = 1;
+    v->visit = COLOR_GRAY;
 
     graph_node *adjv;
     while (!queue_empty(&q)) {
@@ -128,15 +134,17 @@ void graph_bfs_impl(graph_t *g, int x) {
         glist_node *adj = v->head;
         while (adj != NULL) {
             adjv = &g->nodes[adj->vnumber];
-            if (!adjv->visit) {
+            if (adjv->visit == COLOR_WHITE) {
                 printf("-- %d %d\n", v->vnumber, adj->vnumber);
                 adjv->prev = v->vnumber;
                 adjv->weight = v->weight + 1;
-                adjv->visit = 1;
+                adjv->visit = COLOR_GRAY;
                 queue_push(&q, adjv);
             }
             adj = adj->next;
         }
+
+        v->visit = COLOR_BLACK;
     }
 }
 
