@@ -374,24 +374,45 @@ RMI是一种高度抽象的原则，有利于知识的迁移和类比。同样�
 
 \hrulefill
 
+\hl{赋值器、分配器、回收器}。弱分代假说，优先回收年轻代的对象。通过check queue和heap来巡回检测。
+heap满则溢出进行回收。
+
+什么条件沉入老年代？老年代在full gc里进行处理。full gc的处理策略是什么？
+
+order是特别重要的一个概念，一致性即是定义在时钟的基础之上。因果序分为两个部分：进程内以及多个进程之间的消息。
+
+info version和sqlite里的meta version什么关系？在删除一对象时，meta version有什么用？ 后续已更新，则不允许删除。类似cas机制？
+
+多版本？
+
+\hrulefill
+
+HERE
+
 遗留问题
 \begin{enumbox}
-\item RAFT/paxos
+\item \hl{RAFT/paxos}，重中之重
+\item etcd在lich的用法
+\item ***
 \item Lich一致性、恢复和平衡
+\item QoS token bucket and leaky bucket
+\item ***
 \item COW snap tree
 \item ROW1/2/3
 \item LSV
+\item ***
 \item lich架构
 \item RDMA/DPDK/SPDK
 \end{enumbox}
 
 数据结构和算法
 \begin{enumbox}
-\item QoS token bucket and leaky bucket
 \item hash
 \item skiplist
 \item heap
 \item buddy algorithm
+\item lock free ring
+\item 大量数据的情况
 \end{enumbox}
 
 其它
@@ -400,4 +421,67 @@ RMI是一种高度抽象的原则，有利于知识的迁移和类比。同样�
 \item Orache ASM
 \item Orache RAC
 \item Qemu virtio/vhost
+\item GC
+\item 如何管理文件系统元数据
 \end{enumbox}
+
+\subsection{19}
+
+用bst统一去理解二分查找、merge sort and quick sort。merge sort可以看作bst的postorder transval，
+quick sort是preorder scan，pivot就是root。
+
+从CAP角度去理解分布式的why，从逻辑时钟的角度去理解分布式的how，序的概念异常重要！
+包括分布式共识、事务的串行化执行等。
+
+\hrulefill
+
+COW不能做全量快照头，因为引用的是卷，而卷的数据是变化的。
+ROW则可以，引用的是snapshot，snapshot一旦创建就不变了。
+snap tree分析COW各项操作的好方法。
+
+ROW必须管理到页，为什么？否则，写入的时候也会发生COW。
+
+LSV架构更多借鉴了open vstorage。
+GC check效率太低，如何利用有用信息改进？bitmap在update时的信息是有一定启发作用的。
+
+引入auto snap并不是必须的，如果不引入，则存入snap from，无法有效回收，导致空间浪费。
+
+\hrulefill
+
+反思lich架构设计
+\begin{enumbox}
+\item meta采用vfs的方式，过于复杂，解耦为独立的kv服务？
+\item 卷和快照对应不同的卷控，可能映射到不同的core上
+\item multipath
+\item 引入ceph pg优化lich元数据？
+\end{enumbox}
+
+\hrulefill
+
+\hl{chkinfo.snap version}就是创建快照时卷的snap version，
+卷的snap version一直是最大的，且随着创建快照的过程在单调递增。
+
+chunk.snap version在各种操作中是如何变化的？
+该属性只在vol上有用，snapshot上不维护，发生cow之后，snapshot该属性初始化为0。
+\begin{enumbox}
+\item cow后，设为fileinfo.snap version
+\item revert后，设为fileinfo.snap rollback
+\end{enumbox}
+
+revert后，vol上chunk都被置为snap rollback，可用于判定rollback是否完成。
+后续发生cow时，会检测该chunk已经在snapshot上存在，则跳过，不发生实际的cow。
+
+\hl{chkinfo.info version}用于记录chkinfo信息的变更，该信息用于unlink时检测是否合规。
+如传入的值小于当前值，说明已有更新，则拒绝。
+
+数据库的meta version与该值什么关系？要解决什么问题？即是为什么要用？
+
+副本上用clock来跟踪写入。
+
+\hrulefill
+
+重删定长压缩比很低，变长实现难度很大，需要在pool级做。
+
+怎么在lsv理念下解决压缩、重删问题？
+
+EC、重删、压缩能否offload到设备上？
