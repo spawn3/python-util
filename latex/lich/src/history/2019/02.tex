@@ -403,15 +403,20 @@ HERE
 \item ***
 \item lich架构
 \item RDMA/DPDK/SPDK
+\item lich的各项性能指标
 \end{enumbox}
 
 数据结构和算法
 \begin{enumbox}
 \item hash
-\item skiplist
 \item heap
+\item skiplist
 \item buddy algorithm
 \item lock free ring
+\item huffman code
+\item RBTree
+\item log structured merge tree
+\item B+tree
 \item 大量数据的情况
 \end{enumbox}
 
@@ -423,6 +428,9 @@ HERE
 \item Qemu virtio/vhost
 \item GC
 \item 如何管理文件系统元数据
+\item GlusterFS snapshot, which based LVM snapshot
+\item LVM snapshot
+\item Qemu snapshot
 \end{enumbox}
 
 \subsection{19}
@@ -485,3 +493,166 @@ revert后，vol上chunk都被置为snap rollback，可用于判定rollback是否
 怎么在lsv理念下解决压缩、重删问题？
 
 EC、重删、压缩能否offload到设备上？
+
+离线的设计空间更大。可以在性能之间做很多变通。离线任务和在线任务需要同步机制。
+
+先重删、后压缩，理想的顺序。
+
+压缩的难点在于压缩后内容的长度不定，而LSV把更新操作分解为两个操作：写入和gc。
+gc是异步的，可以持续优化。最后收敛到一个理想状态。
+
+\hl{lsv与底层存储的关系是非侵入式的（open vstorage/swift），所以能更好地融入生态。
+定义了清晰边界，堆叠式架构。用lsv框架融合wbuf、read cache、row2/3、dedup、compress and cdp等特性。
+工作在任意的volume/fs之上。如底层volume是分布式的，就自动地继续了这个特性，如hdfs/hbase的关系}。
+
+\hl{分配器}处理分层的问题，封装底层存储细节。
+
+pingcap从distributed redis起家，演进到可扩展的sql。
+
+虚机和容器，也是如此。
+
+\hrulefill
+
+ERTS，Erlang运行时系统，主要处理了几个问题：
+\begin{enumbox}
+\item 进程调度
+\item IO和调度
+\item 进程隔离和垃圾回收: 分代复制式GC
+\end{enumbox}
+
+\hl{Erlang的进程调度器里整合了基于事件的I/O系统}。用进程和消息传递进行并发和分布式编程、通过链接里容错，
+Erang虚拟机和运行时系统，函数式语言。
+
+算法是灵魂，接着是操作系统和编程语言，其上是种种的硬件、软件、通信等等。
+
+用这个框架来理解lich，\hl{类比思维，或RMI}，把结构映射到lich系统上，把一种结构映射到另外一个领域。
+这是非常强大的思维工具。
+
+取象比类
+
+在一个core线程里整合了协程调度和io，如果有异步操作就直接用（提交和polling 完成，如aio、RDMA、SPDK），
+对io block操作则通过辅助线程来模拟异步处理过程（线程+队列）。这里的队列采用\hl{无锁队列}？
+无锁队列的原理是什么？
+
+在core线程内，访问\hl{sqlite/redis、etcd}等slow operations都需要用辅助线程模拟异步操作，机制上是一致的。
+
+运行上下文分为三种情况：core线程（scheduer、task）和外部线程。
+core线程的代码，包括scheduler和task执行的代码，都不能出现block，否则会严重影响吞吐量。
+
+lich采用etcd进行集群管理，如选举admin节点，管理一部分元数据，集群任务管理，\hl{集群全局信息}的存放。
+
+采用了\hl{etcd-api c library}，通过curl http与etcd server通信。restful api？
+
+实现了lock语义，通过独立线程在ttl过期时进行renew。
+获取到lock的lichd进程成为admin角色。normal node watch lock状态的变化，如果发生了异常？
+
+\subsection{20}
+
+\hrulefill
+
+范畴化和做类比是认知的核心。RMI原则揭示了这一点。
+
+一致性问题是重中之重。分层次理解该主题。
+
+lich卷提供了类似disk的服务。需要应用层做出补偿。
+分别分析单disk、单节点，集群整体掉电的情况。
+
+与raft做类比：leader选举，如何找到leader？日志恢复、正常服务几个阶段。
+
+如何定义提交规则？如何apply到apply？lich保证了提交的持久性，
+对uncommitted条目，如何分析其安全性？
+
+nid,magic作为epoch，避免ABA问题。clock/dirty的管理规则
+
+FS/数据库的一致性
+
+\hrulefill
+
+CAS/ABA是个需要重点理解的知识点，lock free ring就是基于类似的原子操作实现的。
+
+spinlock与cas有什么不同？cas在失败的情况下，也是一直retry。
+
+软件事务内存？
+
+论文和书
+\begin{enumbox}
+\item 多处理器编程的艺术
+\item C++并发编程实战
+\end{enumbox}
+
+\hrulefill
+
+写和读具有共轭关系。卷的读写就是所谓I/O。
+
+\hl{一个IO可能涉及多个chunk，如何防撕裂？范围锁？}
+
+COW快照的snaptree上，每个阶段记录了该节点到下一节点的变更原像，这是严格按照快照定义得到的。
+任何一快照，都保留了该时间点的卷的状态。
+
+考量一个极端情况，一直打快照，而无变更，所有快照的数据均为空。revert和delete都没有太多工作要做。
+
+读卷和读快照有着本质上的不同。读卷不受影响，因为卷上一直有着最新的全部数据。
+读快照则不然，需要两步：读该快照及其下游节点，读最低公共祖先到卷所在路径上的节点。
+
+何时需要读快照？revert和clone时。区分读快照与读单个快照。
+
+由此可推到读快照的过程。COW快照能有全量索引吗？有没有更好的做法？
+
+引入auto snap主要是为了节约空间，如果存入snap from，则后续无法区分并清理。
+
+\hrulefill
+
+ROW的快照则保存的是打快照时的卷，相当于双缓冲区，新的写入发生在新的缓冲区。
+读卷和读快照都变得复杂，revert和delete操作也需具体分析。
+
+有特殊的情况可以简化删除过程。分解几种情况：如果快照是一个叶子节点，可直接delete，
+如果是中间节点或根节点，最简单的方式就是标记删除。
+
+\hrulefill
+
+与ceph\hl{做类比，就是对标，以查漏补缺，扬长避短}，disk状态机，检测到到故障后，进入down状态，恢复完成后，进入out状态。
+
+lich无日志，检测和恢复过程可以看做只有peering和backfill，也无基于check sum的scrub过程。
+
+\subsection{21}
+
+NoSQL精粹真是本好书。
+
+系统架构从简单到复杂：\hl{单点、主从、对等}（双活、多活）。主从是单点和对等的结合，包含一和多的特征。
+分析基本的写和读的过程。单机读写冲突(逻辑一致性)、分布式复制环境下的读写冲突(复制一致性)。
+
+在读写分离的情况下，如何保持会话一致性(read your write)？
+
+条件更新是CAS的泛化，应用举例：
+\begin{enumbox}
+\item CAS and ABA
+\item HTTP的etag
+\item lich中的meta version
+\end{enumbox}
+
+在更新时传入old和expected值。把比较值转化为比较version。
+
+如何生成时间戳？物理时间戳有问题，\hl{uuid和内容hash码}无法比对新旧，逻辑时钟比较合适。
+在单点或主从的情况下，用逻辑时钟，在对等环境中，用向量时钟。
+
+Raft的Term、Index与逻辑时钟有什么关系？怎么映射到逻辑时钟上来？
+
+每个server在进行消息交换时按term进行处理。term出现在每个\hl{请求和响应}之中。
+
+lich集群中各个节点的时间不能相差超过5s，是由于什么造成的？
+master election or volume lease？
+
+类比transaction/raft、lich、ceph
+\begin{enumbox}
+\item 做完什么才能返回client？
+\item 如何实现exactly one语义
+\item 什么情况下会read stale data，如何解决？
+\end{enumbox}
+
+ceph中引入pg关系重大： vol -> cid -> nid。
+
+\hrulefill
+
+多元思维模型：计算机重要的模型有哪些？
+
+\hl{基础和前沿}是双线思维的一个应用，守住底线、抓住关键。
