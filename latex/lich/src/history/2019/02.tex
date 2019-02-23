@@ -724,3 +724,73 @@ lich的一致性：无log，用了clock/dirty的概念，类似于index，没有
 \item 有非持久化clock
 \item 无clock
 \end{enumbox}
+
+\subsection{23}
+
+undo日志包含page之前像，可以看着一个就版本，用于实现快照隔离，一致性读？
+
+场景故障有介质故障、节点故障，更复杂的有分区、ABA、ABAB(交错leader)等情形。
+
+分布式系统，\hl{先分片、后复制}。组合分片和复制的系统有bigtable，提供了良好的伸缩性。
+
+事务有单机事务和分布式事务，要求是一样的。通过cc实现隔离性，通过log实现原子性、持久性和一致性。
+log分redo、undo、redo/undo，RAFT里无undo日志。更进一步lich里无log。
+
+需要记住各种硬件的性能数据，每个程序员都需要知道的性能参数。
+
+一致性分为以数据为中心的一致性和以客户为中心的一致性。\hl{read your write}是以客户为中心的一致性，即会话一致性。
+
+顺序一致性的定义与可串行化序列类似。单个进程/事务内操作保序。允许交叉。
+
+RAFT要实现的线性化目标，就是同一数据项的read your write序。当write已经成功返回后，read必须能读到新的值。
+在任何情况下，都不能违反该顺序。
+
+顺序一致性归属于以数据为中心的一致性，复制状态机。
+
+参考资料：
+\begin{enumbox}
+\item 分布式系统原理和范型
+\item 分布式计算
+\item 数据库系统实现
+\item Java并发编程的艺术
+\end{enumbox}
+
+\hrulefill
+
+lich的scheduler如果task is full，而task的执行又派生了新的task。新的task被放入wait队列，如此就发生了deadlock。
+
+\hl{partial page write}在lich中是否被处理了？在MySQL里是通过double write克服该问题的。
+仅仅靠redo日志是不够的，需要一个baseline的页的副本。
+
+\hl{RAFT的read only，不是想象中那么简单}。如何避免read stale data？在只有一个leader的时候，容易做到，
+当lastapplied大于等于read index时，读操作即可返回。
+
+lich里的一致性读/线性化/read your writes。因为没有log，直接写入FM，写完FM才返回。所以总能读到最小数据。
+RAFT则不然？
+
+RAFT、snapshot都需要从写读流程上来分析。commit、apply等操作的区分，带来了很大细微的地方。
+
+副本一致性与cache一致性什么关系？cache可以看做主从副本，主为共享数据，从为cache。读发生在从节点上。
+
+对任一数据项，两者都要解决一致性读的问题。读代表了可见性。ww冲突会引发更新丢失现象，即已提交的数据丢失。
+wr、rw冲突引发读的问题（脏读、不可重复读、幻读）。脏读通常是不可接受的。不可重复读，可以从数据项的多版本来理解。
+最高隔离级别是可串行化。
+
+怎么理解可串行化与顺序一致性呢？\hl{可以把每个w和r看作独立的事务}。事务内只有一个操作，就不涉及操作的可交换性。
+如果单个IO涉及多页、多chunk，则会拆分为sub io。语义会变得复杂些。
+
+\hl{页模型和对象模型}，可以先分析最基础的页模型。
+
+融会贯通以下几个领域：
+\begin{enumbox}
+\item 数据库系统(事务)
+\item 分布式系统(时钟、分布式提交)
+\item NUMA
+\item JMM
+\end{enumbox}
+
+\hrulefill
+
+范畴化和做类比是认识的核心。RMI、芒格的多元思维模型（笛卡尔方法、费曼学习法、波利亚解题法），围绕这个思路做下一步的学习规划。
+
+递弱代偿：分布式系统里的生存度就是一致性。如何保持一致性以及在一致性递弱时如何代偿就构成了分布式系统的核心。
