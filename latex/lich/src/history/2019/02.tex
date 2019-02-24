@@ -781,12 +781,43 @@ wr、rw冲突引发读的问题（脏读、不可重复读、幻读）。脏读�
 
 \hl{页模型和对象模型}，可以先分析最基础的页模型。
 
-融会贯通以下几个领域：
+融会贯通以下几个领域，并行/分布：
 \begin{enumbox}
-\item 数据库系统(事务)
-\item 分布式系统(时钟、分布式提交)
 \item NUMA
 \item JMM
+\item 数据库系统(事务)
+\item 分布式系统(时钟、分布式提交)
+\end{enumbox}
+
+NUMA和JMM具有类似的内存模型，从两个层面去考量：share和cache。
+
+\hl{安全性、活性、性能}，deadlock、livelock和饥饿都是liveness方面的属性。
+
+JMM的几个属性：
+\begin{enumbox}
+\item 有序性
+\item 可见性
+\item 原子性
+\end{enumbox}
+
+JMM典型问题：
+\begin{enumbox}
+\item CAS/ABA
+\item volatile
+\item 顺序一致性参考模型
+\item ***
+\item false sharing
+\end{enumbox}
+
+可见性是对read操作的要求。
+
+并行等级：
+\begin{enumbox}
+\item blocking
+\item starvation-free
+\item obstruction-free
+\item lock-free (CAS)
+\item wait-free (RCU)
 \end{enumbox}
 
 \hrulefill
@@ -794,3 +825,35 @@ wr、rw冲突引发读的问题（脏读、不可重复读、幻读）。脏读�
 范畴化和做类比是认识的核心。RMI、芒格的多元思维模型（笛卡尔方法、费曼学习法、波利亚解题法），围绕这个思路做下一步的学习规划。
 
 递弱代偿：分布式系统里的生存度就是一致性。如何保持一致性以及在一致性递弱时如何代偿就构成了分布式系统的核心。
+
+\hrulefill
+
+\hl{响应式架构}没有提及一致性，一致性暗含在其中了。与DDD和FP什么关系？
+所以一致性就是生存度，是一定要保持的属性。一致性降低需要代偿措施。
+
+事件的顺序在多线程和分布式环境下都很重要，进而引入事务概念。
+
+顺序一致性从数据为中心的角度就是RSM，按客户为中心的角度就是read your writes的会话一致性。
+
+用\hl{可见性}来分析raft的read-only问题：read的必须是最近一次提交才是一致性读。这一条并不是容易实现的，
+特别是考虑stale leader和从fellower读的情况，更是如此。
+
+\hl{操作系统、并行编程和分布式系统}是一个圆的几个部分，计算机体系结构是硬件、
+操作系统、并行计算、分布式系统是软件。
+
+\hrulefill
+
+ceph的每个对象有snap seq字段，lich的chunk snap version，怎么充分地利用起来？只在卷上有意义？
+
+理解分布式系统下的时钟，必分为两部分，分别对应规则一和规则二。逻辑时钟在单线程内递增，
+通过消息在线程间传递时，接收线程按规则二计算逻辑时钟，作为当前值。（取两者较大者，然后加一）
+
+向量时钟：规则一，本地分量加一。规则二，本地分量加一，other取较大者。
+
+\hrulefill
+
+经常回顾加以温习和练习的内容：
+\begin{enumbox}
+\item 以前的工作
+\item 知识体系 (基础+前沿)
+\end{enumbox}
