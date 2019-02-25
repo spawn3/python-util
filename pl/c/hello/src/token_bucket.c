@@ -10,6 +10,11 @@
 
 #include "token_bucket.h"
 
+/**
+ * @todo use lock-free/CAS
+ *
+ */
+
 int token_bucket_init(token_bucket_t *bucket, const char *name,
         uint64_t capacity, uint64_t rate, int private, int leaky)
 {
