@@ -875,3 +875,31 @@ tree sort至关重要，merge、quick、heap sort都基于二叉树的思想。
 \item ceph
 \item etcd
 \end{enumbox}
+
+TCP拥塞控制：
+\begin{enumbox}
+\item slow start
+\item 滑动窗口
+\end{enumbox}
+
+CISCO网络流控
+\begin{enumbox}
+\item token bucket
+\item leaky bucket
+\end{enumbox}
+
+如果input一直大于rate，token bucket的output会收敛到rate。
+在input小于rate之时，token得以累加，直至桶满，累计的token在后期被消耗掉。
+\hl{最大burst为桶的容量+rate}。
+
+开闸放水，\hl{l.b.即使watermark非零}，也是按恒定的速率进行，所以l.b的output rate始终小于等于设定rate。
+t.b则是只要有token即可放行。运行burst流量。\hl{b(u) = b + ru}。
+如果input大于rate，则watermark升高(缓冲区、或队列)。从而起到平滑input的目的。
+
+用一个实例来说明，比如input按正弦曲线达到，则经过l.b.或t.b.之后，output是什么形状。
+如果设定合适的桶容量，l.b.会非常平稳无波动。
+
+如何表达l.b里的固定的速率流出？需要跟踪上一个流出的时间。
+如果当前时间和上一个流出的时间落入同一时间片，则拒绝。
+
+ceph如何结合leaky和token的？

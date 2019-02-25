@@ -68,6 +68,7 @@ set(BINTREE_SOURCE_FILES
     src/mybit.c
     src/mygraph.c
     src/token_bucket.c
+    src/leaky_bucket.c
     src/resume.c
     )
 build_exe(resume "${BINTREE_SOURCE_FILES}")

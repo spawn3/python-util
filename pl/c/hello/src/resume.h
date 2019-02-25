@@ -121,6 +121,7 @@ void test_algo();
 void test_queue();
 void test_bit();
 void test_graph();
+void test_leaky_bucket();
 void test_token_bucket();
 
 #endif

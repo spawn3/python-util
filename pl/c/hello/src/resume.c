@@ -33,7 +33,8 @@ int main() {
     printf("\ntest graph:\n");
     test_graph();
 
-    test_token_bucket();
+    // test_token_bucket();
+    test_leaky_bucket();
 
     return 0;
 }
