@@ -33,5 +33,7 @@ int main() {
     printf("\ntest graph:\n");
     test_graph();
 
+    test_token_bucket();
+
     return 0;
 }

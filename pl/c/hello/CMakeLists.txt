@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(hello C)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -std=c11 -Wall -Werror")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -std=c11 -Wall -Werror -D_GNU_SOURCE -D_REENTRANT -D_FILE_OFFSET_BITS=64")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 macro(debug msg)
@@ -67,6 +67,7 @@ set(BINTREE_SOURCE_FILES
     src/myqueue.c
     src/mybit.c
     src/mygraph.c
+    src/token_bucket.c
     src/resume.c
     )
 build_exe(resume "${BINTREE_SOURCE_FILES}")

@@ -6,8 +6,8 @@
           {\small
           \begin{itemize}
               \item 采用SEDA(Staged Event-Driven Architecture)实现恢复、平衡等特性。引入最小副本数的概念，
-                  支持降级写/异步恢复策略，以平衡一致性和性能(CAP/PACELC)
-              \item 基于token bucket和leaky bucket算法，实现卷QoS和恢复QoS
+                  支持降级写/异步恢复策略，以平衡一致性和性能(CAP)
+              \item 卷QoS和恢复、平衡QoS
               \item 实现异步任务管理框架，支持删除卷(TRIM)、删除快照、revert、flatten等长时操作
               \item 实现批量\&并行allocate，以改进精简配置卷的性能
               %\item 优化故障下的IO中断时间
