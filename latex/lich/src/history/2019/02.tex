@@ -904,3 +904,25 @@ t.b则是只要有token即可放行。运行burst流量。\hl{b(u) = b + ru}。
 \hl{时间片的计算是相对于一个baseline}。
 
 ceph如何结合leaky和token的？
+
+\subsection{26}
+
+从\hl{硬件、软件、通信}几个维度看全闪。双控和分布式架构各自的特征。
+
+\begin{enumbox}
+\item 整理相关资料，以备不时之需
+\item 怎么理解华云在全闪方面的工作？ why/how/what
+\item 全闪进行时
+\item SPDK有perf工具
+\end{enumbox}
+
+RDMA的配置，运行在IB之上。
+
+intel nvme 40多万，memblaze 70多万。pcie插口和\hl{xx插口}，支持热插拔。
+需要定制服务器，现在ssd太多。单盘吞吐量2G。5块NVMe，单机能跑到220w。
+
+两个client端能跑到290w，单个client端跑到150w，升级了内核。为什么多路径更少，单节点80w？
+
+怎么进一步优化，算法，iopath等。
+
+disk slot每个core维护本地副本，变化很少。
