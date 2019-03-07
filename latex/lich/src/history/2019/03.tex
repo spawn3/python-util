@@ -28,3 +28,25 @@
 \subsection{04}
 
 \subsection{05}
+
+掌握sheepdog代码，关键问题：
+\begin{enumbox}
+\item 如何部署？sheepd与节点和磁盘的关系
+\item 存储服务层导出了什么服务？tgt/iSCSI、NBD？
+\item 如何确定vnode数量？
+\item volume-object-node-disk，几级映射关系如何维护？
+\item 如何保证更新和读取的一致性？ epoch？
+\item 如何recovery？dht不便于scan，从volume or object的角度入手？
+\item QoS
+\item snapshot and clone?
+\end{enumbox}
+
+参考项目
+\begin{enumbox}
+\item sheepdog
+\item glusterfs
+\item ceph
+\item minio
+\item swift
+\item scale-io
+\end{enumbox}
