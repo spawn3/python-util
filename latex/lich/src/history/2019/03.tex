@@ -45,10 +45,108 @@
 
 参考项目
 \begin{enumbox}
-\item sheepdog
-\item glusterfs
 \item ceph
+\item glusterfs
+\item sheepdog
 \item minio
 \item swift
 \item scale-io
+\item VSAN
 \end{enumbox}
+
+\subsection{10}
+
+双线：基础和前沿，缺一不可。要有强烈的问题意识，去解决大问题。
+
+\subsection{11}
+
+来大道云行报道！
+
+主要导出了iscsi接口，tgt和gateway部署在一个节点上，通过127.0.0.1进行通信。有内存争用的现象。
+
+每个vdi只有4T。快照采用cow。在恢复和快照时，性能下降严重。
+
+zk内存消耗大、延迟高。
+
+数据一致性：副本、条带一致性和write your read会话一致性。
+
+\hl{epoch是集群版本号}，恢复时用于查找元对象，无对象版本号，无checksum。
+
+\subsection{13}
+
+每个节点包括128个vnode，后续可以在线调整reweight。所有vnode用rbtree来组织。
+在查找一个oid对应的node时，还需考虑zone故障域。
+
+when更新epoch？update epoch会引发一系列后果。在update cluster info里也有处理stale object的过程。
+
+recovery object做什么？优先在本地找，如在stale目录找到，还需比对hash才能确定stale object是否可用。
+
+EC在发生故障时，基本上要调整所有分块，开销太大。
+
+分析一个node反复下线又上线的情况。
+
+io和rebuild的相互干扰。会优先rebuild发生io的object，然后wakeup该对象的io请求，继续进行。
+
+一个vdi是不能被多个client端并发访问的。支持主备multipath，pool下的每个node都导出vdi，
+只有一条path在工作。object cache无法与multipath协同工作。
+
+自己实现tgt，与gateway在一个进程空间。
+
+EC故障下数据和校验分块需要重组，带来很大的带宽压力，能不能不重组？
+
+QoS的控制点放在哪儿？request or gateway？
+
+没有抽象出RPC接口。
+
+journal特性没开？
+
+mount时，是否影响md5计算结果，因为存在cache的缘故。
+
+写入各个EC object要避免张冠李戴、釜底抽薪。每个EC object的写IO要按相同的顺序进行。
+
+IO和recovery有不同的controller？
+
+每个controller是否看到相同的epoch以及对应的节点view。
+
+在全掉电情况下，如何rollback，以保证原子写？
+
+\subsection{19}
+
+no journaling, nosync and no object version
+
+理解sheepdog里的epoch，可以采用类比的方法
+\begin{enumbox}
+\item 快照和卷的关系对应stale和wd的关系
+\item RAFT里term和index的作用
+\end{enumbox}
+
+模拟场景一，一节点下线又上线，又可分为两种情况，没有恢复，恢复未完成，恢复完成
+
+io和recovery中epoch的用法不同。recovery会block io，恢复后wd有最新数据，stale即可回收。读写只读写wd，不读写stale。
+恢复应block所有节点上该对象的io。
+
+读写只是读写wd下的内容，修复才会涉及stale。epoch可以识别过期请求。
+
+xfs的journal，就造成\hl{log over log}的多log问题，影响性能。
+
+replication和EC有很大的不同。
+
+部分成功、部分失败
+
+部分写
+
+\subsection{20}
+
+zk感知故障，30s，时间过长。在节点间连接上做hb？hb和io如何组织网络，一个网络还是两个网络？
+
+要区分\hl{临时故障和永久故障}。怎么区分临时故障和永久故障。
+永久故障时恢复的工作量是恒定的，临时故障时则不然。尽量减少临时故障时所需恢复的工作量。
+
+节点发生故障到触发恢复，再到开始修复，时间窗口较长。触发恢复之前，发生eio，由client端retry。
+开始修复后，发生io的object走绿色通道（direct），优先修复。修复完成后，wakeup该object上的blocking io。
+
+eio会不会导致部分成功、部分失败的场景？特别是EC，如何保证\hl{写入的幂等性？整个过程是可重入的}？
+
+磁盘故障会触发节点级的recovery，不会导致epoch提升。
+
+使用hazard测试ssan的一致性问题。
