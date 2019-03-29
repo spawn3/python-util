@@ -1,0 +1,236 @@
+\section{03}
+
+\subsection{01}
+
+问到的问题：
+\begin{enumbox}
+\item open channel SSD
+\item NVDIMM/NVRAM
+\item DHT的通用问题
+\item 分布式cache
+\item tgt连接数过多时，不稳定，断开
+\item 中存超为的产品
+\end{enumbox}
+
+先着力解决sheepdog的痛点问题
+\begin{enumbox}
+\item 恢复，特别是EC情况
+\item 平衡
+\item QoS
+\end{enumbox}
+
+利用率大于50\%时，会出现空间不足的问题。
+
+\subsection{02}
+
+\subsection{03}
+
+准备入职大道云行。
+
+\subsection{04}
+
+\subsection{05}
+
+掌握sheepdog代码，关键问题：
+\begin{enumbox}
+\item 如何部署？sheepd与节点和磁盘的关系
+\item 存储服务层导出了什么服务？tgt/iSCSI、NBD？
+\item 如何确定vnode数量？
+\item volume-object-node-disk，几级映射关系如何维护？
+\item 如何保证更新和读取的一致性？ epoch？
+\item 如何recovery？dht不便于scan，从volume or object的角度入手？
+\item QoS
+\item snapshot and clone?
+\end{enumbox}
+
+参考项目
+\begin{enumbox}
+\item ceph
+\item glusterfs
+\item sheepdog
+\item minio
+\item swift
+\item scale-io
+\item VSAN
+\end{enumbox}
+
+\subsection{10}
+
+双线：基础和前沿，缺一不可。要有强烈的问题意识，去解决大问题。
+
+\subsection{11}
+
+来大道云行报道！
+
+主要导出了iscsi接口，tgt和gateway部署在一个节点上，通过127.0.0.1进行通信。有内存争用的现象。
+
+每个vdi只有4T。快照采用cow。在恢复和快照时，性能下降严重。
+
+zk内存消耗大、延迟高。
+
+数据一致性：副本、条带一致性和write your read会话一致性。
+
+\hl{epoch是集群版本号}，恢复时用于查找元对象，无对象版本号，无checksum。
+
+\subsection{13}
+
+每个节点包括128个vnode，后续可以在线调整reweight。所有vnode用rbtree来组织。
+在查找一个oid对应的node时，还需考虑zone故障域。
+
+when更新epoch？update epoch会引发一系列后果。在update cluster info里也有处理stale object的过程。
+
+recovery object做什么？优先在本地找，如在stale目录找到，还需比对hash才能确定stale object是否可用。
+
+EC在发生故障时，基本上要调整所有分块，开销太大。
+
+分析一个node反复下线又上线的情况。
+
+io和rebuild的相互干扰。会优先rebuild发生io的object，然后wakeup该对象的io请求，继续进行。
+
+一个vdi是不能被多个client端并发访问的。支持主备multipath，pool下的每个node都导出vdi，
+只有一条path在工作。object cache无法与multipath协同工作。
+
+自己实现tgt，与gateway在一个进程空间。
+
+EC故障下数据和校验分块需要重组，带来很大的带宽压力，能不能不重组？
+
+QoS的控制点放在哪儿？request or gateway？
+
+没有抽象出RPC接口。
+
+journal特性没开？
+
+mount时，是否影响md5计算结果，因为存在cache的缘故。
+
+写入各个EC object要避免张冠李戴、釜底抽薪。每个EC object的写IO要按相同的顺序进行。
+
+IO和recovery有不同的controller？
+
+每个controller是否看到相同的epoch以及对应的节点view。
+
+在全掉电情况下，如何rollback，以保证原子写？
+
+\subsection{19}
+
+no journaling, nosync and no object version
+
+理解sheepdog里的epoch，可以采用类比的方法
+\begin{enumbox}
+\item 快照和卷的关系对应stale和wd的关系
+\item RAFT里term和index的作用
+\end{enumbox}
+
+模拟场景一，一节点下线又上线，又可分为两种情况，没有恢复，恢复未完成，恢复完成
+
+io和recovery中epoch的用法不同。recovery会block io，恢复后wd有最新数据，stale即可回收。读写只读写wd，不读写stale。
+恢复应block所有节点上该对象的io。
+
+读写只是读写wd下的内容，修复才会涉及stale。epoch可以识别过期请求。
+
+xfs的journal，就造成\hl{log over log}的多log问题，影响性能。
+
+replication和EC有很大的不同。
+
+部分成功、部分失败
+
+部分写
+
+\subsection{20}
+
+zk感知故障，30s，时间过长。在节点间连接上做hb？hb和io如何组织网络，一个网络还是两个网络？
+
+要区分\hl{临时故障和永久故障}。怎么区分临时故障和永久故障。
+永久故障时恢复的工作量是恒定的，临时故障时则不然。尽量减少临时故障时所需恢复的工作量。
+
+节点发生故障到触发恢复，再到开始修复，时间窗口较长。触发恢复之前，发生eio，由client端retry。
+开始修复后，发生io的object走绿色通道（direct），优先修复。修复完成后，wakeup该object上的blocking io。
+
+eio会不会导致部分成功、部分失败的场景？特别是EC，如何保证\hl{写入的幂等性？整个过程是可重入的}？
+
+磁盘故障会触发节点级的recovery，不会导致epoch提升。
+
+使用hazard测试ssan的一致性问题。
+
+\subsection{21}
+
+控制逻辑放在request.c里，有四类请求。
+
+集群内各节点不同步进入recovery状态。需要同步。同步点放置在prepare list完成后。
+同步之前和之后的io表现出不同行为。
+
+一旦进入recovery obj阶段，是基本稳定的。
+
+\hrulefill
+
+单次故障后，如果在恢复完成之前，发生新的故障，则取消当前修复实例，启动新一轮的修复过程。
+
+恢复中的io堵在gateway上。如果gateway是primary，则走绿色通道快速修复该对象。
+如果primary在别的节点上，则不能优先修复。需要等待修复完该object后，才能唤醒该io。
+会造成io长时间挂起。
+
+在oid\_in\_recovery里有触发优先修复object的逻辑。
+
+\hrulefill
+
+多次节点故障，req\_wait\_queue在多次节点故障后，处理逻辑有问题。
+
+\hrulefill
+
+在恢复的过程中，primary failover会如何if/then？
+
+磁盘故障处理逻辑不同于节点故障，需要分开考虑。
+
+\subsection{21}
+
+考虑先存为副本，后台转换为EC的解决方案。
+
+\subsection{25}
+
+\subsection{26}
+
+\begin{enumbox}
+\item 没有使用journaling，能否保证EC的一致性？
+\item main thread，有无slow操作？
+\item 恢复一个EC group，需要多长时间？
+\end{enumbox}
+
+\subsection{29}
+
+glustefs
+
+brick是本地文件系统，可以分配给多个volume使用。volume可以理解为一个独立的文件系统，包含file。
+
+一个volume，包含多个brick，有多种模式/subvolume：simple、replicated、striped、dispersed等。replicated和dispersed是常用的两种。
+按组进行扩展，就形成对应的distributed volume。
+
+一个file按DHT方式映射到subvolume里。
+
+glusterfs的每个副本或shard记录version。
+
+\hrulefill
+
+从\hl{leader、version和log}几个方面分析EC一致性问题。EC一致性与副本有所不同。
+
+gateway是io leader，primary shard是recovery的primary，形成双控架构，必须并发控制机制。
+
+version至少有两层含义，epoch和object version。引入object version可以解决epoch不变情况下的部分问题。
+
+如果有对象级version，可以区分新旧，如果写入成功大于等于阈值(strict mode)，则可以成功恢复。
+
+小于阈值的情况，如4+2，只是成功写入三个分片，即把条带写坏了。
+靠分布式块存储系统本身无法从其中恢复到一致状态。
+
+没有恢复时，数据处在不一致的状态。即便经过恢复，回到一致状态，但数据已被破坏。
+
+该种情况亦无法redo，只能通过类似undo log的机制回滚到一致状态。
+
+结合上层应用来分析，如果有retry机制，可以覆盖坏的数据。
+需要注意到非对齐写的情况，即便有retry，亦无法全覆盖。
+
+由此推导出对上层应用的要求/约束。
+
+\hrulefill
+
+不立即恢复、写时恢复、静态hash环。
+
+组合方案：前端用副本卷，后端用EC卷。

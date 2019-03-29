@@ -34,7 +34,7 @@ int main() {
     test_graph();
 
     // test_token_bucket();
-    test_leaky_bucket();
+    // test_leaky_bucket();
 
     return 0;
 }

@@ -1,0 +1,258 @@
+% -*- coding: UTF-8 -*-
+% hello.tex
+
+\documentclass[UTF8,oneside]{ctexbook}
+
+% \usepackage{xeCJK}
+\usepackage[utf8]{inputenc}
+
+% load paralist before enumitem
+\usepackage{paralist}
+
+\usepackage{hyperref}
+\hypersetup{pdftex,colorlinks=true,allcolors=blue}
+\usepackage{hypcap}
+
+\usepackage{color}
+\usepackage[usenames, dvipsnames, svgnames, table]{xcolor}
+% \pagecolor{gray}
+
+\usepackage{makeidx}
+\makeindex
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{fancybox}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+
+\usepackage{indentfirst}
+
+\newenvironment{enumbox}[0]{
+    \begin{tcolorbox}
+    \begin{compactenum}
+} {
+    \end{compactenum}
+    \end{tcolorbox}
+}
+
+\newenvironment{itembox}[0]{
+    \begin{tcolorbox}
+    \begin{compactitem}
+} {
+    \end{compactitem}
+    \end{tcolorbox}
+}
+
+% table
+\setlength{\arrayrulewidth}{1pt}
+\setlength{\tabcolsep}{16pt}
+\renewcommand{\arraystretch}{2.5}
+\newcolumntype{s}{>{\columncolor[HTML]{AAACED}} p{3cm}}
+
+\arrayrulecolor[HTML]{DB5800}
+
+\usepackage{tikz,mathpazo}
+\usetikzlibrary{positioning, fit, matrix, shapes, arrows, chains, trees, arrows.meta}
+
+% \bibliographystyle{plain}
+% \bibliography{math}
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+
+% 摘录
+\usepackage{verbatim}
+\usepackage{libertine}
+\usepackage{graphicx}
+\usepackage{framed}
+
+\newcommand*\openquote{\makebox(25,-22){\scalebox{5}{``}}}
+\newcommand*\closequote{\makebox(25,-22){\scalebox{5}{''}}}
+\colorlet{shadecolor}{Azure}
+
+\makeatletter
+\newif\if@right
+\def\shadequote{\@righttrue\shadequote@i}
+\def\shadequote@i{\begin{snugshade}\begin{quote}\openquote}
+\def\endshadequote{%
+\if@right\hfill\fi\closequote\end{quote}\end{snugshade}}
+\@namedef{shadequote*}{\@rightfalse\shadequote@i}
+\@namedef{endshadequote*}{\endshadequote}
+\makeatother
+
+\usepackage[normalem]{ulem}
+
+\newcommand{\hl}{\bgroup\markoverwith
+  {\textcolor{yellow}{\rule[-.5ex]{2pt}{2.5ex}}}\ULon}
+
+%\usepackage{soul}
+
+%\newcommand{\hlc}[2][yellow]{{%
+%    \colorlet{foo}{#1}%
+%    \sethlcolor{foo}\hl{#2}}%
+%}
+
+% todonode
+\usepackage{lipsum}                     % Dummytext
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+% 
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\newcommandx{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+\newcommandx{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
+\newcommandx{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+\newcommandx{\thiswillnotshow}[2][1=]{\todo[disable,#1]{#2}}
+%
+
+\usepackage[simplified]{pgf-umlcd}
+
+\title{SSAN文档}
+\author{董冠军}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\listoftodos[Notes]
+
+%\part{项目管理}
+
+%\include{todo/cmnet}
+%\include{todo/todo}
+%\include{todo/problem}
+
+%\part{测试}
+
+%\include{test/checklist}
+%\include{test/test}
+%\include{test/perf}
+
+\part{SSAN}
+
+\include{ssan/develop}
+\include{ssan/deploy}
+
+\include{ssan/context}
+\include{ssan/functional}
+\include{ssan/disk}
+  %\include{ssan/volume}
+  \include{ssan/snapshot}
+\include{ssan/info}
+\include{ssan/concurrency}
+\include{ssan/faq}
+
+\include{ssan/ssd}
+\include{ssan/nvme}
+\include{ssan/rdma}
+\include{ssan/iscsi}
+
+% perspective
+\include{ssan/qos}
+\include{ssan/bcache}
+\include{ssan/optimize}
+
+% 评估
+\include{ssan/asos}
+\include{ssan/reliability}
+\include{ssan/perf}
+
+% \include{ssan/hardware}
+% \include{ssan/etcd}
+
+% operational view
+\include{ssan/bug}
+
+% \include{ssan/controller}
+% \include{ssan/schedule}
+
+\part{LichMaster}
+
+\include{lich_master/readme}
+\include{lich_master/snapshot}
+\include{lich_master/lsv}
+
+\part{生态系统}
+
+\include{other/snmp}
+\include{other/lvm}
+\include{other/tgt}
+\include{other/ceph}
+\include{other/nutanix}
+%\include{sheepdog}
+%\include{openvstorage}
+%\include{VSAN}
+
+\part{PBL}
+
+\include{ask/todo}
+\include{ask/os}
+\include{ask/lich}
+
+\part{理论基础}
+
+\include{basic/learning}
+
+% basic
+\include{tool}
+\include{basic/design}
+%\include{basic/arch}
+\include{basic/ds}
+\include{basic/algo}
+\include{basic/pl}
+
+% system
+\include{basic/computer}
+\include{basic/os}
+\include{basic/kernel}
+
+\include{basic/fs}
+\include{basic/db}
+% \include{basic/compiler}
+
+% design
+\include{basic/distributed}
+\include{basic/concurrency}
+\include{basic/performance}
+
+% CBA
+\include{basic/bigdata}
+\include{basic/ai}
+
+\include{flow}
+
+\part{航海日志}
+
+\include{history/2012}
+
+\include{history/2016}
+
+\include{history/2017}
+
+\include{history/2018}
+\include{history/2018/08}
+\include{history/2018/09}
+\include{history/2018/10}
+\include{history/2018/11}
+\include{history/2018/12}
+
+\include{history/2019/01}
+\include{history/2019/02}
+\include{history/2019/03}
+
+\end{document}

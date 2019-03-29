@@ -1,0 +1,1158 @@
+\chapter{2019}
+
+\section{01}
+
+\subsection{08}
+
+用本文档记录日志，只维护一个即可。growth记录更高层次的指导原则，一般来说相对比较稳定。
+如此就形成了一个相互促进的双环架构。
+
+不要自我设限，一定如何如何？打基础，看机遇。
+
+一些指导原则
+\begin{enumbox}
+\item 概念图、重要的是理解核心概念，费曼学习法，用自己的语言描述出来，取象比类，借助类比、联想等思维方式。
+\item 在默认模式/执行模式，走神/专注等进行切换，\hl{文武之道、一张一弛}，有助于激发出创造力。
+\item 强调综合判断能力。
+\item 慢练
+\end{enumbox}
+
+体系架构、操作系统和汇编语言是底层逻辑。数据结构、算法、编程语言结合起来进行学习。
+
+坚持专业技术方面的发展，\hl{CBA都要有所涉猎}。现在正是最佳时机，不能再没有重点了。
+
+重点应放在做过的项目和全闪上。\hl{多路径？多存储网段？SPDK、NVMe}等。
+比如单机存储引擎，用sqlite3、redis、RocksDB，为什么？
+
+从势、道、法、术、器等维度进行梳理。
+
+\subsection{09}
+
+clone后，没把源快照置为protected状态。
+
+\hl{software pipelines和排队论是性能分析利器}。SEDA、actor和lambda是架构方法。
+图论、网络流，老三论。按中医理论，人体由藏象经络组成，运行气血。与网络系统有很强的相似性。
+图是最复杂的数据结构，降维去看其它数据结构会如何？petri net和有限状态机。
+把以前生活中经历的点连成线，会更明晰。
+
+专业的力量、能力变现、价值规律、写作是最好的自我投资、自我进化、放大核心优势都是很好的理念，关键在落实。
+
+本质上是核模式的应用。先在一个小的专业领域建立根据地，再顺势裂变扩张。
+
+眼观六路耳听八方，行业格局分析至关重要，技术加商业两条腿走路。
+
+自己要变得强大，这是积极心态，接下来是如何才能变得强大，这是现实，
+要做现实的造梦者，不做桃花源中人。
+
+lich的io 路径需要控制器中转，是否影响性能？client直接读写数据会如何？ceph client与osd primary直接通信。
+
+只有一个RDMA网卡，存在硬件上限。如何使用多个RDMA网卡呢？8k 100w iops。
+
+接触斯多葛主义。内心的自由和平静。
+
+Oracle asm?
+
+\subsection{10}
+
+向身边的人学习，虚心，不要老端着，自认为了不起，其实需要理解的东西很多。
+差不多先生，含混不清是极大的弊端和缺陷，一定要清晰，清晰才有力量。
+表达要简洁清澈清晰。空性不代表含混，而是包容。
+
+写作是最好的自我投资，要深刻理解这句话，并每日打磨写作技能。
+先记下流水账，固定时间进行归纳整理，提炼升华。
+
+做事情太保守，\hl{视野不够高，格局不够大}，现在呢？更多自以为是，
+需要沉下心来，好好观察、琢磨。看清趋势。正心诚意，取势、明道、优术，然后是利器、举例。
+
+集中一段时间，专攻技术。围绕关键问题，从广度和深度，\hl{致广大而尽精微}。
+技术综述好做，选几本书多读几遍即可，难的还是深度。另外一条途径，就是多与人聊技术。
+
+围绕全闪进行写作。全力以赴吧。
+
+\hrulefill
+
+\hl{重点整理在HY做过的工作}：
+\begin{enumbox}
+\item snapshot and LSV
+\item Recovery
+\item Balance
+\item QoS
+\item ***
+\item ETCD
+\item Network(TCP and RDMA)
+\item ***
+\item Scheduler
+\item Memory Allocator
+\item Disk Management (Local Storage Engine, +NVMe)
+\item ***
+\item iSCSI/iSER/NVMf
+\end{enumbox}
+
+\hl{恢复、平衡、删卷/snapshot、rollback、clone、flat}等操作，如何用统一的任务管理系统进行管理。
+可以借鉴k8s等集群管理系统的经验。有了总控，可以更好地加入策略。
+
+\hl{恢复和平衡}有些逻辑是通用的，如按pool处理，检测本地vctl变化，扫描本地vctl。
+可以放到一个处理框架内进行处理。ceph如何进行数据平衡呢？
+
+太大的调度粒度(vctl)不利于任务调度和负载均衡。qos如同节流阀。可以放到不同的位置上。
+
+\hl{if-what}当前的恢复处理逻辑，如果发生\hl{网络分区故障}，会如何？
+
+为了支持多网卡，需要做什么？
+
+为了支持多路径，需要做什么？
+
+\hrulefill
+
+研读google发表的系统相关论文，看真实需求以及技术演进方向。
+性能、稳定可靠、容错高可用、可扩展是几大非功能属性，决定产品品质。
+
+理解google的技术体系，不能老是泛泛而谈。borg衍生出k8s。
+\hl{hdfs、bigtable、megastore、mapreduce}都已经实现了容器化和统一管理。
+
+有bigtable的sstable演化出leveldb和rocksdb。redis可以与rocksdb进行组合，改变全内存数据库的局限性。
+
+催生了hadoop生态，进一步衍生了spark等lambda架构的统一计算平台。
+
+\hrulefill
+
+光点图灵
+
+RAID之上有LVM，都是单机环境下的产物。虚拟化程序越来越高。进而是盘阵，然后是分布式架构,
+scale-out越来越强，灵活性越来越高，软件定义和超融合由此而来。
+
+MongoDB直接做RAID0，然后利用其自身的集群能力，master/slave replication架构，
+可以failover and failback。这相当于内置存储。当时对存储层面的理解相当有限。
+
+对gridfs扩容是如何做的？通过多个目录做的，也不设计磁盘虚拟化方面，如LVM。
+面对的就是一个扩展性问题。
+
+\hl{迁入阿里云、采用七牛对象存储后}，不自己维护服务器，避免了很大的麻烦。
+
+\hrulefill
+
+\hl{美地森的工作和成长经历}：
+
+很长时间都理解不离aio、事件驱动的实质所在。
+做技术确实死磕精神，重视贪多求大，结果反而欲速不达。
+
+当时做edog又是如何做的呢？有什么可以反思的？
+集群管理采用了Erlang，通过libvirt对接qemu，改了qemu的驱动，接入yfs作为底层存储。
+
+对网络理解不够透彻，接触也少。前端时间获取交换机管理信息，技术收到都是类似的。
+不过关于交换机，很多技术细节理解不到位。\hl{天马行空惯了，细节把握不到位}。
+需要改进，做技术要认真再认真，程序化，每日记录、反思、总结、提炼。
+既要有广度，深度更是必不可少。\hl{专精一件事，就可以立于不败之地}。
+找到了自己的哲学、守中致和，核模式，就要学以致用，一以贯之，用来指导自己的言行。
+
+接触了hadoop，为什么没有坚持呢？放着这么好的东西，不去跟进，
+只是习惯于做些乱七八糟的东西，实在是有眼无珠呀。
+
+虽然也有跟进，\hl{不坚定，不深入}，当然更谈不上真的掌握。
+
+\hrulefill
+
+华胜天成：法国电信做手机的SIP协议，管理软件，一头雾水。
+
+包括以前在\hl{天地伟业、鸿业科技}，都没有深入业务，总是局限在一个小小的技术视角。
+现在软硬件的变化，真是日新月异，不进则退。\hl{没有一个好的平台和机遇}，就很难崛起。
+如何把握好的平台和机遇，当然要靠本日一点一滴的积累，磨炼基本功，把握大趋势。
+
+鸿业科技做的\hl{官网计算}回忆起来，倒是给了很好的启示，说明了管道理论的普遍性。
+
+一是个人成长放在首位，接着就是睁大眼睛，静静地坚定地去找团队、平台和机遇。（\hl{人和事的胜任度}）
+两者匹配了，能力胜任度高，自然一切水到渠成。所以也不必着急焦虑，反反复复磨炼自己就够了，
+金子总会发光的，好酒也怕巷子深。这些看似对立的格言，其实包含了深刻智慧。
+
+这几年，技术发展真是太快了。风口一个也没把握住，原因何在呢？
+
+\hl{接下来干什么呢}？
+
+转移关注点，放低姿态，学习关键知识点，并记录在案。从整体系统中抽离，聚焦于更小的模块。
+
+最近老王他们进行的性能优化工作是值得关注的架构调整。支持多路径，多网卡，甚至插到不同的交换机port上对性能都有影响(8x or 16x)，以提升性能。
+性能的理论上限如何预估？
+
+更多地转变到SPDK(NVMe, NVMf)、RDMA上面来。全NVMe方案如何？怎么构建全局共享，client与数据不同于控制器直接存取？
+可以参考的资源有什么？
+
+纪翠叶问及fio的部分参数什么含义？这是器层面的知识点。
+
+\subsection{11}
+
+中庸是我的圣经。从心道物等诸多维度确定了必要的理念。
+
+\hrulefill
+
+不深入理解传统存储的高度和局限，就不能理解很多核心概念，比如多路径、共享、全局缓存等。
+分布式架构在\hl{扩展性、灵活性}方面胜出。
+
+通过真假latency，可以估计等效并发。方法如下，单并发测量固定时延。多并发测量iops，取倒数即为假时延。
+固定时延和假时延的比值就是该配置下的等效并发度。
+
+io path也有串行和并行两部分，从而引入加速比的概念，上面的等效并发度就是加速比。
+可以评估整个体系结构的并行执行效果。
+
+按pipelines理解体系结构，体系结构也是网中网的分形结构。
+官网、电路等等可以作为分析模型，从流体动力学和物理学里吸收能量。
+但也不必把问题复杂化。从最少的元素推导出更多的规则，解释更多的现象，是科学的研究方法。
+
+从体系结构、操作系统的原理和知识，去深入存储子系统的相关理解。
+
+\hrulefill
+
+\hl{网络分区}下，恢复、平衡和一般的IO是如何进行的？
+
+比如一个5节点集群，采用2副本策略。分区意味着什么呢？怎么理解多数派这一要求。
+5节点2副本，也是只能容忍单个节点故障，\hl{故障容错度是有副本数决定的}，与集群规模无关。
+比如一个10节点的集群，2副本的情况下也只能容忍一个节点故障？
+
+可以通过划分故障域改进这一点。副本数据分布到不同的故障域，容错按故障域来定义。
+
+保护域和pool是等价的概念，保护域是一种物理隔离机制。把一个大集群分拆成小集群。所以基本的嵌套关系是\hl{集群-保护域-故障域-节点-磁盘}。
+
+网络的VLAN是否也是一样的分区机制？
+
+这一点与zk、etcd等协同共识系统存在很大的不同。
+
+MySQL master/slave架构，能否自动切换？
+
+\hrulefill
+
+client直接与数据块通信，lich需要通过vctl中转，如何克服这一点？
+
+多网卡支持，通过多网卡连接控制器，MP软件用来管理导出的LUN，确保只有一个。
+
+SSD FTL中心任务是映射管理，与OS的页表、LSV的快照管理是一样的，关键是维护一个虚拟地址到物理地址的映射。
+可以是一级，也可以是多级。\hl{伟大的计算原理}里面，讨论存储的时候提到四点：\hl{命名，映射，定位，授权}。
+可以按此四个维度去思考林林总总的存储系统。
+
+\hl{按主体-对象模型，授权有两种}：CL和ACL。CL以主体为中心，ACL以对象为中心（如文件系统的ACL）。
+
+\hl{全力投入AFA}，大量阅读，深度思考。知识就是力量，这点认识还是不够深刻。
+
+地址空间管理，抽象成了一切皆文件。内存、磁盘、文件都是地址空间。文件系统的设计需要充分地认识到这一点。
+SSD最核心的功能也是这一点。SSD FTL很类似于LSV，很多可类比的地方，如映射、GC。
+
+数据结构主要也是映射，如hash、map、graph，graph是最通用的映射关系。
+再如，函数也是映射。lambda架构也提及此，map-reduce更成了并行计算模式之一。
+
+\hrulefill
+
+多快好省，快和好是当前重点，多和省在此基础上，迭代优化。\hl{性能、负载、高可用}是几种集群形式，
+bonding，多网卡支持。bonding具有什么特征？只是HA？而不能同时工作，聚合性能和均分负载？
+
+\hl{全力投入AFA}，大量阅读，深度思考。知识就是力量，这点认识还是不够深刻。
+
+\subsection{12}
+
+地址空间，如内存，文件都采用地址空间概念。多级页表可以支持稀疏地址空间，页表与inode采用的radix tree什么区别？
+lich卷的chunk tree也采用了同样的结构。这样，需要维护虚拟地址到物理地址的映射。
+
+对计算机体系结构、指令集、操作系统、汇编、编程语言有了初步的理解。对存储、网络、数据库也有一定的理解。
+接下来就是围绕算法和数据结构为中心，\hl{以问题为主线}, 穿起来进行思考。伟大的计算原理给出了很好的总结。
+
+分层去理解更透彻，如计算机组成结构化方法里，分为七层，网络也是分为若干层。
+
+大的问题主要有调度、内存管理、地址空间管理、通信和同步、事务、分布式算法等。
+
+以数据结构和算法为核心，去解决各类系统的核心问题。问题具有普遍性，算法也应理解为通用的算法。问题和算法是对应的。
+
+提出问题，然后看应该如何去解题。解决问题是价值输出的重要方式。
+
+分析io path就可以把一切知识点贯通了。一个写、一个读。集中在数据平面的相关问题。
+
+\subsection{13}
+
+在华云和光点的工作具有互补性，麻雀虽小五脏俱全，需要得到更好的总结、提炼和升华，一花一世界，由此去理解更广阔的技术世界。
+譬如一个同心圆，虽有规模效应，规模引起一些质变，但稳固的核心，扎实的基本功，确是最为重要的，如此就拥有了强大的迁移能力。
+
+不能不重视写作。
+
+\hl{单一要素最大化，其它要素最小化}。算法可以作为下一阶段的单一要素，是不变的一。
+算法的学习和理解脱离不了具体系统，一以贯之，就是以算法贯穿技术学习活动。
+
+这里的算法是广义上的算法，不仅包括教科书里常常提到的算法，也包括协议、调度、事务等重要概念相关的算法。
+
+\subsection{14}
+
+\hl{化繁为简，打破学科边界}，从实际问题及其方案开始理解。深入理解计算机系统即是采用这种叙述法。
+
+计算机系统可分为cpu(\hl{进程、并发、中断、隔离})、memory、io子系统(storage/fs and network)等，按此结构循序展开。
+io又分存储和网络等，组成tree架构。关键组件：\hl{调度器(thread、io)，空间分配器（cache、memory、disk）}。
+
+采用流一元论(flow dynamics)的描述框架，cpu居中调度，上下文切换和内存copy，可称为指令分配器。
+\hl{flow由节点和边组成}，节点是处理单元或节流阀，边是管道。处理方式可以有多种：转发、映射、压缩、消重等。
+
+衡量流效率的指标是latency、iops、throughput等。流的平衡态由平衡方程描述，输入过多，会导致处理不过来，
+发生拥塞、溢出等故障，故需要限流/节流。
+
+memory copy消耗总线带宽，bus是如何利用的？
+
+先理解一般case，加入cc和故障恢复，系统就变得复杂了。虚拟化、cc、持久性是操作系统研究的三大块。
+
+cpu亲和性需要通盘考虑，不仅仅是内存，还有disk、network，读设计线程和buffer，是否与core线程处于一个NUMA节点？
+还是跨NUMA节点进行内存copy？ aio线程尽量与core线程距离近。\hl{如果只要一块网卡，则网卡属于哪个NUMA节点呢}？
+
+\hrulefill
+
+\hl{数据结构的内存layout}，比如一个int应该怎么存？大端序、还是小端序？浮点数呢？结构体呢？
+什么是补码表示？
+
+任何一个变量、常量都占据一定的内存区域（addr,len）。代码也是，cpu从内存中取指、解码后执行。
+一个函数是一个代码端，微观上是一个指令序列，符号表。一个对象呢？也是如此。内存布局，成员函数指向函数代码的指针。
+模板在编译阶段实例化，用具体类型代替。最后都转化为变量和过程。\hl{class引入了对象作用域和类作用域}。构成了符号的层次结构。
+可以假设最外层有一个global namespace，作为ns树的根。
+
+把内存看做一维向量空间，就容易理解这个问题了。
+最小地址单元是byte。指针运算，与数据类型有关，void *以byte为单元。
+
+磁盘空间也是一维向量空间，分区、文件系统、文件就构成了层次结构，靠mapping建立虚拟地址到物理地址的映射，完成\hl{存储虚拟化}的功能。
+RAID/LVM都是映射，需要\hl{计算或metadata}去实现这种映射。
+
+snapshot、LSV也是meta+data，通过引入mapping实现特性。
+
+\hrulefill
+
+梳理lich中用到的数据结构和算法
+\begin{enumbox}
+\item array
+\item list
+\item stack
+\item queue
+\item heap
+\item ***
+\item bitmap
+\item string
+\item set
+\item ***
+\item skiplist
+\item hash
+\item tree
+\item graph
+\item ***
+\item token bucket and leaky bucket
+\end{enumbox}
+
+\hl{key的结构和分布}非常重要。索引结构不仅要考虑内存结构，还有考虑磁盘结构。
+一个线性空间中key的分布有规律可循，且有序。如果key是string，则分布是多样的。
+
+为什么数据库的索引结构用hash和B+，而不是别的？
+
+\hrulefill
+
+bitmap也是用来管理1D线性空间，如磁盘空间管理，没有引入中间结构，key是offset。
+bloom filter是一种特殊的存在性查询结构，不能用来检索,key是字符串。
+
+页表、inode address space，都是trie（radix tree）结构。与邮政编码、url、dns域名类似。
+name是有结构的，构成prefix tree。
+
+trie与hash、RBtree、B+皆不同，它的key是有结构的，从而形成一定的层次。用来检索一个稀疏的线性空间。
+lich volume即采用了该索引结构，定为三层。路由表采用radix tree设计。
+
+array and list是基础存储结构，其它结构都是建立在此二者之上。
+
+\hrulefill
+
+以上是基础数据结构和算法，加上\hl{cc、事务、分布式、机器学习}等要求后，演化出更加多彩的算法世界。
+分布式算法更多是交互协议设计。
+
+\hl{墨菲法则}，事情总比想象的要坏，真的不能再嘚瑟，认真考虑下一站是当务之急，损失什么的可以不用考虑太多。
+重要的是，把握当下，面向未来。
+
+可以参考的开源软件：
+\begin{enumbox}
+\item nginx
+\item memcached
+\item redis
+\item mongodb
+\item ***
+\item LevelDB
+\item RocksDB
+\item Ceph
+\item Sheepdog
+\item ***
+\item SPDK
+\item DPDK
+\item RDMA
+\end{enumbox}
+
+\hrulefill
+
+由设备文件，可以\hl{分区、格式化、mount}。NVMe采用pci号实现kernel bypass。
+读写设备文件和普通文件，采用同一套接口和语义。
+
+io路径上\hl{page和block dismatch}，page cache和buffer cache，buffer用指针引用page的区域。
+故\hl{不经过page cache的io需要block对齐，包括direct io和aio}。
+
+bcache? \hl{1+N虚拟出N个设备}。
+
+bit + context，要深刻理解这一点。
+
+\hrulefill
+
+调度器：cpu调度器和io调度。多队列。
+
+分配器：内存allocator和fs 空间管理，\hl{命名、映射}。
+
+定位包括cache和replication。流动的数据。
+
+\subsection{15}
+
+\hl{行路难，行路难，多歧路，今安在}？好好沉淀一下吧，路真的不好走，一不留神就万劫不复。
+
+忠于专业，这是安身立命之本。进一步的学习计划：
+\begin{enumbox}
+\item 数据结构和算法
+\item software pipelines
+\item SEDA and actor
+\item lambda
+\item queueing theory
+\item network flow
+\item *** 系统
+\item \hl{操作系统（包括体系结构、OS和编程语言）}
+\item 文件系统
+\item 网络
+\item 分布式系统
+\item 数据库系统
+\item *** 应用
+\end{enumbox}
+
+从\hl{scheduler、allocator和cache}几个维度去研究。
+
+先研究scheduler，有\hl{线程调度、协程调度、io调度、事务调度器}，甚至k8s一样的全局资源调度。
+比如erlang、go的调度也很有特点。
+
+\hl{任务状态，任务队列}。引入任务优先级，就是多队列。进程调度的任务就是选出下一个要运行的进程、线程。
+
+任务上下文切换，scheduler和tasks之间是1+N的关系，交错执行。
+
+调度分抢占式和非抢占式。线程相对于协程，多了中断方式的切换，包括硬中断和软中断。
+
+\hl{调度器就是software pipelines里的分配器}，影响系统整体性能。
+
+scheduler采用什么数据结构来组织任务队列呢？
+
+scheduler采用什么QoS策略？
+
+多调度器下的任务漂移/窃取
+
+调度器自身是不能有长时的block任务的，对这类任务采用异步方式处理。
+线程调度是抢占式，\hl{协程任务是非抢占式，要杜绝出现block操作}，由CQ来完成。
+
+oracle asm架构
+
+三层：\hl{并行、polling、事件处理}，并行线程的cache、memory、pci bus要local。
+尽量避免并发访问共享资源。share nothing是最好的，但有时共享、通信难以避免。
+
+polling和事件处理研究单个scheduler的情况，并行研究多个scheduler的情况。
+
+\hrulefill
+
+所谓异步就是不等待任务处理结果，当任务完成时，会触发事件，进入cq。
+
+\hl{以FusionStor为例}，io有两种情况，\hl{普通disk方式和NVMe方式}。
+普通disk采用aio，NVMe采用其自身的异步机制。
+
+网络也有两种方式：TCP and RDMA。采用epoll多路机制，polling请求或完成事件。
+
+\hl{RDMA和NVMe都是基于事件和多队列}的异步通信方式。
+
+NVMe也很简单，用pci打开后，可以异步读写，\hl{poll时执行callback}。
+Lich里主要处理了core线程和buffer的适配性。
+
+NVMe没有使用aio线程，自身的异步机制，与coroutine结合很好。
+aio还需要结合thread+epoll机制。
+
+allocate时考虑数据块与disk的对应关系。
+NVMe disk需要考虑NUMA亲和性？
+普通盘连接南桥，不需要考虑？
+
+sqlite3、redis相关的block操作，用工作线程pool。\hl{不同于aio，没有CQ这种机制}。
+可以聚合起来进行批处理。因为缺少异步原生支持，可以称之为模拟aio。
+
+网络io怎么做的？\hl{TCP和RDMA不同}，RDMA是异步机制，TCP用得是recv和send。
+
+统一的polling框架，包括aio and NVMe，TCP and RDMA，scheduler等。
+通过eventfd block到一个block点上。
+
+\hrulefill
+
+状态机相对协程，是否更高效？对象的队列是少不了的，也需要schedule。
+每个对象的状态与task不同，需要按每种类型进行分解。而task则与进程一样，有三种基本状态。
+
+\hrulefill
+
+\hl{总结性能优化方法}：NUMA和CPU亲和性，Hugepage，并行、流水线、聚合等方法。
+locality考虑。
+
+virtio, IOMMU，安装在client端，感知虚拟化。
+
+\hl{硬件虚拟化}是指处理器支持虚拟化相关指令集，
+\hl{VAAI}扩展了SCSI语义，加速数据copy速度，与sendfile类似。
+
+\subsection{16}
+
+每个逻辑Core有一个调度队列（RBtree），所谓NUMA和CPU亲和性，就是通过mask，指定线程可以进入的队列。
+调度器是一个函数，从队列或多队列里取出一个或多个要处理的元素。调度器有控制线程，控制线程可以做其它的事情。
+从这个角度说，把调度器理解为一个函数为合适。线程调度、io调度和事务调度，都是这种方式。
+
+调度包括队列、调度entity和class。用class定制调度策略。
+
+LICH中的coroutine调度，采用了简单的FIFO方式，有优化空间。
+
+\hl{从底层物理资源去考虑}，kernel起到资源管理的作用，即资源虚拟化。cpu、memory、devices。理解devices更复杂，
+接入bus，被scan到，加载driver，然后就可以通过一定的方式进行通信，有外部事件时也可以中断方式通知cpu。
+中断通知，必然是先准备好上下文。这个上下文的切换是个重点。
+
+block用物理disk作为backing device，就是\hl{利用disk的物理特性}，而不是虚拟分区。
+
+\hl{时间片，优先级，可抢占}是内核线程调度的几大特征。
+
+协程与状态机方式，都需要分两层看。调度器和状态推进。状态机选出下一个要处理的任务，执行任务状态机一步或多步后退出。
+
+调度器相当于软件pipelines中的分配器。按epoll，需要把fd加入epoll的兴趣列表，
+同时维护分离表/routor：fd到node(event handler以及context)的映射关系。
+
+RDMA用了两层分离机制：epoll用于连接管理，自身的polling机制。
+
+\subsection{17}
+
+\hl{在lich里引入pg如何}？object-pg-osd的关系由两级映射完成，一是降低了metadata量，二是恢复平衡更容易做。
+这融合了ceph和lich两者的优点。
+
+如osd故障，pg处在降级状态。与lich引入vfm要解决的问题类似。\hl{引入最小副本数}，会使得方案更优雅。
+从osd故障到数据恢复，可以定制恢复策略，如时长等。
+
+lich的chunk和replication，类似于RAID的条带化和mirroring。
+
+传统盘阵的控制器结构，有双控、多控。双控关系有A/A，A/P。横向扩展。LUN的归属。
+\hl{理解MPIO在多控架构下的工作原理}。
+
+单处理器的false sharing。\hl{同一cache line}上有多个数据项，被不同线程更新。
+
+多处理器的缓存一致性（同一存储位置），存储一致性（不同存储位置）。NAS的client 缓存一致性
+
+ABA问题
+
+本地文件系统
+\begin{enumbox}
+\item \hl{RAID/LVM}
+\item ext2/3/4
+\item XFS
+\item ZFS
+\item btrfs
+\item ReiserFS
+\item ***
+\item Fuse
+\end{enumbox}
+
+分布式文件系统
+\begin{enumbox}
+\item GFS/HDFS
+\item GlusterFS
+\item Lustre
+\end{enumbox}
+
+与ceph对比
+\begin{enumbox}
+\item 数据分布(元数据管理)
+\item 副本分布(节点为最小故障域粒度)
+\item 卷控（无日志，顺序一致性语义）
+\item IO path (\hl{是否直连})
+\item 恢复
+\item 平衡
+\item QoS
+\item ***
+\item Cache
+\item Tier
+\item ***
+\item md5sum
+\item copy and migrate (online and offline)
+\item *** access control
+\item CHAP
+\item ***
+\item TP
+\item EC
+\item Dedup/Compress
+\item ***
+\item checksum
+\item \hl{Snapshot}
+\item backup
+\item Remote Replication
+\item ***
+\item \hl{RDMA/DPDK/SPDK}
+\item \hl{iSER/NVMf}
+\end{enumbox}
+
+VDI场景下的优化：多重智能cache、write bypass
+
+Lich优化项
+\begin{enumbox}
+\item pool下flat namespace，不需要支持多级目录
+\item 引入类似pg的结构，二级映射
+\item Node内管理磁盘，而没有把disk暴露
+\item ***
+\item 卷控平衡
+\item 查找卷控位置采用了multicast机制，为何不去admin上根据lease情况找？
+\item 数据访问需要vctl中转，client不能存取chunk (与array的双控架构做对比)
+\item 卷控拆分成子卷，支持大容量卷
+\item 恢复可以由卷控自己执行(智能卷控)
+\item 停止恢复
+\end{enumbox}
+
+\hrulefill
+
+Amazon EBS挂载到一个EC2实例上，EBS可以打快照，快照保存到S3上。
+第一个快照是全量的，后续快照是增量的。
+
+对一个pool，容错级别与副本数有关。故障域要大于等于副本数。\hl{EC能改进这个问题}。
+降低同等或更高容错等级下的成本。
+同等品质的硬件配置，pool越大，硬件发生故障的概率就越高。所以pool的规模也有上限。
+
+ceph数据一致性检测和恢复是以PG为基本单元进行的。PG是对象的集合，PG对应的OSD存储了对象的副本。
+副本一致性检测：\hl{peering, recovery, backfill, scrub}等过程。
+
+PG上所有对象的写入，有primary OSD调度，串行化并记录有日志。
+
+故障情况下，OSD(include primary and replica OSD)出现降级对象。
+
+\hrulefill
+
+RAID、副本、EC放在一块去理解。RAID有条带化、镜像、RAID5，在分布式系统中，对应\hl{分块，每块数据做副本orEC等机制}。
+一是数据分块，放到多个节点上，提升并行度。再一个是容错等级，副本、EC是两种标准方式。
+\hl{副本一致性和条带一致性是难点}。副本一致性通过RAFT协议去保障。
+
+scrub可以发现静默错误，依赖的是checksum。
+
+存储处在新旧之交，在快速演进。硬件和软件架构都在变革之中。
+硬件引入了RDMA、SPDK、DPDK、NVMe等快速网络和存储介质、协议。
+软件架构从传统阵列的SCSI、SAN、NAS到新的分布式架构。
+
+新型存储SDS，包括Ceph、Amazon EC2、阿里的盘古等。
+
+\hrulefill
+
+快照，从COW到ROW到LSV，ROW用户数据共享，LSV不仅用户数据共享，而且数据出现多版本，所以需要GC。
+
+ROW2和ROW3，都是带两级bitmap index。不同在于ROW2在新写时，按chunk发生了COW，
+ROW3在新写入时不发生COW，但导致更严重的碎片化，影响读性能。
+
+写有对齐写、不对齐写、overwrite覆盖写。读有对齐读和不对齐读。\hl{不对齐的写和读需要特别处理}。
+
+\hrulefill
+
+\hl{按对象、块、文件遍历本地和分布式系统}，更复杂的NoSQL、NewSQL，暂时没有精力照顾到，后期也需要整理。
+从哪些维度着眼？\hl{分布、副本/EC、sharding、快照}等。
+
+先有disk，再有fs，fs里继续有disk（设备文件），我中有你，你中有我的关系。
+
+怎么理解object、block、file之间的关系？\hl{NAS和SAN}在实际的应用场景中，有什么特别之处？
+大家又是怎么使用的？
+
+\hrulefill
+
+\hl{纸上得来终觉浅，绝知此事要躬行}。看书、源码的时间要慢慢过渡到分析问题、解决问题。
+头脑中要有big picture，在此基础上深化。如果没有这个，很容易迷失在技术的细枝末节里无力自拔。
+
+更基础的知识放在长期的学习计划里，定量有恒，日积月累，定有所获。
+
+\hl{戒定慧，此三学六度}，实在是度人的船阀，还有很深刻简练的吗？
+故称三无漏学，其道甚大，百物不废。何必舍近求远？实乃没有甚深定力和慧解的表现。
+
+应渐渐地少看书了，多动脑、多动手，在解决问题的过程中，扩展知识和能力的边界。
+(这段描述，有所不为而后可以有为，然后有所得) 知止是高级智慧。
+
+AFA是方向，相关技术包括\hl{RDMA/DPDK/SPDK，NVMe、iSER、NVMf}等。
+这些方面应该是下一步的重中之重，道不远人，如果舍近求远，恐有缘木求鱼的危害。
+
+\subsection{18}
+
+cache一致性与副本一致性存在很大的不同。cache一致性出现在共享内存多处理器、分布式文件系统client cache等场景。
+副本一致性出现在replication和EC等场景。
+
+cache一致性关注的是一个数据源，多个cache时的行为。副本一致性表示多个副本之间的一致性。
+cache一致性可以用lease、oplock，可靠多播，MESI协议解决，副本一致性用RAFT协议解决。
+
+\hl{完善性能分析和故障诊断toolbox}。
+
+按\hl{主体-对象模型}，一致性可分为观测一致性和数据一致性。
+
+\hl{CAP和ACID}，深入理解种种细分情形。
+
+\hrulefill
+
+lich meta里记录的是chkid到nids的映射，每个nid通过db查询到实际的disk loc。
+相当于两级映射。
+
+\hl{chunk tree过于复杂}，难以做到事务性的要求。
+allocate的时候，有可能会连续更新多级chunk。
+迁移或故障的时候，也会引发级联更新。
+
+lich无日志，如何保证一致性的？
+
+\hl{lich chunk内并发}，chunk内非覆盖区域，clock的连续性，理论上可以或并发或批量写入。
+有一次排序、精简、聚合、并发的机会。覆盖区域，按fifo顺序提交。
+如clock不连续，则需要等待。（\hl{paxos的日志写入，放松了该要求}）
+
+每个term包括\hl{选举、恢复、正常操作}诸阶段。
+
+\hl{如何减少故障下的io中断时长}？admin、vctl可能发生切换、或reload。需要case by case分析。
+
+实现LSV时采用了该方案。\hl{如果io size不规则，当如何}？
+log和bitmap的写入，采用了pipeline模式。以确保log的并发提交，bitmap的顺序提交。
+
+rcache比较复杂，开始按不同size建立多个cache是不明智的，应统一采用page cache，易于管理。
+不过可以加入readahead等策略。
+
+EC/dedup/compress/都需要建立新的映射。share底层数据块，但造成严重的碎片，对顺序读不友好。
+
+\hl{回顾open vstorage的映射关系}。zerocopy snapshot？索引、共享、多版本？
+多版本比共享有更复杂的引用关系。
+
+\hrulefill
+
+建立知识体系，依次scan各个分支领域。
+\begin{enumbox}
+\item \hl{CAP consensus, include paxos, RAFT and lease}
+\item ACID transaction ARIES
+\item metadata管理，如GFS、BigTable等。
+\end{enumbox}
+
+\hl{这次彻底把Paxos研究透彻，不能在一个地方跌倒两次。
+否则就是有勇无谋，把握不住重点所在}。
+
+戒定慧三字深邃，作为下一阶段的座右铭。
+
+\subsection{19}
+
+庄子内七篇、六祖坛经，从专业的角度去解读，很有意味。工匠精神、企业家精神是一而二、二而一。
+回归专业是正确选择，一直知道、一直不能很好执行，知行不能合一。这次不能再偏离。
+
+从分布式存储开始，建立问题和知识联动的体系，以助力其后的职业发展。
+
+\subsection{21}
+
+怎么查看cs和中断信息？
+
+如何处理slow disk？
+
+性能之颠：\hl{可观测指标=f（资源，workload）}。资源有使用率，基于时间(排队论？)、或容量。
+在software pipelines里，workload是上游，可观测指标是下游，架构影响性能(化学)。
+
+资源：\hl{CPU,memory,fs,disk and network}。
+
+多网卡，MPIO。如何利用多块网卡？
+
+面试经验谈
+\begin{enumbox}
+\item BAT，TMD，浪潮，联想等。
+\item 仔细整理做过的东西，要更深入。不熟悉的东西宁可不写。要非常严谨
+\item 用的什么型号的设备，测试的性能。
+\item RDMA是重点，建立连接的流程，遇到的坑。
+\item 基础编程题，本质上都是工程师
+\item 要知道lich的不足之处
+\end{enumbox}
+
+引入kv用于元数据管理，加强client功能，client可以与object直接通信，更大的chunksize。
+rich client，目前vctl就好像是这样的rich client。
+
+恢复和数据平衡都依赖于控制器平衡，才能有更好的并发度？
+
+\subsection{22}
+
+CAP平衡ACID和BASE，进而引入单副本一致性问题，RSM的解决引入paxos、raft。
+
+独立出metadata(KV)后，rich client，相当于controller前移到client，
+如果允许多个client并发open一个LUN，会涉及一致性问题。
+
+sheepdog采用DHT，不方便scan，所以recovery不好弄？
+
+\subsection{24}
+
+偏爱非对称架构，如有元数据服务器。再如SMP和NUMA。
+
+控制器的粒度，从传统array、卷控制器，到primary osd。
+
+io size影响到怎么处理，如果两个并发io发生了覆盖，则必须排序，然后在多个副本上按同一顺序apply。
+\hl{如果不发生覆盖，则怎么执行都不会影响到最终结果}？元数据更新的io size通常较小，如64B。
+
+ceph中pool不能过大，\hl{把pool限定在一个较小的节点集}，避免过多的节点导致故障概率增加。
+
+存储索引结构，\hl{btree，lsm}，hash，bitmap、bloom filter。
+bloom filter用在允许误判的情况下判定一个元素的存在性。
+
+bcache用btree做什么？
+bLSM是LSM和btree的组合体。
+
+学习数据结构和算法，要自己动手推导，三部曲：\hl{猜想、重建、证实}。
+
+\hrulefill
+
+\hl{edog架构}。通过mnesia数据库管理vm和用户数据。
+libvirt用于控制qemu-img，可以用xml配置文件。云管理平台通过libvirt来创建、启动、关闭、销毁vm。
+qemu通过driver请求各种后台存储，如\hl{rbd、sheepdog、fusionstor}等。
+
+\hrulefill
+
+vfs不仅对理解文件系统有帮助，对理解任何存储系统都是有帮助的，包括对象、块等。
+superblock是引导信息。inode维护着dir/file/volume到数据块的映射，dentry建立了global namespace。
+
+zfs的pool化，\hl{FS/Volume}共存的架构令人耳目一新。传统的\hl{Volume/FS架构}。
+
+存储有几级映射：
+\begin{enumbox}
+\item namespace (tree)
+\item file to object mapping
+\item object to location mapping
+\end{enumbox}
+
+比如ceph引入了pg，又加入了一层。bcache虚拟地址到物理地址的mapping。
+
+ext2/3/4的间接块、extent tree数据结构。ext4区分inode为dir和file，
+分别用htree和extent btree来实现。由此可见\hl{btree作为通用index结构}的强大之处。
+
+\hrulefill
+
+现在可认为建立了相对完善的知识体系。接下来就要围绕几个核心问题，
+查漏补缺，\hl{致广大而尽精微}，打造T型知识结构
+\begin{enumbox}
+\item 体系结构、操作系统、编程语言、数据结构和算法
+\item 网络和分布式系统
+\item 存储
+\item TRIZ
+\end{enumbox}
+
+Lich需要进一步加入理解的地方
+\begin{enumbox}
+\item 数据模型
+\item 数据分布
+\item \hl{IO PATH}
+\item 控制器架构
+\item 本地磁盘空间管理
+\item 副本一致性协议 (vctl, clock)
+\item 恢复( +VFM )
+\item 平衡
+\item QoS(token bucket and leaky bucket)
+\item 快照：COW、ROW、LSV
+\item Slow and Broken Disk Detecter
+\item ***
+\item Redis Engine
+\item BCache
+\item Tier
+\item EC
+\item VDO
+\item RR (sync and async)
+\item ***
+\item SCSI/iSCSI/iSER
+\item NVMf
+\item ***
+\item Scheduler
+\item Memory Allocator and Hugepage
+\item RPC and corerpc (over TCP or RDMA)
+\item RDMA/DPDK/SPDK
+\item Multi NIC
+\item MPIO
+\end{enumbox}
+
+\hrulefill
+
+\hl{把操作系统作为主要隐喻}，按操作系统的视角去看待形形色色的系统。
+操作系统管理物理资源，提供syscall供上层应用使用。
+在操作系统的层面有最好的抽象，如file、virtual memory and process。
+
+\hl{分布式操作系统}会更强大，在OS之上加入分布式，则形成\hl{两层的知识体系}，有分有总。
+网络流，节点和边构成分布式，细化节点形成现代OS的设计。
+
+\hl{分布式操作系统，简称操作系统}，是看待世界的系统方法。
+
+\hl{深耕操作系统这块良田}，\hl{一分耕耘一分收获}。
+这里的OS，既指实际的操作系统，也是一个更为广泛的隐喻。
+坎贝尔神话隐喻予人以重大启示，终于找到了现阶段最重要的隐喻。
+任正非是管道，OS是虚实结合的产物。
+
+\hl{操作系统是软硬件协同设计的典范}，体系结构、编程语言、存储、数据库和网络都是这个生态的积极参与者。
+数据结构和算法。
+
+用OS这个隐喻具有最大的开放性，同时又是专注的。
+\hl{炼金术士手中的操作系统}整合了资源，且有着预定价值输出。
+\hl{OS具有一即一切一切即一的大气魄}。
+
+\subsection{25}
+
+操作系统包括\hl{计算、存储、网络、协作}。从协作的视角来看，分布式系统算法。
+
+卷管理 disk, raid and LVM，ZFS
+
+卷的两种使用方式，一是Filesystem，二是iSCSI，分别对应NAS和SAN。
+NAS文件系统在内部，SAN文件系统在外部。\hl{SAN通过NAS网关即可把NAS包含在内}。
+
+体系结构、编程语言都是OS应有之义。OS封装体系结构供PL使用它的服务，OS又是PL构建的，\hl{Arch、OS、PL构成三连环}。
+OS提供了最有用的抽象，File、Virtual Memory、Process and VM。
+
+\hrulefill
+
+\hl{删除卷}不同于一个一个free object，整体删除应有更便捷的方式。
+在etcd上产生一个删除卷的JOB，包括每个节点上的task。由每个节点调度执行。
+
+每个节点上，周期性地polling相关任务，加入本地任务队列。由独立线程或线程池处理该队列。
+\hl{每个task建模为状态机}。处理完一个task后，从etcd上删除该task。
+
+从replica cache、db和disk里删除vol相关记录。
+注意操作顺序，应先解除ref关系，再回收disk空间。
+
+\hl{删除pool}也应采用batch方式。保证后置条件，执行后不再有该pool数据。
+因为pool id采用了name，\hl{what if}如果在此过程中，又创建了同名pool，会如何？
+最简单的做法是禁止这样的行为。
+
+\hrulefill
+
+能用int表示的，会方便很多，如nid、diskid，需要保证在作用域内的唯一性。
+
+CAS lock?
+
+抽象，庄子齐物论
+
+\hrulefill
+
+bcache，拔盘后虚拟盘依然可写？
+
+\hl{EIO下踢盘}，这样做会引起什么问题？合适吗？
+踢盘后，如果引起部分对象副本不可用，应该如何处理？
+
+画草图，保留自己的笔记！
+
+\subsection{26}
+
+单核、SMP和NUMA，共享内存多处理器
+
+先研究各类调度器，如linux进程调度、io调度，erlang/go协程调度，k8s资源调度等。
+
+linux进程调度，要处理MP架构，减少上下文切换和cache miss等问题。
+
+erlang/go的协程调度，是建立在内核线程上的非抢占式调度，支持大量协程调度，还要处理堵塞io带来的问题。
+即\hl{调度与内存和io}要结合起来考量。io是通过异步提交和事件驱动的方式做的。
+coroutine虽然是非抢占式的，但可以通过\hl{yield和resume机制}主动让出，由外部事件来唤醒。
+
+allocator包括内存管理、磁盘、卷管理，乃至文件系统。
+
+\subsection{28}
+
+协议了解少，包括\hl{SCSI、NFS、CIFS}等，须强化。
+RDMA/DPDK/SPDK、NVMe等慢慢成为主流
+
+\hrulefill
+
+分布式系统概念与设计。
+
+分布式系统和操作系统是基础，需要专精。\hl{一门深入、长时薰修}。
+
+理解分布式系统的起点是CAP定理，为了HA，引入副本，为了性能、引入cache。如此就要进一步解决带来的一致性问题。
+
+\hl{CAP是思考原点}，引入一致性、容错、可用性、性能，弹性、可伸缩性等等。
+引入safety and liveness、ACID and BASE。
+引入replication and cache，进而引入consensus （zk、etcd等）。paxos是核心算法。
+
+分布式系统的很多手段在RAID里已经采用，如条带化、镜像、校验码。分别对应\hl{分块、复制/EC}。
+
+Erlang/OTP在解决分布式系统的痛点上是怎么做的？如何拥抱失败？
+协程调度，适应MP体系结构，同时把mm和io纳入考虑。进程有mailbox，异步通信。
+\hl{go与此有所不同，采用了csp范式}，把channel显式地提了出来，增加了灵活性(Q)。
+
+分析磁盘故障的处理策略：如何检测？恢复和io策略？
+\begin{enumbox}
+\item 出现EIO应该马上踢盘吗？
+\item 检测慢盘坏盘的方式是什么？
+\item 无clean副本时，下一步该如何处理？
+\item 一次恢复失败，接下来怎么办？ retry, redo(all of disk)
+\end{enumbox}
+
+两种模式：强一致性和降级。如果采用强一致性，会堵塞io直到恢复完成，iops下降严重。
+如果指定最小副本数，\hl{运行于降级模式，采用异步恢复策略}。就影响一致性，无法容忍连续故障。
+\hl{性能是可用性的一个体现，这是CAP认识的深化}。
+何况CA不是铁板一块，而是分层分模块有结构的，每个接口都需要单独分析，
+在总的指导思想下，case by case地去处理。
+
+节点故障：不同于磁盘故障，需要全面scan发现待修复的chunk。
+
+两层：分布式和节点。
+
+熟悉lich模块
+\begin{enumbox}
+\item scheduler
+\item memory
+\item io (normal, nvme, spdk)
+\item rpc (including \hl{TCP/IP/RDMA/DPDK} etc)
+\item ***
+\item application protocols, iSCSI/NFS/CIFS
+\end{enumbox}
+
+每个core线程整合了scheduler和io，统一用epoll方式驱动(eventfd, timerfd)。
+不同core线程通过corerpc进行通信。
+
+为什么要依赖于物理时间戳？每个host时间相差要在5s以内？
+
+知识体系：
+\begin{enumbox}
+\item 横（\hl{编程语言、算法、设计模式、架构}）
+\item 存储协议
+\item 分布式系统
+\item 本地引擎
+\end{enumbox}
+
+\subsection{29}
+
+\hl{RDMA对NIC或switch有要求}。
+
+DPDK是用户态TCP，用在以太网环境下。SPDK也是用户态NVMe驱动，并提供了NVMf。
+如果不引入支持RDMA的交换机，在all以太网环境下，可以用SPDK/DPDK分别实现\hl{全用户态的存储和网络}。
+
+输出价值的能力是最重要的能力。
+
+没有时间深入研读DPDK/SPDK，只能做大体上的把握。
+第一个问题就是\hl{如何在用户空间实现设备驱动}？
+
+每个进程的地址空间分两部分：用户态和内核态。内核态只有一个地址空间，映射到不同的进程。
+\hl{不同进程share一份内核空间}，多进程trap后并发执行。
+
+pci设备，通过mmap可以让用户态代码访问。\hl{每个pci设备都是映射到内核的一块内存区域}，可以把该内存区域映射到进程地址空间。
+
+能否在polling模式和中断模式之间动态切换？\hl{用户态接收不到中断，由uio接管}。polling模式检查状态寄存器的值。
+
+缓冲区溢出攻击
+
+\subsection{30}
+
+pacelc，引入replication，RSM（paxos、raft）。副本一致性考虑几个因素：
+\begin{enumbox}
+\item 有无控制节点，控制节点在哪儿？
+\item 更新传播策略，同步还是异步
+\item 是否读写分离
+\end{enumbox}
+
+以上多个策略的组合，定义了不同的tradeoff between consistency and latency。
+从强一致性到最终一致性。
+
+副本一致性本质上是一个paxos/raft问题
+\begin{enumbox}
+\item 谁能当选leader (最低限度要包含所有提交日志)
+\item 如何处理committed and uncommitted日志条目
+\item what if no log？
+\item member change
+\end{enumbox}
+
+难以处理的问题
+\begin{enumbox}
+\item 均衡性和并发度
+\item slow disk
+\item 故障下的io中断
+\end{enumbox}
+
+故障涉及admin、controller的切换、涉及降级模式和异步恢复，如何隔离故障、最小化带来的不良影响？
+
+数据库的隔离级别，与一致性的对应关系。read uncommitted？
+
+retry的幂等性要求。
+
+对比ceph：ceph采用crush算法，如何做到计算结构的均衡性和稳定性？
+如果计算结果总是指向固定的osd，则如何处理慢盘问题？
+
+用latency进行空间分配，没有考虑容量，导致各节点数据分布不均匀，3节点的情况下，两节点full，一节点可用。
+recovery一直rescan，balance无法启动。整个系统无法进一步进行liveness。
+
+过早优化是万恶之源。
+
+\hrulefill
+
+\hl{用户态驱动}意味着什么呢？
+
+\hl{用类比思维}，发挥想象力，触类旁通，有利于知识的迁移和融通。
+象喻、譬喻、数喻等。
+
+kernel的io path，\hl{vfs-pagecache-block-driver-scsi控制器}等。
+管理粒度有page和block之分别，需要处理dismatch带来的问题。
+
+DPDK/SPDK分别看作\hl{用户态的网络和存储driver}，这是设计的初心。
+DPDK已经有十年以上的历史，广泛用于数据中心的交换机和路由设备中。
+
+DPDK是以太网的用户态驱动，采用了PMD，基于DPDK可以重写TCP/IP协议栈。
+DPDK无法直接在现有应用中使用，要借助ULP。
+SPDK采用DPDK的理念，扩展到storage，重写kernel io path。
+
+CPU与外设的通信方式，包括networking and storage。
+\hl{网卡也是pci设备}。网卡的多对列，NVMe的多队列究竟是什么？
+
+如果只用单线程访问一个设备，就无需加锁。
+libc的malloc/free内存管理太低效，所以先从OS申请hugepage，然后定制memory allocator。
+
+DPDK不同于RDMA。但也采用了很多相同的模式，如异步io、PMD。
+运行于IB上的RDMA性能要更卓越一点，\hl{用户态TCP}性能直追了上来，且不依赖于NIC和switch设备，具有更大的普适性。
+
+SPDK：application是采用了SPDK模式实现的任何应用。driver是相对backing device来说的，不同的device需要不同的driver。
+target导出device。\hl{guest os使用virtio driver与后端设备通信}。
+one of major vhost use cases is networking/DPDK or storage/SPDK offload in QEMU。
+QEMU是虚拟设备，前端需要driver，虚拟设备要映射到物理设备上。
+vhost target再与后端存储通信，export出device。
+\hl{vhost-user/vhost-target直接bypass Guest OS/QEMU}。
+
+virtio是在VM领域解决IO path问题的一个方案。
+
+\hrulefill
+
+在bdev下对接分布式存储，bdev以上由target导出volume或blobfs接口。
+\hl{Lich采用什么方式访问的NVMe设备}？直接打开pci？通过bdev可以访问吗？
+
+The SPDK block device layer, often simply called bdev, is a C library intended to be equivalent to the operating system block storage layer
+that often sits immediately \hl{above the device drivers} in a traditional kernel storage stack.
+
+Bdevs can be layered, such that some bdevs service I/O by routing requests to other bdevs.
+This can be used to implement \hl{caching, RAID, logical volume management, and more}.
+Bdevs that route I/O to other bdevs are often referred to as virtual bdevs, or vbdevs for short.
+
+在NVMe driver之上，实现\hl{blobstore/rocksdb}。这可以与kernel的io stack做比较。
+\hl{上层应用要么使用raw device，要么使用某种类似filesystem的东西}。
+这里的上层应用指的是rocksdb等应用层的应用。
+
+\subsection{31}
+
+diskmd的共享锁改进了，用software pipelines去理解共享锁导致的串行化会影响性能。
+
+阿里面试的技术细节，由此可窥探到他们的关注点何在：
+\begin{enumbox}
+\item EC条带更新，如何更新比条带小的数据块呢
+\item SCSI的某个重要tag的用途？
+\item 掉电？
+\item 测试用的设备型号
+\end{enumbox}
+
+\hrulefill
+
+全闪：全闪的dedup和compress是必选项，怎么做好？对性能影响有多大？
+
+数据保护方面，\hl{snapshot、backup和RR}都非常重要。
+checksum怎么做？nvme提供了相关接口？
+
+\hl{open vstorage}只有ls volume，实现了dedup、compress？
+
+\hrulefill
+
+连点成线：edog、lich以及在adesk的TI devops，构成了相对完整的技术体系，包括\hl{存储、虚拟化、运维平台和云平台}。
+反复复盘，以深化对已有经验的理解，提炼出更多普适的知识。
+
+storage: 稳定可靠高性能。
+
+vm生命周期管理，放置policy、存储policy、HA、冷热迁移等。
+调度策略，自动或人工指定。
+
+HA: lease or lock? 自杀条件？不能出现多个vm并发访问一个image。
+
+\hrulefill
+
+\hl{bonding起到LB和容错的多重功能}。
+多网卡，连接映射到不同的网卡，在corenet mapping层维护。
+
+ip地址转化为RDMA地址，然后才能建立连接。
+RDMA连接如何bind到某个具体的设备？
+如何把RDMA连接加入epoll体系？
+
+看文档，理解每个api的含义。把RDMA作为一个重点。

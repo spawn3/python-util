@@ -1,0 +1,928 @@
+\section{02}
+
+\subsection{02}
+
+\hl{Reactive Programming与CAP关系密切}。追求的value是即时响应、可维护性和可扩展性。在正常情况下是如此，即便发生故障，或负载变化，也是如此。
+如何做到？引入了async、non-blocking消息传递，引入了显式的消息队列。通过MQ，如何实现以上诸特性呢？
+
+系统划分成组件树的成绩结构，明确职责、隔离故障，并把故障委托给独立的故障处理单元。
+
+\hrulefill
+
+Lich的故障处理，应该有一套框架去处理所有故障，包括磁盘、节点，甚至把balance也纳入其中。
+通过发送消息来触发相应的处理逻辑。
+
+维护显式的消息队列，放在哪儿？client端，卷控端？如放在卷控端，由谁来调度执行？
+卷控实则是个非执行体，只是一个内存结构。
+
+可以由卷控所在的core线程去调度、或采用timer的方式。
+
+MQ的task之间，如果由依赖关系，如io读写请求，需要同步机制。
+
+并发提交的每个请求对应一coroutine，在scheduler层面，形成了一MQ。
+
+\hrulefill
+
+Lich的task，与actor有很多不同，如没有mailbox，不能形成监督树。
+
+\subsection{04}
+
+明体达用，理论是体，在各种系统中的实现是用。整理分布式存储系统的方方面面，不能脱离具体的工程实践去抽象地理解理论。
+Lich也是诸多系统之一。
+
+按自然的演进过程，从ACID到CAP。单机事务是思考的起点，CAP以及其改进是设计原则。
+加入复制后，情况变得更为复杂。
+
+ACID中，I是隔离性，需要CC机制来保障。A/D是原子性和持久性，需要UNDO、REDO日志来保障。C是业务数据完整性约束。
+与CAP中的C有所不同。CAP中的C是原子读写，如线性一致性、顺序一致性、因果一致性、会话一致性。
+
+CAP也是数据库的设计的指导原则。\hl{CAP的最新形式是PACELC，与Reactive Programming很类似}。
+分布式存储系统是现代大规模高并发网站架构的一个主要部分，按分形学，有很多共性。
+
+线性一致性对读写操作都要执行全序原子多播。顺序一致性需要对写操作执行全序的原子多播。
+
+一致性可以看作物演通论的生存度，一致性递弱需要相应的补偿协议，从强一致性到最终一致性是一个连续的光谱。
+一致性需要高于某一阈值，系统才是健康的。一致性降低必有相应的代偿协议。
+
+为什么要降低一致性？或为什么一致性会降低？
+
+\hl{single master与primary copy}不同，前者针对的是真个数据集，后者针对的是某一数据项。
+还有一种peer to peer系统，就是一个数据项的更新也会涉及多个primary。
+
+两者之区分实质上也就是\hl{paxos协议中无主和有主的区分}。我们把RAFT看作paxos协议的一种实现。
+通过强化约束，来简化实现的复杂度。
+
+\hrulefill
+
+DB引擎，意索引。先考虑CC(隔离性，事务调度器)，次考虑提交协议，最后考虑基于日志的故障恢复(A/D)。
+扩展到分布式数据库系统，需进一步考虑\hl{CC和提交协议如何去满足ACID属性}。
+
+整理数据库相关知识，包括单机、分布式数据库，从数据模型上，包括SQL/NoSQL/NewSQL。
+主要从几个维度进行：
+\begin{enumbox}
+\item 数据分布
+\item 复制
+\item index
+\item transaction
+\item 读/写
+\end{enumbox}
+
+\hrulefill
+
+\hl{CAS/ABA，时间戳，向量时钟}。
+
+MVCC里对每行记录增加两个隐藏version。
+
+除了IO之外，还有并发的其他任务，如replica cleanup。
+
+有多种CC方法，主流的是lock，\hl{TO、MVCC都是基于版本号/timestamp}。
+
+\hrulefill
+
+把以上理论进一步落实到Lich和Ceph的设计中。
+\begin{enumbox}
+\item 更新chunk时递增info version？
+\item 在snapshot也实用了version。
+\end{enumbox}
+
+\subsection{05}
+
+同心圆模型，最核心的是设计心法，从内往外以此是硬件，软件(OS、FS、DB、PL/Compiler)，网络，分布式系统。
+设计和算法是两大重点和难点，可放入最内圈。
+
+可靠性、可用性，容错、resilient，可伸缩性、elastic，可扩展性等概念有着细微的差别。
+
+性能\&故障诊断分析方法：
+\begin{enumbox}
+\item Pipeline
+\item Queuing
+\item ***
+\item PAT
+\end{enumbox}
+
+数据存在的几种形态：
+\begin{enumbox}
+\item Storage
+\item Cache
+\item MQ (stream)
+\end{enumbox}
+
+Storage和Cache具有极大的相似性。
+
+至于async更多是一种架构思想。Reactive Programming强调了MQ的重要性，\hl{message-driven是实现RRE的良方}。
+
+动静分离的静，最适合应用多级cache，御敌于国门之外，最终到达源站。
+无状态的业务逻辑层与有状态的数据层，如何进行伸缩是有很大不同。
+
+\subsection{07}
+
+数据层面：复制(EC、dedup、compress)、snapshot、cache等等。
+
+卷的snapshot，cc中快照隔离，日志的检查点技术
+
+\hrulefill
+
+adesk架构演进之路:
+\begin{enumbox}
+\item 单库无拆分->动静分离->master/slave的replication架构。
+\item 加入ElasticSearch，支持全文搜索功能。
+\item 采集行为日志，进行数据分析。google analysis，umeng等。
+\item 对接广告平台进行变现
+\item \hl{上云}：不再自己运维。采用了阿里云和七牛的云平台。
+\end{enumbox}
+
+性能：索引，cache(CDN etc)、负载均衡
+
+可伸缩性：动静分离、增加磁盘。
+
+推送
+
+监控：第三方监控、nagios、zabbix
+
+增长黑客
+
+\subsection{17}
+
+\hrulefill
+
+进入\hl{刷题模式}，有的放矢、定量有恒地刻意练习，以刻意练习的理念概括之。
+
+paxos的二阶段可用温故知新概括之。
+
+membership change比较复杂，joint联合共治，多数派原则？
+
+由CAP定量出发，来理解分布式系统的复杂性。CAP/PACELC过渡到Reactive Manifesto。
+
+分布式一致性至关重要，相关协议有:
+\begin{enumbox}
+\item 2PC/3PC
+\item paxos
+\item pacificA
+\item raft
+\end{enumbox}
+
+pipeline、SEDA、lambda，软件管道三原则。
+
+可以数据库的事务管理来类比：\hl{cc和故障恢复}。cc有2pl和基于时间戳的多版本机制。
+故障恢复基于log/journal，支持redo和undo操作。
+
+ACID的A/D关乎故障恢复，I关乎并发控制。事务的隔离级别，最少要read committed。因为可以undo，不加控制的话，会出现read uncommitted。
+
+提交不变性：
+
+最大提交原则：提交的一定满足A/D，未提交的如何处理？
+
+所谓顺序一致性就是可以交叉，但要看到共同的交叉顺序。\hl{意味着并不需要UNDO操作？只要原子写入}？
+\hl{顺序一致性}，lich支持顺序一致性，可能读到uncommitted数据，由上层应用来保障完整性。
+
+分布式计算：在分布式环境中，强一致性因全局时钟限制很难实现。程序员开始寻找条件不那么严苛的模型，
+lamport利用逻辑时钟代替全局时钟提出顺序一致性，其定义如下：
+\begin{enumbox}
+\item 所有执行结果相同，就像处理器的所有操作是在一定的顺序下执行的一样。
+\item 在本地时钟下，本地操作顺序为本地程序的执行顺序。
+\end{enumbox}
+
+不同处理器之间的操作出现重叠是可能的，但顺序一致性要求所有处理器看得的重叠相同。
+
+顺序一致性需要客户端的补偿措施。如并发访问文件的一个区域时，由client自己进行同步。这对块来说是合理的。
+对不带journal的文件系统是否有问题？
+
+顺序一致性和read uncommitted的事务隔离级别是两个不同概念，宜分开说。
+先考虑顺序一致性(分布式系统的顺序一致性如何实现)，即便实现了顺序一致性，还需考虑整体故障情况下会发生read uncommitted的问题。
+\begin{enumbox}
+\item 分布式系统如何实现顺序一致性
+\item 如何处理整体故障情况下的read uncommitted问题？
+\end{enumbox}
+
+事件因果序由逻辑时钟、向量时钟、矩阵时钟定义。分为两部分：本地所见的全局时间、本地逻辑时钟。
+在逻辑时钟里，两部分压缩为了一个变量，所以逻辑时钟并非强一致性的，即由逻辑时钟推导不出事件的前后顺序。
+
+分布式计算：顺序一致性不如线性那么严格，相比线性更容易实现。虽然存在全局顺序，但是本地处理器执行操作顺序未必一定要严格遵守全局时间顺序，
+\hl{整个过程只需要对写操作使用全序广播机制}，并不需要对读操作使用全序广播。
+
+lich采用了单控和clock，无journal，clock没有持久化。通过lease机制来保障卷控的唯一性。
+vip机制用来寻址iscsi target。(iscsi targt和卷控通常在一个节点上)
+
+保序：iscsi initiator生成一个序号，或者根据session？这里有什么问题？
+提交到一个卷控，然后该\hl{卷控failover}，然后呢？
+
+换个角度来看，lich卷提供了类似裸盘的东东，操作系统等上层应用对裸盘有什么要求和保障，
+需要做什么才能保障业务数据完整性？ lich的client端与lich卷之间的关系也是如此。
+(RMI：关系映射反演，是化归原则的进一步抽象？)
+
+io大小对一致性的影响？就地写，而不是多版本下的shadow page、或COW写。会带来什么样的问题？
+
+多控会把顺序一致性问题变得复杂。用单控和clock可以实现顺序一致性（logical clock）。所有元数据和数据都有卷控集中处理。
+卷控的存在，把问题简单化了，但会引入新问题，如读写局部性/本地化。Ceph rbd(rich client)如何处理该问题？
+\hl{什么场景下多个rbd client会访问一个卷的相同区间}？
+
+如果把这个问题推到多控场景呢？ 引入KV之后，元数据/数据缓存面临一样的问题，共同构成共享状态。
+多控下如何考虑Multipath。或者说配置multipath会导致多控问题。multipath下的多各卷控什么关系？是主备还是双活？
+仅仅是容错，还是可以聚合带宽？ 用lease、cas机制能实现多控吗？
+
+\hl{多控下如何实现顺序一致性}？ vector clock、paxos？
+
+\hl{应用场景}：orache rac、asm是什么样的架构？多个qemu实例会不会有共享卷？
+
+CAP、质量三角形都体现了\hl{递弱代偿原理}。一致性的下降需要补偿措施。
+ROW2/3提高了write操作的性能，可增加了元数据，来补偿Read操作。
+写和读也是平衡关系，特别是\hl{随机写、顺序读}两者之间。
+
+引申到事务管理，顺序一致性更多是前端并发控制的问题，而read uncommitted则是事务本身面临的问题，
+需要与client结合在一起作为一个整体来考虑。
+也可以\hl{用RMI原则来分析}：原领域（lich）- 映射到事务管理（cc和recovery）。
+
+没必要说lich是什么顺序一致性，从复制状态机的角度去描述更好。
+用raft协议去说明写是如何提交的，又如何读。
+
+\hrulefill
+
+快照：COW、ROW 1/2/3、LSV。
+
+快照不变式，由快照读定义。
+
+vmware如何实现快照？每个卷/快照对一个一个或多个文件，粒度更细，更易均衡管理。
+
+open vstorage打快照非常容易，how to read，问题依然是读操作的性能，如引入快照头的开销如何？
+
+如果卷和快照按1:1映射关系，还有必要堆叠在裸卷之上吗？直接实现一种与COW同级的ROW1/2的卷格式如何？
+这样管理粒度更小，更易于灵活组织。采用非堆叠方式，只需要一层元数据即可。
+
+先理解当前实现的COW快照树。主要问题有几个：
+\begin{enumbox}
+\item 卷和快照如何组织，与底层裸卷是什么关系？1:1，还是n：1?
+\item 维护快照树
+\item 快照头有无完整索引？索引采用什么结构？
+\item 如果有索引，索引的管理粒度是多大？page？
+\item 如何保障\hl{读的不变性}？ how to read
+\item 每种操作的性能和复杂度
+\item 支持的快照数量
+\end{enumbox}
+
+在混合存储里，两层元数据最好都落到高速层上。由底层空间分配器进行管理。
+
+ROW3相对于ROW2的管理粒度更小（从chunk到page），ROW2的chunk内偏移是可以通过计算获得的。
+这也显示了一种管理映射关系的设计模式，{是通过元数据还是通过计算}？
+sheepdog、ceph都是基于DHT进行计算的。
+
+分析写和读过程。新create的快照无数据，后续也只是存储私有数据。
+所以没有完整索引，会有读(快照读，而不是卷读)放大现象。
+
+快照读由卷控执行，用在\hl{revert和clone}的场景下。快照读按一定顺序读取多个快照乃至卷。
+
+revert最复杂，是个两阶段过程：既需要保留一部分卷上的数据到snap from或auto snap上(vol -> auto snap)，
+然后用读取目标快照，覆盖卷上数据(target snap -> vol)。
+
+几个相关属性
+\begin{enumbox}
+\item fileinfo.snap version
+\item fileinfo.snap from
+\item fileinfo.snap rollback
+\item chkinfo.snap version
+\end{enumbox}
+
+\hrulefill
+
+ROW1是LSV项目开始时的设计方案，Btree实现索性，但是只记录写入卷的私有数据，而没有完整copy快照头。
+所以对读操作而言，需要一个回溯过程。
+
+ROW2采用了完整的快照头做索引，采用了类似内存页表的数据结构。这是因为LBA是非常规则的线性地址空间。
+内存、inode、ext3的间接块都采用了类似结构。
+
+ROW 2/3的不同：一个chunk逻辑上多个LBA（以页为管理粒度），是否对应一个裸卷的chunk。
+分析不同读写模式下性能和空间的影响。读写/顺序、随机可有四种组合。ROW2在随机写的情况下，会导致大量空间浪费。
+ROW3则碎片化严重，顺序读性能需要补偿。
+
+ROW2保留chunk内的相对顺序，随机写会浪费大量空间。ROW3以append方式写入，碎片化问题严重。
+
+bitmap cache，有点类似页表的TLB。
+
+bitmap记录LBA到PBA的映射关系。PBA引用到本卷或别的卷的一个物理页（chkid,chkoff, chk内页偏移）
+clone时候需要指向外部卷，跨卷访问。
+
+LBA如何映射到PBA？连续的LBA是否映射到连续的PBA上？
+
+bitmap组织成二级索引结构。L1 bitmap私有，L2bitmap共享，发生COW。
+
+\hrulefill
+
+LSV的why、how和what？
+
+LSV适用于什么场景？对标的系统有:
+\begin{enumbox}
+\item HDFS/HBase
+\item LevelDB/RocksDB
+\item NOVA文件系统
+\item Open Vstorage
+\item SSD/FTL（磨损均衡）
+\item LSMT
+\end{enumbox}
+
+\hrulefill
+
+数据结构和算法
+\begin{enumbox}
+\item buddy algorithm
+\item graph dfs/bfs采用三色标记
+\item radix tree/radix sort, bst/quick sort
+\item trie tree, prefix用于压缩，postfix用于匹配
+\item DPDK的lock free ring
+\item DPDK/SPDK生态：
+    \begin{enumbox}
+    \item oracle RAC/ASM
+    \item QEMU virtio/vhost
+    \end{enumbox}
+\item QoS
+\item snapshot
+\end{enumbox}
+
+为什么说FP适合于并发编程？
+
+\subsection{18}
+
+ceph的pg也是一种分区机制。从sharding/replication的组合看分布式系统的选择。
+
+小米开源了pegasus键值存储系统，table/partition/replica，table隔离。
+
+lich的最基础单元是卷，卷没有做分区处理。iscsi target和卷控绑定到同一个core上。非iscsi的场景呢？
+
+lich的pool采用name作为id，无法rename，无法保障唯一性。
+如果删除/再创建，无法判定是否是同一个pool（ABA问题）。
+
+公有云很难采用单一卷控方式，如果在client端直接访问chunk层（此时client即相当于卷控）。如果有多个client并发访问呢？
+就多卷控并发访问。如果做并发控制？如果client端有cache，如何做到cache一致性？(CAS/lease)。
+
+聚合边界：\hl{kv、列存、mongodb，都采用了聚合的概念，聚合内部保障原子性}，如kv的一条记录、列存的一行、mongodb的一个document。
+聚合之间难以处理原子性问题。为了计算某些统计量，适合用MR计算框架。
+
+cassadra采用了hbase和dynamo的混合。底层存储用列存、用DHT实现分区扩展性。
+
+SQL-on-Hadoop，这种\hl{NewSQl设计范式}在进一步发展，如Spanner、OceanBase、TiDB等。大多基于列存？
+
+\hl{全闪新架构}：C/M/D，client，Meta and data。Meta采用分布式键值存储。
+带来的好处是： 剥离vol元数据道M，无table1、table2了，且client可直连data，无需target/卷控转发。
+
+cinder是控制平面的事，无关IO。
+
+\hrulefill
+
+RMI是一种高度抽象的原则，有利于知识的迁移和类比。同样的问题和模式发生在不同的领域，
+如果能这样\hl{触类旁通}，极大地提高了学习效率。
+
+盘阵-分布式-数据中心，双活或多活方案，双控有三种模式：\hl{主备、双活（ALUA、SLUA）}。
+双控都甩出同一个物理LUN，host端通过多路径软件连到两个LUN上，盘符删除、路径选优。
+
+\hrulefill
+
+\hl{赋值器、分配器、回收器}。弱分代假说，优先回收年轻代的对象。通过check queue和heap来巡回检测。
+heap满则溢出进行回收。
+
+什么条件沉入老年代？老年代在full gc里进行处理。full gc的处理策略是什么？
+
+order是特别重要的一个概念，一致性即是定义在时钟的基础之上。因果序分为两个部分：进程内以及多个进程之间的消息。
+
+info version和sqlite里的meta version什么关系？在删除一对象时，meta version有什么用？ 后续已更新，则不允许删除。类似cas机制？
+
+多版本？
+
+\hrulefill
+
+HERE
+
+遗留问题
+\begin{enumbox}
+\item \hl{RAFT/paxos}，重中之重
+\item etcd在lich的用法
+\item ***
+\item Lich一致性、恢复和平衡
+\item QoS token bucket and leaky bucket
+\item ***
+\item COW snap tree
+\item ROW1/2/3
+\item LSV
+\item ***
+\item lich架构
+\item RDMA/DPDK/SPDK
+\item lich的各项性能指标
+\end{enumbox}
+
+数据结构和算法
+\begin{enumbox}
+\item hash
+\item heap
+\item skiplist
+\item buddy algorithm
+\item lock free ring
+\item huffman code
+\item RBTree
+\item log structured merge tree
+\item B+tree
+\item 大量数据的情况
+\end{enumbox}
+
+其它
+\begin{enumbox}
+\item 多控和多路径
+\item Orache ASM
+\item Orache RAC
+\item Qemu virtio/vhost
+\item GC
+\item 如何管理文件系统元数据
+\item GlusterFS snapshot, which based LVM snapshot
+\item LVM snapshot
+\item Qemu snapshot
+\end{enumbox}
+
+\subsection{19}
+
+用bst统一去理解二分查找、merge sort and quick sort。merge sort可以看作bst的postorder transval，
+quick sort是preorder scan，pivot就是root。
+
+从CAP角度去理解分布式的why，从逻辑时钟的角度去理解分布式的how，序的概念异常重要！
+包括分布式共识、事务的串行化执行等。
+
+\hrulefill
+
+COW不能做全量快照头，因为引用的是卷，而卷的数据是变化的。
+ROW则可以，引用的是snapshot，snapshot一旦创建就不变了。
+snap tree分析COW各项操作的好方法。
+
+ROW必须管理到页，为什么？否则，写入的时候也会发生COW。
+
+LSV架构更多借鉴了open vstorage。
+GC check效率太低，如何利用有用信息改进？bitmap在update时的信息是有一定启发作用的。
+
+引入auto snap并不是必须的，如果不引入，则存入snap from，无法有效回收，导致空间浪费。
+
+\hrulefill
+
+反思lich架构设计
+\begin{enumbox}
+\item meta采用vfs的方式，过于复杂，解耦为独立的kv服务？
+\item 卷和快照对应不同的卷控，可能映射到不同的core上
+\item multipath
+\item 引入ceph pg优化lich元数据？
+\end{enumbox}
+
+\hrulefill
+
+\hl{chkinfo.snap version}就是创建快照时卷的snap version，
+卷的snap version一直是最大的，且随着创建快照的过程在单调递增。
+
+chunk.snap version在各种操作中是如何变化的？
+该属性只在vol上有用，snapshot上不维护，发生cow之后，snapshot该属性初始化为0。
+\begin{enumbox}
+\item cow后，设为fileinfo.snap version
+\item revert后，设为fileinfo.snap rollback
+\end{enumbox}
+
+revert后，vol上chunk都被置为snap rollback，可用于判定rollback是否完成。
+后续发生cow时，会检测该chunk已经在snapshot上存在，则跳过，不发生实际的cow。
+
+\hl{chkinfo.info version}用于记录chkinfo信息的变更，该信息用于unlink时检测是否合规。
+如传入的值小于当前值，说明已有更新，则拒绝。
+
+数据库的meta version与该值什么关系？要解决什么问题？即是为什么要用？
+
+副本上用clock来跟踪写入。
+
+\hrulefill
+
+重删定长压缩比很低，变长实现难度很大，需要在pool级做。
+
+怎么在lsv理念下解决压缩、重删问题？
+
+EC、重删、压缩能否offload到设备上？
+
+离线的设计空间更大。可以在性能之间做很多变通。离线任务和在线任务需要同步机制。
+
+先重删、后压缩，理想的顺序。
+
+压缩的难点在于压缩后内容的长度不定，而LSV把更新操作分解为两个操作：写入和gc。
+gc是异步的，可以持续优化。最后收敛到一个理想状态。
+
+\hl{lsv与底层存储的关系是非侵入式的（open vstorage/swift），所以能更好地融入生态。
+定义了清晰边界，堆叠式架构。用lsv框架融合wbuf、read cache、row2/3、dedup、compress and cdp等特性。
+工作在任意的volume/fs之上。如底层volume是分布式的，就自动地继续了这个特性，如hdfs/hbase的关系}。
+
+\hl{分配器}处理分层的问题，封装底层存储细节。
+
+pingcap从distributed redis起家，演进到可扩展的sql。
+
+虚机和容器，也是如此。
+
+\hrulefill
+
+ERTS，Erlang运行时系统，主要处理了几个问题：
+\begin{enumbox}
+\item 进程调度
+\item IO和调度
+\item 进程隔离和垃圾回收: 分代复制式GC
+\end{enumbox}
+
+\hl{Erlang的进程调度器里整合了基于事件的I/O系统}。用进程和消息传递进行并发和分布式编程、通过链接里容错，
+Erang虚拟机和运行时系统，函数式语言。
+
+算法是灵魂，接着是操作系统和编程语言，其上是种种的硬件、软件、通信等等。
+
+用这个框架来理解lich，\hl{类比思维，或RMI}，把结构映射到lich系统上，把一种结构映射到另外一个领域。
+这是非常强大的思维工具。
+
+取象比类
+
+在一个core线程里整合了协程调度和io，如果有异步操作就直接用（提交和polling 完成，如aio、RDMA、SPDK），
+对io block操作则通过辅助线程来模拟异步处理过程（线程+队列）。这里的队列采用\hl{无锁队列}？
+无锁队列的原理是什么？
+
+在core线程内，访问\hl{sqlite/redis、etcd}等slow operations都需要用辅助线程模拟异步操作，机制上是一致的。
+
+运行上下文分为三种情况：core线程（scheduer、task）和外部线程。
+core线程的代码，包括scheduler和task执行的代码，都不能出现block，否则会严重影响吞吐量。
+
+lich采用etcd进行集群管理，如选举admin节点，管理一部分元数据，集群任务管理，\hl{集群全局信息}的存放。
+
+采用了\hl{etcd-api c library}，通过curl http与etcd server通信。restful api？
+
+实现了lock语义，通过独立线程在ttl过期时进行renew。
+获取到lock的lichd进程成为admin角色。normal node watch lock状态的变化，如果发生了异常？
+
+\subsection{20}
+
+\hrulefill
+
+范畴化和做类比是认知的核心。RMI原则揭示了这一点。
+
+一致性问题是重中之重。分层次理解该主题。
+
+lich卷提供了类似disk的服务。需要应用层做出补偿。
+分别分析单disk、单节点，集群整体掉电的情况。
+
+与raft做类比：leader选举，如何找到leader？日志恢复、正常服务几个阶段。
+
+如何定义提交规则？如何apply到apply？lich保证了提交的持久性，
+对uncommitted条目，如何分析其安全性？
+
+nid,magic作为epoch，避免ABA问题。clock/dirty的管理规则
+
+FS/数据库的一致性
+
+\hrulefill
+
+CAS/ABA是个需要重点理解的知识点，lock free ring就是基于类似的原子操作实现的。
+
+spinlock与cas有什么不同？cas在失败的情况下，也是一直retry。
+
+软件事务内存？
+
+论文和书
+\begin{enumbox}
+\item 多处理器编程的艺术
+\item C++并发编程实战
+\end{enumbox}
+
+\hrulefill
+
+写和读具有共轭关系。卷的读写就是所谓I/O。
+
+\hl{一个IO可能涉及多个chunk，如何防撕裂？范围锁？}
+
+COW快照的snaptree上，每个阶段记录了该节点到下一节点的变更原像，这是严格按照快照定义得到的。
+任何一快照，都保留了该时间点的卷的状态。
+
+考量一个极端情况，一直打快照，而无变更，所有快照的数据均为空。revert和delete都没有太多工作要做。
+
+读卷和读快照有着本质上的不同。读卷不受影响，因为卷上一直有着最新的全部数据。
+读快照则不然，需要两步：读该快照及其下游节点，读最低公共祖先到卷所在路径上的节点。
+
+何时需要读快照？revert和clone时。区分读快照与读单个快照。
+
+由此可推到读快照的过程。COW快照能有全量索引吗？有没有更好的做法？
+
+引入auto snap主要是为了节约空间，如果存入snap from，则后续无法区分并清理。
+
+\hrulefill
+
+ROW的快照则保存的是打快照时的卷，相当于双缓冲区，新的写入发生在新的缓冲区。
+读卷和读快照都变得复杂，revert和delete操作也需具体分析。
+
+有特殊的情况可以简化删除过程。分解几种情况：如果快照是一个叶子节点，可直接delete，
+如果是中间节点或根节点，最简单的方式就是标记删除。
+
+\hrulefill
+
+与ceph\hl{做类比，就是对标，以查漏补缺，扬长避短}，disk状态机，检测到到故障后，进入down状态，恢复完成后，进入out状态。
+
+lich无日志，检测和恢复过程可以看做只有peering和backfill，也无基于check sum的scrub过程。
+
+\subsection{21}
+
+\hl{NoSQL精粹}真是本好书。
+
+etcd也是好东西！非常值得深入研读，从论文到源码。
+
+系统架构从简单到复杂：\hl{单点、主从、对等}（双活、多活）。主从是单点和对等的结合，包含一和多的特征。
+分析基本的写和读的过程。单机读写冲突(逻辑一致性)、分布式复制环境下的读写冲突(复制一致性)。
+
+在读写分离的情况下，如何保持会话一致性(read your write)？
+
+条件更新是CAS的泛化，应用举例：
+\begin{enumbox}
+\item CAS and ABA
+\item HTTP的etag
+\item lich中的meta version
+\end{enumbox}
+
+在更新时传入old和expected值。把比较值转化为比较version。
+
+如何生成时间戳？物理时间戳有问题，\hl{uuid和内容hash码}无法比对新旧，逻辑时钟比较合适。
+在单点或主从的情况下，用逻辑时钟，在对等环境中，用向量时钟。
+
+Raft的Term、Index与逻辑时钟有什么关系？怎么映射到逻辑时钟上来？
+
+每个server在进行消息交换时按term进行处理。term出现在每个\hl{请求和响应}之中。
+
+lich集群中各个节点的时间不能相差超过5s，是由于什么造成的？
+master election or volume lease？
+
+类比transaction/raft、lich、ceph
+\begin{enumbox}
+\item 做完什么才能返回client？
+\item 如何实现exactly one语义
+\item 什么情况下会read stale data，如何解决？
+\end{enumbox}
+
+ceph中引入pg关系重大： vol -> cid -> nid。既是partition，又能缩减元数据的量。
+引入一中间层，便于调度。
+
+RMI不仅在于解决/分解未知问题，把待解决问题映射到别的问题上，
+更在于温故知新，加速学习效率，用已知知识为根基去探索未知。
+
+\hrulefill
+
+多元思维模型：计算机重要的模型有哪些？
+
+\hl{基础和前沿}是双线思维的一个应用，守住底线、抓住关键。
+
+\subsection{22}
+
+复制一致性和逻辑一致性，cache一致性是复制一致性的特殊形式。
+复制一致性有两种形式：\hl{主从和对等}。通常采用主从复制，对等复制过于复杂。双活或多活是对等复制。
+分别对应两种时钟：逻辑时钟和向量时钟。使用逻辑时钟可以检测新旧，使用向量时钟可以检测写入冲突。
+需要利用领域知识解决冲突。
+
+RAFT协议是主从复制的一种实现。<Term,Index>是两级结构，Term确保leader的唯一性，Index确保日志提交的单调唯一性。
+为了确认某一Index的command，可能经历一个或多个Term。通过Message Passing交换Term和Log每个节点维护的相关信息。
+
+每个server维护term，\hl{compare and update}，逻辑时钟则通过消息交换定义了事件的因果序（happen-before关系），
+没有compare这个条件。RAFT有了compare，就可以选主，term大者胜出，小者无条件服从。
+
+RAFT是分布式系统的一个思维模型，认真彻底地理解了这个模型，就可以映射到别的领域，加速学习效率。
+
+RAFT要解决的RSM，也是一个分布式事务的问题。\hl{事务管理和RAFT}两个概念体系之间如何映射？
+理解RAFT也有助于理解事务管理的方方面面。
+
+\hl{从事务管理到cap，到paxos/raft，到单控多控，到互联网架构}。有着相同的问题结构。
+RSM可以看着一个简单的分布式事务问题，paxos/raft通过MVCC解决该问题。
+
+并发控制和故障恢复。并发控制是从多个client的角度来看的，故障恢复则从数据的角度来看。
+安全性所需要保证的是，已提交的数据不能丢失。至于未提交的数据，怎么处理并不重要？
+或undo，或按最大提交原则进行处理，或任择其一，但要保障多副本的一致性，进行backfill。
+
+RAFT无undo log，通过retry进行补偿，所有请求都须保证幂等性。
+如何做到？
+
+\hrulefill
+
+buffer采用环形缓冲区的概念。
+
+深入理解事务的隔离级别。MySQL的innoDB采用多版本并发控制，通过undo log和就地写实现(COW?)。
+理想的MVCC是先copy出原数据，然后在copy上执行修改（ROW？）。
+
+read uncommitted, read stale?两种读异常，以committed point为分界线。
+
+幽灵复现和交错leader问题：幽灵复现新leader没有写入就切换到原来的server了（ABA），
+交错leader则是新leader有一定提交。(一旦有新提交，原来的leader还能成为leader吗？)
+
+RAFT论文中论及提交前一term是不安全的\hl{ABAB问题}：一，分发appendentries后leader下线；二，新leader上线后写入新log；
+三，切换回原来的leader，此时形成多数派，但不能算是提交状态。如果算成提交状态，接下来会有提交丢失的风险。
+四，再次切换到B。怎么解决的问题？\hl{新leader上任之初就要提交一个no-op}。这也是解决幽灵复现、交错leader的方案。
+以确认提交commitIndex。强化版的提交规则。
+
+网络分区的情况下，如何避免read stale data？
+
+\hrulefill
+
+lich的一致性：无log，用了clock/dirty的概念，类似于index，没有持久化。
+如果各个副本存在clock值，故障后可选clock最大者做权威副本。整体掉电的情况下，clock丢失。
+对写入操作能否提交分两种情况：全量写入，降级情况下多数写入。
+整体掉电的情况下是无法区分多数不多数的，需要有对应补偿措施。
+
+整体掉电+降级写的情况下，会破坏数据，丢失已提交数据。\hl{降级写时clock切换到持久化模式即可}，这就是所需要的补偿措施。
+这样就可以按clock区分为多种情况，优先级如下:
+\begin{enumbox}
+\item 有持久化clock
+\item 有非持久化clock
+\item 无clock
+\end{enumbox}
+
+\subsection{23}
+
+undo日志包含page之前像，可以看着一个就版本，用于实现快照隔离，一致性读？
+
+场景故障有介质故障、节点故障，更复杂的有分区、ABA、ABAB(交错leader)等情形。
+
+分布式系统，\hl{先分片、后复制}。组合分片和复制的系统有bigtable，提供了良好的伸缩性。
+
+事务有单机事务和分布式事务，要求是一样的。通过cc实现隔离性，通过log实现原子性、持久性和一致性。
+log分redo、undo、redo/undo，RAFT里无undo日志。更进一步lich里无log。
+
+需要记住各种硬件的性能数据，每个程序员都需要知道的性能参数。
+
+一致性分为以数据为中心的一致性和以客户为中心的一致性。\hl{read your write}是以客户为中心的一致性，即会话一致性。
+
+顺序一致性的定义与可串行化序列类似。单个进程/事务内操作保序。允许交叉。
+
+RAFT要实现的线性化目标，就是同一数据项的read your write序。当write已经成功返回后，read必须能读到新的值。
+在任何情况下，都不能违反该顺序。
+
+顺序一致性归属于以数据为中心的一致性，复制状态机。
+
+参考资料：
+\begin{enumbox}
+\item 分布式系统原理和范型
+\item 分布式计算
+\item 数据库系统实现
+\item Java并发编程的艺术
+\end{enumbox}
+
+\hrulefill
+
+lich的scheduler如果task is full，而task的执行又派生了新的task。新的task被放入wait队列，如此就发生了deadlock。
+
+\hl{partial page write}在lich中是否被处理了？在MySQL里是通过double write克服该问题的。
+仅仅靠redo日志是不够的，需要一个baseline的页的副本。
+
+\hl{RAFT的read only，不是想象中那么简单}。如何避免read stale data？在只有一个leader的时候，容易做到，
+当lastapplied大于等于read index时，读操作即可返回。
+
+lich里的一致性读/线性化/read your writes。因为没有log，直接写入FM，写完FM才返回。所以总能读到最小数据。
+RAFT则不然？
+
+RAFT、snapshot都需要从写读流程上来分析。commit、apply等操作的区分，带来了很大细微的地方。
+
+副本一致性与cache一致性什么关系？cache可以看做主从副本，主为共享数据，从为cache。读发生在从节点上。
+
+对任一数据项，两者都要解决一致性读的问题。读代表了可见性。ww冲突会引发更新丢失现象，即已提交的数据丢失。
+wr、rw冲突引发读的问题（脏读、不可重复读、幻读）。脏读通常是不可接受的。不可重复读，可以从数据项的多版本来理解。
+最高隔离级别是可串行化。
+
+怎么理解可串行化与顺序一致性呢？\hl{可以把每个w和r看作独立的事务}。事务内只有一个操作，就不涉及操作的可交换性。
+如果单个IO涉及多页、多chunk，则会拆分为sub io。语义会变得复杂些。
+
+\hl{页模型和对象模型}，可以先分析最基础的页模型。
+
+融会贯通以下几个领域，并行/分布：
+\begin{enumbox}
+\item NUMA
+\item JMM
+\item 数据库系统(事务)
+\item 分布式系统(时钟、分布式提交)
+\end{enumbox}
+
+NUMA和JMM具有类似的内存模型，从两个层面去考量：share和cache。
+
+\hl{安全性、活性、性能}，deadlock、livelock和饥饿都是liveness方面的属性。
+
+JMM的几个属性：
+\begin{enumbox}
+\item 有序性
+\item 可见性
+\item 原子性
+\end{enumbox}
+
+JMM典型问题：
+\begin{enumbox}
+\item CAS/ABA
+\item volatile
+\item 顺序一致性参考模型
+\item ***
+\item false sharing
+\end{enumbox}
+
+可见性是对read操作的要求。
+
+并行等级：
+\begin{enumbox}
+\item blocking
+\item starvation-free
+\item obstruction-free
+\item lock-free (CAS)
+\item wait-free (RCU)
+\end{enumbox}
+
+\hrulefill
+
+范畴化和做类比是认识的核心。RMI、芒格的多元思维模型（笛卡尔方法、费曼学习法、波利亚解题法），围绕这个思路做下一步的学习规划。
+
+递弱代偿：分布式系统里的生存度就是一致性。如何保持一致性以及在一致性递弱时如何代偿就构成了分布式系统的核心。
+
+\hrulefill
+
+\hl{响应式架构}没有提及一致性，一致性暗含在其中了。与DDD和FP什么关系？
+所以一致性就是生存度，是一定要保持的属性。一致性降低需要代偿措施。
+
+事件的顺序在多线程和分布式环境下都很重要，进而引入事务概念。
+
+顺序一致性从数据为中心的角度就是RSM，按客户为中心的角度就是read your writes的会话一致性。
+
+用\hl{可见性}来分析raft的read-only问题：read的必须是最近一次提交才是一致性读。这一条并不是容易实现的，
+特别是考虑stale leader和从fellower读的情况，更是如此。
+
+\hl{操作系统、并行编程和分布式系统}是一个圆的几个部分，计算机体系结构是硬件、
+操作系统、并行计算、分布式系统是软件。
+
+\hrulefill
+
+ceph的每个对象有snap seq字段，lich的chunk snap version，怎么充分地利用起来？只在卷上有意义？
+
+理解分布式系统下的时钟，必分为两部分，分别对应规则一和规则二。逻辑时钟在单线程内递增，
+通过消息在线程间传递时，接收线程按规则二计算逻辑时钟，作为当前值。（取两者较大者，然后加一）
+
+向量时钟：规则一，本地分量加一。规则二，本地分量加一，other取较大者。
+
+\hrulefill
+
+经常回顾加以温习和练习的内容：
+\begin{enumbox}
+\item 以前的工作
+\item 知识体系 (基础+前沿)
+\end{enumbox}
+
+bitmap可用于小范围内整数的检索，如磁盘空间管理等。
+
+hash不仅是一种检索结构，也是一种partition工具。
+
+tree sort至关重要，merge、quick、heap sort都基于二叉树的思想。
+二分查找也是基于二叉树的递归思想。
+
+\subsection{25}
+
+从看书转移到看代码/论文。主要的项目：
+\begin{enumbox}
+\item lich
+\item dpdk/spdk
+\item sheepdog
+\item ceph
+\item etcd
+\end{enumbox}
+
+TCP拥塞控制：
+\begin{enumbox}
+\item slow start
+\item 滑动窗口
+\end{enumbox}
+
+CISCO网络流控
+\begin{enumbox}
+\item token bucket
+\item leaky bucket
+\end{enumbox}
+
+如果input一直大于rate，token bucket的output会收敛到rate。
+在input小于rate之时，token得以累加，直至桶满，累计的token在后期被消耗掉。
+\hl{最大burst为桶的容量+rate}。
+
+开闸放水，\hl{l.b.即使watermark非零}，也是按恒定的速率进行，所以l.b的output rate始终小于等于设定rate。
+t.b则是只要有token即可放行。运行burst流量。\hl{b(u) = b + ru}。
+如果input大于rate，则watermark升高(缓冲区、或队列)。从而起到平滑input的目的。
+
+用一个实例来说明，比如input按正弦曲线达到，则经过l.b.或t.b.之后，output是什么形状。
+如果设定合适的桶容量，l.b.会非常平稳无波动。
+
+如何表达l.b里的固定的速率流出？需要跟踪上一个流出的时间。
+如果当前时间和上一个流出的时间落入同一时间片，则拒绝。
+\hl{时间片的计算是相对于一个baseline}。
+
+ceph如何结合leaky和token的？
+
+\subsection{26}
+
+从\hl{硬件、软件、通信}几个维度看全闪。双控和分布式架构各自的特征。
+
+\begin{enumbox}
+\item 整理相关资料，以备不时之需
+\item 怎么理解华云在全闪方面的工作？ why/how/what
+\item 全闪进行时
+\item SPDK有perf工具
+\end{enumbox}
+
+RDMA的配置，运行在IB之上。
+
+intel nvme 40多万，memblaze 70多万。pcie插口和\hl{xx插口}，支持热插拔。
+需要定制服务器，现在ssd太多。单盘吞吐量2G。5块NVMe，单机能跑到220w。
+
+两个client端能跑到290w，单个client端跑到150w，升级了内核。为什么多路径更少，单节点80w？
+
+怎么进一步优化，算法，iopath等。
+
+disk slot每个core维护本地副本，变化很少。

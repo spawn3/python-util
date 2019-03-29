@@ -1,7 +1,15 @@
 #include "stdio.h"
 #include "assert.h"
+#include <string.h>
 
 #include "resume.h"
+
+#define CHAR_BIT 8
+
+#define BIT_SET(a, n) (a[n/CHAR_BIT] |= (1<<(n%CHAR_BIT)))
+#define BIT_DEL(a, n) (a[n/CHAR_BIT] &= (~(1<<(n%CHAR_BIT))))
+#define BIT_GET(a, n) (a[n/CHAR_BIT] & (1<<(n%CHAR_BIT)))
+#define BIT_CLEAR(a, n) memset(a, 0x0, n/CHAR_BIT)
 
 int bit_count_one(unsigned int n) {
     int count = 0;
@@ -26,4 +34,17 @@ void test_bit() {
     assert(bit_count_one(3) == 2);
     assert(bit_count_one(4) == 1);
     assert(bit_count_one(5) == 2);
+
+    char bitmap[4];
+    BIT_CLEAR(bitmap, 32);
+    for (int i=0; i < 32; i++) {
+        assert(BIT_GET(bitmap, i) == 0);
+
+        BIT_SET(bitmap, i);
+        printf("%d %d\n", i, BIT_GET(bitmap, i));
+        assert(BIT_GET(bitmap, i) != 0);
+
+        BIT_DEL(bitmap, i);
+        assert(BIT_GET(bitmap, i) == 0);
+    }
 }
