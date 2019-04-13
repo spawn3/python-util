@@ -1,0 +1,95 @@
+\section{12}
+
+\subsection{03}
+
+交换机SM HA不可用，更新OS到相同版本后可用。
+
+熟悉RDMA
+
+两副本，一副本处在chunk状态，且vfm非空，包括另一副本
+
+\subsection{10}
+
+熟悉iscsi/iser架构和代码，进一步需要熟悉spdk、nvmf等，这是块存储的趋势所在。
+
+\begin{enumbox}
+\item NVMe设备，通过设备文件和pci直接访问的不同
+\item linux kernel的block layer
+\item udev
+\item mount是指定dirsync选项
+\item dd在测试快照时，指定direct io
+\item async和non blocking的异同
+\item buffer和cache的异同
+\item session和cookie
+\item 内核提供了什么功能？现在又为什么在网络和存储上提倡kernel bypass。
+\item vip and multipath
+\item ceph
+\item fs and object
+\item db
+\end{enumbox}
+
+除了协议和生态部分，内核部分的主要模块也要持续思考，包括编程模型、元数据管理、HA等。
+要具有提要钩玄的能力，勾勒出主要脉络，分清主次，带动全局。中医对生命科学的思考方式，很有借鉴意义。
+人的生命是一个动态发展的整体。如何维持此整体的健康？
+
+\subsection{11}
+
+要深入体会网络协议栈的架构设计实现，充分地体现了分层架构的巨大威力。
+
+要想富，先修路。网络编程的第一步就是连接管理。连接的建立、维护到断开。
+一个或多个连接构成session。一个session见得唯一的target。target与lun什么关系？
+为什么需要多个连接构成session？
+
+关于学习：重视第一手资料，道听途说不能解决问题，善于提问，不要有畏难情绪。
+比如RDMA，从原始文献好好体会，在iSER里进一步体会，温故知新，没有过不去的坎。
+
+再回头看RDMA代码，当明白了一些原则后，就显得一目了然了。
+iscsi和iser代码也是如此。为什么呢？需要理解消息交换的基本原则。
+在一个循环内，既有post，又有poll。
+
+scst与lio解决的是同一类问题，scst的代码分为三部分：core、target driver and storage driver。
+lich也有如此模块。core起到存储虚拟化的作用。
+
+学习一定要破除神秘感，循着正确方法，很容易攻克。即便如AI、数学，也不是不能捡起来。应该捡起来。
+
+\subsection{12}
+
+对个人来说，做什么才能产生复利效应？专业、认知。
+
+一个lich系统，一个生命系统，都是系统。系统论具有普适性。
+
+网络和scheduler的事件循环，也是一个圆运动。
+
+\begin{enumbox}
+\item 列出所有controller及其分布
+\item 控制器为什么加载不成功？
+\end{enumbox}
+
+专注全闪，不做它想。不知自我克制，终将一事无成。
+
+在docker里用文件模拟设备文件，因为文件io接口是一样的。
+
+测试方法和工具：\hl{道法术器}几个层面，工具化、自动化至关重要，
+但必须在正确策略的指引之下。
+
+查找控制器为什么用mcast机制，而不是去admin上查（lease机制），
+因为客户端有cache，也不会对admin带来额外负担。
+
+vip才会有arp缓存失效的问题，需要主动更新client端arp缓存。
+
+\subsection{13}
+
+linux
+\begin{enumbox}
+\item 操作系统
+\end{enumbox}
+
+ceph
+\begin{enumbox}
+\item 两篇论文
+\item 官方文档
+\item 参考书
+\item 源码
+\end{enumbox}
+
+\subsection{14}

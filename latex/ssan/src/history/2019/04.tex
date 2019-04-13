@@ -1,0 +1,90 @@
+\section{04}
+
+\subsection{01}
+
+区分四种消息类型，特别是local和peer，区别很晦涩。
+
+recovery有main thread get的用法，只能在主线程里使用。什么时候用到呢？
+
+主线程做了太多的事情，包括所有完成队列的处理，会成为性能瓶颈点。
+
+理解ssan线程模型。在main函数里启动了一个event loop，构成主线程。
+另外有若干\hl{消息队列及其线程池}。
+
+特别要注意是一个函数是在\hl{主线程或是工作线程}里被调用的。
+终于明白为什么要用work和main来命名函数了。
+
+\subsection{02}
+
+\subsection{13}
+
+分析理念：生命周期分析法，每个对象及其上面的操作，构成对象的生命周期。
+对象包括：数据对象、一次IO过程、recovery过程等。
+
+对一致性分析而言，每个逻辑对象对应的物理对象，要满足一直的变化规则（状态机模型）。
+
+日志要满足可追踪性。
+
+日志分析很重要的一点，就是对齐时间线，梳理事件之间的因果关系，找到发生问题的最终原因。
+
+IO场景
+\begin{enumbox}
+\item 无IO
+\item 有IO
+\end{enumbox}
+
+故障场景
+\begin{enumbox}
+\item 恢复完成后再次故障
+\item 恢复完成前再次故障
+\end{enumbox}
+
+新旧恢复过程过渡期间易出问题。
+
+\begin{enumbox}
+\item transmit block main thread，移交到work线程。
+\item 日志缓冲区过小，会丢日志
+\item 节点在prepare list之前，即收到transmit请求，从oid list取出，后又有同一oid被加入oid list，导致一个oid被修复多次
+\item 修复要满足exactly once条件，唯一性
+\item if-what 如果多个IO落到同一object，会如何？
+\item rename与io交叉执行，完善epoch机制
+\item fio 报O\_DIRECT错误，/dev/disk/by-path看不到该设备
+\end{enumbox}
+
+trace点
+\begin{enumbox}
+\item start\_recovery
+\item finish\_recovery
+\item run\_next\_rw
+\item finish\_object\_list
+\item get\_.*robj
+\item ***
+\item gateway\_write\_obj
+\end{enumbox}
+
+要理解的内容：
+\begin{enumbox}
+\item tgt
+\item zookeeper
+\end{enumbox}
+
+分析方法
+\begin{enumbox}
+\item 完善LOG
+\item GOTO
+\item ASSERT and coredump
+\item PROFILE
+\item 对齐各个节点的时间
+\item 识别更多不变式，加入断言
+\item 返回值和可重入性
+\item RAMDISK，可以用fio的verify机制
+\end{enumbox}
+
+工具：
+\begin{enumbox}
+\item fio
+\item pdsh
+\item timedatectl
+\end{enumbox}
+
+工欲善其事必先利其器。下一步重点考虑方法和工具，提升效率。

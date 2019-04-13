@@ -1,0 +1,125 @@
+\section{11}
+
+\subsection{01}
+
+编程注意事项
+\begin{enumbox}
+\item long time操作之前与之后，需要renew lease，防止lease失效，导致vctl切换
+\item 读写、vfm\_get、vfm\_stat、stat等操作之前，必须chunk check。\hl{如果不检查，可能会返回ESTALE, see \_\_chunk\_read\_getnode}
+\item chunk组织成tree，就意味着依赖性，需要从上到下依次保护,check
+\item chunk上有lock保护
+\item alloc/discard与io分离，故io加rdlock
+\item \hl{困难之处在并发，tree结构上的并发，并且涉及到持久化、lease}
+\end{enumbox}
+
+诊断工具
+\begin{enumbox}
+\item 怎么快速得到各个controller的状态，包括pool、volume、snapshot等？
+\item 怎么检查底层数据一致性？
+\item 打印集群chunk tree，以及每个chunk的详细信息
+\end{enumbox}
+
+写到LUN结尾处，会自动扩容。ROW3这里有问题？
+
+垃圾数据，干扰恢复，gc replica目前不能打开？
+
+\subsection{02}
+
+尽可能通过\hl{DBUG、GOTO}保留可跟踪线索，以方便线上调试。
+
+mellanox交换机编程：SDK？
+
+\subsection{08}
+
+交换机的任务告一段落，遗留的部分问题：授权，不知如何获取部分信息。
+
+\hl{交换机类似于一个host}，如果配置ip地址后，就可以通过SNMP等用户接口进行访问。
+不同的是它具有的交换、端口管理能力。
+
+\subsection{09}
+
+session，网站的session，在服务器端维护，记录某用户的相关信息，比如login状态。
+客户端浏览器的cookie里如果记录了session id，在server端session没有失效的情况下，不需要再次登录。
+
+iscsi的session什么约定？一个session包含一个或多个连接。
+
+target有多义：一指target server，二指init连接到的某个具体的LUN（portal）
+
+多网段，vip，multipath。
+
+支持\hl{存储多网段}，就是有多个存储网段，通过bond机制管理的，只能看做是一个网段。
+
+\subsection{14}
+
+平衡是个关键指标，平衡了，才能充分利用集群的规模效应。平衡分数据、负载的平衡，这是多个层次的事情。
+
+再次理解COW快照，不再做太多改进，进入维护模式。重点是ROW3，但\hl{ROW3依赖于大卷，同时需要空间回收}。
+稳定下来，尚需时日。
+
+精简配置、cache、RC、\hl{EC、压缩、重删}等功能也需要先行设计。目前看来，cache、RC优先级要高些。
+
+QoS还需要更精细，但非当前急务，当前急务是一个稳定可靠高性能的版本。覆盖最小功能集。
+
+高性能相关特性，特别是全闪相关的特性，如RDMA、SPDK等也需要尽快熟悉。RDMA不同于TCP。
+
+target方面，iser、NVMe也有理解之必要。如何结合多路径，就会复杂不少。整体上依然是外围的工作。
+\hl{存储引擎处理controller以及以下层的事务}，包括底层资源管理，可靠性、平衡、性能、QoS特性等等。
+
+bcache是在物理磁盘的层面上处理io的。按\hl{二实一虚的架构}，导出虚拟设备供上层应用使用。
+进而理解\hl{linux的block io架构}。
+
+SPDK不经过kernel的block层，而是直接用pci号与NVMe控制器直接通信。一个NVMe设备，就是一个独立的pc。
+不同的是，没有独立的电源系统。一经插入，就可以直接通信，所以能有极高的iops，极低的latency。
+
+RDMA是transfer，NVMf是target，NVMe是driver，从存储和网络\hl{硬件和协议}的角度，全面提升存储性能。
+RDMA是tcp的替代品，而不改变rpc API。
+
+如存储多网段、多路径是从架构的角度提高存储系统的可靠性和性能。
+
+针对每一个特性，就不能泛泛地理解了，需要反复深入。
+
+\subsection{19}
+
+启动时，disk load与etcd的顺序？通过etcd获取pool list，用于判定pool的有效性。
+在lich内部，加盘的时候，也需要检查pool是否有效。
+
+如果删除disk symlink时，没有同时删除关联的pci文件，会如何？
+
+删除pool需要满足的规则：
+\begin{enumbox}
+\item disk何时可重用？
+\item 在删除的过程中，不能创建同名pool。
+\end{enumbox}
+
+磁盘管理需要rethink。
+
+\subsection{21}
+
+删除pool，提炼模式：由集群内节点并发处理某任务，当所有节点都完成时，任务完成。
+同步、异步：任务异步执行。
+
+完成一个操作，要进行模式提炼，方便reuse到其它地方。
+
+etcd里与pool有关的状态：
+\begin{enumbox}
+\item /lich4/storage/
+\item /lich4/poolstatus
+\item /lich4/task/poolremove/
+\end{enumbox}
+
+删除pool也影响到数据恢复、平衡任务。
+
+lich网络配置，检查netmask，\hl{一个网段不能出现多个网络接口}？
+
+两个存储交换机，每个节点双链路做bond，如果自己实现支持多存储网段，改动会比较大。
+
+\subsection{26}
+
+vfm cleanup必须在成功恢复后才能执行。check vfm
+如果scan阶段没有标上vfm，也是有问题的。
+
+\subsection{30}
+
+mellanox SM HA行为不正常，SW1012经过一次failover过程后，sm功能不可用。
+
+下周学习RDMA，解决快照相关问题。

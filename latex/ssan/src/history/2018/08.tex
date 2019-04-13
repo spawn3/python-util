@@ -1,0 +1,530 @@
+\section{08}
+
+\subsection{0813}
+
+制定下一阶段的专业学习计划，为下一步的发展奠定良好基础，争取在不远的将来，取得事业发展的大突破。
+
+念念不忘的10X成长，缺少可以操作的形式，需要进行细化。
+
+一整天纠结在为学为道的关系上，显得有点焦虑，没有归一，各种事务格格不入，应化为一事，以做事来涵养心体。
+这样无论做何事，都不会陷入单纯事务的境地，而是牢牢把握住头脑，以心为主，不为物役，物物而不物于物。
+
+道是求之不得、弃之不离。紧巴着心去求道，反而不得安闲。道者，贵宽贵舒，贵周贵密。若无故纠结彷徨，即是非道也。
+平常心是道，自然无为，清静以为天下正。这层意思要多体会。
+
+行有不得，反求诸己。及时地觉知不良习惯、偏见、习性，而断然改进之。
+
+\hl{问、学、习三者，把问放到第一位}。学与习皆在解决问题。如何问是一门大学问，也是领导力的首要原则，
+学记：善问者如攻坚木。先其易者，次其节目，及其久也，涣然而解。问题能把诸多主题贯通起来。
+这符合行动学习的基本原则。
+
+思方三式: what，why，拓展式。
+
+\subsection{0814}
+
+块、文件、对象构成统一存储，目前统一存储平台有ceph等。块是最底层的，文件应用在哪些场景？对象为什么会取代文件？
+硬件方面的改进，如何影响到软件架构？什么样的软件架构能适用于未来硬件技术的变革？
+(\hl{块建立在对象层之上，比对象大的如何处理？比对象小的又如何处理}？)
+
+存储公司的盈利能力如何？ 
+全闪存的市场格局是什么？
+
+未来要研发的功能：删重、压缩、EC等容量优化技术，多活、备份等数据安全技术。
+
+内核的块处理模块，kernel bypass技术，高性能架构。
+
+常用标准、协议、算法等。
+
+以块为中心，慢慢过渡到统一存储，一个存储架构提供多个接口是否是合理选择？why not？
+
+今天要解决什么问题？
+\begin{enumbox}
+\item 无RAID卡时，调用RAID相关功能出现异常 [y]
+\item cron触发lich.node --disk\_load [y]
+\item 反思lich.node --start时重建symlink的合理性 (跳过标记为不可用的disk)
+\item \hl{如何验证是否影响到NVMe设备}
+\item \hl{bcache没有reformat，能否作为新盘加入}？
+\item 故障磁盘上线后，终止相应的磁盘恢复过程，是否需要独立的GC？
+\end{enumbox}
+
+需要管理几个层次上的事情：物理设备/RAID，bcache，lich。
+
+检测到磁盘故障，设置该盘进入offline状态，同时清除对应的disk文件，关闭文件描述符(否则bcache无法register)。
+待恢复完成后，清除其他的磁盘文件(block, info, bitmap等)。
+
+若在恢复的过程中，调用了lich.node --start，则会重建disk文件，再次触发检测过程。
+这个过程，可以模拟拔盘插盘后自动上线的场景。
+
+检测到磁盘故障时，做标记，一是是否能做上标记；二是即便能标记成功，何时清除该标记？
+在拔盘插盘的情况下，不清除标记，就无法自动加入。
+
+问题在于，write EIO会导致lichd进程退出，如果配置restart=on，会自动重启lichd。
+需要重新思考的是，\hl{write EIO为什么会导致lichd重启，如何才能做到不重启}？
+
+如果把lich.node --disk\_load做成周期性任务，则无非通过删除symlink来模拟磁盘故障。
+同时会干扰整个逻辑：\hl{处在恢复中的磁盘，会进入检测-删除软链接-软链接被修复的循环}。
+
+\hl{只load前后之差值}？即是通过修复raid与bcache之后，多出来的设备。不改变lich.node --start的语义。
+
+\begin{enumbox}
+\item Ceph是怎么处理这个问题的？其它系统呢？
+\end{enumbox}
+
+\subsection{0815}
+
+负面情绪仍太多，诸如YN这样的，何必放在心上。当下有更重要的事情等待去办理，最最重要的是什么？
+成长离不开良好的平台，机会那么多，能不能抓住一两个？老子：居善地，心善渊。
+
+成长从善于提问出发。学思辩行，非问不行，不能持久贯通。问，从道心物三合关系开始。心与物对，道则无对。
+什么才是好问题？本质的、具体的，抽象的也有大价值。5W2H+XXX，XXX可以是NLP的理解层次，
+也可以是道心物、天地人等思考框架。
+
+四不光对应PDCA、也是2x2的分析框架，如SWOT，平衡积分卡、重要-紧急矩阵等，从正交维度去分析。
+要特别重视维度一概念，\hl{升维思考、降维贯通}。道与别的事务不同，一个大的原因就在于维度。
+存储的关键维度是质量。
+
+计算、存储、网络都是大课题，存储与数据相关，贯穿计算、网络，是个大产业。放开了格局去看，可做的事情很多。
+不必计较一时得失，应该做的是充实自己。
+
+经验可以加以反刍，以提炼最大的价值。未经反思的生活不值得过，反思则能极大丰富生活的意义。
+
+要有强烈的问题意识与紧迫感，
+今天要解决什么问题？
+\begin{enumbox}
+\item 继续完善学习计划
+\item 以问答的形式，整理存储的知识体系，致广大而尽精微
+\item 添加一工具，集中显示recovery、qos的配置和状态信息
+\end{enumbox}
+
+\subsection{0816}
+
+大道即可通过易经而理解，细读系辞传，简练以为揣摩，富有之谓大业，日新之谓盛德，生生之谓易。
+盛德大业，内圣外王的梦想，通过使命去完成，小小情绪皆当封存。使命、身份、信念是一端，
+能力、行动、环境是另一端。由内而外，分威散势，则遂其志向。
+
+功业可为不可期，侍命以待，可为者在自我磨炼，如精金白玉，如切如磋，如琢如磨，下学而上达。
+
+以此洗心，退藏于密，大易足矣，一以贯之。归宗大易，奠定思想基础。
+
+易与天地准，故能弥论天地之道。一切即易，易即一切。一阴一阳之谓道，此语点出易之形上精义。
+立二参一，阴阳三合。定心在中，万物得度。
+
+U形理论的核心就是沉下来，重为轻根，静为燥君。是以君子终日行，不离其辎重。虽有荣观，燕处超然。
+
+居则观其象而玩其辞，动则观其变而玩其占。以一卦为基本单元，六十四种场景了了分明。
+动起来，立足于当前形势，向理想态势进行过渡。或交换上下，错综复杂等各种卦变爻变之手法，为我所驱使。
+每种场景下，就有合宜的对策可供选择。此完全操之在我也。
+
+今天要解决什么问题？
+\begin{enumbox}
+\item 评估bcache dirty data的影响
+\item 拔cache盘，disable cache (做RAID1？)
+\item \hl{下电节点，性能下降（vfm，clock）}
+\item \sout{write EIO}
+\item recovery when pool deleted
+\item 100G文件MD5sum需要多久
+\item 配合测试解决问题
+\item 完善诊断工具
+\end{enumbox}
+
+vfm标记节点故障，可以简化部分检测工作。
+io带内恢复，会极大地降低性能。先标记，延迟恢复。
+
+clock不一致引发的恢复流量，对性能也有一定影响。
+
+延迟重建，故障发生后，按规则执行重建，如果只有一处故障，延迟一定时间进行重建。
+
+诊断工具的前提：
+\begin{enumbox}
+\item 本地、集群（汇总本地状态）
+\item lichd在线，lichd无法启动
+\item 分离MVC
+\end{enumbox}
+
+\subsection{0817}
+
+\begin{enumbox}
+\item bcache cache disk破坏后，重启服务器能否恢复正常？
+\item 对cache disk做RAID1，效果如何？
+\item bcache的dirty data在各种场景下是否行为一贯正确？
+\item 作为新盘加入，需要做什么？
+\end{enumbox}
+
+拔数据盘，盘符变化，如sda变成sdai，导致/sys/fs/bcache/<uuid>下的链接失效，如何校正？
+
+重启后，能恢复，其中一次出现readitems core，数据损坏。
+
+新盘sdai
+
+\subsection{0820}
+
+Week Plan:
+\begin{enumbox}
+\item bcache可靠性
+\item 增删盘的流程
+\end{enumbox}
+
+有待解决的问题：
+\begin{enumbox}
+\item \hl{进一步完善诊断工具，对系统运行状态了了分明}。
+\item 观察lich health的输出是否正确？
+\item 关闭chunk内并发，可能存在io error
+\item dirty状态的chunk没有恢复？
+\item \hl{故障与恢复之间的延迟}？
+\end{enumbox}
+
+今天解决的问题：
+\begin{enumbox}
+\item 对disk的部分访问没有并发保护，导致close文件描述符时出错，应该还有别的并发问题。
+\item write EIO不再coredump，效果有待进一步观察。
+\end{enumbox}
+
+升级到kernel-4.18.3，bcache表现符合预期。升级方法：
+\begin{itembox}
+\item rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+\item yum --enablerepo=elrepo-kernel install -y kernel-ml
+\item grub2-set-default 0
+\item reboot
+\end{itembox}
+
+\subsection{0821}
+
+性能优化
+\begin{enumbox}
+\item 阿里盘古系统
+\item Lustre
+\item GlusterFS
+\end{enumbox}
+
+存储引擎2.0，其上有块，文件，对象等。ElasticSearch运行在大容量、高性能的块上。
+
+TODOList:
+\begin{enumbox}
+\item 移动不允许预先采用allocate，须优化精简卷性能
+\item 节点下电后的性能
+\item 性能抖动
+\item etcd规模
+\end{enumbox}
+
+\subsection{0822}
+
+TODOList:
+\begin{enumbox}
+\item 拔bcache数据盘，导致kernel hangup，重启服务器后，出现readitems的magic错误
+\item udev机制监听热插拔事件，触发lich.node --disk\_load调用，不用cron机制
+\item 比较bcache与无bcache模式，以定位问题
+\end{enumbox}
+
+udevadm可以监听设备相关事件。
+
+\begin{enumbox}
+\item /dev/bcacheN何时出现？
+\item cache盘离线后，data盘是否能独立工作？
+\item cache盘离线又上线，能否继续工作
+\item data盘离线又上线，能否继续工作？
+\item RAID strip大小，影响bcache的data offset设置？ 见bcache官方文档
+\item 采用WT模式如何？
+\item schedule.c的诊断方法
+\end{enumbox}
+
+Linux的IO架构：
+\begin{enumbox}
+\item VFS
+\item Page Cache
+\item Block Layer
+\item SCSI
+\item Drivers
+\end{enumbox}
+
+\subsection{0823}
+
+DayPlan:
+\begin{enumbox}
+\item 进一步诊断增删盘引起的vdbench IO中断，细分每一个关键步骤，并profile
+\item mount -o sync模式copy文件的性能，即100G需要多长时间
+\end{enumbox}
+
+加盘分为几个步骤：
+\begin{enumbox}
+\item raid miss
+\item raid load
+\item disk link
+\item lichd内部处理
+\end{enumbox}
+
+RAID配置改变是否会影响IO中断？可以验证，\hl{RAID控制器会引起IO中断}。
+
+sync, async，direct IO区别是什么，dd，mount等命令可以指定这些选项。
+
+计算、网络、存储是云计算三大基石，存储最有搞头。存储范围很广，企业存储、统一存储、云存储、大数据等，
+有同有异。
+
+计算有操作系统，最好能深入理解kernel的整体架构，网络是一个难点，做到理解基本原理。
+存储要围绕关键问题，多问多想多动手。
+
+云计算、大数据、AI也是构成一个序列。云计算解决底层基础架构，其上大数据+AI，双剑合璧。
+
+搜索引擎、推进系统、计算广告都是大数据的应用，都涉及机器学习，
+知识体系也要围绕这个\hl{ABC三角形}进行构建。
+
+\hl{先做整理资料的工作}。围绕存储这个支点，构建全方位的知识体系。
+
+标准、协议、算法
+
+任何文件（包括设备文件）都可以格式化为文件系统，然后mount。
+
+按上下左右(四面八方)模式理解块存储的定位，下是硬件，上是应用场景，左是运维平台，右是云平台。
+这种思维方式也可以用来理解kernel的各个模块之间的关系。比如VFS。
+在Linux的世界里，一切皆文件。
+
+四面八方，立于中央。
+
+拔出一块数据盘，bcache会如何处理与该盘相关的dirty data呢？
+该数据盘不在线，故cache无法flush该盘相关的dirty data。\hl{理想的行为，应是一直保有该dirty data}。
+如果丢弃了部分dirty data，会导致数据不一致。cache disk的dirty data加上data disk的数据，才是完整数据(\hl{不变式})。
+
+合并成一个分支，这是需要的，资源分散，重复劳动，效率极为底下。
+
+高性能版本通过配置文件启用。增加的模块主要有：
+\begin{enumbox}
+\item SPDK/NVMe
+\item RDMA
+\item \hl{DPDK}?
+\item iSCSI/iSER
+\item NVMf
+\end{enumbox}
+
+从存储+网络+计算三方面去加深理解，四面八方。
+从图论模型去理解网中网，节点属性、边的属性。
+
+介质上增加了NVMe支持，\hl{网络走RDMA，对应的网络协议变更：iSER, NVMf}。
+RDMA的支持有两处：一是target的RDMA支持，二是存储网络之间的RDMA通信。
+
+NVMe设备有两种使用方式：一是通过/dev/设备文件，采用aio方式； 二是通过pci号直接访问，与控制器直接通信。
+后者性能要好很多。
+
+kernel bypass，用户态代码直接与设备控制器通信，设备控制器具有独立的处理器（offload）。
+在上而言是target，导出服务的接口、协议，在下而言是driver，资源管理。
+
+介质、网络、协议的细节如何？
+
+\subsection{0824}
+
+\hl{敢问路在何方，路在脚下}。放着如此好的条件，不好好学习，首先对不起自己。
+惟精以察之，惟一以守之。
+
+Day Plan:
+\begin{enumbox}
+\item SNMP MIB Browser，可以接收snmp trap请求
+\end{enumbox}
+
+磁盘空间管理，normal节点向admin节点汇报本地磁盘状态，admin维护有diskmap结构。
+
+相关特性：
+\begin{enumbox}
+\item disk\_keep默认为20G。
+\item solomode还能工作吗？
+\item etcd状态乱了，包含多个节点，solomode模式设置失败。
+\end{enumbox}
+
+系统引导启动过程很有趣。对关键流程的分析，可以把整个知识体系贯穿起来，如果没有这些线，就显得支离破碎。
+
+测试，docker、自动化测试。引入了docker，要作为基本组件熟悉起来。编排系统k8s？
+
+对齐？direct IO需要对齐。async IO必然基于direct IO。
+
+每个设备都有控制器，可以接收专用指令集，实现为一定的接口。用户态驱动与内核态驱动的异同？
+DPDK/SPDK做了什么？\hl{DPDK与IA架构绑定，加速AI计算}。
+
+设备通过bus接入系统，系统通过bus寻址设备，设备是节点，bus是边。
+CPU要访问一个设备，向一个设备发送指令。CPU、内存、I/O设备三者之间的关系，设备的分类以及各自的特征。
+性能不仅与设备有关，也与连接设备的bus有关，要能分析出\hl{真正的瓶颈}所在。
+
+如何分析？观察每一层的性能指标，排队论。主要的性能指标有延时、IOPS、抖动等。
+
+每块磁盘以柱面为基本单元，可以进一步划分为若干分区。每个分区具有与磁盘相似的访问行为，\hl{分区容量不方便变化}。
+故在磁盘或分区之上，构建LVM。因为引入了一层映射，LV可以灵活地扩容(扩容通常不会影响到LV的数据布局，缩容则不然)。
+
+在硬件变革的影响下，软件架构当做何种配合？EC、消重、压缩、LSV等等特性也变得更具必要性与可行性。
+
+企业存储的诸多特性，如数据安全、备份、容灾、二级存储等。
+
+假设有一组disk，具有0-255之间的diskid。
+pool与disk具有1:m的关系。
+disk必然属于一个pool，一个pool可以包含多个disk。
+
+已知diskid，可在slot里查到对应的disk\_t内存结构。
+
+一个pool具有独立的空间分配器，负责响应对应的空间分配请求。
+
+disk模块向上层replica提供了哪些接口？
+
+\subsection{0827}
+
+Week Plan:
+\begin{enumbox}
+\item SNMP
+\item 高速下的QoS
+\item \hl{disk\_load有顺序问题}，没有赋值dop的情况下，用到了dop。
+\item scan过程及时更新pool状态
+\end{enumbox}
+
+分布式全闪存架构，全闪存不同于混合存储或传统的全HDD。SSD的发展突飞猛进。
+架构上，从阵列到分布式也是一变革。分布式架构，相对于阵列控制器，有哪些要解决的关键问题？
+分布式、超融合HCI架构。
+
+关键问题：
+\begin{enumbox}
+\item 集群的数据一致性校验工具
+\item \hl{诊断工作工具化、自动化}
+\item 性价比
+\item 大家都在做什么？
+\item SolidFire
+\item Ceph
+\end{enumbox}
+
+采用\hl{上下左右四象分析法}，分析分布式块系统的相关模块。
+
+分为两层：分布式+节点级。分布式包括集群选主，定位控制器，节点间通信。
+节点级包括chkid到磁盘位置的映射，磁盘空间管理等。
+
+控制器相关逻辑包括：控制器的定位，chunk分配与回收，读写流程。
+因为一个卷相关的所有操作都经过控制器，同时控制器进行了core绑定。
+
+主要的抽象包括：\hl{target、controller、chunk、replica、disk}等。
+
+hazard无法写：
+\begin{enumbox}
+\item 卷控制器日志报: \_\_table2\_chunk\_newinfo ENOSPC。 (backtrace打开)
+\item admin节点 dispatch\_srv\_newdisk DBUG: need 2 got 1 (打开DBUG模式，level设为1)
+\item UMP观察到该pool空间不足
+\item 需要考虑disk keep的影响，默认保留20G。
+\end{enumbox}
+
+\hl{lich stat -v}可以看到pool的空间情况，lich health看到存储池状态。
+
+目前实现上的问题：
+\begin{enumbox}
+\item 空间分配没有考虑节点权重，如果某一节点配置了更多的磁盘空间，无法得到有效利用。(按pool组织)
+\item 数据平衡过程没有按pool进行处理。
+\item 跨pool的copy和migrate
+\item \hl{逻辑pool、物理pool各自的优缺点}
+\item 静默错误没处理
+\item 磁盘坏扇区导致踢盘
+\end{enumbox}
+
+\subsection{0828}
+
+硬件、软件维度，计算、存储、网络维度，两个维度2x3，如何进化？
+
+理解offload一词的含义，比如RDMA、DPDK、SPDK等框架下，主机cpu的工作卸载到设备控制器去做。
+用户态驱动，polling模式与中断模式的演进，io极快的情况下，无需中断即直接返回。
+
+在全闪的场景下，cache、lsv价值几许？ssd控制器会做很多工作。
+
+与成本相关的特性变得重要，如dedup、压缩、ec等，也相应降低了性能，这是一种权衡。
+
+从系统系统到磁盘IO，存储都是一个关键组件。
+
+系统挂载一个或多块盘，其中一个是boot盘，boot扇区包含启动代码，进一步加载内核镜像。
+
+磁盘的使用有几种途径：一，分区、格式化为文件系统；二，作为设备文件；三，用户态驱动(NVMe)。
+
+在linux的世界里，一切皆文件，强大的VFS抽象，包容了各式各样的文件系统。
+
+\hl{本地}： 多块盘联合起来使用，有两种方式：RAID、LVM。
+RAID导出的是物理设备，LVM在物理设备之上，构建逻辑卷，可以灵活地调整分区的大小。
+
+\hl{SAN}：iSCSI，tgt，导出底层服务，发现并链接后，作为本地的一块盘使用，iSCSI target只是一个接口协议，
+至于底层实现则是另一层面的事情。\hl{VAAI扩展、iSER扩展}。
+
+从企业存储到统一存储，有架构的巨大变革。分布式HCI架构？
+
+支持FCP? 有什么开源项目？ \hl{linux io？scst}？从C/S架构，则不难理解形形色色的存储接口与协议。
+
+在更大的范围内去看分布式存储的定位。如在多云架构内去看，与\hl{docker/k8}的结合等。
+从分布式块存储出发，\hl{扩展到四面八方}。
+
+\hl{读锁里面嵌套写锁}，可以通过解耦两种活动异步地来做。
+
+\subsection{0829}
+
+模式：
+\begin{enumbox}
+\item 多加DBUG，方便实时诊断问题，也包括命令行工具开发过程。
+\item \hl{list要先del，然后才能free，否则有内存错误}。
+\end{enumbox}
+
+理解vfm的工作原理
+
+一个subvol维护一个vfm结构体，记录在chunk的info区。
+
+恢复完成后，执行vfm\_cleanup操作。
+
+rack感知，三种状态。
+
+chunk有两种实现机制：rep and ec。
+
+\subsection{0830}
+
+问：
+\begin{enumbox}
+\item \hl{docker镜像的/etc/resolv.conf宜为空，否则会连接DNS，导致ssh变慢}
+\item diskmd\_recovery中加入正常的diskid，会有副作用吗？
+\item diskmd\_recovery的工作线程不主动退出，由外部monitor线程进行启停
+\item testing分支恢复性能慢，为什么？
+\item 因为是按比例进行QoS，\hl{一方过小会导致另一方也小，不合理}
+\item 删除快照有性能问题
+\item 支持\hl{多存储网}
+\end{enumbox}
+
+\hl{diskmd\_recovery的工作机制}：当检测到磁盘故障时，产生一事件，或发起一新线程组，
+或插入到线程组的故障磁盘队列里。
+
+线程组由\hl{一monitor线程以及若干工作线程}组成，工作线程数量按一定策略进行动态调节。
+工作线程不主动退出，由minitor线程进行控制。
+
+删除pool时，需要从故障磁盘队列里踢出相应磁盘，停止其对应的恢复过程。
+
+一个disk恢复完成后，也应从故障磁盘队列里剔除相应disk，否则会不会造成问题呢，遗留一条垃圾记录？
+\hl{如果diskid被重用了}，又会如何呢？
+
+\begin{enumbox}
+\item 给定一chkid，得到其各个副本位置，以及各节点上的状态(\hl{db、bitmap、数据, clock})，如此可以检查副本一致性以及垃圾副本
+\item 对一个卷的所有chunk执行以上步骤
+\end{enumbox}
+
+\subsection{0831}
+
+扎根分布式块存储，战略的要义就是\hl{舍九取一}。
+什么是好存储？
+
+\begin{enumbox}
+\item QoS性能
+\item 如何查看哪些卷在恢复？
+\item 从工具层面思考调试的效率
+\item 卷或控制器具有检查并恢复功能，由外部事件触发
+\item 抽象线程使用模式（带任务队列）
+\item 性能分析：init - target - storage分成两个部分，分别看其latency。
+\item 恢复与IO的关系，并发下的性能，采用\hl{RAFT来实现chunk副本一致性}？
+\item 模块化，最小化模块的外部接口
+\end{enumbox}
+
+新思路
+\begin{enumbox}
+\item 控制器知道自己所在的存储池，存储池的拓扑结构，repnum等关键信息。
+\end{enumbox}
+
+三节点三副本，掉一节点，\hl{无法恢复，反复检查}？性能下降
+标记第三副本为stale，继续执行。
+
+一个volume建立有多个iscsi session会如何？
+
+物理盘、逻辑卷，存储虚拟化，对上层应用是一样的。\hl{RAID、LVM、VDO、Bcache、iSCSI}都可以看做存储虚拟化技术。
+入口是设备文件，可以格式化成文件系统，或者供上层应用直接使用。\hl{mount选项知多少}？
+
+PCI设备可以跳过kernel直接进行交互，是用户态driver的基础。用户态与kernel态的\hl{本质区别}是什么？
+
+\hl{系统盘}的分区原则，数据盘
+
+用描述性语言刻画系统特性

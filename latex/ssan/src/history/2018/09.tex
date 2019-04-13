@@ -1,0 +1,478 @@
+\section{09}
+
+\subsection{0901}
+
+\subsection{0902}
+
+知几其神乎？三合之道的三角对应心道物，相应的修行原则对应诚神几。
+
+几有危微两方面的意思。致诚、用神、制机，从而实现改造现实达成目标的现实意义。
+
+鬼谷有持枢中经残篇，枢纽、枢机、枢要，皆重要之点。主要矛盾，当今主要矛盾依然是财务自由这一主题。
+实现财务自由即是最大的胜利，至于精神自由固然重要，却易于自我欺骗，不思进取，而贻误战机。
+
+夫道者，体常而应变，常是原则，随机应变，应变要随机。如带中心点的圆环，后顺得常。
+
+\subsection{0903}
+
+删除pool没有完成，此时重启lichd，会残留pool相关状态，如相关的disk文件，影响后续过程。
+
+\begin{enumbox}
+\item 显示disk依然处在使用状态，无法加入新的pool里。
+\item pool已经不存在，disk依然能够加载成功？
+\item 暂时控制恢复进程的命令行工具
+\item \hl{用RAFT实现副本一致性}？
+\end{enumbox}
+
+添加etcd task，用于处理pool remove过程中的异常中断。\hl{其它bh bask也可以切换到etcd方式}。
+因为pool name可能被reuse，会引起难以预料的问题。
+
+\hl{把数据结构、算法和架构的学习和思考放入内功修炼}，持续地不中断地打牢基础。
+
+反思recovery的线程与队列组织，有诸多不便之处，无法方便地\hl{hash不同的数据到不同的线程}。
+\hl{线程最好有自己的队列}，封装成SEDA模型，按策略分配不同的任务到不同的线程。
+
+在拔盘的时候，EIO要封装在底层(EGAIN)，不能返回给前端，目前已能正确处理。
+
+问题集
+\begin{enumbox}
+\item 把chunk作为object layer，如何？其上构建统一存储。
+\item ceph架构: CRUSH pool、pg、object
+\item 节点内：RAID、LVM、Bcache、VDO等
+\item 分布式：RAFT
+\item iSCSI, tgt、spdk项目
+\item VFM
+\item 多存储网
+\item Sqlite/LevelDB/RocksDB
+\item 从阵列到分布式架构
+\item QoS
+\end{enumbox}
+
+多个\hl{索引}如果转化成LevelDB的KV模式？
+
+上下左右看，ABC
+
+往下看，看到操作系统乃至硬件，往上看，看到虚拟机、docker/k8s、\hl{企业存储、云存储、数据库、大数据}、乃至AI。
+右手螺旋法则，立体河图
+
+dd、mount、fio、vdbench、hazard
+
+\subsection{0904}
+
+分几个方面建立知识体系：
+\begin{enumbox}
+\item 项目：实战（立足手头工作）
+\item 架构：编程、架构(数据结构、算法、模式)
+\item 系统：\hl{操作系统、文件系统、数据库、网络}、分布式系统、缓存、MQ
+\item 四面八方延伸至ABC
+\item 要包含数学这个异常重要的基础
+\end{enumbox}
+
+数据模型即是访问层，如统一存储的对象、块、文件，NoSQL的KV、文档、列存、图、关系等。
+对块存储系统（SAN）而言，可分两层去思考，一是对象层，二是块层。
+
+大规模分布式存储系统一书的架构组织不错，从理论到实践、从下到上循序展开。
+
+基础知识分单机存储引擎和分布式架构，质量属性是自始至终都要考虑的要素，包括性能、可靠性、可用性与扩展性等(视角)。
+\hl{视图（来自视点，以视点为模板）+ 视角的架构描述方法}值得参考。
+
+\hl{事务}的观点、并发控制与恢复的观点、虚拟化和持久化的观点贯彻始终。
+
+单机存储系统需要考虑的要素有哪些？分布式系统增加了哪些复杂度？
+
+从上至下、从下至上双通路考察本地存储系统。
+
+不要受到当前实现方式的限制，从更基础的层面提出问题，并思索方案的可能性空间。
+先发散、后收敛。
+
+存在两类数学，一种是\hl{易经上、或神圣几何里的大衍之数}，一种就是数学学科，包括纯粹数学和应用数学。
+大衍之数体现了数学的艺术性、哲学性。
+
+QoS是一个大问题
+\begin{enumbox}
+\item 控制目标：下限、上限、突发
+\item 集中式控制、分布式控制
+\item 优先级
+\item \hl{高速pool的时候}，QoS机制本身带来的开销太大，导致IOPS严重地低于设定值。
+\item dbg模块会生成/dev/shm/lich4/msgctl目录下的若干文件
+\item bcache在docker内部不显示虚拟设备
+\end{enumbox}
+
+QoS的参考资料：
+\begin{enumbox}
+\item Ceph的dmClock算法
+\item XSKY的漏桶与令牌桶结合的策略
+\item SolidFire
+\item NetApp
+\item SPDK bdev
+\end{enumbox}
+
+\subsection{0905}
+
+pci设备？通过pci设备号操作该设备，不经过kernel。
+
+本地存储引擎，带索引的关系模式怎么转换为KV模式？
+磁盘空间管理、chkid到磁盘位置的映射关系。
+
+在allocate或discard时，会建立这些关系。读写时，只是访问这些关系。
+allocate过程或独立进行、或在使用的时候按需分配(精简配置)。
+
+chunk的metadata，记录了副本的位置信息。所以\hl{最小的故障域是节点}。
+
+副本或条带一致性是最困难的部分。
+
+数据分布（分配、再平衡、恢复、GC）的一般规则：
+\begin{enumbox}
+\item 按pool组织
+\item pool内满足故障域规则
+\item chunk满足副本数要求，且副本之间是一致的
+\item 容量和负载在节点之间尽量均衡分布
+\item 考虑节点的权重
+\end{enumbox}
+
+异常情况的处理，比如故障域小于副本数要求。
+
+pool资源组织成一树状结构，pool-rack-node\hl{-disk}。
+
+负责空间分配的admin在内存中维护着这样的结构，在节点启动之后，
+会周期性地向admin上报自己本地的pool拓扑信息。
+
+pool的ns，通过pool controller和volume controller跟踪维护。
+
+给定chkid，如何\hl{定位controller所在位置呢}？
+后续所有controller相关操作，都要调度到该controller去处理。
+
+已知问题：
+\begin{enumbox}
+\item controller在节点以及节点内core上的分布是否均匀？
+\item 大卷无法有效地进行负载均衡，瓶颈受限于一个core
+\end{enumbox}
+
+数据的复制、迁移。
+
+一个系统可分解为基础结构kernel和高级特性，宏内核架构，尽量组织成模块化。
+宏内核方便模块之间的通信，但因隔离性差，也容易引入严重问题，影响到全局。
+
+\subsection{0906}
+
+把disk故障也纳入vfm，即不再使用check方法，而是按subvol进行标记，
+被标记的subvol就处在可疑状态，待全部确认后，再清除其上的标记。
+
+check标记的是副本，\hl{subvol标记的是一个subvol范围内的所有chunk在某节点上的所有副本}。
+
+subvol标记怎么做到io和恢复的隔离，从而提高性能的？
+
+\hl{扫描顺序的影响}：如果按顺序进行扫描，待扫描完成后，即可清理其上的标记。
+如果是在一个大的范围内随机扫描，则只有全部完成，才能清理每个subvol上的恢复标记。
+
+\subsection{0908}
+
+两种故障要尽量统一处理。
+
+加班
+\begin{enumbox}
+\item disk recovery，增加控制逻辑，动态调节参数，包括开关、恢复速度(统一为disk\_fill\_rate)
+\item QoS，精确控制在高IOPS下难以实现，退而求其次，控制node recovery的fill\_rate
+\item 在scheduler层面，iops与recovery采用不同的队列
+\item fill rate == 0时，\hl{不退出恢复过程，循环等待}，scan过程及其结果要保留，此约定适用于两种故障
+\end{enumbox}
+
+恢复控制参数
+\begin{enumbox}
+\item 控制开关 (静态、动态)
+\item 带宽
+\item 线程数
+\item 每请求提交到控制器的chunk数 (最小最大)
+\end{enumbox}
+
+两个pool的隔离性，\hl{拔出一个pool的盘为什么会严重干扰另一个pool的iops}？
+\begin{enumbox}
+\item RAID (WT)
+\item DB
+\item schedule
+\end{enumbox}
+
+\subsection{0910}
+
+TODO list：
+\begin{enumbox}
+\item \hl{被deleted的卷/快照导致recovery rescan}
+\item recovery 合并重复事件
+\item 没有IO的时候，限制recovery不合理(Q4)
+\item 删除pool过程如果中断，残留下的垃圾影响到后续过程
+\item fnotify
+\item qos schedule\_sleep delay是固定值，不合理
+\item recovery recover的并行化，多次RPC
+\item \hl{VFM机制有放大可疑区间的问题}
+\item 与节点启动时间变长有关？etcd lock？
+\item 验证VFM是否把写时恢复的流量给成功剥离出来了，启用background\_recovery配置选项
+\item VFM：IO时skip vfm存在的副本，解耦IO时恢复，交给外部恢复过程处理
+\item \hl{ENABLE\_CHUNK\_DEBUG 跟踪chunk的生命周期活动，在controller上捕获尽可能多的信息、条件、事件}
+\item 连接频繁断开，触发recovery过程
+\end{enumbox}
+
+\subsection{0911}
+
+在整个recovery过程中，如果有卷/快照被删除，如何处理？
+目前的策略是退出recovery过程，然后重新扫描？但如果一直在删除快照，会导致频繁地重新扫描。
+
+李刚彬工作交接：
+\begin{enumbox}
+\item 数据布局
+\item 切换时间控制
+\item lookup过程，gc特性关，误删数据
+\item chunk check
+\item snapshot, 数据view，树型快照
+\item snapshot，连续删除、标记删除
+\item EC 条带一致性，故障下的恢复，log，cache，或先写入临时区域
+\item cache
+\item etcd选主依赖于物理时间，容易引发问题
+\item admin的切换过程，ctl的切换过程，两者可能有叠加。
+\item ***
+\item 故障诊断 hazard
+\item iscsi session切换，原session的IO还在继续处理
+\item clock
+\item chunk check
+\item chunk tree里parent的chkinfo的rep set变了，沿着chunk tree向上跟踪
+\item mbuffer不配对，忘了free，导致内存泄露
+\item \hl{诊断方法见: 192.168.1.7 文档}
+\item 常见问题：可在git仓库里搜索write failure
+\end{enumbox}
+
+\subsection{0912}
+
+理解VFM和clock机制
+\begin{enumbox}
+\item 解决了什么问题？
+\item 需要管理什么信息，粒度，这些信息需要持久化吗？
+\item 选择什么样的标记粒度？vol, subvol?
+\item CRUD 增删改查的条件
+\item 不正确设置VFM会带来什么后果？
+\item 更好的方案是什么？
+\item 可配置选项有哪些？
+\item \hl{恢复chunk集是扫描chunk集的子集}
+\item 动态重配置问题
+\item 一旦标记subvol，则该subvol的所有chunk皆处在可疑状态，需要确认。
+\item \hl{一致性分析：异步恢复违反副本的强一致性原则，会带来不可预期的影响}
+\item VFM失效，导致iops低
+%\item \hl{chunk check的core\_request影响到跨pool性能}？
+\end{enumbox}
+
+\hl{故障下的写时恢复机制}极大地影响了IO性能，解耦IO与恢复两种活动。
+
+在检测到故障时，记录nid到VFM，在恢复完成后，清除相关标记。
+在读写的时候，skip VFM列表中的副本。处在vfm列表里的副本，可能处在\hl{stale状态}。
+如果按chunk标记该状态信息，因为需要持久化，成本比较高。
+
+\hl{在恢复的时候，如何确定scan和恢复的策略}？
+
+只对raw chunk采用vfm机制来实现异步恢复，meta chunk数量少，且更重要，最好同步恢复。
+
+vfm按subvol进行标记，有放大扫描范围的倾向。
+
+\subsection{0913}
+
+理解QoS
+\begin{enumbox}
+\item QoS: 分层分类控制。分层：节点、core、controller，分类：IO、Recovery。
+\item QoS尽量部署在上游，靠近输入端，什么是end-to-end？
+\item 基于类是最佳实践
+\item 所有算法都是基于token bucket。token bucket有很多种实现形式
+\item 测量：依赖于高精度的定时器，且测量干扰性能(\hl{测不准原理})
+\item 调度：network scheduler，基于队列(显式或隐式)
+\end{enumbox}
+
+高IOPS就类似于从牛顿力学进入了量子世界。
+
+性能、可用性、QoS三特性一起考虑。故障分两种：节点故障和磁盘故障。
+
+先分析跨pool影响，再分析pool内影响。
+
+从资源使用的角度分析故障的跨pool影响，故障下，恢复流量会用到内存、网络资源，sqlite?
+磁盘是隔离的，core也是隔离的。
+
+节点之间的corerpc只有一个连接。两个卷映射到不同的core hash上。
+
+简化测试环境：\hl{两个pool，每个pool一个卷(映射到不同的core hash上)，做故障}。
+从简单到复杂，先确定简单情况下没有问题，然后再推广到更复杂情况。
+
+\begin{enumbox}
+\item background recovery off
+\item \hl{确认是否有带内恢复流量}，统计chunk\_push被调用的次数，按pool/vol分组
+\item clock merge带来的性能抖动
+\item chunk bh是干什么的
+\end{enumbox}
+
+\subsection{0914}
+
+问题集
+\begin{enumbox}
+\item getnode返回estale
+\item disk故障，没有加入vfm，导致带内恢复
+\item recv/send是block操作，堵塞scheduler主循环
+\item qos disable overflow
+\end{enumbox}
+
+\subsection{0917}
+
+\begin{enumbox}
+\item 对标ceph，如何体现竞争力？
+\item AFA是大势所趋，如何把握机会窗？
+\item 客户在哪里？
+\end{enumbox}
+
+为平滑删除资源，采用垃圾桶、skip、维护模式等\hl{设计模式}进行。
+本质上是设计资源的状态机，不同的状态允许不同的操作，通过区分不同的状态来达到目的。
+
+问题是如何持久化资源的状态，以满足ACID等基本属性？
+
+\subsection{0919}
+
+\begin{enumbox}
+\item volume\_lease use 3s
+\item recovery immediately
+\item 单磁盘故障，恢复影响io性能，为什么
+\item vfm影响io性能
+\item 恢复影响io性能
+\item etcd版本不一致导致问题
+\end{enumbox}
+
+工作职责
+\begin{enumbox}
+\item 解决产品中遇到的问题
+\item 维护存储引擎以及恢复、平衡、QoS、快照等模块
+\item 优化现有系统架构，评估并引入关键功能
+\end{enumbox}
+
+\subsection{0920}
+
+目前，主要有两类问题：\hl{资源管理和故障处理}。资源管理特别是资源的删除，一是要考虑事务性，二是要考虑性能。
+比节点、pool、卷、快照等。
+
+故障处理，包括磁盘和节点故障，事件触发恢复，需要综合考虑可用性、性能和QoS等指标。
+
+以磁盘故障为例。从\hl{事件处理}的角度来看，事件、事件处理、新的事件可能会中断前面的事件处理过程等。
+从资源的角度来看，资源建模为状态机，状态机模型可以融合事件处理。\hl{状态-事件构成状态机，或矩阵}。
+
+节点状态分两个维度：out/in，up/down，实际状态是以上维度的组合。把状态按维度 
+从执行线程的角度来看
+
+事件：
+\begin{enumbox}
+\item 磁盘故障，开始恢复
+\item 磁盘上线
+\end{enumbox}
+
+用CAP理论分析VFM的设计，采用了异步复制，提升了A，而降低了C。
+对分布式块存储系统，C是第一位的，任何情况下都不允许丢失数据的后果。
+
+\subsection{0921}
+
+推广事务概念到分布式系统，CAP理论是分布式系统所特有。融合两个理论，中心是C和A。A有二义：原子性、可用性。
+
+\hl{数据模型分布与复制}是根本需求，由此带来了要解决的一系列问题，如一致性、故障处理、负载均衡、性能、容量等。
+
+先看数据模型或范式，如文件系统、数据库、KV、文档、对象、列存、图、搜索引擎等。
+NoSQL、NewSQL如雨后春笋，否定之否定螺旋进化。虚拟化、分层堆叠。
+
+围绕着数据来思考，数据结构、模型、关系、存储、提取、分析等等。
+数据管理在整个业务开发中最为复杂。
+
+对象是统一的概念模型，在对象层之上构建更复杂的数据模型。文档的V是结构化的、列存是KV之间有一定的模式。
+
+\hl{事件、模式、结构冰山模型}，要从结构去识别。数据模型决定数据结构，进一步影响到数据分布。
+
+以分布式块存储为例，volume分成固定大小的chunk，chunk采用了复制或EC机制。
+这是最基础的数据模型，pool、dir、snapshot是次一级的数据模型。
+
+pool是对磁盘的一次物理划分，故障域是对pool的又一次物理划分。按chunk组织副本，需要较多的元数据。
+
+Ceph引入了PG概念，pool分PG，PG内的所有对象，具有相同的副本位置。一个对象映射到一个PG，就决定了其副本位置。
+这样，所需元数据骤减。PG与OSD具有多对多的映射关系。
+
+使用场景，从用到体。金融机构的OLAP，需要在一定时间内完成。
+
+两个卷、指定范围内的数据合并。
+
+\subsection{0926}
+
+以分布式存储系统为核心，向上下左右、四面八方拓展。
+
+沿着CBA上行，先集中全力攻克C中的S。
+
+上通C，下及OS，左右为AB。Arch、Algo、DS/System分居四隅。
+
+系统：\hl{从系统开始，由整体观部分，由部分观整体}，操作系统、文件系统、数据库、网络等。
+
+分布式系统：传统阵列架构、迁移到分布式架构。多个服务器构成，由多组合成一，隐藏其中的复杂度（虚拟化、透明性）。
+共识问题是分布式系统的核心问题。CAP和ACID等要求，经之以五事，校之以计，而索其情（V型）。
+
+架构：是系统的素描，骨骼。架构驱动的软件设计强调了架构设计在整个软件开发过程中的重要性。
+为了更有针对性地描述架构，架构纵横交错，可分为视图、视角两个维度，分而治之。
+架构决定了系统的诸多特性。\hl{架构是高层认知}。架构犹如将军之排兵布阵。
+
+算法：算法是更具体的设计。
+
+编程语言：实现
+
+以FusionStor为例。架构描述？关键算法？
+
+\subsection{0928}
+
+莫名其妙的core，看dmesg，是否OOM？
+
+ext4格式化慢，xfs格式化快
+
+\subsection{0929}
+
+VFM通过标记，化同步恢复为异步恢复，能提升IOPS？
+
+lease renew既周期性执行，在一些长时操作的过程中，也要插入该逻辑。
+
+如果避免一个task长时执行？长时任务检测
+
+XSKY 2018也投入了全闪，大势所趋，为什么不重视，不all in？机不可失失不再来。
+
+阳明心学即是独立的领域，也是渗透到一切言行。在专业、工作中，处处是致良知的机会。
+
+地毯式扫描，包围式学习，温故知新。全闪意味着什么？这是书本上所没有的，要看论文、最新报道、行业会议等。
+用心感知趋势所在。
+
+vip multipath, nvmf, snapshot是下一阶段的重点。
+
+整理资料？书籍、论文、网站、行业报告、会议、与高手交流。
+
+\subsection{0930}
+
+\begin{enumbox}
+\item 恢复策略: 事件、定时
+\item vfm下有多种速度：扫描、恢复，按不同的速度进行
+\item 恢复、平衡等活动，\hl{严格按pool、按卷进行分组}，道法自然，按事务的本来面目进行程序设计
+\item 精简配置的性能
+\item 故障下的性能
+\item 系统行为的全局控制
+\item *
+\item 分布式架构
+\item 支持新硬件(存储+网络)
+\item 支持新协议
+\end{enumbox}
+
+如何不违反强一致性？\hl{chunk内并发、读改写、clock、vfm}等机制引入了额外复杂度。
+
+两副本的标准行为如何？三副本呢？
+
+磁盘故障下，标记了节点，放大了范围。具体来说，对涉及的每一个controller，触发了所在节点所在pool的节点恢复过程
+
+磁盘故障过程中，标记的vfm，自身并不负责清除，而是委托给了节点恢复过程做清除vfm标记的工作（共用了该逻辑）。
+
+最好的做法是什么？
+一，由磁盘故障恢复过程本身来负责清除，相关信息需要持久化。
+二，由pool恢复过程，周期性地扫描所有卷，以发现卷上是否标记有vfm。
+
+事件可能丢失，状态通常不变，卷的连接管理如此，vfm标记也是如此。
+检查状态，按状态触发行为，以补充事件丢失带来的潜在风险。
+
+pool即是对磁盘的划分，也是卷的逻辑容器。所以在X结构里，pool出现两次。
+物理结构：cluster->node->pool->disk。逻辑结构：cluster->pool->dir->volume(+snapshot)。
+
+节点故障后，IOPS下降严重。为什么？根本原因是什么？
