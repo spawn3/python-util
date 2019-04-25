@@ -88,3 +88,333 @@ trace点
 \end{enumbox}
 
 工欲善其事必先利其器。下一步重点考虑方法和工具，提升效率。
+
+\subsection{15}
+
+以后不管每天多忙，都要坚持记日记。清晰思考、清晰表达。
+牢记自己的目标，少做无用功。
+
+当下头脑还是挺混乱，没有聚焦到最终的目标上，白白浪费时间和精力。
+
+\subsection{16}
+
+理解ssan的线程和队列模型。每一个放入queue的对象，都内嵌work结构体，包括request、recovery\_work等。
+根据work指针可以反向检索到任务所需上下文信息。每个work队列对应一个动态伸缩的线程池。
+
+目前定义了四类request：cluster、gateway、peer和local。如何区分peer和local request？peer是gw发送过来的消息。
+local是本地节点执行的消息，\hl{为什么不直接执行}，而采用了相同的队列/线程池的执行模型？
+
+\subsection{17}
+
+增加object version，version的变化规则：
+\begin{enumbox}
+\item create and write 
+\item write
+\item read
+\item recovery (调用create and write，与分配用的区分开)
+\end{enumbox}
+
+recovery，version不应该变化，用recovery所选择的version作为权威version，同步gw上version。
+gw上所有堵塞的io，都需要用更新后的version值继续。这是双控之间的同步过程。
+
+如果recovery时不更新version，如果区分recovery fail的情况？真的需要区分吗？
+
+\hrulefill
+
+object version用来做什么？
+\begin{enumbox}
+\item 记录在peer端的日志里，跟踪对象的修订历史
+\item 触发动态恢复，动态恢复与优先修复满足相同的条件
+\item 取代get hash方法，鉴别对象的新旧
+\end{enumbox}
+
+\hrulefill
+
+增加并行版的ssan\_send\_req，优化多节点通信的性能。封装map、或pmap功能。
+
+version是否需要持久化？write op和持久化version的操作，是否需要保证原子性？如何做到？(diry/clock)
+
+gw和magic是否需要传到peer端？
+
+复制方式下的副本和EC下的分片都可由（oid、idx、epoch）三元组唯一确定。
+副本和分片的不同在于idx，副本的idx都为0，分片的idx为一个有序序列。
+
+\hrulefill
+
+TODO List
+\begin{enumbox}
+\item 一致性: node and disk
+\item 性能
+\end{enumbox}
+
+动态修复与当前的节点修复和disk修复之间如何同步? 一个对象只能被修复一次，如果触发了多次修复，后续修复须具有幂等性。
+
+每次epoch变更，须要做到：
+\begin{enumbox}
+\item 从所在epoch可以检索到所有有效对象
+\item 然后接收新的请求
+\end{enumbox}
+
+参考RAFT协议，可以认为epoch更新经历多个阶段：选主、修复、正常操作。
+所有节点应看到相同的视图变更历史。
+
+如何处理集群重启这个特殊场景？系统启动后，需要做哪些工作？
+
+\hrulefill
+
+如果gw故障，client配置了multipath。由multipath软件确定何时切换路径。
+
+每个lun在所有gw上都export了，但只有一个处在active状态。
+
+\hrulefill
+
+听老王讲课蹦出来的新概念
+\begin{enumbox}
+\item 520格式
+\item overlay OS
+\item token
+\end{enumbox}
+
+\subsection{18}
+
+性能优化，\hl{无测量，不优化}，说明了定位问题的重要性。
+\begin{enumbox}
+\item 去掉多余的日志，或控制日志等级
+\item 主线程的slow操作
+\item 充分并行
+\item io 同步 or async
+\item 聚合
+\item *** 修复相关
+\item 去掉notify standby逻辑
+\item 引入对象version后，rethink修复过程
+\item 修复EC分片时的读改写，若无变化则不需写，若无必要，甚至不需读
+\item prepare list概率地出现无效oid，可以先过滤掉，至于根本原因，待查
+\item 事件循环里，事件name为何会是乱码
+\end{enumbox}
+
+直接回退到旧版本的分片，也可能存在一致性问题。因为分片与io边界不一定一致，
+基于分片的回退机制有可能导致已提交数据丢失。
+
+\hrulefill
+
+zookeeper是如何工作的？
+\begin{enumbox}
+\item 如何选出master
+\item watcher机制
+\item queue机制，订阅-发布模式
+\end{enumbox}
+
+ssan架构方面的问题
+\begin{enumbox}
+\item 线程和消息队列
+\item Memory
+\item RPC
+\item Disk IO
+\item 无supervisor进程
+\item journal
+\item object cache
+\item QoS
+\item tgt与ssan进程的IPC通信
+\item all user space storage stack
+\item *** 工具
+\item log
+\item GOTO
+\item trace
+\item coredump
+\end{enumbox}
+
+DHT有平衡即恢复的特点。
+
+MULTIPATH和VIP
+
+快照是个重要并难的主题。
+
+引入vdi控制器，至少在概念上要有这个东西。用rb tree组织多个vdi控制器。vdi控制器包括若干属性，
+\begin{enumbox}
+\item 所有对象以及对应的版本
+\item QoS policy
+\end{enumbox}
+
+如果由gw控制恢复过程，按vdi进行组织，这样可以进一步完善恢复策略。
+
+最近强化写作，按主题编制文档，最终整合为一，形成知识体系。
+
+凡有所思，皆行诸文字和图表，固化下来，方便优化。溯源传统道兵诸学，奇正之术。
+写作的物质载体，首推latex。
+
+\subsection{19}
+
+考驾照列入日程，能在京郊有套别墅当然更好。小目标如何做到？庖丁解牛的寓言里面有答案。
+\begin{enumbox}
+\item 驾照
+\item 车牌
+\end{enumbox}
+
+从黑洞模型谈起。护城河，守正出奇。
+
+\subsection{22}
+
+disk故障恢复与节点故障有所不同，没有改变vnode分布，不用提升epoch，只需要由磁盘所在节点处理即可。
+
+disk故障时，disk所在节点接收到start\_recovery。
+
+应尽量优化修复性能，优化掉多余操作。
+
+一致性的修复过程
+\begin{enumbox}
+\item peer sync
+\item move过程有io
+\item 两次recovery交替之时，应用新的epoch做是否已修复的条件
+\item 对象名加epoch，避免move
+\item 按epoch分目录存放object
+\item unlikely用法错误，把任意参数转化为bool值
+\item 回收：下游节点存在，可回收上游节点
+\item purge dir可以采用move并异步purge的策略
+\end{enumbox}
+
+制定问题排查清单
+\begin{enumbox}
+\item 排查依赖性，如\hl{zk、agent、tgt}等
+\item 在代码中捕获不变式，用断言处理，fast fail
+\end{enumbox}
+
+理解exec\_local\_req，深度学习ssan，力求全面掌握，在这个过程中，整理学习笔记。
+
+理解zk的工作原理，以notify standby为例。每个节点都发出该消息，加入zk消息队列，会广播给所有节点。所有节点都能接收到该消息。
+节点注册有事件处理程序。notify standby消息，只在master上处理，别的节点收到后直接返回。这与收不到消息是不同的。
+
+\subsection{23}
+
+zk的工作机制：提供了若干api，模拟消息队列。通过watcher回调函数监控这些节点变化。最后交给epoll事件处理程序。
+seq node按序增加，用来模拟消息队列。记录队列头部位置queue pos。
+
+clis/agentd配套使用。
+
+ssan二进制里加入git的branch和commit。
+
+epoch是否可抽象为一对象，多个epoch构成epoch的变更历史。可以方便地查询某一epoch下是否有某节点。
+
+\hrulefill
+
+磁盘故障没有提升epoch，如disk a故障，object存在disk b上，并有更新。disk a再次上线，会link到stale版本上。
+可以命名为ABA问题，因为没有版本可以进行区别。
+
+理解ssan的目录结构，多磁盘也用DHT来管理，up/down会导致大量对象的位置变化。
+
+新plugin的盘，可能包含着stale对象。最简单粗暴的处理方式是清空其上的所有数据。
+分几种场景来考虑。
+\begin{enumbox}
+\item 刚下线的disk
+\item 刚上线的disk (\hl{上面可能有stale对象，不能作为有效对象使用，如何鉴别？})
+\item 其它正常工作的disk （上面的对象也可能需要变动位置）
+\end{enumbox}
+
+磁盘故障需要扫描本地所有对象，并重新分布。因为link不支持跨文件系统，所以需要read出并写入。
+
+磁盘故障支持IO对象优先修复。
+
+从update epoch看起，因为磁盘修复不改变epoch，所有update epoch过程有所不同。
+update epoch是把各个disk上wd里的对象移入stale目录。
+如采用epoch组织目录结构，因为源目录和目标目录相同，如何处理？
+
+修复过程\hl{优先从本地搜索合适的对象}，并判断是否可用。如果可用，则link之。
+判断是否可用是必须的，否则会导致对象一致性问题。
+
+没有object version，且epoch不变，无法有效地比较对象的新旧。
+
+修复诸阶段
+\begin{enumbox}
+\item update epoch
+\item prepare list
+\item recover objs
+\item 每个object修复完成后的cleanup操作
+\item 整个修复完成后的cleanup操作
+\end{enumbox}
+
+\hrulefill
+
+写作更重要。有世界阅读日，更应该有世界写作日。用写作的方式理解ssan，
+不仅仅coding，也包括文档，对主题的理解以及引申。
+能用文字刻画出系统运行的关键过程，是一种非常好的锻炼。
+
+认知天性是刻意练习的升级版？
+
+ssan的master节点承担了什么特别的职能？zk的所有事件都在main thread里处理？
+可以解耦出来，用独立线程处理zk事件吗？如此可以提升main thread的响应能力。
+
+main thread是非常稀缺资源，也是下一步性能优化的一个重点部分。
+没有采用supervisor-worker双进程架构。
+
+\subsection{24}
+
+purge directory逻辑导致重启进程后所有数据都被清空。
+插入一块新盘，与重启系统应该不同。
+
+如在get tgt epoch的时候。在read请求时，如传入buf小于response的data length，会如何？
+
+epoch从1开始递增，0是无效值。
+
+default init做了什么？
+
+object list cache 和stale list cache，主要用于恢复过程。
+
+\hrulefill
+
+一个vdi可以拥有一个vdi object（支持最大4T的卷），若干data object，若干ledger object。
+ledger object与data object采用同一结构组织。一个data oject对应零个或一个ledger对象。
+
+\hl{snapshot vdi与volume vdi的vid不同}，采用同一的数据结构。
+一个volume vdi可以对应多个snapshot vdi，构成snap tree。
+
+DHT修复的过程，可以看着rehash的过程，从历史epoch里选取对象，分布到新位置(\hl{选择-修复-应用})。
+节点和磁盘修复都可以这么看。磁盘故障的特别之处是没有提升epoch，可能会发生ABA问题。缺少版本机制，
+所以一定要作为新盘加入，purge掉其上的数据。
+
+oid、vnode、node三者之间的关系。oid hash到vnode上，沿着vnode ring旋转，直到找到不同zone的vnode，
+vnode有指向node的指针。
+
+没有另外的平衡过程。
+
+选择是关键操作，选择不好，会导致一致性问题。
+\hl{选择阶段为什么可以往前回溯多个epoch}？
+
+ssan有多种场景，用到了不同的选择策略：
+\begin{enumbox}
+\item replication
+\item ec
+\item disk （无epoch变化，难以区分)
+\end{enumbox}
+
+一旦高epoch修复完毕，则所有低epoch的版本即可回收。
+
+ssan里复制卷各个节点独立进行recovery是否可行？如与IO交错，有无一致性风险？
+
+以\hl{A/B/C/D四节点}的集群为例，创建2+1的EC卷。
+
+\hrulefill
+
+两级元数据架构：object到分片，分片到磁盘。这里object是逻辑对象，包括多个副本或分片。
+统一用术语\hl{分片}指代复制的副本或EC的数据分片和校验分片。
+
+EC比副本更复杂，各个分片严格有序。
+
+\hrulefill
+
+一致性割：分析对象的变更历史（\hl{IO粒度}），以及选择的判定标准。
+一致性割可由object version来刻画。
+
+leader和journaling是达成一致性的手段。\hl{单控、双控、多控}都可以，只要能保证最终的更新序。
+单控最容易实现。journaling为了保证IO的原子写。在处理EC的时候，需要某种UNDO机制，来保证liveness。
+
+从\hl{safety和liveness}两种属性看恢复过程。
+
+需要什么信息才能得到某一对象在某一epoch的分布情况？这个过程必须是唯一确定的过程。
+可以认为就是ceph的cluster map？
+
+用raft membership change的算法解决static hash问题？
+
+\subsection{25}
+
+各个关键操作的事务性？ 如md\_move\_object。
+
+从对象的角度考虑，一致性意味着数据对象在正确的位置上，且不降级(No Error, No Missing)。
