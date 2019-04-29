@@ -82,8 +82,8 @@ trace点
 
 工具：
 \begin{enumbox}
-\item fio
 \item pdsh
+\item fio
 \item timedatectl
 \end{enumbox}
 
@@ -189,6 +189,9 @@ TODO List
 \item 引入对象version后，rethink修复过程
 \item 修复EC分片时的读改写，若无变化则不需写，若无必要，甚至不需读
 \item prepare list概率地出现无效oid，可以先过滤掉，至于根本原因，待查
+\item 顺序+优先修复，QoS控制正常修复流量
+\item 按epoch目录组织底层数据，更进一步，用hash slot来管理多磁盘
+\item Recovery QoS
 \item 事件循环里，事件name为何会是乱码
 \end{enumbox}
 
@@ -428,7 +431,7 @@ leader和journaling是达成一致性的手段。\hl{单控、双控、多控}�
 
 \hl{couchbase和redis采用hash slot设计}，不同于一般的consistency hash。hash slot是一种static hash机制。
 
-ABA问题，没有版本可以用来鉴别新旧，作为新盘加入。
+\hl{ABA问题}，没有版本可以用来鉴别新旧，作为新盘加入。
 
 优先选本地，select and link。其它盘可能有对应数据吗？应该保证不会有，有了也会GC掉，不影响正确性。
 
@@ -442,3 +445,60 @@ slot就不再是通用概念，而是与复制或EC的规则有关联了。
 ssan的大环和小环有着重大区别，大环需要支持\hl{副本或EC机制}，小环不需要。
 
 向Jeff Dean学习，\hl{语言-系统-AI}跨领域通行无碍。
+
+\subsection{28}
+
+更聚焦。
+
+学习拉卡拉的五行管理法：定目标、控进度、抓考评、理规范
+
+EC一致性方面的工作，哪些适用于副本？
+
+有可能切换到全闪方面的工作，目前对ssan理解得如何？快照方面尚没有涉及，其它方面大体熟悉了。
+
+熟悉了DHT的处理方式，ssan采用了大环和小环，大环用于集群级多节点的数据分布，小环用于节点内多磁盘的数据分布。
+DHT过于敏感，所以redis、couchbase采用了hash slot方案：
+\begin{enumbox}
+\item 固定slot数目
+\item 两级映射：key-slot-node
+\end{enumbox}
+
+考虑到slot-node的一对多关系，如支持rep和EC。此时的slot就有点类似ceph中pg的概念了，slot的使用受到了一定限制。
+小环采用slot机制不存在这方面的问题。
+
+随着epoch的变化，构成epoch history。每个epoch对应确定的members，包括vnode和node，以及相应的故障域规则。
+在一个epoch内，一个对象的数据分布是唯一的。引入slot后，假定一个对象对应多个slot，因为多个slot需要满足故障域规则，
+则slot的漂移受到很大限制。
+
+version是一重要概念。\hl{按一致性分割的解释，版本是最重要的设计因素}。leader和jounaling是实现方式，版本是内在要求。
+
+在每个epoch周期内，可分为若干阶段。直到完成finish object list，才允许IO进入。各节点完成finish object list的时机不同，
+允许由transmit引起的优先修复。这里要保证：一个oid只能被修复一次exactly once。
+
+\hrulefill
+
+有六类object，常用的有\hl{vdi、ledger、data，依次对应0x80、0x08、0x00}。oid的高8位用于对象类型。比如63位设为1，代表vdi object。
+全0代表data object等等。接下来的24bit代表vid，最后的32bit，随着object type而具有不同的含义。
+
+一个vdi对象有13M那么大。
+
+\hrulefill
+
+分模块理解ssan，分解并组合。
+
+\subsection{29}
+
+screen object list访问到无效rinfo，推测其被free了。worker thread在执行prepare object list时，main thread切换了rinfo。
+所以，需要类似引用计数的机制，来管理rinfo的使用和释放过程。
+
+refcount技术，在gc中有广泛用途。gc的本质和同一解释，就是引用计数。
+
+run next rw的语义：本轮不需要执行了吧？如果nrinfo非空，则返回true。
+
+校正各节点上的时间。\hl{ntpdate time.nuri.net;hwclock -w}
+
+引入trace日志等级，强度介于debug和info之间。
+
+% 通过命令\hl{md5sum $(find /data -name '80*')} 来验证副本。
+
+复制的恢复机制有问题。
