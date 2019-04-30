@@ -191,6 +191,7 @@ TODO List
 \item prepare list概率地出现无效oid，可以先过滤掉，至于根本原因，待查
 \item 顺序+优先修复，QoS控制正常修复流量
 \item 按epoch目录组织底层数据，更进一步，用hash slot来管理多磁盘
+\item update epoch 两次，且stale部分由main thread
 \item Recovery QoS
 \item 事件循环里，事件name为何会是乱码
 \end{enumbox}
@@ -502,3 +503,30 @@ run next rw的语义：本轮不需要执行了吧？如果nrinfo非空，则返
 % 通过命令\hl{md5sum $(find /data -name '80*')} 来验证副本。
 
 复制的恢复机制有问题。
+
+\subsection{30}
+
+node recovery一直显示nan，vdi list堵塞的\hl{原因分析}：
+\begin{enumbox}
+\item update epoch时间较长，且stale部分由main thread执行，须改进。
+\item notify standby没有完成，无法进入prepare object list阶段。此时又来了新的恢复事件。
+\item kill ssan进程，导致按disk方式修复。在update epoch阶段，数据已移入stale目录。disk方式无法完成。\hl{disk修复基于wd}。
+\end{enumbox}
+
+kill、或整体掉电的行为分析
+\begin{enumbox}
+\item \hl{kill后的restart触发disk方式修复} (shutdown不触发修复)
+\item 如果kill之时，处在recovery过程，甚至刚刚把数据移入stale，则无法通过disk方式修复
+\item config跟踪kill前是否处在recovery状态？
+\end{enumbox}
+
+update epoch在start recovery和run next rw各调用了一次，都是同一个epoch。为什么这么做？
+怎么理解这种行为？
+
+日志规则：
+\begin{enumbox}
+\item 减少日志条目，提高信息密度，包括尽可能多的上下文信息
+\item 尽量捕获重要且低频的日志
+\item 用debug日志等级trace object、io等实体的生命周期活动
+\item 在线调整日志等级
+\end{enumbox}
