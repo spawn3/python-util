@@ -1,7 +1,7 @@
 all:
 	cd src && xelatex main.tex && mv -f main.pdf ../ssan.pdf
 
-r: r4
+r: r5
 
 r1:
 	vim src/history/2019/01.tex
@@ -38,4 +38,3 @@ r11:
 
 r12:
 	vim src/history/2019/12.tex
-
