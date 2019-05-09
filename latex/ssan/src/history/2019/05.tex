@@ -8,3 +8,182 @@ primary在节点间分布不均，导致各节点恢复进度差别较大。
 
 恢复性能分析：用流体动力学模型。分调度器和下游处理节点。调度能力应大于下游处理能力。
 怎么评估main thread的调度能力。
+
+性能分析工具
+\begin{enumbox}
+\item perf
+\end{enumbox}
+
+网络层RPC
+\begin{enumbox}
+\item 并行
+\item libev
+\end{enumbox}
+
+磁盘修复不回溯stale数据，为什么？
+
+\subsection{05}
+
+测试发现，从某个epoch起，\hl{scli node recovery总是返回nan}，即便停止故障模拟，recovery无法进行。
+
+看standby相关日志，可以很容易发现问题所在，后续收到的只有193的消息，没有收到过192和192的消息，为什么？
+进而仔细分析\hl{start recovery和run next rw}两个过程。
+
+run next rw里的cur在某个时间点之后再没有变更过，说明了什么问题？其状态为prepare list，无法推进了。
+进一步的分析表明，\hl{该rinfo没有进入recovery的任务队列}。
+
+多次recovery被压缩为两次事件，需要小心管理\hl{recovery的上下文切换}过程。
+worker线程用到的rinfo，不允许被main thread free掉。上下文切换的过程，目前的实现也涉及与zk的交互。
+
+不变式：任一rinfo，都需经过free过程。满足malloc/free的对称性。可以用上下文切换的语义建模，辅助理解。
+
+每次recovery周期，update epoch可能被调用一次或两次，视start recovery里新创建的rinfo是否放入next rinfo而定。
+
+\hrulefill
+
+可以用egrep的OR方法，保留多个相关日志的相对顺序，便于分析。如\hl{start\_recovery|free\_recovery\_info|standby|prepare}模式。
+欲设计出诊断问题的模式，需要对系统的运行机制有全面而清晰的理解。
+
+发现的问题：
+\begin{enumbox}
+\item retry逻辑，导致当前恢复周期很长时间才退出，
+\item 192异常退出后，191一直恢复失败。
+\item 数据跑到stale下面，恢复没有完成，vdi list堵塞。
+\item 大量数据被放置在stale下，导致磁盘空间满
+\end{enumbox}
+
+移动对象容易带来问题，\hl{需要设计不移动对象的数据管理方案}。
+另外，如果采用raw disk方式管理磁盘，如果轻量地移动对象呢？raw disk可是没有rename特性的。
+
+完成队列采用polling机制，不一定要main线程去做？
+
+内部retry逻辑影响到run next rw，进而影响到整个系统的响应能力。
+block式网络io也有很大问题。
+
+\hrulefill
+
+\hl{worker thread request done}包括多个完成队列，如rx main、tx main、recovery object main等。
+rx main和tx main需要进一步测量其性能，不能是慢操作。
+
+或者是有\hl{多个main线程}，去承担节点内所有负载？
+切分任务到不同的main线程，任务进行局部化管理。参考lich的core线程设计。
+
+选择什么标准划分任务？任务类型包括：IO、recovery等。
+
+rpc和corerpc的区分：corerpc处理与对象IO，其它请求通过rpc来做？
+对象IO可以按照对象hash到不同的main thread上。部分请求是不涉及对象的。
+
+\hrulefill
+
+notify standby发起消息，当master收集到足够的消息后，触发recover peer过程。
+
+\hrulefill
+
+QoS，不限制需要优先恢复的对象。
+
+埋点在工作线程上，故需要线程安全。
+
+\subsection{07}
+
+准备切入全闪方面的工作，ssan的工作大概到五月底。
+
+分布式块存储系统是能力核心，扩大了说就是分布式系统，体系结构方面。
+AI是下几年的学习重点。\hl{向Jeff Dean学习}，能横跨体系结构和AI多个领域。
+合而言之，就是ABC的细分领域。
+
+全面认识ssan的价值，部分c代码和设计是可以重用的。
+
+wd和stale可以理解为COW过程。update epoch是创建对象snapshot的过程。
+
+\subsection{08}
+
+192上的ssan无响应，用\hl{strace/gdb跟踪}了一下，发现陷入sd read lock的循环内。
+进一步推测在finish object list里访问rinfo是无效的，被free了。
+
+进一步检查日志发现，rw被生成了两次，一次是init状态，一次是prepare状态。
+在执行第二个rw时，关联的rinfo已被freed。
+
+sd read lock的实现，类似于retry逻辑，在某些情况下，会严重影响系统的响应能力。
+main thread无限循环，系统永远不再工作。
+
+在update epoch之后，如果无法完成修复，会有大麻烦。
+
+\hrulefill
+
+可追踪性是一项重要的能力，举凡log、stap、gdb、perf，都意味着trace。
+
+egrep分析日志的模式：
+\begin{enumbox}
+\item start recovery | free recovery info
+\item default update epoch
+\item ***
+\item standby | recover peer
+\item queue recovery work
+\item prepare | finish object list
+\item ***
+\end{enumbox}
+
+\hrulefill
+
+改进ssan
+\begin{enumbox}
+\item 大量LOG
+\item 引入GOTO、assert
+\item 产生coredump
+\item check and set rlimit
+\item 双进程结构
+\item 可扩展的main线程
+\item 调整epoch目录结构
+\item 并发网络请求
+\item rinfo状态机，并发下的引用计数
+\end{enumbox}
+
+\hrulefill
+
+战略要义在于一。\hl{舍九取一，取一是主要方面}。有所为有所不为，有所为是主要方面。
+
+没有记录的公司是没有希望的，同样，没有记录的个人成长也值得怀疑。
+一旦确立长期观点，就可以深谋远虑，变得从容主动。
+
+一是综合判断，聚焦，不排斥多元的变化，蕴涵无尽可能。
+
+道生一，无极而太极。一即是战略，又是战术。后面的数字偏于分析。
+
+吾道一以贯之。天下之道，可一言而尽也：其为物不二，则其生物不测。
+
+少年得志可喜，大器晚成可贵。有目标，沉住气，踏实干。
+
+天下之动，贞夫一者也。找到人生的这个一，即是使命。
+
+老子传奇里，某位真人对老子的教导，就强调了这个一字。阳明归纳而又归纳，得出致良知一法门。
+孔子曰：吾道一以贯之。商君一言，利出一孔、利出一孔，处处显出一的可贵。有个这个一，则万象生。
+爰有奇器，是生万象。
+
+\hrulefill
+
+update epoch是非常危险的操作，且耗时，且由main thread来完成，故必须优化。
+
+\subsection{09}
+
+ssan测试出来的问题
+\begin{enumbox}
+\item update epoch耗时极多，堵塞main thread
+\item 加入节点时，do get vdis发生panic，原因是其它节点在进行耗时的update epoch
+\item stale object GC
+\item disk full，恢复无法继续，会丢数据
+\end{enumbox}
+
+\hl{重新format集群时，需先行卸载各个卷}。否则，貌似有问题。
+
+rinfo状态机
+\begin{enumbox}
+\item 何时放入工作队列
+\item oid in recovery
+\item 能否取消，开始下一周期
+\end{enumbox}
+
+\hrulefill
+
+性能之巅一书，结构很是合理。\hl{文件系统和数据库系统}，复杂度很高。
+
+ssan的精髓是什么？
