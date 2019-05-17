@@ -187,3 +187,131 @@ rinfo状态机
 性能之巅一书，结构很是合理。\hl{文件系统和数据库系统}，复杂度很高。
 
 ssan的精髓是什么？
+
+需要有自己的作品和名片。
+
+\subsection{10}
+
+用epoch管理数据和处理逻辑，epoch是一个全局大版本。版本在分布式系统里有着广泛的应用。
+但epoch粒度过大，有些逻辑难以处理。看待问题有两个角度：版本和对象。对象随着版本在演化。
+
+notify standby如果收集不到足够的消息，就会堵塞整个修复进程。
+此时如果有新的修复事件，应该可以取而代之，把恢复过程推向前进。
+
+回收stale object，需要独立的GC过程。\hl{GC与IO、Recovery}各个过程之间需要一定的同步机制。
+
+通过策略模式提炼并行send reqs。适配和策略。
+
+vdi check没有检查vdi对象，目前ssan的副本修复机制感觉有问题，\hl{选择何者为权威}是一个没有得到证明的过程。
+
+用valgrind分析内存问题很给力。
+
+与epoch相关问题
+\begin{enumbox}
+\item rebuild stale list too long
+\item 对象在文件系统上如何组织，包括wd和stale的区分
+\item recovery过程占用空间与数据量的关系，空间利用率有多高
+\item 恢复中的GC策略和独立的GC过程
+\item ***
+\item 木桶原理
+\end{enumbox}
+
+\hrulefill
+
+\begin{enumbox}
+\item 为什么要移入stale目录？
+\item rename是否必要
+\item epoch不变的情况如何处理
+\item GC策略是什么？回溯至最高可用版本？
+\end{enumbox}
+
+rebuild stale list只在磁盘故障时有必要，移除故障盘上的相关记录。
+单纯节点修复时，本节点stale list无变化。
+
+stale list本质上是对象在各个磁盘上的存储结构。
+每个对象可包含如下属性：\hl{oid、epoch、idx、diskid、version}等。
+
+object list cache可由stale list推导而来，即是stale list的keys。
+stale list的相关信息，只对EC卷有用。副本卷只需要object list的信息。
+
+\hl{GC过程}需要stale list，本节点的stale list信息并不够，
+对任一对象而言，还需看别的节点的相关信息。
+
+结论：object list cache作为对象在磁盘上的分布的一种反映。
+提供接口给上层应用使用，如get tgt epoch，get object list。
+
+\subsection{14}
+
+统一stale list cache和object list cache，处理好CRUD等操作
+\begin{enumbox}
+\item load
+\item create and write | link
+\item remove object
+\item remove stale versions
+\item move from wd to stale
+\item change diskid
+\end{enumbox}
+
+某一数据分片<oid, idx>在某节点上有一个或多个版本<epoch>，存放在特定的disk上<diskid, wd>。
+多个版本构成版本历史，用动态数组管理，按epoch降序排列。
+
+跟踪大型数据结构的内存占用量。
+
+\hrulefill
+
+集中心力思考大事要事，切己体察，多讲利益，少讲价值观。
+
+\subsection{15}
+
+刊落声华，一意本源。
+
+有目标、沉住气、踏实干。
+
+验证stale cache与底层对象分布的一致性。
+
+为什么get tgt epoch返回空结果，后续如何处理？
+
+stale cache按epoch组织，是否有一个epoch对应多个数据分片呢？
+wd和stale什么情况下具有相同的epoch？如何处理？
+
+vdi object特别处理，其epoch和index规则均不同。
+
+等待的时候可以写日志。中年焦虑，反正下一帐必须赢，浪费不起了。
+一寸光阴一寸金，寸金难买寸光阴。
+
+\subsection{16}
+
+观察分析恢复的空间复杂度。算法要从多个指标上去评估，主要是时间和空间复杂度。
+
+加强断言，能发现一些隐藏的bug。
+
+维护磁盘上对象结构的内存映射比想象中的要复杂。要始终一致。
+如果出现不一致，可以增加重新加载的机制。
+\begin{enumbox}
+\item 如update epoch失败会如何？get tgt epoch返回错误结果。所以，\hl{务必要确保update epoch能正常完成}。
+\item \hl{create and write跨start recovery}，都成功了，导致wd下有两个版本的对象，epoch不同。
+\item link与create and write同，也产生了新对象。
+\item \hl{优先加载vdi}，很多操作依赖于vdi state信息。
+\item 191退出，fio不退出，mount3一直无法完成。
+\end{enumbox}
+
+\subsection{17}
+
+需要密切注意的是，add和remove在各种粒度上的对称性，粒度包括：对象，对象之epoch等。
+不同层次或粒度都是物质不灭、能量守恒的。物质不灭或不为真，能量守恒则必为真。
+
+今天是在东升科技园的最后一天，搬家去技术转移中心。外界之境遇在变，我心不变。
+\hl{存在是一}，巴门尼德的这个认识极有深度。一是系统观，二是本体论。
+
+\hl{郝拉克里特}说得是现象界的流变及其动力，巴门尼德说的是本体界、物自体。
+
+object list cache通过version来跟踪变化情况。
+
+stale cache的数据项，按\hl{oid, epoch, index, diskid, wd}进行区分。缺少一项就有可能出问题。
+<oid, index>代表数据分片，<diskid, wd>代表物理位置，epoch代表版本。注意副本和EC的同和异。
+
+stale cache转化为磁盘上对象分布的cache，包括wd和stale对象。在此之上，导出相关API。
+
+\hrulefill
+
+延展集群
