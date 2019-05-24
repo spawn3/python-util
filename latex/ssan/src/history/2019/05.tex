@@ -327,7 +327,7 @@ stale cache转化为磁盘上对象分布的cache，包括\hl{wd和stale对象}�
 
 心无旁骛，专注于一事。
 
-\subsection{17}
+\subsection{20}
 
 战略，大处着眼、小处着手的大处。无战略，悲人生。
 盲目地做事情，就有赖于机遇。
@@ -341,3 +341,162 @@ S是战略、是成功，战略是制胜之道，没有战略何谈成功呢？
 战略之追求在于行动自由，致人而不致于人。何以致之？修道而保法，故能为胜败之政。
 
 产品是战略的物质载体，不可谓不重也。
+
+\hrulefill
+
+指标分时间和容量两方面。io中断时长、降级下的性能是时间方面的指标，
+额外的空间占用是容量方面的指标。与算法分析类似，\hl{时间复杂度和空间复杂度}。
+
+\subsection{21}
+
+阳光照耀大地，通天接地，双线法则。天之命题：道生一，地之命题：道生法。
+哲学、战略之同异犹如天地。\hl{哲学、战略、战术}如连环。常山之蛇。
+
+\hl{大处着眼、小处着手}。基础和前沿，两者要兼顾。
+
+晚上的时间，不用太忙于工作，复盘、刻意练习，打基础，跟踪前沿。
+日积月累，持之以恒。
+
+\hrulefill
+
+unlink stale object看上去也不是并发问题，是什么导致cache和磁盘上结构不一致呢？
+unlink为什么返回ENOENT，在哪里删除了呢？
+
+可以通过两个计数器来判断是否出现了并发。
+
+ssan上不再实现新功能，一是bugfix，二是设计。
+\begin{enumbox}
+\item 副本一致性机制
+\item 性能
+\item 异步通信
+\end{enumbox}
+
+\hrulefill
+
+DHT的不足之处，一旦ring任一节点发生变化，\hl{实际问题与计算位置}就不一致。
+需要尽快纠正，因为EC要求严格顺序，情况会更复杂些。
+
+\hl{thread pool and work queue}，好好体会一下。一个线程池处理一个提交队列，一个完成队列。
+完成队列可以与别的线程池共享。\hl{线程池中的每个线程，处理提交队列的任务，完成后，加入完成队列}。
+由polling thread处理完成队列。
+
+任务都嵌入了work对象，指定所需的callback函数。
+
+\subsection{22}
+
+分布式系统，先看\hl{数据模型、协议、算法}等。
+\hl{通过wiki或其它途径进行scan}，官网可以了解有什么，然后多方途径，探知其why and how。
+
+\begin{enumbox}
+\item 华为
+\item BAT
+\item TMD
+\item 浪潮
+\end{enumbox}
+
+博采众长，研究几个系统：
+\begin{enumbox}
+\item FusionStor
+\item SheepDog
+\item Ceph
+\item *** File and Object
+\item GlusterFS
+\item Qumulo
+\item Isilon (DELL/EMC)
+\item Lustre
+\item *** DB
+\item sqlite3
+\item Redis
+\item MongoDB
+\item LevelDB/RocksDB
+\item Pegasus (XiaoMi)
+\item TiDB
+\item OceanBase
+\item ***
+\item SPDK/DPDK
+\item QEMU
+\end{enumbox}
+
+Ceph的PG概念，一个pool内PG数目相对固定，调整PG数目会引发大量数据迁移。
+PG有几个特点：object映射到PG，PG映射到OSD，第二层映射与副本和EC有关，
+所以副本和EC都是按pool指定的。\hl{如果PG数目不变，则第一层映射不变}。
+
+Redis的hash slot又是如何解决这个问题的呢？
+
+视野要放到数据存储和管理行业，包括公司、人物、技术前沿。
+
+\hrulefill
+
+Redis的数据模型，基本数据模型是KV，V可以是一个数据结构。
+
+\hrulefill
+
+c语言中\hl{array和struct的初始化语法}类似，分别采用索引或成员表达式指定对应的成员，不指定的采用默认值。
+
+EC中特定情况下需要log，如果按读改写逻辑，记录整个条带到日志，就不需要UNDO日志，用单一的REDO日志即可。
+RAID5就是这么做的（张东）。
+
+pool、vol、snapshot数据在etcd上保存，vol的元数据采用MDS。
+
+IO路径由client直达数据存储端，不经过控制器中转了。支持多个client端访问一个数据，
+有subvol controller负责同步，具体地说就是每次io需要申请一个token/version，
+IO按object version语义规则进行。
+
+读改写发生在client上，数据存储端收到的都是对齐的条带。
+
+EC所需LOG不必引入LOG volume，而是放在数据分片的物理层上。
+采用两阶段提交协议，来实现原子写。
+
+\subsection{23}
+
+战略，取舍，战而胜之。兵道接近生活之真义，在竞争中战而胜之，得行动自由。
+
+孙子更言兵道之重要，国之大事，死生之地，存亡之道，不可不察也。
+如何察之？道天地将法，孙子尚五。
+
+\hrulefill
+
+新发现的问题：
+
+update epoch后，有create and write，后面才有prepare object list，导致对象无法恢复。
+create and write不被block，节点恢复又是基于stale数据。
+
+master recover peer work如果遇到不可用sockfd，需要重试。否则，无法唤醒部分节点，
+导致部分节点恢复正常进行，部分节点不能进入prepare阶段。总的结果是恢复无法进行。
+
+与一个节点sockfd cache有多个fd，如果retry仍然失败呢？
+
+观察master recover peer的重试次数。
+
+每个节点finish object list时机不同，所以每个节点上\hl{恢复开始有先有后}。
+
+standby过程不可少，需要完成object list cache的构建，后续prepare object list的结果才是正确的。
+
+\subsection{24}
+
+世界虽大，忘战则小。小到没有生存空间，丧失行动自由。
+此多年切实之体会，回到兵道。\hl{我欲清溪寻鬼谷，不论礼乐但论兵}。
+诗和远方需要强大的后备力量支撑，空口白话无意义。
+
+没有斗争意识，奋斗精神，世界的宝藏不会向你开放的。
+
+兵道并非蛮力，乃是一生存权的竞争，东方兵道具有哲学和战略的高度。
+
+\hrulefill
+
+磁盘空间利用率过高时，如需要恢复，可能无法完成。如何解决该问题？
+
+在finish object list进行检查，需要具体到每个磁盘是否有可用空间，同时还需跟踪记录create and write的占用情况。
+磁盘空间由三部分占用：wd、stale，还有新生成的。
+
+如果空间不足，则标记当前集群状态，并退出该次修复。按集群状态处理各种操作。
+如可以删除卷以回收空间，回收空间后，重新检查。
+
+与shutdown的处理方式有类似之处。shutdown是单向不可逆的过程，标记空间不足则是可逆过程。
+
+\hrulefill
+
+怎么确保move to stale过程总是成功的呢？
+
+按epoch组织目录结构，就不需要移动object了。\hl{因为磁盘故障不提升epoch，则需特别处理}。
+
