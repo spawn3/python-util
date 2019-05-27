@@ -37,12 +37,24 @@ IO控制器是gateway，SSAN原始实现无恢复控制器，后针对任一对�
 无日志，难以处理特定情况下的恢复问题。
 
 \subsection{对象组织及其cache}
+\label{subsec:object-dir}
 
 因为可能在工作目录创建不同epoch的对象，工作目录下的对象名字也要包括epoch。
 
 进一步可以考虑按epoch组织目录，这样可以简化关键操作，比如消除rename和link操作。
+磁盘故障时，因为不升级epoch，所以需要特别处理，\hl{校正对象的磁盘位置，但不需要link了}。
+需要保证过程的原子性。
+
+\includegraphics[width=11cm]{../imgs/object-dir.png}
 
 维护磁盘对象结构的内存cache，在其上面提供API，合并stale cache和object list cache。
+需要实现的API包括：
+\begin{enumbox}
+\item get\_obj\_list，获取一节点上所有对象的oid
+\item get\_obj\_history，获取一个object的历史版本
+\item get\_obj\_history2，获取一个object的历史版本，wd==0
+\item stale\_cache\_compact，清除无效磁盘相关的记录
+\end{enumbox}
 
 \subsection{恢复实例}
 
@@ -66,7 +78,19 @@ IO控制器是gateway，SSAN原始实现无恢复控制器，后针对任一对�
 
 主要通过日志机制来实现。把每个对象、io、恢复实例等等实体看作对象，追踪其生命周期行为，便于分析异常现象。
 
+\subsection{create and write采用sync模式}
+
+出现虽然写成功，后来发现对象内容为全零的情况。
+
+\subsection{优化oidlist的索引}
+
+优先修复vdi object。
+
+采用bitmap检索data object和ledger object。\todo{摘除优先修复对象}\hl{数据量大时，优先修复的oid依然效率低}。
+
 \subsection{改进对象组织方式}
+
+参考小节~\ref{subsec:object-dir}
 
 \subsection{改进stale object cache}
 
@@ -74,6 +98,8 @@ IO控制器是gateway，SSAN原始实现无恢复控制器，后针对任一对�
 通过支持所需API，来替代原来的object list cache和stale cache。同时也方便stale object的GC过程。
 
 \subsection{恢复状态机引入新状态}
+
+重构恢复实例的状态机。
 
 引入RW\_INIT：为了实现没有进入prepare状态的恢复实例，可以切换到下一实例。一旦进入prepare阶段，则切换过程有所不同。
 \hl{通用原则是确保rinfo上下文信息的安全性}。在有引用计数的情况下，不能被free掉。
@@ -86,7 +112,20 @@ IO控制器是gateway，SSAN原始实现无恢复控制器，后针对任一对�
 
 \subsection{磁盘空间不足时的恢复过程}
 
-\todo{磁盘空间不足时的恢复过程}
+\todo{磁盘空间不足时的恢复过程}可以在finish object list过程，加入检查逻辑。检查项：
+\begin{enumbox}
+\item 每个disk的容量是否够用（执行hash运算后分布到该磁盘上的对象）
+\item 对象的历史版本可能没及时回收
+\item 在恢复过程中会有新的create and write
+\end{enumbox}
+
+如果不能通过检查，则标记节点状态为NODE\_NOSPC，影响到的操作：
+\begin{enumbox}
+\item 读写io
+\item 退出恢复过程
+\end{enumbox}
+
+在此状态下，运行执行删除卷操作，以回收空间。回收完成后，重新进入修复状态。
 
 \subsection{retry机制}
 
@@ -97,6 +136,10 @@ retry机制的使用需要具体分析，内部过程慎用retry，避免堵塞m
 \subsection{Too many open files}
 
 文件句柄数量控制，由最大1024改为1048576。直接在SSAN进程内设定。
+
+\subsection{unlikely使用不当}
+
+\includegraphics[width=11cm]{../imgs/unlikely.png}
 
 \section{副本一致性}
 
@@ -121,10 +164,36 @@ retry机制的使用需要具体分析，内部过程慎用retry，避免堵塞m
 工具方面
 \begin{enumbox}
 \item 完整日志追踪系统，细粒度地追踪程序运行时行为
+\item 加入PROFILE日志，辅助分析各个过程的性能特征
 \item 多用断言，以捕获程序中的不变式，尽早暴露问题
 \item 生成COREDUMP
 \item 采用valgrind分析内存问题
-\item 尽量配备可用的开发和测试环境
+\item 采用egrep分析日志，保留相关日志的相对顺序
+\item ***
+\item 尽量保障开发和测试环境
 \end{enumbox}
 
-关于日志子系统，需要进一步规范化。
+egrep的使用示例:
+\begin{lstlisting}[language=bash,frame=single]
+egrep 'start_recovery|free_recovery_info' ssan.log
+egrep 'start_recovery|iops' ssan.log
+\end{lstlisting}
+
+关于日志子系统，需要从内容和形式上进一步规范化。
+\begin{enumbox}
+\item 可动态调整日志等级
+\item 管理对象的生命周期活动
+\item 捕获尽可能多的上下文信息
+\item 提高日志的信息密度
+\item 关键字
+\end{enumbox}
+
+性能分析
+\begin{enumbox}
+\item 流出等于流入
+\item 下游处理能力大于流入流量
+\item 调度能力大于下游处理能力
+\end{enumbox}
+
+重点是提升下游节点的处理能力和中间节点的调度能力。
+以修复为例，下游处理能力对应恢复性能，调度能力对应main线程的调度能力。
