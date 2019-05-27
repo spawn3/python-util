@@ -4,8 +4,12 @@
 
 \includegraphics[width=11cm]{../imgs/consistency-splice.png}
 
-从逻辑上讲，一致性是由任一对象的变更历史决定的。任一对象的多个副本/分片，可以看作有限状态机，
-须按同一顺序执行变更。变更通常包括写IO和修复IO。
+从逻辑上讲，一致性是由任一对象的变更历史决定的。强一致性要求：
+\begin{enumbox}
+\item 任一对象的多个副本/分片，可以看作有限状态机，须按同一顺序执行变更。变更通常包括写IO和内部修复IO。
+\item 已提交的写不能丢失
+\item 能读到最新数据
+\end{enumbox}
 
 相比于副本机制，EC的各分片具有严格顺序。
 
@@ -34,7 +38,9 @@ IO控制器是gateway，SSAN原始实现无恢复控制器，后针对任一对�
 
 \subsection{日志}
 
-无日志，难以处理特定情况下的恢复问题。
+无日志，难以处理特定情况下的恢复问题。比如4+2时，如果成功写入3个数据分片，则过程无法重入，无法
+从该不一致状态修复到一致性状态。\hl{对条带对齐的IO，可采用REDO日志replay这个过程}。
+维护UNDO日志则相对复杂。
 
 \subsection{对象组织及其cache}
 \label{subsec:object-dir}
@@ -70,13 +76,26 @@ IO控制器是gateway，SSAN原始实现无恢复控制器，后针对任一对�
 \item 若一节点收不到recover peer，无法进入NOTIFY STANDBY DONE状态
 \end{enumbox}
 
-\section{EC一致性改进之处}
+\subsection{TODO}
+
+\begin{enumbox}
+\item prepare object list，接收到非法oid
+\item do\_event\_loop里ei->name出现乱码
+\end{enumbox}
+
+\section{EC一致性的改进之处}
 
 具体见git仓库的提交日志。
 
 \subsection{增强系统可追踪性}
 
 主要通过日志机制来实现。把每个对象、io、恢复实例等等实体看作对象，追踪其生命周期行为，便于分析异常现象。
+
+引入GOTO、SD\_ASSERT macro。
+
+引入COREDUMP
+
+引入RAMDISK
 
 \subsection{create and write采用sync模式}
 
@@ -141,6 +160,13 @@ retry机制的使用需要具体分析，内部过程慎用retry，避免堵塞m
 
 \includegraphics[width=11cm]{../imgs/unlikely.png}
 
+\subsection{scli cluster check的OOM现象}
+
+因为check过程相对低效，导致等待check的队列大量积压，消耗大量内存，引起OOM。
+故引入QoS机制，限制队列长度，减少内存消耗。
+
+\subsection{日志缓冲区设定过小，导致日志丢失}
+
 \section{副本一致性}
 
 现象：观察到恢复完成后，有时vdi对象并不一致。
@@ -169,6 +195,7 @@ retry机制的使用需要具体分析，内部过程慎用retry，避免堵塞m
 \item 生成COREDUMP
 \item 采用valgrind分析内存问题
 \item 采用egrep分析日志，保留相关日志的相对顺序
+\item 采用fio的verify和scli cluster check机制验证一致性
 \item ***
 \item 尽量保障开发和测试环境
 \end{enumbox}

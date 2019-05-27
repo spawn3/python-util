@@ -29,7 +29,7 @@
 
 \subsection{磁盘访问}
 
-\todo{直接管理裸盘}
+\todo{直接管理裸盘}引入管理元数据层。
 
 \subsection{数据组织方式}
 
@@ -42,8 +42,9 @@
 
 \subsection{QoS}
 
-已实现恢复QoS，控制恢复带宽。
+已基本实现恢复QoS，控制恢复带宽。
 
 \subsection{异步修复}
 
 \todo{异步修复}磁盘不采用一致性hash，而是采用hash slot机制。
+可参考Redis Cluster Slot、Ceph PG的设计思想，但引入了相当的复杂度。
