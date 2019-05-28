@@ -1,0 +1,134 @@
+\chapter{测试}
+
+\lstset{numbers=left,
+    frame=shadowbox,
+    numberstyle= \tiny,
+    keywordstyle= \color{ blue!70},commentstyle=\color{red!50!green!50!blue!50}, 
+    rulesepcolor= \color{ red!20!green!20!blue!20} 
+}
+
+\section{已知问题}
+
+\begin{enumbox}
+\item vol resize会产生死锁
+\item vol copy的提示
+\item flat后保护快照
+\end{enumbox}
+
+\section{部署}
+
+基本步骤：
+\begin{enumbox}
+\item 创建集群
+\item 创建存储池
+\item 向存储池添加磁盘(Tier, SSD Cache)
+\item 创建卷
+\item 创建快照
+\end{enumbox}
+
+\subsection{创建集群}
+
+\begin{lstlisting}[language=bash]
+lich prep t151 t152 t153
+lich create t151 t152 t153
+\end{lstlisting}
+
+\hl{注意事项}：
+\begin{compactenum}
+\item 检查IP是否重复
+\item 检查子网mask是否匹配
+\item ...
+\end{compactenum}
+
+\subsection{创建存储池}
+
+\begin{lstlisting}[language=bash]
+lichbd pool create p1
+\end{lstlisting}
+
+\subsection{向存储池添加磁盘}
+
+\begin{lstlisting}[language=bash]
+lich.node --disk_add all --force --pool p1
+\end{lstlisting}
+
+\hl{注意事项}：
+\begin{compactenum}
+\item 存储池内每个节点上需要有SSD，支持tier功能
+\item 存储池内每个节点上需要有SSD，支持SSD cache功能
+\end{compactenum}
+
+\subsection{创建卷}
+
+\begin{lstlisting}[language=bash]
+# 卷路径规范：<pool>/<protocol>/<volume>
+# 三副本
+# row2格式
+lichbd vol create p1/iscsi/v1 --size 4096Gi --repnum 3 -F row2
+lich.inspect --localize /iscsi/v1 0 --pool p1
+\end{lstlisting}
+
+\hl{注意事项}：
+\begin{compactenum}
+\item 卷格式：row2 or raw (default)
+\item 三副本 (default: 2)
+\item 关闭localize
+\end{compactenum}
+
+\subsection{创建快照}
+
+\begin{lstlisting}[language=bash]
+# 快照路径规范：<pool>/<protocol>/<volume>@<snap>
+lichbd snap create p1/iscsi/v1@snap1
+\end{lstlisting}
+
+\section{工具}
+
+省略...
+
+\subsection{iSCSI}
+
+\begin{lstlisting}[language=bash]
+iscsiadm -m discovery -t st -p 192.168.251.202
+\end{lstlisting}
+
+\subsection{fio}
+
+单机测试
+
+\subsection{vdbench}
+
+支持分布式测试。
+
+在master上配置和查看日志，master配置为可以免密登录slave节点。
+
+slave上需要提前把卷挂载好。
+
+\section{故障测试}
+
+每类节点故障行为不同。除选举过程外，还有vip，iscsi连接，controller的切换，lease，io，恢复过程等。
+评价可靠性的指标，主要是vdbench测试中，各种故障条件下io无中断。
+
+另外，故障点还会破坏事务执行的原子性，如allocte过程，创建snapshot过程，
+导致严重后果，如造成垃圾，数据状态不一致。如何通过可重入性，或事务解决此类问题？
+
+快照的rollback，delete，flat都设计为可重入过程。如果任务执行失败，可以重新调度。
+各种持久化状态之间，保持一致性。
+
+\subsection{单磁盘故障}
+
+磁盘有两种角色：数据盘和cache盘。拔cache盘等同于节点故障？
+
+\subsection{节点故障}
+
+节点有多种角色：
+\begin{compactenum}
+\item etcd master
+\item lich admin
+\item lich normal
+\end{compactenum}
+
+受VIP机制影响，arp协议会影响客户端到iscsi target的网络连接。
+需要注意的是，大部分网络会禁用arp广播，单播则可以。
+
+控制器的加载，lease获取等需要一定时间。

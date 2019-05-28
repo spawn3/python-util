@@ -1,0 +1,23 @@
+\chapter{SNMP}
+
+各种MIB，\hl{有rfc定义的}，有厂商私有的
+
+trap
+
+怎么知道一个交换机支持什么OID？用walk遍历所有。
+
+工具
+\begin{enumbox}
+\item iReasoning MIB Browser
+\item pysnmp
+\end{enumbox}
+
+MIB文件的位置：
+\begin{enumbox}
+\item /usr/share/mibs/ietf -> /var/lib/mibs/ietf
+\item /usr/share/mibs/iana -> /var/lib/mibs/iana
+\item SNMPv2-MIB
+\item HOST-RESOURCES-MIB
+\item IF-MIB
+\item ENTITY-MIB
+\end{enumbox}

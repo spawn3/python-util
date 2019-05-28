@@ -1,0 +1,319 @@
+\chapter{learning}
+
+五行结构：中心是心道物三合，外围是PDCA环。
+
+学习目的、学习方法都属于心道物三合。三合有更深刻的内涵。
+三合是定义环节，PDCA是实现、落地环节。
+
+通常说来，物定义了运转PDCA的目的。五行分解为1+4。一分为三、三生万物。
+
+有点类似人生算法的逻辑。一个内核、认知闭环、一个外环。认知闭环仅仅是PDCA的部分环节。
+引入外环的用意不明？
+
+\section{学习目的}
+
+更上一层楼
+
+\subsection{面试题}
+
+\hl{围绕工作、面试进行学习}
+
+编程
+\begin{enumbox}
+\item Open函数的参数，flag选项
+\item C++
+\end{enumbox}
+
+数据结构、算法
+\begin{enumbox}
+\item list的del
+\item B+ tree、Bcache
+\item Radix tree
+\item 用数组来保存二叉树，在disk上如何存储tree结构
+\item quick sort
+\end{enumbox}
+
+设计模式、架构
+\begin{enumbox}
+\item decorator
+\end{enumbox}
+
+操作系统
+\begin{enumbox}
+\item 用户态和内核态的区别
+\item syscall
+\item mmap
+\item \hl{Select和epoll的区别}
+\item stdio, stdout, stderr
+\item 生产者-消费者模型 (队列、排队论)
+\item 读者-写者模型
+\item 哲学家就餐问题
+\end{enumbox}
+
+存储
+\begin{enumbox}
+\item 如何实现NFS cache一致性？
+\item mount流程
+\item IO流程
+\item Fuse
+\item MDS/CDS分离
+\end{enumbox}
+
+分布式系统
+\begin{enumbox}
+\item 集群架构
+\item CAP理论
+\item 多副本一致性
+\item Paxos与RAFT的区别
+\end{enumbox}
+
+系统
+\begin{enumbox}
+\item LevelDB的原理
+\item lustre 论文（提及如何处理NFS cache一致性）
+\item OneFS
+\end{enumbox}
+
+\subsection{公司}
+
+\begin{enumbox}
+\item 阿里
+\item 腾讯
+\item 百度
+\item 华为
+\item 京东
+\item 小米
+\item XSKY
+\item 同友
+\item 衫岩
+\item 浪潮
+\item 曙光
+\item 联想
+\item 迅雷
+\item 大道云行
+\item 首都在线
+\item 谷数科技
+\end{enumbox}
+
+HCI
+\begin{enumbox}
+\item SmartX
+\item ZStack
+\item 深信服
+\item UCloud
+\item EasyStack
+\item Zetta云
+\end{enumbox}
+
+外国公司
+\begin{enumbox}
+\item EMC
+\item HDS
+\item NetApp
+\item Nutanix
+\end{enumbox}
+
+\section{学习方法}
+
+查理芒格的模型：学科的重要模型。
+
+数学概观：\hl{现实-模型-理论}三元组。模型是对现实的抽象，把逻辑运用到模型推演出理论体系。
+通过一问一答解决现实问题。模型的验证，一是事实，而是逻辑。
+
+找到某些基础模型、或如高焕堂老师说的：form。作为构建更复杂系统的基本单元，
+有助于达成以简御繁的目的。
+
+化整为零
+
+临摹
+
+师法造化，内得心源。
+
+\subsection{戒定慧}
+
+六度架起此岸、彼岸的桥梁。
+
+\begin{enumbox}
+\item 11点之前睡觉、六点起床
+\item 问题驱动
+\item 一心二本
+\end{enumbox}
+
+\subsection{守破离}
+
+以算法为中心，贯通多个领域。
+
+\subsection{包围式学习}
+
+包围式学习合乎画小圈、组块化、刻意练习的理念，达到以我为主，为我所用的效果。
+
+学习的本质是联系，内化这种联系，触类旁通，更有利于应用时的回忆和提取。
+
+E=K/I，温故知新，通过包围式学习构建知识网络。这是主动的开疆辟土，步步为营。
+
+学习、学问这些词汇，有很深内涵，回到中庸的论述。学的是思维方式和方法论，习是刻意练习，
+体用、知行、道器一体。器是作品集。
+
+\hl{图论提供了一个很好的模型}，神经网络也好，网络流也好，都是图论的变体。
+知识点相当于图论上的节点，通过已知节点去探索新的节点。
+图的遍历，有深度优先和广度优先等次序。
+
+可以在更普适的意义上去理解数据结构，玩味其内涵。
+
+\subsection{Example：进程、线程、协程}
+
+进程、线程、协程都是一种软件抽象和虚拟化技术。
+
+进程是资源管理的基本单元，具有独立的逻辑地址空间。
+
+线程是调度的基本单元，同一进程的多个线程，共享进程资源，线程可以拥有TLS。
+线程是抢占式调度，需要时序方面的考量。
+
+协程呢？上下文切换成本低，用户态的非抢占式调度。
+
+单核，多核，多处理器，逐步引入更复杂的架构，以及需要面对的问题。
+
+% https://en.wikipedia.org/wiki/Algorithm#Informal\_definition
+
+\section{学习计划}
+
+知识体系：编程语言、数据结构和算法、架构和系统。
+最重要的系统有：操作系统、编译原理和数据库。
+
+分布式存储系统能把这些知识点贯通起来。
+
+\subsection{理论知识}
+
+怎么学习理论知识：\hl{书籍，论文，网站，与人讨论}等。道心物三者融合无间，方好。
+
+常常琢磨一些重要问题，心态开放。由手头工作延伸开来
+
+及时把问题、思考的进展、与人讨论的结果等一切新知记录下来，留出一定的时间进行反思，整理出知识体系来。
+
+工作相关：
+\begin{enumbox}
+\item LICH架构，以及关键问题
+\item NVMe
+\end{enumbox}
+
+重要专业知识
+\begin{enumbox}
+\item 存储基础知识
+\item RAID
+\item LVM
+\item udev
+\item iSCSI
+\end{enumbox}
+
+基础知识
+\begin{enumbox}
+\item 编程语言
+\item 数据结构与算法
+\item 分布式算法
+\item 操作系统
+\item 数据库
+\item 网络
+\end{enumbox}
+
+\subsection{常用工具}
+
+\begin{enumbox}
+\item Clion/VIM
+\item GIT
+\item CMake
+\item gdb
+\item perf
+\item valgrind
+\item stap
+\end{enumbox}
+
+\subsection{流行技术}
+
+存储系统
+\begin{enumbox}
+\item SheepDog
+\item Ceph
+\item GlusterFS
+\item ZFS
+\item SPDK
+\item tgt
+\end{enumbox}
+
+计算与虚拟化
+\begin{enumbox}
+\item Linux
+\item Docker
+\item KVM
+\item VMWare
+\end{enumbox}
+
+网站架构
+\begin{enumbox}
+\item Nginx/Envoy
+\item MySQL
+\item Redis
+\item MongoDB
+\item MQ
+\item Oracle RAC
+\end{enumbox}
+
+大数据计算平台
+\begin{enumbox}
+\item Hadoop
+\item Spark
+\item ElasticSearch
+\item Kafka
+\end{enumbox}
+
+\section{Site}
+
+\begin{enumbox}
+\item Wiki
+\item 知乎
+\item \url{http://www.talkwithtrend.com/}
+\item \url{https://www.snia.org/}
+\item \url{https://www.latex-tutorial.com/}
+\item \url{http://wiki.archlinux.org}
+\end{enumbox}
+
+\section{Paper}
+
+\section{Book}
+
+\subsection{老马识途}
+
+斩码三刀：猜测-实证-建构
+
+阅读源码的方法：调试-阅读-调试。以调试为方法，动起来，把握主线。所以要熟练掌握gdb等工具。
+
+逆向工程是匕首，答疑解惑。
+
+主要目的在于培养系统观，不以记住知识为高，而以培养系统观为能，就是学会学习的方法。
+
+\subsection{算法导论}
+
+\subsection{伟大的计算原理}
+
+六类计算原理：计算、存储、通信、协作、评估、设计。
+
+算法、架构、设计三部曲。
+
+架构：高可用、高性能、负载均衡。
+
+设计准则：需求、正确性、容错性、时效性、适用性。
+软件系统的设计原理：层级式聚合、层级、封装、虚拟机、对象、C/S。
+
+\subsection{完美软件设计}
+
+设计的几个原则：
+\begin{enumbox}
+\item 正交
+\item 分层
+\item 时序下的数据流
+\item 封装
+\item 名实
+\end{enumbox}
+
+\subsection{设计原本}
+
+\subsection{计算机程序的构造与解释}

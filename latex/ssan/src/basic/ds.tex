@@ -1,0 +1,133 @@
+\chapter{数据结构}
+
+array和list是存储结构，大部分ADT都依赖于此。
+
+每个数据结构都要考虑创建和销毁，以及元素的CRUD。
+
+可以有多种实现方式。
+
+\section{认识递归}
+
+array/string/list都可以看做[H|T]，对支持双向运动的array/string/double linked list来说，
+也可以从首尾两端向中间靠拢。
+
+\hl{子结构，子树}，由此可见array/string，list、tree都是递归定义的数据结构。
+
+要深刻认识数据结构的递归定义，递归是分治法的基石。
+进一步，引入模式匹配和累加器accumulator，可以\hl{改造递归为尾递归}，方便实施尾递归优化。
+
+理解递归，可以形象化为\hl{递归调用树}。一个问题如果缩减为一个小的问题，就是stack。
+如果分解为两个或多个子问题，就是递归树。以fibonacci序列为例，如果不进行优化，存在大量的重复计算，则复杂度是指数级的。
+可以引入cache机制，把以及计算的结果缓存起来，需要的时候直接查表即可。
+
+substructure的表示法，以array为例，用[offset, len]、or [left, right]。
+如果仅仅指定len，则默认offset=0，此种表示法适合从后向前遍历。
+注意\hl{差一错误}，区间的尾端是开还是闭。
+
+\hl{递归=迭代+Stack}。递归和迭代之间的互换，有时容易，有时则不是那么明显。
+
+\section{Bit}
+
+计算机的工作原理
+
+\subsection{Bmap}
+
+\subsection{BloomFilter}
+
+是一个查找结构。
+
+\subsection{Bmap Index}
+
+\section{Array}
+
+\section{String}
+
+String是一特殊数组，支持随机存取，各种方法需要首先检测输入参数。
+
+翻转、旋转，可以通过翻转实现旋转功能。
+如s1=xy，s2=yx，s1s1=xyxy，s2是s1s1的substring。
+
+回文、镜像
+
+\hrulefill
+
+\begin{enumbox}
+\item c: char array
+\item c++: string class
+\item Java: StringBuilder
+\item re
+\end{enumbox}
+
+\section{List}
+
+\subsection{Single list}
+
+是否引入哨兵？在slist头部增减节点会引起头指针的改变。
+引入哨兵，即可屏蔽这种不规则性。
+
+二叉树一旦建立后root很少改变，故不需要引入哨兵。为了统一起见，则slist也不引入哨兵。
+
+问题集
+\begin{enumbox}
+\item kth，顺序或倒序
+\item 求中间节点
+\item 逆转、反转
+\item 判定是否\hl{回文结构}
+\item 倒序输出
+\item 判定是否有环，以及环的入口节点
+\item 两个slist的第一个重合节点
+\end{enumbox}
+
+\subsection{Double list}
+
+\subsection{SkipList}
+
+多通路，大步长
+
+\section{Stack}
+
+Stack用数组即可轻松实现，用slist则只在头部push and pop。
+
+正反序，反序的要考虑用stack和post order遍历
+
+问题集
+\begin{enumbox}
+\item 两个stack实现queue
+\end{enumbox}
+
+\section{Queue}
+
+Queue实现方式很多，如ring数组/动态数组、带tail的slist、两个stack。
+
+问题集
+\begin{enumbox}
+\item BFS
+\end{enumbox}
+
+
+\section{Hash}
+
+hash函数，hash局部性不佳(影响CPU高速缓存性能)，大的hash表最好分组，极限情况是radix tree。
+Linux Page Cache采用了radix tree，而不是hash。
+
+\section{Heap and Priority Queue}
+
+TopN，多路归并，从TopN中再选出TopN
+
+\section{Tree}
+
+\subsection{Binary Search Tree}
+
+\subsection{Red Black Tree}
+
+\subsection{Trie}
+
+\subsection{Radix Tree}
+
+\subsection{B and B+ Tree}
+
+\subsection{Huffman Code}
+
+\section{Graph}
+
+\section{Disjoint Set}

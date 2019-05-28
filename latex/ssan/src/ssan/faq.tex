@@ -1,0 +1,76 @@
+\chapter{运维视图}
+
+\section{问题集}
+
+三理：生理、病理、治理。治理建立在生理和病理的基础之上，治理要追根究底，三因分析。
+
+通用问题集
+\begin{enumbox}
+\item 允许的故障节点数？
+\end{enumbox}
+
+lich特定问题
+\begin{enumbox}
+\item 理解table2->chunk\_check做了什么？
+\item 拔盘后的行为？
+\item lichd --init做了什么
+\item 每个节点的nid保存在哪儿，如何分配的？
+\item /opt/fusionstack/data目录布局
+\item /dev/shm/lich4目录布局
+\item cleanup
+\item clock机制
+\item hsm
+\end{enumbox}
+
+\begin{compactitem}
+\item coroutine and scheduler
+\item polling \change{polling}
+\item kernel bypass
+\item mbuffer
+\end{compactitem}
+
+问题集：
+\begin{enumbox}
+\item /的位置信息
+\item 当前分配的最大卷ID？
+\end{enumbox}
+
+P1: IOMeter测试，256K，Lich顺序和随机IO性能差别大
+
+P2: lsv\_gc\_check断言失败
+
+P3: Error Handling
+
+\section{约束}
+
+\subsection{最大副本数}
+
+6
+
+\subsection{单卷最大快照数}
+
+
+\section{Performance}
+
+\subsection{估算}
+
+HDD：
+\begin{itembox}
+\item 顺序1M 200
+\item 随机1M 50
+\item 顺序4K IOPS
+\item 随机4K IOPS
+\end{itembox}
+
+集群部署
+\begin{enumbox}
+\item 网络
+\item 磁盘
+\item 副本数
+\end{enumbox}
+
+\subsection{精简卷顺序1M写入性能低}
+
+subvol写锁，导致串行化
+
+用allocate命令先批量填充，性能有显著提升。

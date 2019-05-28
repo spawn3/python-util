@@ -1,0 +1,81 @@
+\chapter{iSCSI}
+
+\section{IQN}
+
+关于iqn的不变性，iqn是卷的公开标示，供上层应用引用该卷。改变iqn，需要通知依赖于iqn的应用，做出相应的改变。
+
+回到lich的情况，iqn包含了路径部分：<pool\_name>.<image\_name>，跨存储池迁移，rename等操作会改变路径部分。
+
+问题： 可否用卷的volid作为iqn的一部分，替代path，同时保证volid在各种操作下具有不变性？
+
+ceph的做法：
+\begin{compactenum}
+\item rbd访问方式，用的是路径。
+\item 通过tgt提供iscsi服务时，通过tgt配置项建立iqn到path的映射
+\end{compactenum}
+
+\begin{lstlisting}[frame=single]
+<target iqn.2014-04.rbdstore.example.com:iscsi>
+    driver iscsi
+    bs-type rbd
+    # Format is <iscsi-pool>/<iscsi-rbd-image>
+    backing-store iscsi/iscsi-rbd  
+    initiator-address <clients address allowed>
+</target>
+\end{lstlisting}
+
+\section{CHAP}
+
+In function \verb|ns_build_auth_chap|
+\begin{compactitem}
+\item \verb|lich_system_username|
+\item \verb|lich_system_password|
+\end{compactitem}
+
+\section{白名单}
+
+\begin{compactitem}
+\item \verb|is_connect_allowed|
+\end{compactitem}
+
+没有设置ip或initiator，默认拥有全部权限，不符合白名单语义，最小权限原则。
+可以切换到黑名单机制。
+
+xattr用于保持ip或initiator白名单，如果很长，则溢出。
+需要找到更合适的存储方式。
+
+可以采用编/解码方式存入，通过多个xattr进行扩展。
+
+\section{Initiator}
+
+\begin{lstlisting}[language=bash,frame=single]
+echo 2 > /sys/block/sdd/device/queue_depth
+cat /etc/iscsi/initiatorname.iscsi
+
+iscsiadm -m node -u
+iscsiadm -m discovery -t st -p 192.168.110.219 -l
+\end{lstlisting}
+
+看日志
+
+VIP与普通方式有别
+
+\section{与vctl之间的连接}
+
+以vctl的日志为中心，target在建立连接和断开连接的时候会在vctl上注册。
+并且，target有定时任务，每隔30s，尝试向vctl上注册活动连接。
+
+vctl上的记录发生错误，必然是因为建立注册和注销不对称造成的。
+\hl{这种不对称有可能是周期性任务导致的}。
+
+if-what
+\begin{enumbox}
+\item 如果注销之后，又触发了周期性任务，必然就存在该问题。
+\item 如果target发生故障，会如何？
+\end{enumbox}
+
+如何识别非活动连接的相关记录，并及时清理？
+
+vctl上的记录格式：nid->[addr1,addr2]，addr只有ip，不包括port，完整吗？
+
+怎么验证以上假设？

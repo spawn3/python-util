@@ -1,0 +1,80 @@
+\chapter{操作系统}
+
+资源管理，架起硬件和上层应用之间的桥梁。资源的3+1模型：cpu、memory、disk and network。
+
+\section{设计原则}
+
+\begin{enumbox}
+\item 分离机制与策略
+\item 主奴机制
+\item 模块化
+\end{enumbox}
+
+\section{CPU}
+
+从单核cpu说起，多核cpu引入了哪些关键问题？
+
+进程调度器本身是什么？
+
+内核可以调度用户态代码吗？怎么做？
+fuse由内核调用用户态代码。
+
+nfs不同于posix语义，nfs client是内核态。
+曙光文件系统client也是内核态。
+
+进程、线程、协程调度
+
+通信和同步
+
+经典问题：
+\begin{enumbox}
+\item 生产者-消费者问题
+\item 读者-写者问题
+\item 哲学家就餐问题
+\end{enumbox}
+
+\section{Memory}
+
+多层分配器，解决内外碎片现象。
+
+\section{I/O Device}
+
+\begin{enumbox}
+\item /dev (udevd)
+\item /dev/mapper
+\item /sys (ioctl)
+\end{enumbox}
+
+VFS统一管理设备文件，ioctl和sysfs用于特殊的属性控制。
+
+设备导出为/dev下的设备文件，通过设备文件调用device driver。
+比如块设备，可以看到分区。lsblk
+
+udev可用于管理磁盘事件。
+
+device mapper是磁盘映射，基于dm实现soft RAID，LVM，VDO等特性。
+\hl{RAID导出的是盘，LVM导出的是逻辑卷}，LVM over RAID，即LVM可以管理RAID导出的盘。
+
+通常分为内核部分与用户空间部分，实现机制与策略的分离。
+
+\subsection{VFS}
+
+VFS Over Block Driver，提供了page cache。
+
+不同的文件系统实现，共用块设备驱动程序。
+
+direct IO跳过page cache层。sync IO不跳过page cache，但强制flush。
+
+dirty data是指buffer中修改的数据，还没有持久化，有独立的异步flush线程。
+
+\subsection{块设备}
+
+buffer cache，speedup，alignment
+
+\subsection{ioctl}
+
+netlink什么用？怎么用？
+
+\subsection{网络设备}
+
+不在VFS之下

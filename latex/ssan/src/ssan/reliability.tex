@@ -1,0 +1,216 @@
+\chapter{可靠性}
+
+重建延迟时间
+
+如何检测磁盘故障
+
+如何标记一块盘？
+
+受控的磁盘分组
+
+\section{大pool的可靠性}
+
+数据模型
+
+C/M/D三角架构的关系
+
+Meta的映射
+
+meta如何存取？如果meta分布到各个节点上，发生故障的概率增加。
+
+对N副本系统，容错等级是N-1。N各副本散布在N个故障域，则发生故障的概率如何计算？
+假设故障域发生故障的概率为p，则系统发生故障的概率为p\^N(概率乘法法则)。
+\hl{故障域越多，概率越大，故障域内节点越多，概率越大}。
+
+\hl{client能否直接存取osd？}
+控制器粒度太大，引入卷控后，卷控相当于底层存储引擎的client，
+iscsi必然需要转发，如果iscsi target与卷控在一个节点上，只需转发一次。
+
+只要不share，存取数据项就不需加锁。\hl{是否需要加锁取决于数据是否共享}，与控制器粒度无关。
+
+负载均衡和热点：
+
+与此形成对比的是，ceph引入pg，控制器的粒度放在了primary osd上，
+ceph中任何一对象的副本大体分布在pg对应的osd上，是受控的。
+
+采用EC机制可以改进可靠性，降低了性能。
+
+\section{场景}
+
+追踪如下典型场景：
+\begin{enumbox}
+\item 添加盘
+\item 拔盘后插入
+\item 删除盘，删除pool，重用该盘
+\end{enumbox}
+
+磁盘的状态通过状态机来维护。每种状态下，其关联的资源项的明确规定。
+
+一个磁盘处在out/in状态的标志是什么？
+
+如何快速清除一个pool？
+
+\section{磁盘故障}
+
+拔盘，引起IO错误，或检测线程检测出磁盘不可写状态，此时，把磁盘的内存状态设为offline，并删除对应软链接。
+调度进行恢复操作。待恢复完成后，disk unload，才正式从集群中剔除。
+
+\hl{写过程中发生EIO，则会导致lichd进程重启}。在退出之前，调用disklost过程，删除软链接。
+
+如果没有删除完成，重启了lichd，则会修复软链接，加载该盘。
+
+测试中，出现了无软链接，但有别的相关磁盘文件的情况，磁盘加载后进入offline状态，但因为数据库残存有该磁盘的相关记录，
+故进入不了完全删除的状态。lich health显示有offline磁盘。
+
+\hl{磁盘故障的处理，同时也作为GC机制}。数据库的记录，不在chunk的当前位置列表中，即可判定为是垃圾数据。
+
+原来掉盘的情况下，没有关闭磁盘对应的文件描述符，导致\hl{bcache的数据盘不能register}。所以，掉盘时需要关闭相关描述符。
+再次上线的时候，重新open即可。
+
+\subsection{磁盘元数据}
+
+从状态一致性的角度进行分析。
+
+一个磁盘的状态，依赖于其本身与关联元数据资源。约分为三级：
+\begin{enumbox}
+\item 物理磁盘+RAID
+\item + BCACHE
+\item LICH磁盘 (数据文件与内存状态)
+\end{enumbox}
+
+其他派生状态
+
+LICH磁盘文件：
+\begin{enumbox}
+\item /opt/fusionstack/data/disk/disk/\%.disk (soft link)
+\item /opt/fusionstack/data/disk/block/\%.block
+\item /opt/fusionstack/data/disk/bitmap/\%.bitmap
+\item /opt/fusionstack/data/disk/info/\%.info
+\item /opt/fusionstack/data/disk/tier/\%.tier
+\item /opt/fusionstack/data/disk/speed/\%.speed
+\end{enumbox}
+
+LICH内存状态：
+\begin{enumbox}
+\item offline
+\item deleting
+\end{enumbox}
+
+\subsection{场景：添加磁盘}
+
+如果bcache关系已存在，仅仅创建disk文件，触发lichd的加盘操作，这样有无问题？毕竟\hl{bcache的数据盘没有被重新格式化}。
+
+\subsection{场景：删除符号链接然后加上}
+
+为什么加上符号链接后，恢复速度反而变慢很多？
+
+一块盘被拔出，经过一段时间后再插入，是否可以停止对应恢复进程？
+该盘对应的数据块处在几种状态：最新、过期、或成为垃圾。
+
+仅仅停止恢复进程是不够的，再次调度恢复(包含GC)？
+
+\subsection{场景：拔出cache盘随后插入}
+
+概率性地出现如下问题：cache盘无法上线，data盘无法上线。即register阶段失败。
+重启服务器后恢复正常。
+
+data盘无法上线的情况：如果一块盘恢复完成了，可以观察到register成功。说明什么？
+lsblk依然能看到虚实数据盘之间的映射关系。
+
+\subsection{场景：删盘}
+
+主动删除盘后，需要恢复。但如果进一步删除了pool，则须退出pool内所有disk的恢复过程。
+
+\subsection{管理线程}
+
+\section{节点故障}
+
+每个pool对应一个常驻的恢复主线程。有定向唤醒机制。恢复分三节点：扫描控制器，扫描控制器对应chunk，恢复。
+各阶段通过队列进行通信。
+
+标记的是疑似，未必需要恢复，但计入了恢复速度，不妥。
+
+没有按卷组织恢复，难以精确控制恢复的顺序。
+
+异常处理：
+\begin{enumbox}
+\item 有新ctl加入本节点会如何？
+\item 删除pool会如何？
+\item 删除vol会如何？
+\item 改变控制参数会如何？
+\item 恢复过程中，遇到fail的chunk，如何处理？简单重试依然无法成功的情况呢？
+\item 怎么才算本轮恢复完成了呢？
+\item 什么条件下，标记rescan?
+\end{enumbox}
+
+\section{VFM}
+
+在recovery过程中，标记卷的所有subvol，恢复完成后清除标记。
+
+\hl{以意逆志} 在学习时，先站在一个更高的层次上，以道观之，去分析问题。
+比如，这个特性要解决什么问题？如何解决的？会不会引入新问题？其它的做法是什么？
+不解决这个问题会如何？
+
+没有加入VFM机制，存在什么问题？
+
+全面理解VFM，VFM破坏了强一致性原则，\hl{化同步恢复为异步恢复}。解决\hl{故障下IOPS严重下降}的问题。
+
+统一拓扑结构：单故障域(节点级的故障域)和多故障域
+
+两副本和三副本: 两副本最多标记一个故障域，三副本最多标记两个故障域？\hl{一致性如何}？
+
+推演三节点两副本的情况。
+
+\begin{enumbox}
+\item 标记规则：不考虑故障域的情况，3副本只能标记两个节点，2副本最多标记一个节点；要考虑故障域，每个故障域最多只能标记一个节点
+\item 何时标记、取消标记？卷控制器自己做标记，外部过程通过vctl利用该信息(感知到问题)
+\item 标记什么内容？
+\item 标记信息用来做什么？用于读写和恢复过程
+\item *
+\item 由etcd上节点连接信息判定节点状态（离线或在线）
+\item 如某vctl感知到某节点离线，则标记所有subvol
+\end{enumbox}
+
+标记后，相关chunk不执行写时恢复逻辑，依赖于外部恢复过程。
+
+如果一个subvol标记了某节点，表明该subvol的所有chunk，如有副本对应该节点，则执行特定的逻辑。
+磁盘故障，标记的是节点，范围被放大。\hl{磁盘故障的need recovery是扫描数据库得到的，会放大吗}？
+
+标记的节点，就是代表该副本不可用。在磁盘故障的情况下，相邻chunk不一定处在一个节点上。
+比如\hl{同一subvol内两个chunk，可能位于同一节点的不同disk上}。
+
+如何区分真正恢复的和仅仅检查的情况，都计入恢复速度吗？\hl{有两种速度，深度扫描速度和恢复速度}。
+
+三阶段：扫描、深度扫描和恢复。
+
+Tools
+\begin{enumbox}
+\item lich.inspect --vfmget vol
+\end{enumbox}
+
+\section{验证}
+
+Test Case
+\begin{enumbox}
+\item 恢复编程available后，还需要再次lich health scan，不需第三次（节点的两副本、磁盘故障）
+\item 推到一些极限情况，比如两副本，故障两个节点，会如何？
+\item 性能影响：默认300的恢复速度情况下，故障对ssd pool的影响大于hdd pool（-10\%）
+\end{enumbox}
+
+\section{工具}
+
+\subsection{Hazard}
+
+hazard的IO模式：对同一IO extent，先写入，再读取。如果两者不一致，则再次读取。
+写和读分两次，每次的大小是随机的。但两次加起来代表一个完整的IO extent。
+只有写入与第一次读取不一致时，才有第二次读取进一步验证。故结果分为几种情况：
+\begin{enumbox}
+\item w != r1, w == r2，为读错误
+\item w != r1, r1 == r2，为写错误
+\item w != r1, w != r2，为unknown
+\end{enumbox}
+
+绘成三角形，如w为顶点，r1、r2为两底点，能更形象地去表示三者的关系。
+
+\hl{定位对应的chunk}，区分两种情况：raw和fs。raw的情况容易定位，\hl{(LBA-1) * 512}即可计算出对应的chunk，一个LBA对应512B。
+fs需要借助辅助手段来定位。模拟一io，通过底层FusionStor的log来定位。

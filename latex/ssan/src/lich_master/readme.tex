@@ -1,0 +1,219 @@
+\chapter{Lich Master}
+
+\section{生态}
+
+全闪架构有两种：阵列、分布式。分布式高一级，更灵活，实现难度也更大。
+
+\begin{enumbox}
+\item 有哪些产品，各有什么亮点
+\item 硬件的性能数据 (亚毫秒级)
+\item 如何评估性能理论上限
+\end{enumbox}
+
+latency and iops
+
+万兆网络的延时100微秒，采用用户态协议栈可以达到20微秒左右，IB RDMA大概5-8微秒。
+
+NVMe的延时20微秒
+
+\subsection{华为OceanStor}
+
+华为OceanStor Dorado V3是面向企业关键业务打造的全闪存存储系统。
+
+采用智能芯片、NVMe架构和FlashLink®智能算法，在开启重删、压缩、快照等增值特性后仍能保证0.5ms的稳定时延, 业务性能提升3 倍。
+
+支持平滑扩展到16个控制器，满足未来不可预期的业务增长。一套系统同时支持SAN和NAS，企业级特性齐备，为数据库和文件共享等应用提供更高品质的服务。
+
+支持免网关双活方案，可平滑升级到两地三中心方案和融合数据管理方案，实现方案级99.9999\%可靠性保障。
+
+通过在线重删、在线压缩技术，提供可达5:1的数据缩减率，OPEX节省75\%。
+
+满足数据库、虚拟桌面（VDI）、虚拟服务器（VSI） 和SAP HANA场景所需，助力金融、制造、运营商等行业向闪存时代平滑演进。
+
+\section{取势}
+
+AFA是趋势，SDS向AFA过渡需要在架构上做很多事情，也是ceph下一步演化的重点。
+
+从1+3模型描述硬件资源的使用方式。
+\begin{enumbox}
+\item NUMA下的多核
+\item 内存管理
+\item 存储设备
+\item 网络通信
+\end{enumbox}
+
+网卡、NVMe都是pci设备，是内存设备，即对应一定的内存地址，操作对应内存地址就是与该设备进行通信。
+pci设备不同于诸如硬盘等sata设备。\hl{pci设备的精密度远比sata设备为高}。
+
+iscsi和iser的代码是从tgt项目的不同版本取得的，NVMf则用的是spdk。
+spdk实现了很多内存管理功能。
+
+什么情况下需要数据对齐、内存对齐？
+
+全用户态的SDS架构，kernel bypass。
+
+\section{RDMA}
+
+latency是最重要的性能指标。
+
+RDMA是一种transfer，采用DPDK USN也是一种选择，比IB慢，但比kernel TCP协议栈要快几倍。
+
+\begin{enumbox}
+\item RDMA的编程模型？
+\item RDMA的连接管理过程？
+\item RDMA的内存使用方式有什么不同？
+\item iSCSI/iSER conn是如何关联起来的？
+\item 更好的抽象？
+\end{enumbox}
+
+RDMA是与TCP并列的一种网络传输方式，需要特定硬件支持，包括RDMA的NIC与交换机。
+网络设备不同于存储设备，RDMA可以carry任意网络流量，包括iSCSI/iSER，自定义协议(corenet)等。
+
+ibverbs API屏蔽了链路层的不同，可以用一套API同时支持IB，RoCE、iWARP等。
+
+\subsection{ibverbs}
+
+分为几个层次：node、core/dev、conn、event。
+
+每个设备对应rdma\_info\_t结构，有ibv\_context属性，是唯一的key。
+rdma\_cm\_id具有该属性。
+
+\begin{itembox}
+\item pd
+\item cq （被所有连接共享）
+\item mr  (shared)
+\end{itembox}
+
+深刻理解一个RDMA连接管理的过程，建立连接的每个阶段需要做哪些工作？
+
+每个RDMA连接，qp关联到cq上。cq\_poll。iov\_mr
+
+qp支持ibv\_post\_recv操作，peer的send操作会消耗这些buffer，
+在与远端建立之后，就应注册相关buffer，建立必要的关系，特别是指定wr\_id属性，并post，然后等待接受请求。
+
+在ibv\_cq\_poll之后，得到的ibv\_wc里，包含所需上下午信息(post之前建立的关系，初始化task时)。
+可以直接从buffer里recv到的数据。
+
+RDMA是异步通信机制。
+
+\subsection{MM}
+
+RDMA通信包括两类：msg与数据读写，所需内存都需要register。
+
+向RNIC注册内存
+
+\subsection{建立连接}
+
+采用epoll机制
+
+\subsection{通信}
+
+采用ibv\_cq\_poll机制
+
+\subsection{协议-iSER}
+
+iSCSI over RDMA
+
+iSCSI分多阶段，包括Login、Full Feature等。
+
+\section{DPDK}
+
+\section{SPDK}
+
+\subsection{NVMe}
+
+\subsection{协议-NVMf}
+
+NVMe over Fabric
+
+\section{MM}
+
+\subsection{问题}
+
+\begin{enumbox}
+\item 简单接口
+\item 便于调试
+\item 并发性能
+\item 内外碎片
+\item 动态化
+\item RDMA内存
+\item replica\_srv\_init不能利用core内存，模块依赖性
+\item Hash局部性不好，不利于CPU高速缓存
+\end{enumbox}
+
+\subsection{现状}
+
+源文件：
+\begin{enumbox}
+\item ylib/lib/mem.c
+\item ylib/lib/mem\_hugepage.c
+\item ylib/lib/mem\_cache.c
+\item ylib/lib/mem\_pool.c
+\item ylib/lib/buddy.c
+\item ylib/lib/buffer.c
+\end{enumbox}
+
+两级内存管理
+
+分为core内外两种情况：core使用私有内存。
+
+先生成hugepage，并置0。malloc后得到虚拟地址空间，把hugepage依次mmap到该虚拟地址空间。
+
+hugepage与numa物理内存的关系是怎么样的？什么时候建立起来的？
+
+底层hugepage不一定要用buddy，并且应可动态扩展。
+然后是pool层，可动态扩展，用buddy管理每个hugepage。
+其上是对象层slot，用于分配应用对象，用大小不等的多个队列管理。
+
+RDMA需要注册内存，目前是把整个core内存一次性注册了。
+每个core都调用注册函数？
+
+\section{Performance}
+
+性能优化，需要考虑CPU cache的行为，内存管理的效率等等因素。
+
+\subsection{Hash}
+
+\begin{enumbox}
+\item Lock table
+\item Replica srv
+\end{enumbox}
+
+\subsection{NUMA}
+
+内存、网卡的本地化
+
+多个RDMA、多个NVMe均匀分布之NUMA节点上（服务器通常有两个NUMA节点）
+
+\subsection{Queue Pair}
+
+aio、RAMD、iSER、NVMe等异步通信，大多采用多queue模型，有提交队列和完成队列。维持一定的上下文。
+调度器、QoS也基于队列模型。
+
+block和非block的区别，block是事件/中断驱动，非block是polling mode driven（PMD）。
+
+异步意味着非block，把提交和完成解耦，可以并行执行，重要的是完成后可以配对到相应任务。
+每一个请求建模为一任务，构成一状态机。如果实现为协程，就是隐式的状态机。
+
+任务组织成一定的数据结构，所谓调度，就是从中选取下一个要运行的task。然后，切换上下文。
+
+网络层、AIO都是如此。sqlite、redis等操作，派生出独立的工作线程，每个线程维护有私有的请求队列。
+
+\subsection{socket}
+
+区分连接socket和监听socket。监听socket构成网络连接的一方，而是起到辅助建立连接的作用。
+在epoll等multiplexing机制里，可以同时处理。
+
+aio通过事件抽象后，也纳入事件驱动的方式，其它如定时器等。
+
+\subsection{对齐}
+
+内存缓冲区对齐
+
+offset对齐道sector边界，NVMe对齐到4K，否则性能会非常差
+
+\subsection{知识体系}
+
+ABC，从google三论文开始，hadoop大数据分析平台，spark, openstack+ceph的演进。
+
+分为几类：\hl{协作、存储、计算、缓存}等。存储是最底层，可以把诸多领域贯通起来。

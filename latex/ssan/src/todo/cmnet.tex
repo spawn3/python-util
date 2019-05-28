@@ -1,0 +1,289 @@
+\chapter{移动集采}
+
+产品评估：功能和质量。质量包括：可靠性，性能，QoS，可扩展性（负载均衡），用户体验(管控，交互，接口)等方面。
+
+性能不是一个值，而是不同场景下的特征曲线。性能是系统配置和负载的函数：$P=F(S, W)$。
+精简配置，快照，故障，实现机制等因素都会影响性能及其抖动。
+
+\section{CheckList}
+
+对标\hl{移动集采测试规范}
+
+当前遇到的问题
+\begin{enumbox}
+\item 155 load过高
+\item vdbench提前退出(76, 77, Pipe broken，port 22)
+\item allocate、故障下coredump
+\item 其它方面的验证（QoS，Recovery）
+\item 标前测试的价值？
+\item 只参与一个标前测试
+\item 标前、标后的时间安排
+\end{enumbox}
+
+注意事项
+\begin{enumbox}
+\item 参考去年FS测试经验
+\item 人员、演练
+\item 严控测试时长，记录每一任务的时长，所有任务的总时长
+\end{enumbox}
+
+\subsection{Phase}
+
+\begin{enumbox}
+\item 预备工作
+\item 预备工作 - 文档
+\item 预备工作 - RAID1
+\item 进场
+\item 安装系统(测试机、压力机)
+\item 检测硬件
+\item 执行测试用例
+\item 预填充+vdbench 1M（串行 or 并行）
+\end{enumbox}
+
+\subsection{Hardware}
+
+同质化项：
+\begin{enumbox}
+\item 开机Logo
+\item 贴标
+\item 开机卡，需断电源
+\item IPMI
+\item 万兆网卡双bond (交换机)
+\end{enumbox}
+
+\subsection{Software}
+
+标前测试：
+\begin{enumbox}
+\item 管理系统相关Logo
+\item 上架
+\item 安装
+\item 性能测试
+\end{enumbox}
+
+BUG
+\begin{enumbox}
+\item etcd依赖于物理时间
+\item bcache拔cache盘后需要重启服务器
+\end{enumbox}
+
+配置
+\begin{enumbox}
+\item polling core的数量
+\item \hl{禁用coredump}
+\item cache开关
+\end{enumbox}
+
+功能：
+\begin{enumbox}
+\item IPv6
+\item SNMP
+\item ...
+\item Recovery
+\item ...
+\item Balance
+\item Balance启用产生coredump
+\item ...
+\item QoS
+\item QoS 1.1抖动幅度是否需要可配置
+\item opt\_iops\_jitter，动态可配置
+\item ...
+\item 网卡bond，部分接口down
+\item 设置vip，netmask计算方法
+\item ...
+\item bcache dirty data, disk\_list
+\item bcache
+\item ...
+\item 连接管理，删除卷后
+\end{enumbox}
+
+性能：
+\begin{enumbox}
+\item \hl{打开chunk parallel开关}
+\item 优化Log
+\item O3编译
+\item -g
+\item 代码段
+\item 恢复性能
+\end{enumbox}
+
+可靠性
+\begin{enumbox}
+\item 网络
+\item 节点
+\item 磁盘
+\end{enumbox}
+
+\section{LEFT}
+
+\subsection{IPv6}
+
+配置
+\begin{enumbox}
+\item 在存储节点上配置IPv6网络地址
+\item 在测试机上配置IPv6网络地址
+\item 测试网络连通性：ping6
+\item iscsiadm -m discovery -t st -p [::1]
+\item iscsiadm -m discovery -t st -p [::1] -l
+\end{enumbox}
+
+
+\subsection{可靠性}
+
+诊断写错误效率太低，需要完善分析方法和工具。
+
+log分析法
+
+chunk，副本级数据一致性校验(disk bitmap和sqlite)。
+
+disk bitmap无，而sqlite有。会导致什么结果？多个sqlite记录指向同一个磁盘位置。
+
+\subsection{性能}
+
+clock(副本一致性)
+
+msqqueue(操作日志)
+
+卷分为chunk，chunk有多副本。在独立的部分之间，尽量并发。
+
+多个卷，要注意session和controller平衡。
+
+在分配阶段，一个chunk的持久化信息，包括三部分：diskmd，sqlite和table2 meta。
+
+并发，锁的粒度。
+
+\subsection{删除}
+
+删除卷，比删除快照更早完成，导致快照无法删除
+
+回收replica时，sqlite有，disk bitmap无。
+
+并发删除一个卷的多个快照会如何？
+
+有节点不在线，无法完成删卷操作，反复重试而无果。
+
+timer不工作，是堵塞还是其它？
+
+删除队列里的快照，也计入快照数，满足一下不等式：root+auto+rmsnap+user <= 256。
+
+提供强制回收的工具
+
+\subsection{平衡}
+
+批量分配卷
+
+\subsection{md5sum}
+
+每个chunk有几种状态：没分配，分配，分配并填0。
+第一种和第三种状态等价，第二种状态结果不可知。
+
+\section{TODO}
+
+\begin{enumbox}
+\item Pool
+\item Volume size
+\item Volume mv and copy
+\item Volume IOPS QOS
+\item Mapping
+%\item Recovery
+%\item 可靠性 Robustness
+%\item Load Balance
+%\item Performance
+\item extentability
+\end{enumbox}
+
+\section{重要问题}
+
+\subsection{存储池}
+
+模型：概念及其关系。
+
+重建状态和速度按存储池进行统计。
+
+\subsection{卷}
+
+\begin{enumbox}
+\item 精简配置
+\item 三副本
+\item 扩容
+\item 卷的QoS：IOPS
+\item 全量拷贝和增量拷贝
+\end{enumbox}
+
+三副本 \info{三副本性能}
+
+\subsection{快照}
+
+\begin{enumbox}
+\item 显示卷和快照的创建时间，名称，宿主，\hl{容量，存储池}。
+\item 快照树是必须的
+\item 快照验证：每个快照关联一个数据集。
+\end{enumbox}
+
+\subsection{映射}
+
+数据访问和隔离机制，应按\hl{最小权限原则设计}。主机仅能访问映射到该主机的卷
+
+\subsection{故障处理}
+
+\begin{enumbox}
+\item IO抖动
+\item 重建
+\end{enumbox}
+
+\subsection{数据恢复}
+
+触发策略，QoS，性能，状态。
+
+\begin{enumbox}
+\item 在线调整策略：应用优先，或恢复优先。
+\item 负载调整到原来的20\%时，数据重建效率。
+\item 显示恢复速度和状态，区分实际重构的，和跳过的
+\item 拔出硬盘的存储池降级（数据冗余度发生下降，目前恢复进程是节点级的，与存储池没有直接关系，并且，在节点的维度上，存储池是有覆盖的，overlay network，\hl{按卷进行汇总}）
+\item 磁盘漫游，存储系统不发生重建，且数据无异常
+\item 模拟故障：单磁盘，单节点，单机架。要求：无读写中断。
+\end{enumbox}
+
+要研究的问题：
+\begin{enumbox}
+\item 在业务负载限定为标准负载的20\%的情况下，恢复性能如何？
+\item 如业务IO和数据恢复并存，数据恢复会挤压到很小。原因是什么？\hl{如何做到恢复优先}？
+\item 拔盘后，感知状态变化较慢。如\verb|md_chunk_set|不持久化meta，有无副作用？恢复时，也可不持久化。
+\end{enumbox}
+
+\subsection{负载均衡}
+
+均衡有数据均衡和负载均衡之分。
+
+单卷的负载均衡，因为FusionStor卷控制器绑定到core上，只能利用单核能力。
+CPU利用率上有瓶颈。同时，开启polling模式，会独占core cpu。
+
+\subsection{QoS算法}
+
+卷的IOPS和带宽，数据恢复的QoS，采用同一算法：令牌桶Token bucket。
+
+按恒定速度往桶里加入令牌，任务会消费令牌。如果令牌不足，则任务进入等待状态。
+目前，等待时间采用polling策略。等待一个较小的值（200us），唤醒后重新检查。
+
+接口保持不变。
+
+\begin{tcolorbox}
+fio队列深度过大，iscsi会有优化，进行IO聚合提交。这样一来，前端工具看到的IOPS可能会有所不同。
+但是，各层观察到的带宽应该一致，保证流量守恒。
+\end{tcolorbox}
+
+\subsection{Cache}
+
+BCache
+
+\subsection{Misc}
+
+VAAI
+
+\section{不需要做的项}
+
+\begin{enumbox}
+\item 一致性组
+\item 同步/异步远程复制
+\item EC
+\end{enumbox}

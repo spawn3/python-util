@@ -1,0 +1,44 @@
+\chapter{情境视图}
+
+\begin{enumbox}
+\item 企业存储架构SAN的升级
+\item 与云平台对接HCI
+\item OLAP
+\item OLTP
+\item Oracle RAC
+\item SAP
+\item 统一存储
+\item 大数据
+\end{enumbox}
+
+往上看，分层架构：提供target(iscsi, NVMf，vhost等)、命令行工具、API等接口。
+目前对接的云平台有zstack、openstack（通过cinder驱动）。
+
+目前较稳定的是iSCSI接口，支持VIP、VAAI等。iSCSI target以及所有客户端连接controller层，执行目录、卷、快照相关操作。
+对象层没有独立出来（ceph是在对象层之上构建卷，形成\hl{统一存储架构}）。
+
+每个控制器管理一个chunk树分支，一个pool的所有数据和元数据构成一颗chunk树，多个pool构成chunk树的森林。
+根节点记录在etcd上，中间节点是元数据，叶子节点是卷或快照卷的raw数据。
+
+iSCSI accept客户端链接后，即映射到相应的core的调度器队列。后续该连接上的所有请求响应，都由该调度器进行调度。
+
+多路径？
+
+链路的冗余设计？
+
+检测scheduler是否有block调用，包括syscall等。
+
+\hl{增加RDMA支持}：RDMA链接，不同于TCP链接。RDMA连接既存在于init到target(iSER)之间，也存在于集群的各个节点之间。
+
+为什么要引入RDMA？ network层的kernel bypass。iscsi需要强化为iSER，corenet同时支持tcp和rdma。
+RDMA在内存使用上也有所不同，都由core scheduler调度。
+
+\hl{增加NVMe支持}：在disk层面(SPDK)，在网络层面(NVMf)
+
+不同节点上具有相同hash的core构成corenet，corenet中的节点之间两两建立连接（一条连接）。
+如果两个节点彼此并发地建立连接，如何保证有且只有一条连接？
+
+上层采用nid作为节点标示，通过nid查询net table，得到对应的连接，然后执行网络通信。
+采用什么数据结构呢？array最为高效。
+
+\hl{TCP之上的multi paxos}：分为两层，通信+协议。

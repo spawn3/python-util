@@ -1,0 +1,475 @@
+\chapter{信息视图}
+
+meta管理采用对称的中心化架构。在节点中选举出admin节点，
+管理全局状态和数据分配工作。当admin节点发生故障时，会发生
+failover过程，选举出新的admin节点来。
+
+lichd进程内嵌各种server，包括iscsi target等。
+
+作为存储系统，主要考虑是元数据组织和IO，恢复等关键过程。
+功能之外，可靠性、性能，可扩展性至关重要。
+
+client可以和每个节点进行通信，推荐采用VIP机制，简化连接管理。
+
+\section{架构演化}
+
+关键问题：
+\begin{enumbox}
+\item 数据分布与数据平衡
+\item 复制及其一致性
+\item 容错设计
+\item 性能分析
+\item 扩展性设计
+\end{enumbox}
+
+问题与评估形成V型。CAP和ACID是两套主要的指标体系，一致性居于中心地位。
+\hl{把两套体系融合为一体}，故障、并发、持久化都是现实的需求。
+
+用Paxos解决C问题，用2PC解决分布式A问题。lease是时间的授权机制，比如心跳方法去检测节点A是否在线，\hl{NAS的cache一致性}。
+
+架构演进：
+\begin{enumbox}
+\item{引入etcd}
+\item{引入存储池}
+% \item{引入Bcache}
+% \item{引入VDO}
+\item{引入ROW3}
+\end{enumbox}
+
+\subsection{架构优化}
+
+\begin{enumbox}
+\item 统一内存管理
+\item Radix Tree
+\item pool下的目录结构
+\item lease是否必须
+\item Volume与snapshot位于同一节点内
+\item subvol控制器（负载均衡）
+\item 数据分配的权重、再平衡
+\item 内置http server，导出状态数据
+\item QoS
+\end{enumbox}
+
+\section{ETCD}
+
+依赖于服务器物理时间？
+
+高吞吐下造成timeout？
+
+可扩展性，proxy模式
+
+\section{结构}
+
+两类服务器节点：
+\begin{compactenum}
+\item admin
+\item normal
+\end{compactenum}
+
+从meta节点中选举出admin。meta节点是静态指定的吗？meta节点列表构成一个小的集群，类似于ceph的monitor。
+
+normal节点是数据节点，存放元数据和数据。元数据和数据都是按1M的chunk组织。
+元数据包括四类chunk: pool，subpool，vol，subvol。每个chunk具有固定数目的槽位bucket，指向管理的下一级节点。
+集群内的所有chunk，构成一个单根树。每个pool，每个volume，都是这个大树下的子树。
+
+引导信息bootstrap：rootable。记录了根分区的位置，即所在chunk的位置信息。根分区是一个特殊的pool。
+
+所有的控制器，包括pool和volume控制器，通过lease机制保证集群内的唯一性。
+其节点位置，由所在子树的根chunk的主副本确定。
+
+chunk副本的节点分布：基于diskmap的随机分布算法，并记录在元数据里。同时，遵循故障域规则。
+
+chunk副本的磁盘分布：本地数据管理（bitmap+sqlite）
+
+chunk副本之间的一致性：强一致性协议。在每次IO操作前，检查各副本的clock和dirty状态，必要的情况下，进行修复。
+
+为了提升性能，需要充分考虑聚合和并发。聚合优于并发，先考虑聚合/批处理。
+聚合，一次提交多个chunk。
+并发的粒度，多个chunk，一个chunk的多个副本。同时，锁的粒度要恰如其分。
+
+副本数据的管理，没有采用资源池模式，与chkid紧耦合，非共享，不利于分配和释放。
+
+\subsection{admin节点}
+
+职责：
+\begin{compactenum}
+\item paxos leader
+\item lease server
+\item 管理系统引导信息
+\item 集群节点列表
+\item 维护diskmap
+\item VIP（控制器当前位置）
+\item 分配卷Id
+\item 分配\hl{chunk副本位置}
+\end{compactenum}
+
+持久化信息和上报信息，心跳机制
+
+可扩展性
+
+admin上持久化的信息，\hl{是如何避免单点故障的，即如何同步到各个meta节点上的}？
+可以rootable为例，参见\verb|mq_master.c|。
+
+引入etcd后，admin处理逻辑会简单些。同时引入了多存储池，寻址过程变得复杂。
+
+\subsection{数据目录}
+
+/opt/fusionstack/data:
+\begin{itembox}
+\item node/rootable (\hl{global info})
+    \begin{compactitem}
+    \item sysroot/root
+    \item misc/fileid
+    \item node/t53
+    \end{compactitem}
+\item disk (local, disk management)
+\item chunk (local, sqlite3)
+\item status
+\end{itembox}
+
+\section{命名}
+
+\section{映射}
+
+\subsection{VIP}
+
+\subsection{微控制器}
+
+每一个加载的卷，对应一个集群内唯一的卷控制器，负责卷的IO等操作。
+
+\subsection{元数据管理}
+
+元数据包括：
+\begin{enumbox}
+\item \hl{引导信息，用于加载相应对象}
+\item 目录下包含哪些文件？
+\item 文件包含哪些chunk？
+\item chunk的副本位置（节点和节点上的磁盘）
+\item 快照以及快照树
+\item xattr
+\item 各实体对象描述信息，包括创建时间，id等
+\end{enumbox}
+
+关键问题有：
+\begin{enumbox}
+\item 空间管理，分配和回收
+\item 数据分布
+\item 复制/EC
+\item 数据恢复和平衡
+\end{enumbox}
+
+在顶层设计下的case by case。
+
+每一个卷的元数据和数据，共有三层chunk，L1和L2是元数据，L3是数据，构成chunk的单根树。
+快照和clone出的卷采用统一的chunk树结构，不过增加了交叉引用关系。
+
+L1原先只有一个chunk，有固定数目的槽位，指向L2的chunk，L2的chunk，有固定条目的槽位，指向L3的数据chunk。
+
+table1包含了指向全部L2 chunk的指针数组(table\_proto)，table2包含了指向全部L3 chunk的指针数组（chkinfo+chkstat）
+table\_proto内在也包含chkinfo和chkstat。每一个chunk，都需要在其父节点上登记，\hl{卷的第一个chunk}登记在pool里。
+
+parent的界定：\hl{raw和subvol的parent都是volume的chkid，subpool的parent是pool的chkid。
+vol的parent是pool的chkid}，即parent都是可寻址的实体对象(具有控制器)。\hl{sqlite记录的parent遵循该语义}。
+
+如果\verb|table1->table_count|和\verb|table2->chknum|比较大，会有扩展性和性能方面的问题，同时会消耗比较多的内存。
+
+\hl{raw chunk无法跨卷共享，每个chunk的chkid编码了卷id。是否引入对象层，对象由上层应用共享。}
+
+ROW3在raw卷之上实现快照与克隆，需要大卷支持，本质上chunk是共享的。
+
+\subsection{精简配置}
+
+每个raw chunk有三者状态：ENOENT，alloc，alloc and zero。第一种和第三种等价。
+
+分配一个chunk，开销较大，影响到精简配置和快照的性能。
+分配一个chunk，涉及到更新元数据。
+
+快照、克隆卷天然就是精简配置的。
+
+磁盘空间分配器，db记录chkid到磁盘位置的映射(采用rocksdb？)。
+
+\section{认证}
+
+\section{定位}
+
+\subsection{数据分布}
+
+positioning是指将数据放置到存储器层级结构或者网络节点的不同层上，以保证系统具有更好的性能。
+
+高可用、高性能、负载均衡是几个主要设计目标。
+
+数据分布首先要满足规则要求，其次则需做到均衡和局部性。
+规则是强制的，极端条件下可能退化。均衡和局部性则影响系统性能。
+
+卷属于存储池，存储池上定义副本数和副本放置规则。
+保护域和故障域，可以用存储池来统一。
+
+FusionStor通过元数据来管理，\hl{与CEPH的CRUSH有重大不同}。
+
+数据分布规则有：
+\begin{compactitem}
+\item 存储池规则
+% \item 保护域规则
+\item 故障域规则(\ref{rule:faultset})
+\end{compactitem}
+
+负载均衡和本地化两方面考虑，平衡包括数据平衡和任务平衡。
+
+chunk在节点上的分布，节点内chunk在磁盘上的分布（包括分层）
+
+controller在节点上的分布，controller在core上的分布
+
+各种任务的分布情况，如数据恢复。
+
+\subsection{本地化}
+
+卷控制器所在节点，具有所有chunk的副本。
+
+当切换控制器的时候，需要控制本地化过程的QoS。
+
+\subsection{分层}
+
+卷的xattr，有目标分层设定：priority。默认是-1，即开启自动分层。先落入tier 0，根据数据热度，
+通过异步过程进行数据迁移(纵向的数据流动)。所以有两个异步任务：
+\begin{compactenum}
+\item 统计访问热度
+\item 按策略执行数据迁移(目标分层的偏离，数据热度)
+\end{compactenum}
+
+每个chunk有实际分层：tier，不是在副本级。
+
+\subsection{SSD缓存}
+
+SSD Cache实现了写缓存，没有实现读缓存, 通过内存实现读缓存。
+
+\subsubsection{配置项及系统行为}
+
+相关控制参数：
+\begin{enumbox}
+\item lich.conf/disk\_keep: 10G （废弃）
+\item lich.conf/disk\_cache: 10G
+\item 卷的xattr: writeback
+\item 卷的属性：priority (设定卷的目标存储分层）
+\end{enumbox}
+
+disk\_cache配置磁盘cache区，对新盘有效，若一个盘已经配置，就固定了，不再改变。
+此配置对SSD和HDD都起作用，预留磁盘末尾的空间。
+
+priority是手工分层机制，持久化到卷属性上。
+
+tier是自动分层机制，默认行为是什么？ 优先落到SSD上，若SSD满，落到HDD上。
+
+所以，分三种情况：
+\begin{compactenum}
+\item 自动分层，priority == -1，优先落盘到SSD上，如果SSD满，落盘到HDD上
+\item priority == 0, 同自动分层机制
+\item priority == 1，落盘到HDD上（此时根据writeback的设置，决定是否走SSD cache）
+\end{compactenum}
+
+写IO流程
+
+以下两种情况，会落盘到HDD上：
+\begin{compactenum}
+\item priority == 1
+\item SSD满
+\end{compactenum}
+
+落盘到HDD的写IO，\hl{其行为受xattr.writeback影响}，分两种情况：
+\begin{compactenum}
+\item xattr.writeback == 1，写入ssd的cache区+内存后，返回。
+\item xattr.writeback == 0, 写入HDD。
+\end{compactenum}
+
+落盘到SSD的写IO，不经过Cache, 走原来的IO路径。
+\begin{compactenum}
+\item 自动分层，会优先落到SSD上
+\item priority == 0, 会导致落盘到SSD上
+\end{compactenum}
+
+已知问题
+
+\begin{compactenum}
+\item 原来的分层机制，默认情况下，会写满SSD，导致后续写HDD（先快后慢）。
+\item 异步线程的工作机制 (周期性执行，20min执行一次, 最后才会置换proirity == 0的数据）
+\item disk cache区开启后，就不能再改变，空间无法回收，且不能关闭（不可逆过程）
+\end{compactenum}
+
+不确定的地方
+
+考虑以下问题，初次分配dispatch\_newdisk，等固定了分层后，后续的变更规则是什么？
+
+\subsection{高性能}
+
+网络层：iSER，NVMf
+
+设备层：libnvme/SPDK
+
+libiscsi
+
+tgt
+
+\subsection{分区容忍性}
+
+参考fence.c
+
+\subsection{负载均衡}
+
+\section{复制一致性}
+
+\begin{tabular}{|s|p{6cm}|}
+    %\hline
+    %\rowcolor{lightgray} \multicolumn{5}{|c|} {Snapshot} \\
+    \hline
+    pool & LICH\_REPLICA\_METADATA  \\
+    \hline
+    subpool & LICH\_REPLICA\_METADATA  \\
+    \hline
+    vol & fileinfo \\
+    \hline
+    subvol & fileinfo  \\
+    \hline
+    raw & fileinfo  \\
+    \hline
+\end{tabular}
+
+恢复和再平衡过程，是怎么工作的？
+
+控制器协调所有IO操作，通过(owner, magic, clock)维护副本一致性。
+owner，magic联合起来，处理controller切换的情况。
+clock处理一个chunk内所有变更的顺序。
+
+若干问题：
+\begin{enumbox}
+\item 因为有owner和magic，是否不需要再维护controller的唯一性？
+\item 没有使用日志
+\end{enumbox}
+
+\subsection{正常情况}
+
+chunk内的更新按clock顺序提交，这样做影响并发度，进一步影响到性能。
+如果不遵循clock序提交，需要有一假设：所有并发任务无重叠，或者是在有重叠的地方按clock串行化。
+上层应用不会提交重叠的IO，内部元数据涉及小IO，比如小于512B的IO，多个更新可能指向同一扇区。
+如果多个副本不按同样的顺序，就会出现数据一致性问题。
+
+如果收到clock连续的io，且这些io无重叠部分，可以直接提交。
+如果io有重叠，按clock序依次提交。采用lattice，可以实施聚合优化。
+
+一种做法是保证并发io无重叠。需要分析每一种io情况，包括应用层io，内部元数据等。
+另一种做法是维护一数据结构，能够跟踪io重叠情况。
+
+\subsection{故障情况}
+
+控制器切换
+
+在降级写的时候，没有参与的副本标记持久化状态stale，保证在reload的时候，不会被选为权威副本。
+
+网络分区
+
+节点掉电
+
+集群掉电
+
+disk and raid cache
+
+\subsection{Clock}
+
+每个core对应一个\verb|logical_clock_t|和hash索引。
+进一步分组，每组对应一个\verb|clock_queue_t|，表示1M的mmap空间。
+提交clock时，会append到相应的queue file。
+满1M时，切换到新的clock文件。
+
+在启动、关闭节点时，同步clock目录下的文件。
+
+掉电情况下，因为保持在/dev/shm/lich4/clock目录下，没有真正的持久化，clock文件会丢失。
+clock丢失，会引起chunk sync过程，极大降低性能。
+
+同一queue的clock file需要定期合并。
+
+如果core hash变化，则需要重建所有clock？
+
+评估内存占用量，load时间等性能指标。如何优化？nvdimm？
+
+\section{关键过程}
+
+\subsection{启动集群}
+
+\subsection{创建存储池}
+
+创建存储池后，会在etcd上记录引导信息。
+创建存储池后，必须添加磁盘到该存储池。一块磁盘只能属于一个存储池。
+
+\subsubsection{磁盘管理}
+
+每块磁盘对应一个bitmap，用于该盘的空间管理。
+
+磁盘有分层属性，通常0表示SSD，1表示HDD。有三种分层策略：tier==0，表示写入SSD，tier==1表示写入HDD，
+tier==-1表示自动分层，先写入SSD，通过异步后台线程flush不活跃的数据到HDD。
+
+在分配每一个chunk的时候，可以指定tier。没有指定的情况下，默认为卷的priority设定。
+
+chunk\_id到磁盘物理地址的映射，是一随机过程，定位到空闲的bitmap上。
+
+如何确定磁盘的分层？
+
+RAID管理，disk和raid都有cache，需要注意掉电情况下是否丢数据。
+
+\subsection{创建卷}
+
+\subsection{IO过程}
+
+写过程，可能内在地包含了分配chunk的过程，缺页分配。当在末尾写入时，还可能扩展了卷的大小。
+
+大范围内的随机写入，造成很多的缺页分配，分配过程会成为性能瓶颈。
+
+\subsection{分配一个chunk的过程}
+
+分为两阶段：分配空间，chkid和磁盘位置的映射。两阶段按SEDA方式组织，没按pipeline组织。
+
+分配空间线程池：每个磁盘一个线程，多线程共享任务队列。
+
+
+函数：
+\begin{compactitem}
+\item \verb|__table2_chunk_create|
+\item \verb|replica_srv_create|
+\item \verb|disk_create|
+\end{compactitem}
+
+与admin交互，返回节点列表，即各副本所在节点。
+
+需要持久化的信息：
+\begin{compactitem}
+\item disk bitmap，记录磁盘上每个chunk的分配状态
+\item sqlite3，记录chkid（副本）到物理地址的映射关系
+\item table2 meta，记录chunk info（副本位置）
+\item 填充chunk内容为全0？
+\end{compactitem}
+
+分配chunk的过程，会影响到若干特性，如精简配置，快照、恢复，再平衡，写入等，都产生新chunk。
+
+优化allocate的性能：
+\begin{compactitem}
+\item 加大lich.inspect线程数到20
+\item table2 lock粒度 \change{dynamical lock table}
+\item 异步化sqlite，每个db一个工作线程
+\end{compactitem}
+
+\subsection{事务处理}
+
+一个复杂的主题是事务处理，即如何保证在故障条件下，过程执行的ACID属性。
+需要做出事务保证的典型过程有：
+\begin{compactenum}
+\item 创建卷(metadata表出现垃圾记录)
+\item 创建快照(snap\_version得不到有效维护)
+\item 分配chunk(meta和副本不一致)
+\end{compactenum}
+
+以分配chunk为例，基本操作有：
+\begin{compactenum}
+\item 申请chkid和chkinfo
+\item 分配disk bitmap
+\item 分配sqlite记录
+\item 写入meta
+\end{compactenum}
+
+任何两个操作之间发生故障，都会导致问题。

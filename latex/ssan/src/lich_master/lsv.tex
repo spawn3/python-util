@@ -1,0 +1,195 @@
+\chapter{LSV}
+
+现有Lich raw卷，存在性能问题，COW快照也不便于扩展。所以实现了Log structured Volume，
+转化随机IO为顺序IO，基于其上，实现了ROW快照。
+
+特别要注意的是，实现中应着力避免顺序IO随机化，会引起IO放大，从而极大地降低性能。
+
+
+\section{Volume}
+
+Volume模块负责空间管理。提供malloc/free接口，也可批量分配和回收。采用bitmap和free list多种管理方式。
+freelist充当分配缓冲区的角色，可持久化，也可不持久化。
+
+lsv-lich raw-disk的chunk空间存在两级映射关系，会影响到读写性能。
+
+底层空间宜按固定大小的段来组织。每个段空间管理的开销是固定的。
+目前支持两级存储分级：
+\begin{tcolorbox}
+    \begin{multicols}{2}
+        \begin{itemize}
+            \item 0：ssd
+            \item 1：hdd
+        \end{itemize}
+    \end{multicols}
+\end{tcolorbox}
+
+\section{Bitmap}
+
+Bitmap更合适的叫法是页表，与操作系统里的页表类似，负责虚拟地址到物理地址的映射关系。Bitmap有两层：L1和L2，
+按类似页表的方式组织。和Log层数据一起，构成三层。
+
+L1是Bitmap的头部，大小固定，属于卷或快照私有。L2按需分配，在快照之间共享。在Clone的情况下，会涉及跨卷读。
+
+通过Bitmap层，支持快照的全部特性，多个快照构成快照树。快照树分两种方式展示：树状或列表。
+
+\section{Log/Chunk}
+
+底层物理空间，划分为固定大小为1M的数据块，进行统一管理：分配/释放。
+
+在Volume模块之上做了简单封装，表示卷的数据，Bitmap表示卷的元数据。在覆盖更新的情况下，Bitmap指向新的数据页，
+导致原来的数据页失效，可以回收。在有快照的情况下，会变得较为复杂。
+
+Log模块无需要持久化的信息。
+
+在Lich卷空间映射到磁盘的时候，目前实现为一个随机过程。\textcolor{red}{磁盘的1M随机和顺序，差别较大}。
+
+\section{WBuf}
+
+Wbuf有两个序列：WAL和Wbuf的提交序。在wbuf中读出的最新数据和提交后通过bitmap+log读取的数据，应该一致。
+
+IO内，LBA不同，无冲突，页序；IO间，LBA可能相同，有冲突，需要串行化。
+
+\section{RCache}
+
+多级缓存机制，需要注意针对多种读场景进行优化，如顺序读。因为经过虚拟页表映射，虚拟地址空间和物理地址空间，顺序可能是交叉的。
+应着力避免出现顺序变随机导致读放大的情况。
+
+预读很重要，也比较困难，需要构建学习模型。
+
+\section{GC}
+
+log功能单一化，gc模块独立出来。gc要解决的问题有二：
+\begin{enumerate}
+    \item 跟踪所有log
+    \item 在所有log中，根据一定策略（qos），选择回收价值最大者进行回收
+\end{enumerate}
+
+目前的实现，是局域的解，而不是全局最优解，是bottom-up的分代垃圾回收器。可增量并行执行，与前台赋值器需要同步机制。
+回收器和赋值器需要读写barrier。
+
+优化GC Check过程：每一页的信息，只会出现在部分的bitmap记录里，与快照树的拓扑结构有关。
+在创建快照时，分配snap id。 snap id组织成单调递增的序列。如果中间没有删除或rollback操作，
+很容易定位到某页所属的快照点。经过rm或rollback之后，情况有所不同，但依然有迹可循。
+
+\section{Recovery}
+
+正常关机的情况下，各个模块会flush必要的数据，下次启动的时候，load出来即可。
+
+异常关机的情况下，各个模块没有机会flush数据，导致丢失部分内存状态信息。
+这样，在下次启动的时候，需要执行恢复过程。
+
+需要flush数据的模块有：
+\begin{itemize}
+    \item Wbuf
+    \item GC
+    \item Volume
+\end{itemize}
+
+提出几个问题：
+\begin{tcolorbox}
+\begin{enumerate}
+    \item 正常关机时，需要flush什么信息？
+    \item 恢复过程，从X恢复出Y，X是什么？Y是什么？(X是日志，Y是最新状态)
+    \item 怎么理解提交等基础操作？
+    \item 恢复的性能如何？如何通过检查点机制改善恢复性能？
+\end{enumerate}
+\end{tcolorbox}
+
+针对以上问题，每个模块的恢复机制有所不同，但分析方法具有通用性。
+
+\subsubsection{Volume Recovery}
+
+ $U = (A - B) + C + D$
+
+tail标记了可见空间，可见空间=已分配+可分配（free list）。free list组织成内存和磁盘两部分。flush时，需要持久化freelist的内存部分。
+
+在调用malloc和free接口的时候，会同步更新用于空间管理的bitmap。为1的为已分配，为0的为可分配，这个关系总成立。
+
+为了支持批量malloc和free接口，引入dirty page bitmap，类似于GC中提到的卡表，可以实现\textcolor{red}{多次更新，一次提交}的设计模式。
+
+主要操作：
+\begin{tcolorbox}
+\begin{itemize}
+    \item malloc操作：依次从C，D，U里取可用chunk。
+    \item free操作：把释放的chunk放入C，如果C满，则转化为D。
+\end{itemize}
+\end{tcolorbox}
+
+这里的提交操作可以理解为：C转化为D的过程，并没有记录检查点。
+所以恢复操作，要全扫描bitmap，从bitmap重建C和D。
+
+\subsubsection{GC Recovery}
+
+GC recovery过程可以理解为：从gc bitmap重建内存状态。
+
+所有的log，分为两部分：old storage和bitmap。bitmap相当于journalling。进入check queue的logctrl，先登记到bitmap。
+在提交时，即从heap移入old storage时，清除/注销相应的bitmap项。
+
+\subsubsection{Wbuf Recovery}
+
+谁充当了日志的角色？在wbuf模块很明确，有专门的WAL。写入阶段登记，commit阶段回收。
+
+\section{LSV测试}
+
+LSV(\textcolor{red}{Log Structured Volume})基于Lich原生卷，实现了日志结构的卷格式，支持快照的各种操作。
+
+相对于Lich原生卷，LSV有几点优势：
+\begin{tcolorbox}
+    \begin{itemize}
+        \item 转化随机IO为顺序IO，混合存储情况下有更高性能
+        \item 实现为ROW快照，zero-copy快照，\textcolor{red}{支持快照树}
+    \end{itemize}
+\end{tcolorbox}
+
+LSV的关键过程：
+\begin{tcolorbox}
+    \begin{description}[style=nextline]
+        \item [写] 写入wal和wbuf后，即可返回。wbuf积聚到1M时，提交log+bitmap后台异步任务。
+        \item [读] 从wbuf读取最新数据，如果没有命中，则依次从rcache，bitmap+log读取。
+        \item [GC] 垃圾回收，后台异步任务，按一定策略，回收无效页。
+        \item [重启] 分两种情况，正常和异常情况。正常情况下会刷新内存状态，重启时直接加载即可；异常情况下，进入recovery过程。
+    \end{description}
+\end{tcolorbox}
+
+
+LSV测试，主要分为功能，正确性和性能几个方面，\textcolor{red}{正确性和性能按标准测试用例}执行即可。下面列出一期测试计划。
+
+\subsubsection{GIT分支}
+
+lsv\_pipeline
+
+\subsubsection{特性}
+
+%\begin{tcolorbox}
+\begin{lstlisting}[language=bash,frame=single]
+# 创建LSV卷：
+lichbd vol create p1/v1 --size 100Gi -F lsv -p iscsi
+
+# 快照功能，与原来一样，部分命令示例：
+lichbd snap create p1/v1@snap1 -p iscsi
+lichbd snap create p1/v1@snap2 -p iscsi
+lichbd snap ls p1/v1 -p iscsi
+
+# 暂不支持flat操作
+
+\end{lstlisting}
+%\end{tcolorbox}
+
+\subsubsection{性能/正确性测试清单}
+
+\begin{itemize}
+    \item 与lich原生卷全面的性能对比
+    \item 资源利用率(包括磁盘，内存)
+    \item 系统启动时间
+    \item 重启系统的恢复过程
+    \item 存储分层
+    \item 扩展到多卷
+\end{itemize}
+
+\subsubsection{注意事项}
+
+\begin{itemize}
+    \item 日志满：/opt/fusionstack/log/lich.log (echo 5 > /dev/shm/lich4/msgctl/level)
+\end{itemize}
+

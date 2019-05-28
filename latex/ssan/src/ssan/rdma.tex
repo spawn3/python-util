@@ -1,0 +1,68 @@
+\chapter{RDMA}
+
+\section{编程模型}
+
+理解异步机制。分提交队列和完成队列。多个cm\_id可以共用一个完成队列。一个dev用一个完成队列。
+
+\subsection{建立连接}
+
+\hl{三层：多核并行-调度-事件}
+
+注意事件循环，消息派遣机制，同步操作。
+注意内存使用。
+
+C/S，S端收到RDMA\_READ请求时，push数据到客户端的内存。
+S端收到RDMA\_WRITE请求时，从客户端pull数据到本地。
+
+rpc构建于RDMA/IB verbs之上，是同步机制。rpc客户端通过post send发送协议参数，
+分为读、写两种情况。\hl{RDMA read和write都是由RPC server-side完成的}。
+
+ibv\_post\_recv若干内存区块，以接收ibv\_post\_send消息。处理完一个，再次调用。
+就好比有若干空槽，来一个send msg，填充一个，处理完后，reset进入可用状态。
+这是不同于tcp send/recv的地方，\hl{send/recv基于字节流，post send/recv基于msg}。
+send/recv都不涉及rkey，不需要知道peer的内存地址。
+
+rdma write相当于push本地内存数据到远端应用内存，
+rdma read相当于从远端应用内存pull数据到本地内存。
+
+通过send/recv交换双方内存信息，或其它方式进行交换。\hl{在接收端，要先准备post recv}。
+
+首先要掌握连接管理，采用c/s架构。
+
+为什么理解epoll机制不够顺利？原因在于这是一个双层结构的东东。理解RDMA面临同样问题。
+rdma\_cm\_id约等于一个tcp连接，也需要区分listen socket和connection socket，与客户端共同构成三角形结构。
+
+第一层是block point，监听多个fd上的事件。
+
+\subsection{通信}
+
+建立连接后，连接两端处在peer角色。且可以在corenet的router表里检索到。
+
+\section{corerpc}
+
+source files
+\begin{enumbox}
+\item corenet\_connect\_rdma.c
+\item rdma\_event.c
+\item corenet\_mapping.c 记录nid到sockid的映射
+\item corenet\_rdma.c 消息传递API
+\end{enumbox}
+
+以stor\_rpc\_read和stor\_rpc\_write为例，理解RDMA通信机制。
+post、commit和poll分别对应wr队列和wc队列。wr队列又分为发送和接收队列。
+
+\section{iSER}
+
+use tgt
+
+iscsi initiator和target之间的RDMA，与lich实现类似，由三个transfer接口组成：send、read、write。
+target端负责RDMA read/write。\hl{iSER是iscsi over RDMA}，payload协议是scsi。
+
+回到网络的基本模型去理解，上层的协议和接口通常不变，新的硬件和transfer，通常引入了新的协议层去适配。
+由此可见，整个\hl{网络协议栈}的设计非常强大，具有很好的扩展性和适应性。
+
+交换机并不是什么神秘的东西，可以理解为一台计算机，导出了网络服务，主要功能是port的交换和路由。
+
+\section{NVMf}
+
+use spdk NVMf target

@@ -1,0 +1,17 @@
+\section{snapshot}
+
+两种快照实现
+
+引入row快照后，需要区分卷的物理大小和逻辑大小。
+因为卷以及快照数据都保存在同一个LUN上，所以要支持大卷。
+
+\subsection{Tool}
+
+\begin{lstlisting}
+lich.snapshot --list /iscsi/vol-2 --pool hdd-pool-1 
+              -a -f tree -v
+
+/iscsi/vol-2
+`-- lich_system_root ver:0 from:-1 allocate:1048576
+    `-- 2-snap1 ver:1 from:0 allocate:999464
+\end{lstlisting}

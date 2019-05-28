@@ -1,0 +1,36 @@
+\chapter{编程语言}
+
+不应该放在太琐碎的知识点上，要放在\hl{核心概念的融会贯通}上。
+
+多提问，\hl{是什么？为什么？别人是如何做的？}，思方学。
+视野要开阔，避免坐井观天、夜郎自大。有生态思维。
+
+体系结构、操作系统和汇编语言是底层逻辑。
+
+编程语言通常提供了比较完备的数据结构和算法库，可以结合起来进行学习。
+
+\section{C}
+
+编译和链接
+
+\section{C++}
+
+代码组织方式：file, namespace, exception
+
+\hl{function, class, template}是三个核心概念。class是data type的扩展，template作用于function和class之上。
+
+value、pointer、reference。reference又分为左值和右值。右值引用用来实现move语义，避免不必要的数据copy。
+这与mbuffer等zero-copy技术类似。
+
+一个大原则：pointer和reference必须指向有效数据，\hl{局部声明的临时对象，被销毁的对象}都不能再使用指向这些对象的指针或引用。
+结合内存模型是很容易理解的。
+
+什么是左值，什么是右值呢？可以取地址的是左值，常数、函数返回的临时变量是右值。
+
+\section{Erlang}
+
+\section{Go}
+
+Go的调度机制
+
+\section{Python}

@@ -1,0 +1,88 @@
+\chapter{CEPH}
+
+\section{问题集}
+
+\begin{enumbox}
+\item 故障下的io中断
+\item 降级模式
+\item bluestore是osd粒度的吗？
+\item kernel space和user space之划分
+\item ceph的数据位置计算而来，如何保证平衡是一个重点。
+\end{enumbox}
+
+\section{架构}
+
+从硬件，存储引擎，存储服务，接口，管理等层次分析一款存储产品。评价指标：多快好省。
+多是空间，是扩展性，快是性能，是时间。好是品质，可靠性，高可用等；省，在标准下的优化措施。
+两个维度，构成纵横交错的矩阵结构。任何一项功能，都服务于一个或多个指标，
+都需从多快好省几个维度去分析（雷达图），只是有所偏重。
+
+\begin{enumbox}
+\item 接口层：iscsi
+\item 服务层：瘦配置，快照，克隆，cache，分级，QoS，备份，灾备，dedup，压缩，加密（缩减，保护，隔离，安全）
+\item 模型层：block/file/object pool，卷，快照，一致性组(服务层是模型中实体的属性和操作)
+\item 引擎层：分布，复制/EC，恢复，平衡
+\item 硬件层：
+\end{enumbox}
+
+对象模型：\hl{pool/pg/osd}，object存入pool/pg的对应osd上，关键过程：
+\begin{enumbox}
+\item io path
+\item recovery
+\item balance
+\item QoS
+\end{enumbox}
+
+进程结构
+
+存储池，统一了保护域，故障域，pool, 缓存，EC等，都是通过灵活的存储池配置实现的。
+
+存储池关联到ruleset，ruleset指定了bucket和设备的存取规则。
+
+osd对应到磁盘设备，bucket是容器，构成分层的物理拓扑结构。
+
+按x型结构理解ceph，ceph突出了object层(RADOS)，在object层之上构建块、文件、对象的统一存储系统(\hl{1+3架构})。
+对比lich：chunk分为五种类型，构成一树状结构，增加了实现复杂度。
+
+集群由node组成，node上运行monitor和osd服务，一个节点一般有多个osd进程。
+monitor维护集群全局信息，如cluster map。
+
+逻辑资源由pool、pg、对象构成，在pg和osd之间是多对多的映射，所以对象的存储位置由pg决定。
+位置计算成本低，但如何保证数据平衡，是一个需要深入论证的课题。如何管理再平衡过程?
+
+三层架构：target driver、core、storage driver。每层的性能和扩展性如何？
+
+从pg角度来看，一个pg对应有若干osd，primary osd负责它以其为主的各有pg的写入请求。
+与协程方式处理的优缺点？
+
+pg维护有eversion，epoch+version，version规定了该pg的写的顺序？
+why not object？\hl{是一个全序，而不是偏序关系}，降级了并发度。
+能否执行乱序写入？
+
+理解对象及其关系后，就要重点分析关键过程，如IO、恢复、平衡等。
+副本和EC处理上有何异同？
+
+\section{PG}
+
+pg是一个枢纽，沟通了object和osd。\hl{pool-pg-osd构成一拓扑结构}，object的位置由CRUSH算法计算而来。
+
+对象一致性和恢复都是基于PG进行的，包括四个关键过程：\hl{peer, recovery, backfill, scrub}。
+
+若变更一个pool的pg num，需要平衡数据，如何使数据迁移量最小，如何管理迁移过程？
+什么情况才需要变更pg num？
+
+pool/object, pg/osd。二级映射
+
+引入pg意味着什么？二级映射。读写流程，故障恢复，副本一致性。
+引入最小副本数，进行异步恢复，以减少恢复对正常业务的影响。
+
+每次写入都有一序号，用于串行化，eversion。\hl{RAFT协议}？分区故障的影响？
+
+本地读写经过bluestore，包括日志和数据。
+pg upset是计算的osds，pg activeset是当前在用的osds？
+
+client与primary osd建立连接，直接进行数据存取，连接数过多？
+如果建立cpu binding，引入core hash一维度，是否可以共用连接？
+在primary osd上，按pg映射到不同的core上进行处理。
+
+资源消耗：\hl{线程、连接、内存}等

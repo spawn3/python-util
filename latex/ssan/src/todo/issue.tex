@@ -1,0 +1,43 @@
+\chapter{随笔}
+
+parent通常指的是控制器，定位到控制器才能进行后续操作。
+
+chkinfo和chkstat为什么不打包进行管理？
+
+路径/标示，寻址/定位，范围，IO，缓冲区,其它属性(tier, 是否填零等)
+
+pool+path
+poll+fileid
+
+nid, chkinfo
+
+分配磁盘空间，在多个卷控制器之间共享，每个disk受一个写锁保护，粒度过大，并发度低。
+
+同时可以通过批量分配的方式，降低成本。
+
+如果每个磁盘有一个请求队列?
+
+节点级回收线程：
+\begim{compactenum}
+\item 离线时删除卷，遗留下的垃圾
+\item 多于指定副本的垃圾数据，需要根据chkinfo判断(跨节点)
+\item /dev/shm/lich4/nodectl/diskstat，与实际disk布局不批量，需要清理，避免影响stat和health结果
+\end{compactenum}
+
+需要注意与recovery等过程的相互影响。
+
+\section{元数据管理}
+
+卷包含了哪些数据块？每个数据块各个副本的位置。
+
+在写入数据时，首先要分chunk。每个chunk都是allocate和io两个阶段。
+
+meta，sqlite和diskbitmap信息不一致
+
+\section{平衡}
+
+控制器平衡
+
+数据平衡（节点负载平衡）
+
+schedule_task_get和schedule_yield一定要配对出现

@@ -1,0 +1,756 @@
+\chapter{功能视图}
+
+\begin{tikzpicture}[show background grid]
+    \begin{class}{Disk}{6, 0}
+    \end{class}
+    \begin{class}{Pool}{6, 2}
+    \end{class}
+    \begin{class}{Volume}{6, 4}
+    \end{class}
+    \begin{class}{Host}{6, 6}
+    \end{class}
+    \begin{class}{Cluster}{0, 2}
+    \end{class}
+    \begin{class}{Snapshot}{0, 4}
+    \end{class}
+
+    \composition{Cluster}{pools}{1..*}{Pool}
+    \composition{Pool}{disks}{1..*}{Disk}
+    \composition{Pool}{volumes}{1..*}{Volume}
+    \composition{Volume}{mapping}{*..*}{Host}
+    \composition{Volume}{snapshots}{1..*}{Snapshot}
+\end{tikzpicture}
+
+四面八方，对上导出iSCSI等服务，对下整个各种物理资源，左右对接运维平台和云平台。
+
+整体，集群按两个维度来理解，一是物理资源，二是逻辑资源。
+物理资源包括节点以及节点上的磁盘，逻辑资料包括存储池、目录、卷、快照等。
+
+\section{资源管理}
+
+集群、故障域、节点
+
+存储池、磁盘
+
+\section{Pool}
+
+存储池是集群的物理划分。把物理节点划分为不同的保护域，一个卷的所有数据只出现在一个保护域内。卷可以跨保护域进行复制和迁移。
+
+默认一个，包括所有节点(显式创建，不默认)。
+
+\hl{与文件系统的类比}：存储池相当于磁盘分区，构成一个树，mount到根分区，多个pool构成chunk对象的森林。
+pool包括目录和卷，相当于文件系统包括目录与文件。卷和文件都是逻辑实体，需要跟踪其包含的数据块的详细信息。
+
+从文件系统出发去理解存储系统是一条可行途径。
+
+文件系统：先有分区或磁盘，格式化为文件系统，然后mount到系统的目录树之下。
+所谓格式化成文件系统就是在磁盘上建立文件系统的数据结构，包括superblock、索引结构、日志等。
+
+\hl{嵌套、分形、递归}。
+
+% 保护域是物理节点的划分，存储池是存储介质的划分。每块盘只能出现在一个存储池里。
+
+Pool: 逻辑容器
+
+故障域有粒度之分，如磁盘，节点，机架，机柜，数据中心。
+
+存储池内，要满足故障域规则：一个chunk的不同副本，分布在不同的故障域内。\label{rule:faultset}
+
+在所有的\hl{数据分布（初次分配、再平衡和恢复等）}过程中，都需遵循这些规则。
+
+\begin{tcolorbox}
+
+可以参考ceph的CRUSH实现。bucket和device定义了集群的物理拓扑结构，rule定义了数据存取规则，
+pool上关联rule，从而定义了pool中卷数据的放置规则。设备即OSD，对应一个物理磁盘。
+
+***
+
+存储池可以取代保护域，定义所有对象的存放位置是一个节点集。
+
+***
+
+存储池可以用来实现tier cache。重定向IO到cache pool。
+
+***
+
+统一概念：保护域，存储池，pool。Consistency Group不同于pool，与物理存取无关，
+而是卷的逻辑集合，卷可以来自不同的pool。
+
+\end{tcolorbox}
+
+与存储池有什么同和异？存储池可以看做关联了磁盘的pool，可以看做pool的子类。
+
+% 存储池是disk的集合，与节点无关。但disk所在的节点构成存储池的节点列表，不同存储池的节点可能覆盖。
+
+存储池下，可以创建volume。没有关联磁盘的存储池，不能创建卷。
+
+\hl{chunkid到磁盘物理位置有两级映射：chunk的副本节点列表，节点内chunkid到物理地址的映射}。
+
+在为卷分配chunk的时候，需要确定各个副本的物理存储位置。当前实现是返回不同副本的节点列表。
+如果指定了存储池，就需要在存储池所在的节点范围内进行分配，同时要满足故障域和数据均衡规则。
+
+\begin{tcolorbox}
+移动采集中存储池要求，相比于目前的逻辑pool，更多是一种设计上的退步。
+存储虚拟化的目标，是物理位置无关。我们可以基于逻辑容器，实现基于策略的管理。
+所以，\hl{从实现层面，要保留当前pool的功能，按照系统配置确定pool的类型}。
+但是，存储池关联磁盘，可以实现高速池等按物理特征划分的功能。
+\end{tcolorbox}
+
+% 存储池内，要满足故障域规则(\ref{rule:faultset})
+
+步骤：
+\begin{enumbox}
+\item 创建pool，但此时不能创建pool的元数据chunk，因为还没有绑定磁盘（需要一全局的地方，存储pool名字）
+\item 添加磁盘到pool，并上报给admin节点
+\item 当在pool下面创建卷的时候，前提条件是已准备好磁盘，生成pool元数据chunk(位于同一pool里)。
+\end{enumbox}
+
+pool元数据chunk必须位于自己的存储池内，如果分布在不同的存储池，不满足故障域条件。
+
+pool引导信息可以存在rootable里(用etcd取而代之)。
+
+原来的/的元数据chunk放置在哪儿？还是不再需要，每个pool有独立的树，多个pool构成森林。
+
+规则：存储池包括其下的所有卷和快照的元数据和数据，都必须存在该存储池关联的磁盘上。
+包括原来/system下的内容。
+
+\subsection{lookup}
+
+\begin{compactitem}
+\item 从path到id 拆分path，逐级查找(正向)
+\item 从id到path 遍历pool，找到即退出(反向)
+\end{compactitem}
+
+\subsection{属性}
+
+\begin{enumbox}
+\item 副本数
+\item 故障级
+\item 精简池
+\item 磁盘列表
+\item 复制类型（复制，EC）
+\item 配额
+\item \hl{有足够的故障域，且不同故障域配置一致的资源量}
+\end{enumbox}
+
+相关类：disk、volume
+
+删除操作时，影响到相关类。
+
+\subsection{操作}
+
+\begin{enumbox}
+\item pool create
+\item pool rm
+\item pool info or stat
+\item pool list all
+\item pool add disk
+\item pool remove disk
+\item pool list disk
+\item 扩展（添加磁盘到\hl{已存在的存储池}，该映射关系持久化到本地，同步到admin节点）
+\item 缩容（从存储池中移除磁盘，引发数据重建过程）
+\item 不同存储池之间，卷的复制
+\item 不同存储池之间，卷的迁移，可在线或离线
+\item 存储池级别的统计信息
+\item \hl{自动或手动按磁盘速率进行存储池分级划分}
+\end{enumbox}
+
+\section{Volume}
+
+属性：
+
+操作：
+\begin{compactenum}
+\item rename
+\item resize \info{在线扩容}
+\item mv
+\item copy \change{全量拷贝/增量拷贝} \change{跨存储池拷贝} % change不能出现在box里
+\end{compactenum}
+
+\subsection{属性}
+
+\begin{lstlisting}[language=c,frame=single]
+typedef struct {
+        fileid_t id;
+        uint16_t magic;
+        uint16_t repnum;
+        uint64_t snap_rollback;
+        uint64_t snap_version;
+        uint64_t reference;         //clone reference
+        uint32_t attr;
+        int32_t  priority;
+        uint32_t __pad__[4];
+
+        uint64_t size;
+        uint32_t mode;
+        uint32_t uid;
+        uint32_t gid;
+        uint32_t ctime;
+        uint32_t mtime;
+        uint32_t btime;
+        uint32_t atime;
+} fileinfo_t;
+\end{lstlisting}
+
+卷是ServerSAN核心对象，是pool，snapshot，mapping和cg的中心。
+
+卷的属性记录在L1 chunk的fileinfo段。fileinfo段是vol info区的第一个段。
+
+\subsection{大小}
+
+目前，卷的元数据由两级组成：L1，L2。L1只有一个chunk，每个chunk有8000个槽位。每个槽位指向一个L2 chunk。
+L2 chunk有16000个槽位，每个槽位指向一个raw chunk。所以，最大卷大小约为$122TB = 8000 \times 16000 \times 1MB$。
+
+为了支持更大的卷，需要扩展此结构，把L1扩展到多个chunk。改变会影响到：
+\begin{compactitem}
+\item 加载table1 (加载多个chunk，记录每个chunk的chunkinfo信息)
+\item table1的各项操作
+\item 遍历卷的chunk
+\item 数据恢复过程
+\item migrate
+\item copy
+\item snapshot clone，需要copy L1 chunk
+\item ...
+\end{compactitem}
+
+L1 chunk：vol.xxx.0, vol.xxx.1, vol.xxx.2。其中，vol.xxx.0的chunkinfo记录在pool。
+\hl{vol.xxx.1等chunkinfo记录到vol.xxx.0里info区的第二个块，并需记录其个数}。动态加载。
+
+父：raw和subvol的父chkid为vol.xxx.0，vol.xxx.1的父chkid也为vol.xxx.0。vol.xxx.0的父chkid为所在pool的chkid。
+
+缺页中断：从上到下检查。创建chunk的时候，先检查L1 chunk是否存在，然后检查L2 chunk是否存在。
+不存在，则创建。在以下过程会改变卷的数据结构树：
+\begin{compactitem}
+\item \verb|__pool_proto_mkvol|
+\item \verb|volume_proto_load|
+\item \verb|volume_proto_chunk_pre_write|
+\item \verb|__volume_proto_chunk_allocate|
+\end{compactitem}
+
+\begin{lstlisting}[frame=single]
+lichbd write /iscsi/p1/v1 hello -o 280375465082880
+lichbd cat /iscsi/p1/v1 -o 280375465082880 -l 5
+\end{lstlisting}
+
+chunk allocate开销较大，即要申请磁盘空间，也涉及记录元数据到父节点。
+
+遗留问题：
+\begin{enumbox}
+\item lich.inspect --stat极慢 (统计，load)
+\item 分析内存占用量
+\item clone
+\item recovery
+\item balance
+\item 回收空间
+\end{enumbox}
+
+\subsection{副本数}
+
+\subsection{操作}
+
+\begin{enumbox}
+\item create
+\item rm
+\item ls
+\item info
+\item resize
+\item rename
+\item mv
+\item copy (read/write)
+\item migrate (move all chunk)
+\item duplicate (snapshot-based: clone/flatten)
+\item import
+\item export
+\item mapping
+\item \hl{IO}
+\end{enumbox}
+
+\subsection{create}
+
+\subsection{rm}
+
+显式回收空间
+
+分为两阶段：标记和回收。先把卷移入/system/unlink，有后台异步线程负责回收。
+
+相关源文件：
+\begin{compactitem}
+\item pool\_rmvol.c
+\item rmvol\_bh.c
+\end{compactitem}
+
+\section{Snapshot}
+
+snapshot隶属于卷，无卷则无快照，快照组织成快照树，其中有且只有一个快照是可写快照，即卷的写入点。
+
+基本操作，对IO path的影响。区分数据平面和控制平面。
+
+\subsection{操作}
+
+需要支持的快照操作：
+\begin{enumbox}
+\item create
+\item rm
+\item list
+\item read
+\item rollback
+\item clone(跨卷read)
+\item flatten(存储池迁移和复制，需要实现该接口)
+\item protect/unprotect
+\end{enumbox}
+
+\begin{tabular}{|s|p{0.6cm}|p{0.6cm}|p{0.6cm}|p{0.6cm}| }
+    \hline
+    \rowcolor{lightgray} \multicolumn{5}{|c|} {Snapshot} \\
+    \hline
+    Feature & COW & ROW1 & ROW2 & LSV \\
+    \hline
+    snap tree & N &  & & \\
+    \hline
+    snap create & N &  & & \\
+    \hline
+    snap rm -> gc & N &  & & \\
+    \hline
+    snap rollback & N &  & & \\
+    \hline
+    snap clone -> read & N & & & \\
+    \hline
+    write & N &  & & \\
+    \hline
+    read & & N & & \\
+    \hline
+    space & N &  & & \\
+    \hline
+    consistency group & N &  & & \\
+    \hline
+\end{tabular}
+
+采用COW，ROW或两者的组合形式，各有优缺点。
+
+COW方式的快照，卷有完整的索引结构。别的快照点，只有增量的索引结构和发生更新的数据。
+每个快照，存储的是创建之后，到下一个快照点之间发生更新的所有数据块。所以需要尽量降低发生copy的开销。
+适用于频繁且具有局部性的热点负载场景，固定时间段内，每次copy的开销以及\textcolor{red}{复制集的大小}。
+
+ROW方式下，如果meta不发生COW，新的快照点并无完整的索引结构，读过程需要沿着快照链向上回溯。
+并且，rm，rollback等操作需要合并快照点。
+
+如果发生了COW，索引项和数据项引用关系不再是1:1，而是多对多，需要专门的GC机制。
+但rm，rollback等操作实现起来变得简单。
+
+数据项的粒度，定长或变长，不同的负载，读写性能有不同的影响。
+发生COW的粒度，索引结构管理的粒度决定了数据项的粒度。
+
+IO粒度和数据项粒度的关系，如果IO粒度大于数据项粒度
+
+如果IO粒度小于数据项粒度
+
+这条规则是否永远成立：\textcolor{red}{快照树的任一路径，都需要具有完整的索引结构和数据项集，可以有冗余和共享}。
+
+\subsection{COW}
+
+为了支持快照树，需要分析rollback和读快照的过程。
+
+刚刚revert到某一快照，此后会发生COW吗？
+
+COW，\hl{io size与cow发生的粒度不一样}，如果是小块数据的大量随机写，写放大会非常严重。
+
+\subsection{Create}
+
+卷，clone卷，快照具有相同的索引结构，不同在于fileinfo的attr。
+
+卷和快照的所有chunk，都是私有的，无法通过索引结构有效地定位chunk的位置。
+
+创建快照是相当简单的过程，创建索引结构，设置正确的fileinfo，同时复制xattr。
+卷的snap\_from指向其挂载的快照。\hl{新建快照不包含指向卷的索引结构}。快照头部也不包含其它快照的信息。
+所以，读快照是通过所在卷控制器进行的。
+
+每创建一个快照，快照取得当前卷的snap\_version，卷的snap\_version则更新为当前可用的最小值，snap\_from正确设置。
+
+快照本身不包含\hl{完整的snapshot-tree结构信息}，只是知道其parent。
+
+在写入卷的时候，发生COW过程，被修改的chunk先复制到卷的最近一个快照的私有存储空间里，
+然后在卷上进行in place写。
+
+有两种快照读，一种是读单个快照本身；另一种读快照，\hl{如果快照上没有对应数据，则回溯}。
+如clone卷的快照读行为，即是后者。
+
+所以，卷和快照的元数据项，只有私有数据，没有交叉引用关系。
+
+快照采用独立控制器的方式，快照只保存增量数据，读快照涉及大量的跨卷访问(相同节点、或不同节点)，会影响到性能。
+
+\hrulefill
+
+卷级(version,from,rollback)和chunk级(version)的snap相关属性，就有怎么样的规则？
+
+f.version总是具有最大值，在刚创建snapshot的过程中，f.version=s.version，s表示新建snapshot。
+
+稳定态，一个卷的version,rollback相等，from用来跟踪记录父节点。
+发生rollback时，version,rollback不等。
+
+f.version和c.version用来管理cow和rollback过程。cow完成后，c.version=f.version，rollback完成后，c.version=f.rollback。
+cow和rollback过程，只能发生一次。
+
+rollback时，依然可以进行rw，但须先rollback对应chunk。这与cow过程是相反的。
+cow是chunk从vol流向snapshot。rollback是从snapshot流向vol。
+
+\hrulefill
+
+长时操作的异步处理，以及\hl{操作之间的兼容性}。
+
+ROW采用了快照和卷共用一个底层卷的方式，受底层卷大小的限制较大。
+ROW的卷和快照带有索引结构，故可以交叉引用。简化了rm和rollback等操作。
+
+\hl{qemu和vmware}怎么管理快照的？有哪些限制？
+
+\subsection{Rollback}
+
+rollback，卷为源，以目标快照的内容覆盖源卷的内容。同时，为了不丢失信息，需要提前保存一定的数据。
+需要保存什么数据？沿着快照树的根，到卷的当前快照(所在分支的最后一个快照)，\hl{所有修改过的chunk}。
+
+卷的当前快照：只有在卷的当前快照是叶子节点的时候，才需要保持数据。
+
+读快照的规则：
+\begin{compactenum}
+\item 自身
+\item 下游
+\item 回溯至卷(先回溯至快照与卷upstream first公共父节点，然后下沉到卷)
+\end{compactenum}
+
+前两步是为了读取修改过的chunk，后一步是为了读取所在分支上从来没有修改过的chunk。
+两者合起来，代表快照的数据。
+
+通过fileinfo的snap\_from建立快照树，通过snap\_version为每个快照分配id，通过snap\_rollback指定要回滚的目标快照版本号。
+
+rollback的状态变迁
+
+rollback过程依赖于两个快照路径：
+\begin{compactenum}
+\item root snap list
+\item cross snap list
+\end{compactenum}
+
+
+\subsection{ROW}
+
+% ROW与LSV的不同，在于同一LBA，只对应一个数据项，而不是对应多个版本的数据项。
+% 但这个数据项的引用计数，可以为0，1，或多个。
+
+ROW，快照会产生一个数据项的多个版本。LSV，除了快照之外，一个LBA的覆盖写入也会产生多个版本。
+
+卷和快照，共存于底层lich卷，是否有问题？
+
+元数据的\hl{基本管理单元是page}。按page来组织，每个page unit：chunkid+pageid。
+在ROW的过程中，可以只改变一页到新chunk。而bitmap则发生了COW，copy 1M，改变其中一项。
+(用chunkid+ page bitmap的方式行不通)。\hl{有一种特殊情况，bitmap管理了连续1M的数据，此时chunkid是重复的}。
+如无页级元数据，则需要发生1M的COW。有页级元数据，引入了优化的机会。
+
+bitmap管理1M对应底层1M。管理所需元数据：chunkid+各页的元数据。
+
+snap tree, snap, chunk, page构成四级结构。LSV时，没有chunk那一级（写入位置模式）。
+
+写入模式：顺序写入，需要维护当前写入点。1M模式，需要1M：1M的映射, 而不再需要chunk内页索引。
+引用关系是页级的，写入模式是chunk级的。降低了ROW的写入粒度。
+
+vvol：clone时用，跨卷引用。支持多级clone。clone与snapshot基本一致，不同在于跨卷读取。
+
+写入的过程：会检查每个isref，入为1，则表明该chunk归属于本快照，否则，需要创建新的。
+对L2 bitmap言，发生1M的COW；对LOG言，申请分配1M，同时写入。
+
+cache一致性问题：
+
+session聚合写入：
+
+CC： 页锁，bitmap单元锁，COW锁。\hl{细粒度的锁，无法保护更大粒度锁上的并发操作}，如COW过程，ROW过程，
+IO锁最好是区间锁。bitmap单元的提交操作。
+
+页式管理的局限性：连续的有信息冗余。
+
+空间管理：\hl{逻辑空间和物理空间的关系，物理空间的扩展性}。
+
+\subsection{IO过程}
+
+\begin{itembox}
+\item CC: 范围锁，层次锁
+\item 需要的实际IO次数
+\item 页对齐
+\item 跨chunk边界
+\item 重入分析(数据更新，bitmap更新)
+\end{itembox}
+
+两个并发IO，如果落入一个1M，会访问到同一bitmap单元。
+应先锁定bitmap单元，再锁定IO范围。遵循树状锁协议。
+参考\hl{数据库索引结构上的锁协议}。
+
+\begin{tcolorbox}
+
+假设有新旧两个快照点S1, S2，每个快照点包括meta和data，提炼出的几个引导性问题：
+
+\begin{enumerate}
+    \item 数据块的粒度，page，chunk，extent？
+    \item 每个快照点是否有完整的索引结构？
+    \item 卷（写入点）是否有完整的索引结构？
+    \item 哪一个是写入点？
+    \item meta是否发生COW？
+    \item data是否发生COW？
+    \item 快照操作(create, rm, rollback, clone, flatten, ls, cat, protect/unprotect)的复杂度？
+\end{enumerate}
+
+\end{tcolorbox}
+
+\subsection{ROW2}
+
+\subsection{快照树}
+
+快照树的每个节点，都是一个完整的索引结构。其中一个代表着当前写入点，写入点代表着卷。
+回滚操作会改变当前写入点。
+
+统一一下，卷和快照具有相同的索引结构。
+
+每个快照结构有唯一的ID，是随着创建快照的过程递增的，卷快照/写入点具有最大的snap id。
+LSV log结构记录了每页的snap id。
+
+一颗树的节点，可以分为三类：
+\begin{compactenum}
+\item 根节点
+\item 中间节点（有无分支）
+\item 叶子节点
+\end{compactenum}
+
+\subsection{创建快照}
+
+原有写入点变成只读，创建新的写入点，并复制L1元数据。
+
+\subsection{删除快照}
+
+快照树上不同的节点，需要不同的删除过程。对于叶子节点，直接删除即可，\textcolor{red}{需要回收数据吗}？
+
+回收快照，涉及meta和data两个部分。
+
+不应改变父快照的内容
+保留子节点的共享内容
+
+分两个节点：\hl{标记和回收}。
+
+\subsection{列出快照树}
+
+\subsection{写}
+
+写是ROW的重定向过程，可能发生复制第二层元数据的过程。
+
+如果连续写入，需记录当前的写入点。chunk内数据是逻辑不连续的，或者说，逻辑上连续的在chunk内是随机化了。
+
+如果非连续写入，每页的写入位置计算得到，chunk内数据是逻辑连续的。大范围随机写入的情况下，需要分配很多chunk。
+\textcolor{red}{需大力优化chunk的分配过程}。
+
+pagetable是逻辑连续的，按逻辑空间组织。如果已分配位置，则覆盖写入。如果没有分配位置，如何分配？
+
+逻辑地址怎么映射到物理地址？页式，段页式
+
+\hl{写入位置，有三种分配策略：ROW2，ROW3，LSV}，都是按页粒度管理物理卷空间。
+
+\subsection{回滚}
+
+回滚并不会重用回滚到的快照点，而是相当于把写入点嫁接到目标快照点。写入点本身是一个独立的快照结构。
+
+除了写入点的所有快照点，都处于只读状态，没有任何操作可以改变其状态。
+
+回滚后的写入过程
+
+\subsection{读}
+
+如果不复制元数据，ROW实现的读过程需要回溯快照树，性能不佳。
+如果复制元数据，则每一快照点都具有完整的索引结构，可以做到一次即可定位。
+
+复制元数据，快照和数据具有多对多的引用关系，相当于共享数据块。
+
+读优化： 元数据可以一次定位，但可能碎片化，沿着快照链往上读取。可以通过flatten的过程优化。
+
+\subsection{Clone}
+
+卷和其上的快照位于同一个物理卷内，所以不涉及跨卷读。clone后，会用到跨卷读快照，
+类似于ROW过程，所以，创建和clone过程具有相似性。
+
+cat, protect, unprotect, flatten
+
+\subsection{GC}
+
+GC过程和引用计数。每个记录的is\_ref记录是否写入了数据。可以回收写入点，但无法回收一般快照。
+
+LSV: 逐个扫描每个log。
+
+\subsection{实现}
+
+快照列表信息记录在卷table\_proto的smap和sinfo区，info区的每一项包括name和chkinfo，还包括snap\_attr\_t。
+smap用bit标记该位置是否有效。卷上的所有快照，构成快照树。
+
+每个快照有自己的snap\_version和snap\_from，分别表示自己的版本号和父节点的版本号。
+
+新创建的快照，采用卷当时的版本号和父版本号，创建成功后，更新卷版本号和父版本号，rollback版本号与卷版本号一致。
+
+revert的时候，rollback版本号表示目标快照的版本号，如有autosnap生成，采用卷当时的版本号和父版本号。
+完成后，更新卷的版本号，父版本号和rollback版本号。
+
+卷的每一chunk具有自身的版本号，revert成功后，所有chunk的版本都等于目标快照版本号。
+
+\subsection{rollback}
+
+主要通过4个变量来控制rollback过程：fileinfo(snap\_version)。
+
+/pool1/system/rollback/vol.32.0
+
+\subsection{Bitmap Cache}
+
+要解决的关键问题有：
+\begin{enumbox}
+\item cache一致性
+\item 并发与事务
+\end{enumbox}
+
+问题导向
+\begin{enumbox}
+\item 这是最好的设计/实现吗？
+\item 需要维护什么序？哪些操作可以并发？
+\item chunk的is\_ref与bunit的ref什么关系？
+\item 怎么区分snapshot与clone两种情况？
+\end{enumbox}
+
+chunk的is\_ref表示引用别的快照的L2 bitmap chunk。
+在创建snapshot时，设为1。发生COW后，设为0。
+
+如果chunk的is\_ref == 1，则读出的bunit.ref也等于1。
+(发生COW后)
+如果chunk的is\_ref == 0，则读出的bunit.ref可能有两种值。
+
+在COW后，chunk的is\_ref等于0，对应的所有bunit都等于1。随着卷上发生写操作，对应的bunit也变为0。
+所以两者的含义都是\hl{所指向的对象是否属于卷本身}，用于判断COW与数据写入过程是否需要分配数据块的条件，
+两者都需要持久化。
+
+每个快照对应一个bitmap，用于映射每个数据页的LBA到底层物理地址。
+bitmap分两层：第一层私有，第二层在各个快照之间共享。
+在写的时候，触发COW过程，从父快照copy对应的chunk，然后才能写入。
+
+一个卷的多个快照，只有一个快照是可写的，其它快照都处于Read-only状态。
+所有写的位置，必须是卷本身的数据空间。所以，对任一数据chunk，都是在可写快照时分配的，创建快照后冻结，产生新的写入点。
+
+为了提高bitmap的存取性能，引入bitmap cache，按页组织(可以类比于VFS的page cache，每个inode对应一个radix tree)。
+更新bitmap的粒度是bunit，通常为8B，对应一个底层物理位置，一次io可能对应多个bunit，甚至可能跨越page边界。
+
+\subsection{Read}
+
+\subsection{Write}
+
+IO写的时候，对应的每一个bunit，都存在四种状态：
+\begin{enumbox}
+\item 本地
+\item 没有分配
+\item 指向某快照
+\item 克隆卷，指向克隆卷的源快照
+\end{enumbox}
+
+后三种情况统一处理。
+
+如果是单页更新过程，
+
+如果是多页更新过程，
+
+\section{ConsistencyGroup}
+
+一致性卷组 \change{Consistency Group}
+
+\begin{shadequote}
+
+Consistency Groups could be useful for Data Protection (snapshots, backups) and
+Remote Replication (Mirroring).
+
+The Mirroring support will allow to setup mirroring of multiple volumes in the
+same consistency group (i.e. attaching multiple RBD images to the same journal
+to ensure consistent replay).
+
+There is already an interest to implement this functionality as a part Mirroring feature:
+http://tracker.ceph.com/issues/13295
+
+The snapshot support will allow snapshots of multiple volumes in the same
+consistency group to be taken at the same point-in-time to ensure data
+consistency.
+\end{shadequote}
+
+使用场景：如一个分布式数据库，log写入一个卷，数据写入另一个卷，如何打快照才能不违反应用层的一致性？
+
+LVM的快照，涉及底层多个物理卷。clvm
+
+ceph组内各卷，共用一个journal，性能低、架构不灵活
+
+CG是一个独立实体，创建后为空，可以把一些卷加进来，按组进行快照操作。
+
+\subsection{问题}
+
+\begin{enumbox}
+\item session方式，无commit
+\item 随机IO，小cache，频繁swap，有问题
+\item 如果标记dirty，会出现all dirty的情况
+\item 如果有COW，需要pin住源
+\end{enumbox}
+
+\section{Mapping}
+
+数据隔离/ACL，数据保护
+
+卷对主机的可见性。一个卷只有映射给了某主机，才可以被该主机访问。
+
+\section{迁移}
+
+离线/在线迁移
+
+不改变卷ID。卷ID和chunkid集群内唯一，迁移过程中保持不变。
+
+怎么判断一个卷是离线还是在线？有无访问者。target上的链接数，
+每个卷的volume\_proto都有一个connect\_list。
+
+\begin{lstlisting}[language=bash,frame=single]
+# lich.inspect --connection /iscsi/p1/v1
+\end{lstlisting}
+
+基于快照实现存储池的迁移和复制。相当于clone了新卷，chunkid皆发生变化。
+
+\section{复制}
+
+卷可以建模为状态机，不同状态允许不同的操作，按条件在不同状态之间切换。
+
+\section{精简配置}
+
+\section{数据管理}
+
+恢复、平衡、GC
+
+\section{缓存}
+
+\section{存储分级}
+
+\section{QoS}
+
+\subsection{QoS}
+
+token bucket。IOPS与block size相关，两者乘积等于带宽。
+如果各层发生IO聚合，则在流量守恒的情况下，显示IOPS有所不同。
+
+IOPS必须假定一定的block size。
+
+抽象出AbstractVolume，Volume、Snapshot、Clone都是其子类。
+
+\hl{卷或克隆卷扩容后，快照没有相应扩容，会返回ENOENT，需要填充0}。
+
+\section{IPv6}
+
+\section{EC}
+
+与副本机制在同一架构层面上。
+
+\section{重删}
+
+VDO
+
+\section{压缩}
+
+\section{远程复制}
+
+在iscsi层做？

@@ -1,0 +1,25 @@
+\chapter{NVMe}
+
+\section{NVMe设备}
+
+\begin{lstlisting}
+# 管理NVMe设备：
+lspci | grep Non
+lsblk
+
+echo '0000:04:00.0' > /sys/bus/pci/drivers/nvme/bind
+echo '0000:04:00.0' > /sys/bus/pci/drivers/nvme/unbind
+
+# 支持两种模式: spdk on | off
+# SPDK模式，会卸载NVMe驱动，以PCI号的方式使用
+# 可以kernel bypass，提升性能
+lich.node --start --ttyonly
+\end{lstlisting}
+
+uio\_pci\_generic内核驱动
+
+drivers和devices存在多对多的关系。
+
+\subsection{依赖项}
+
+libnvme，还没有采用spdk，NVMf target采用SPDK。
