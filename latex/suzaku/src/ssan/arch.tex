@@ -24,7 +24,7 @@ RAID分析作为架构驱动力
 \item MULTIPATH
 \end{enumbox}
 
-\section{元数据}
+\section{数据结构}
 
 \subsection{ETCD}
 
@@ -104,9 +104,17 @@ hash ring上有一个节点充当master角色。如何选主，如何保持其�
 
 diskid是全局的，在etcd上有目录。
 
+\subsection{Driver}
+
+diskmd磁盘访问接口，支持libnvme驱动。
+
+需要管理物理内存，如hugepage和memory pool。
+
+NVMe/RDMA需要访问物理内存。
+
 \section{关键过程}
 
-\subsection{分配}
+\subsection{Allocate}
 
 diskmap.c，不宜放入bactl。bactl所有API都带diskid，针对单盘进行。
 
@@ -118,13 +126,15 @@ tier and cache？
 
 负载均衡
 
-\subsection{Driver}
+\subsection{Discard}
 
-diskmd磁盘访问接口，支持libnvme驱动。
+\subsection{Write}
 
-需要管理物理内存，如hugepage和memory pool。
+\subsection{Read}
 
-NVMe/RDMA需要访问物理内存。
+\subsection{Recovery}
+
+\subsection{Balance}
 
 \section{Snapshot}
 
