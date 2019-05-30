@@ -1,0 +1,50 @@
+\chapter{SSAN性能问题}
+
+\section{性能}
+
+\subsection{线程结构}
+
+\begin{enumbox}
+\item 把slow操作从main线程里分离出来，避免堵塞main线程，改进系统的响应能力。
+\item 双进程结构，保证osd意外退出后，按照一定策略进行处理
+\item 后续可横向扩展main线程，以解决系统的单点性能瓶颈。
+\end{enumbox}
+
+\todo{双进程结构}构成监工/工作者结构，保证osd意外退出后，按照一定策略进行处理。
+
+\todo{横向扩展main线程}进行负载均衡，以提升系统的整体调度能力
+
+\subsection{内存分配}
+
+\todo{hugepage和内存池}
+
+\subsection{网络通信}
+
+\begin{enumbox}
+\item 多节点相同命令的并行化，比如修复过程中，primary向所有节点请求数据，若串行则耗时过长
+\item 网络通信异步化（改动较大，优先级较低）
+\end{enumbox}
+
+\todo{并行、异步网络通信}
+
+\subsection{磁盘访问}
+
+\todo{直接管理裸盘}引入管理元数据层。
+
+\subsection{数据组织方式}
+
+\begin{enumbox}
+\item 数据目录组织方式优化
+\item object version
+\end{enumbox}
+
+\section{恢复下的性能}
+
+\subsection{QoS}
+
+已基本实现恢复QoS，控制恢复带宽。
+
+\subsection{异步修复}
+
+\todo{异步修复}磁盘不采用一致性hash，而是采用hash slot机制。
+可参考Redis Cluster Slot、Ceph PG的设计思想，但引入了相当的复杂度。

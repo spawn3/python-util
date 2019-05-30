@@ -1,0 +1,140 @@
+% -*- coding: UTF-8 -*-
+% hello.tex
+
+\documentclass[UTF8,oneside]{ctexbook}
+
+% \usepackage{xeCJK}
+\usepackage[utf8]{inputenc}
+
+% load paralist before enumitem
+\usepackage{paralist}
+
+\usepackage{hyperref}
+\hypersetup{pdftex,colorlinks=true,allcolors=blue}
+\usepackage{hypcap}
+
+\usepackage{color}
+\usepackage[usenames, dvipsnames, svgnames, table]{xcolor}
+% \pagecolor{gray}
+
+\usepackage{makeidx}
+\makeindex
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{fancybox}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+
+\usepackage{indentfirst}
+
+\newenvironment{enumbox}[0]{
+    \begin{tcolorbox}
+    \begin{compactenum}
+} {
+    \end{compactenum}
+    \end{tcolorbox}
+}
+
+\newenvironment{itembox}[0]{
+    \begin{tcolorbox}
+    \begin{compactitem}
+} {
+    \end{compactitem}
+    \end{tcolorbox}
+}
+
+% table
+\setlength{\arrayrulewidth}{1pt}
+\setlength{\tabcolsep}{16pt}
+\renewcommand{\arraystretch}{2.5}
+\newcolumntype{s}{>{\columncolor[HTML]{AAACED}} p{3cm}}
+
+\arrayrulecolor[HTML]{DB5800}
+
+\usepackage{tikz,mathpazo}
+\usetikzlibrary{positioning, fit, matrix, shapes, arrows, chains, trees, arrows.meta}
+
+% \bibliographystyle{plain}
+% \bibliography{math}
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+
+% 摘录
+\usepackage{verbatim}
+\usepackage{libertine}
+\usepackage{graphicx}
+\usepackage{framed}
+
+\newcommand*\openquote{\makebox(25,-22){\scalebox{5}{``}}}
+\newcommand*\closequote{\makebox(25,-22){\scalebox{5}{''}}}
+\colorlet{shadecolor}{Azure}
+
+\makeatletter
+\newif\if@right
+\def\shadequote{\@righttrue\shadequote@i}
+\def\shadequote@i{\begin{snugshade}\begin{quote}\openquote}
+\def\endshadequote{%
+\if@right\hfill\fi\closequote\end{quote}\end{snugshade}}
+\@namedef{shadequote*}{\@rightfalse\shadequote@i}
+\@namedef{endshadequote*}{\endshadequote}
+\makeatother
+
+\usepackage[normalem]{ulem}
+
+\newcommand{\hl}{\bgroup\markoverwith
+  {\textcolor{yellow}{\rule[-.5ex]{2pt}{2.5ex}}}\ULon}
+
+%\usepackage{soul}
+
+%\newcommand{\hlc}[2][yellow]{{%
+%    \colorlet{foo}{#1}%
+%    \sethlcolor{foo}\hl{#2}}%
+%}
+
+% todonode
+\usepackage{lipsum}                     % Dummytext
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+% 
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\newcommandx{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+\newcommandx{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
+\newcommandx{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+\newcommandx{\thiswillnotshow}[2][1=]{\todo[disable,#1]{#2}}
+%
+
+\usepackage[simplified]{pgf-umlcd}
+
+\title{SUZAKU架构文档}
+\author{董冠军}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\listoftodos[Notes]
+
+\part{架构}
+
+\include{ssan/arch}
+%\include{ssan/consistency}
+%\include{ssan/perf}
+
+\end{document}
