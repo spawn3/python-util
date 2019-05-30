@@ -1,64 +1,49 @@
 \chapter{架构}
 
-\section{ROADMAP}
+\section{RAID分析}
 
-道法自然
+RAID分析作为架构驱动力
 
-奥卡姆剃刀
-
-PM的质量三角
-
-行百里者半九十
-
-群起而攻之
-
-滚雪球，定义MVP：
+新设计解决了什么老问题？
 \begin{enumbox}
-\item \hl{定义存储引擎}，用各项特性对设计进行压力测试
-\item CRC分析，明确职责，划分模块、定义接口
-\item 尽快验证性能、一致性和可靠性
-\item 完善自动化测试
+\item 单卷的水平扩展问题
+\item IO path上的数据转发问题
+\item allocate性能低，影响精简配置和COW性能
+\item thread local影响CPU利用率
+\item 灵活的MM
+\item 每个节点导出core、disk等资源，进行全局调度
 \item ***
-\item Storage Driver
-\item MM
+\item 底层chunk对象依然不是跨卷的
+\item 单卷大小的限制
+\item chkinfo是动态大小的，副本数、EC配置
 \item ***
-\item EC
-\item Snapshot
-\item Consistency Group
+\item table1/table2实现过于复杂的问题
+\item disk md and slots
+\item coroutine难于调试
+\item ***
+\item MULTIPATH
 \end{enumbox}
 
-\section{测试}
+\section{元数据}
 
-驱动
+\subsection{ETCD}
 
-网络
+\subsection{卷的元数据}
 
-perf方式
+两层元数据，etcd指向顶层对象。每个对象属于一个卷，
+因为不是一般的对象系统，\hl{在快照的情况下，无法直接共享}。
 
-跟踪每个版本的性能，每个版本都有记录
+索引组织方式，类似于B+ tree，更简单。
 
-先验证TCP，测试iscsi、NVMf，导出卷测试。
-
-RDMA
-
-\section{架构设计}
+\section{模块}
 
 分布式系统架构通常包括几个部分：client、mds、cds。分别对应什么？
-
-vss包括4个range，range包括4个pa，pa包括固定数目的chunk。pa和chunk都是4M大小。
-vss是否必要，还是增加了设计复杂度？
-
-token是向range ctl获取的，粒度为chunk。range ctl上每个chunk维护有token计数器。
-
-token里包含了每个副本的位置信息，这是向mds请求得到的。
-
-client并不与mds直接通信。分离fr和mds为两个进程，一是可以指定不同的core；二，便于debug。
-
-diskid是全局的，在etcd上有目录。
-
 \begin{center}
-\includegraphics{../imgs/token.png}
+\includegraphics[width=11cm]{../imgs/modules.png}
 \end{center}
+
+target到bactl，有两条路径，视是否通过range ctl而定。如果不通过range ctl(rangectl bypass)，数据流可直达后端存储，
+实现控制流和数据流分流的目的。同时降低了转发成本。
 
 问题集：
 \begin{enumbox}
@@ -70,7 +55,25 @@ diskid是全局的，在etcd上有目录。
 \item 副本一致性是如何实现的？
 \end{enumbox}
 
+\subsection{FRCTL}
+
+target如何与分布式卷相连？
+
+vss包括4个range，range包括4个pa，pa包括固定数目的chunk。pa和chunk都是4M大小。
+\todo{vss是否必要}vss是否必要，还是增加了设计复杂度？
+
+token是向range ctl获取的，粒度为chunk。range ctl上每个chunk维护有token计数器。
+
+token里包含了每个副本的位置信息，这是向mds请求得到的。
+
+client并不与mds直接通信。分离fr和mds为两个进程，一是可以指定不同的core；二，便于debug。
+
+\begin{center}
+\includegraphics{../imgs/token.png}
+\end{center}
+
 range ctl和mds都在hash ring上。都采用了hash机制来定位目标节点。
+所以\hl{有两个hash ring：range ctl和mds}。两个ring都通过mds master来维护。
 ring的节点结构是什么？node and core？
 \begin{center}
 \includegraphics[width=11cm]{../imgs/chunk-location.png}
@@ -78,26 +81,42 @@ ring的节点结构是什么？node and core？
 
 partition是range ctl和mdctl共用模块。range ctl目前归属frctl。
 
-hash ring上有一个节点充当master角色。如何选主，如何保持其唯一性？
-通过etcd lock实现。
-
-lease机制目前没用，如果需要把range ctl放置到session所在的位置，
-可以选用lease机制，而不用dht机制。
+lease机制目前没用，如果需要把range ctl放置到session所在的位置(一个volume的所有range都在一个节点上？)，
+可以选用lease机制，而不用dht机制。怎么理解session？
 
 一旦ring结构发生变化，会有什么影响？SSAN通过epoch来管理ring结构的变化。
-ring lock有什么用？
 
 ring上节点负载均匀性如何？
 
+ring lock有什么用？在mds master上维护状态，处理ring发生变更的情况。
+是否可通过引入epoch实现同样的功能？
+
+GFM？解决全局同一视图的问题。
+
 如何识别和处理stale消息？
 
-\section{BACTL}
+\subsection{MDCTL}
+
+hash ring上有一个节点充当master角色。如何选主，如何保持其唯一性？
+通过etcd lock实现。
+
+\subsection{BACTL}
+
+diskid是全局的，在etcd上有目录。
+
+\section{关键过程}
 
 \subsection{分配}
 
 diskmap.c，不宜放入bactl。bactl所有API都带diskid，针对单盘进行。
 
-数据分布的均匀性、负载均衡
+如何管理diskmap的版本呢？
+
+\hl{数据分布的均匀性}: 节点和磁盘两种粒度
+
+tier and cache？
+
+负载均衡
 
 \subsection{Driver}
 
