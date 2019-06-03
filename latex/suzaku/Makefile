@@ -1,7 +1,10 @@
 all:
 	cd src && xelatex main.tex && mv -f main.pdf ../suzaku.pdf
 
-r: r5
+r: arch
+
+arch:
+	vim src/ssan/arch.tex
 
 r1:
 	vim src/history/2019/01.tex

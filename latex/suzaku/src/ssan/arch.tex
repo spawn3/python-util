@@ -4,36 +4,37 @@
 
 RAID分析作为架构驱动力
 
+假设和信念
+\begin{enumbox}
+\item 云是新常态
+\item 数据资产是战略资源
+\item 全闪是大势所趋
+\end{enumbox}
+
 新设计解决了什么老问题？
 \begin{enumbox}
 \item 单卷的水平扩展问题
 \item IO path上的数据转发问题
 \item allocate性能低，影响精简配置和COW性能
-\item thread local影响CPU利用率
+\item 每个节点导出core、disk等资源，进行全局调度(均衡)
 \item 灵活的MM
-\item 每个节点导出core、disk等资源，进行全局调度
+\item thread local影响CPU利用率
 \item ***
-\item 底层chunk对象依然不是跨卷的
-\item 单卷大小的限制
+\item 重新调整数据布局
+\item 单卷大小的限制(支持大卷)
 \item chkinfo是动态大小的，副本数、EC配置
+\item 底层chunk对象依然不是跨卷的
+\item ***
+\item COW: volume和snapshot共享对象
 \item ***
 \item table1/table2实现过于复杂的问题
 \item disk md and slots
 \item coroutine难于调试
 \item ***
+\item 多网络
 \item MULTIPATH
+\item IPv6
 \end{enumbox}
-
-\section{数据结构}
-
-\subsection{ETCD}
-
-\subsection{卷的元数据}
-
-两层元数据，etcd指向顶层对象。每个对象属于一个卷，
-因为不是一般的对象系统，\hl{在快照的情况下，无法直接共享}。
-
-索引组织方式，类似于B+ tree，更简单。
 
 \section{模块}
 
@@ -51,8 +52,8 @@ target到bactl，有两条路径，视是否通过range ctl而定。如果不通
 \item vss是否必要？
 \item ***
 \item io路径是什么？
-\item IO和Recovery之间如何同步？
 \item 副本一致性是如何实现的？
+\item IO和Recovery之间如何同步？
 \end{enumbox}
 
 \subsection{FRCTL}
@@ -112,11 +113,30 @@ diskmd磁盘访问接口，支持libnvme驱动。
 
 NVMe/RDMA需要访问物理内存。
 
-\section{关键过程}
+\section{资源}
 
-\subsection{Allocate}
+从\hl{资源的生命周期模型}开始思考。资源包括：\hl{集群、节点、core、磁盘、pool、volume、snapshot}等，以及内部资源。
+
+ERD
+
+\subsection{Cluster}
+
+\subsection{Node}
+
+Node是Process、Core、Disk等资源的合集。利用Core的方式是个亮点。
+
+增删节点是重大事件
+
+\subsection{Disk}
+
+Disk导出，分配过程可以进行全局调度。
+
+调度器位于md ctl。md ctl负责管理chkid到disk id的映射关系。
+\todo{diskid类型}diskid采用16bit整数是否太小？
 
 diskmap.c，不宜放入bactl。bactl所有API都带diskid，针对单盘进行。
+
+怎么做到每个副本属于不同的节点的呢？
 
 如何管理diskmap的版本呢？
 
@@ -126,18 +146,36 @@ tier and cache？
 
 负载均衡
 
-\subsection{Discard}
+\subsection{Pool}
 
-\subsection{Write}
+\subsection{Volume}
 
-\subsection{Read}
+\begin{enumbox}
+\item TP
+\item Recovery
+\item Balance
+\item QoS
+\item ***
+\item EC
+\item Dedup
+\item Compress
+\item ***
+\item RC
+\end{enumbox}
 
-\subsection{Recovery}
+\subsection{Snapshot}
 
-\subsection{Balance}
+如何共享底层对象？
 
-\section{Snapshot}
+consistency group
 
-\section{Schedule}
+\section{数据}
 
-不能支持嵌套task，用pre yield变量来控制。
+\subsection{ETCD}
+
+\subsection{卷的元数据}
+
+两层元数据，etcd指向顶层对象。每个对象属于一个卷，
+因为不是一般的对象系统，\hl{在快照的情况下，无法直接共享}。
+
+索引组织方式，类似于B+ tree，更简单。
