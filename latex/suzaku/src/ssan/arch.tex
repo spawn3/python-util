@@ -169,6 +169,41 @@ tier and cache？
 
 consistency group
 
+分析各种操作的复杂度，包括空间和时间。
+
+\hrulefill
+
+平安科技：可写快照
+
+与COW平列实现ROW？
+
+快照占据底层volume空间共享？
+
+COW的问题
+\begin{enumbox}
+\item 影响写性能
+\item Rollback慢
+\item clone卷慢，scan snap tree。snapshot也可执行flatten
+\end{enumbox}
+
+snap头包含什么指针？
+
+快照卷与物理卷什么对应关系，
+
+映射表的管理粒度，是chunk还是page？范围，是全局还是私有？
+
+COW一次读，两次写
+
+ROW一次读，一次写
+
+\hrulefill
+
+SSAN的snapshot实现。
+
+ROW，两层元数据？
+
+vol id发生变化，凡是依赖于vol id的都需要进行适配。
+
 \section{数据}
 
 \subsection{ETCD}
@@ -177,5 +212,3 @@ consistency group
 
 两层元数据，etcd指向顶层对象。每个对象属于一个卷，
 因为不是一般的对象系统，\hl{在快照的情况下，无法直接共享}。
-
-索引组织方式，类似于B+ tree，更简单。
