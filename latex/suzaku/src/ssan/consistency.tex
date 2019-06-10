@@ -1,4 +1,4 @@
-\chapter{SSAN一致性问题}
+\chapter{一致性}
 
 \section{原理}
 
@@ -21,6 +21,17 @@
 \item EC的磁盘故障
 \item 副本
 \end{enumbox}
+
+\section{副本一致性}
+
+现象：观察到恢复完成后，有时vdi对象并不一致。
+
+\todo{副本一致性}目前副本的一致性实现，机制上恐有问题。
+恢复的选择步骤，各个副本独立运行选择过程，所依据的并非该对象各个副本的全局信息，而是相当局部的信息。
+并不能保证一定选择到正确副本。
+
+需要参考EC一致性的机制，选出primary协调IO和recovery活动。
+副本的选择步骤相对简单：可用的最大版本的副本，以之为权威副本，覆盖其余。
 
 \section{EC一致性}
 
@@ -51,8 +62,6 @@ IO控制器是gateway，SSAN原始实现无恢复控制器，后针对任一对�
 磁盘故障时，因为不升级epoch，所以需要特别处理，\hl{校正对象的磁盘位置，但不需要link了}。
 需要保证过程的原子性。
 
-\includegraphics[width=11cm]{../imgs/object-dir.png}
-
 维护磁盘对象结构的内存cache，在其上面提供API，合并stale cache和object list cache。
 需要实现的API包括：
 \begin{enumbox}
@@ -63,8 +72,6 @@ IO控制器是gateway，SSAN原始实现无恢复控制器，后针对任一对�
 \end{enumbox}
 
 \subsection{恢复实例}
-
-\includegraphics[width=11cm]{../imgs/recovery-fsm.png}
 
 恢复实例可以看作有限状态机。在恢复期间，SSAN进程运行一个恢复实例。
 如果有新的故障，则执行上下文切换，切换到下一恢复实例。需要保证切换恢复实例过程的正确性。
@@ -156,27 +163,12 @@ retry机制的使用需要具体分析，内部过程慎用retry，避免堵塞m
 
 文件句柄数量控制，由最大1024改为1048576。直接在SSAN进程内设定。
 
-\subsection{unlikely使用不当}
-
-\includegraphics[width=11cm]{../imgs/unlikely.png}
-
 \subsection{scli cluster check的OOM现象}
 
 因为check过程相对低效，导致等待check的队列大量积压，消耗大量内存，引起OOM。
 故引入QoS机制，限制队列长度，减少内存消耗。
 
 \subsection{日志缓冲区设定过小，导致日志丢失}
-
-\section{副本一致性}
-
-现象：观察到恢复完成后，有时vdi对象并不一致。
-
-\todo{副本一致性}目前副本的一致性实现，机制上恐有问题。
-恢复的选择步骤，各个副本独立运行选择过程，所依据的并非该对象各个副本的全局信息，而是相当局部的信息。
-并不能保证一定选择到正确副本。
-
-需要参考EC一致性的机制，选出primary协调IO和recovery活动。
-副本的选择步骤相对简单：可用的最大版本的副本，以之为权威副本，覆盖其余。
 
 \section{小结}
 

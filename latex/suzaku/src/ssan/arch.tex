@@ -36,6 +36,108 @@ RAID分析作为架构驱动力
 \item IPv6
 \end{enumbox}
 
+\section{资源}
+
+从\hl{资源的生命周期模型}开始思考。资源包括：\hl{集群、节点、core、磁盘、pool、volume、snapshot}等，以及内部资源。
+
+ERD
+
+\subsection{Cluster}
+
+\subsection{Pool}
+
+Pool是对磁盘的横向物理划分。
+
+\subsection{Node}
+
+Node是Process、Core、Disk等资源的合集。利用Core的方式是个亮点。
+
+增删节点是重大事件
+
+\subsection{Disk}
+
+Disk导出，分配过程可以进行全局调度。
+
+调度器位于md ctl。md ctl负责管理chkid到disk id的映射关系。
+\todo{diskid类型}diskid采用16bit整数是否太小？
+
+diskmap.c，不宜放入bactl。bactl所有API都带diskid，针对单盘进行。
+
+怎么做到每个副本属于不同的节点的呢？
+
+如何管理diskmap的版本呢？
+
+\hl{数据分布的均匀性}: 节点和磁盘两种粒度
+
+tier and cache？
+
+负载均衡
+
+\subsection{Volume}
+
+\begin{enumbox}
+\item TP
+\item Recovery
+\item Balance
+\item QoS
+\item ***
+\item EC
+\item Dedup
+\item Compress
+\item ***
+\item RC
+\end{enumbox}
+
+\subsection{Snapshot}
+
+分析各种操作的复杂度，包括空间和时间。
+
+\hrulefill
+
+COW的问题
+\begin{enumbox}
+\item 影响写性能
+\item Rollback慢
+\item clone卷慢，scan snap tree。snapshot也可执行flatten
+\end{enumbox}
+
+snap头包含什么指针？
+
+映射表的管理粒度，是chunk还是page？范围，是全局还是私有？
+
+如何共享底层对象？
+
+COW一次读，两次写
+
+ROW一次读，一次写
+
+ROW，两层元数据？
+
+\hrulefill
+
+SSAN的snapshot实现。
+
+consistency group
+
+\section{数据}
+
+\subsection{ETCD}
+
+\subsection{卷的元数据}
+
+两层元数据，etcd指向顶层对象。每个对象属于一个卷，
+因为不是一般的对象系统，\hl{在快照的情况下，无法直接共享}。
+
+\begin{center}
+\includegraphics[width=11cm]{../imgs/volume-addressspace.png}
+\end{center}
+
+vss包括4个range，range包括4个pa，pa包括固定数目的chunk。pa和chunk都是4M大小。
+\todo{vss是否必要}vss是否必要，还是增加了设计复杂度？
+
+采用两层元数据，第一层有一个PA对象，记录指向第二层PA对象；
+第二层的PA对象按需分配，记录指向卷地址空间chunk对象。由此可推算最大卷的大小。
+
 \section{模块}
 
 分布式系统架构通常包括几个部分：client、mds、cds。分别对应什么？
@@ -59,9 +161,6 @@ target到bactl，有两条路径，视是否通过range ctl而定。如果不通
 \subsection{FRCTL}
 
 target如何与分布式卷相连？
-
-vss包括4个range，range包括4个pa，pa包括固定数目的chunk。pa和chunk都是4M大小。
-\todo{vss是否必要}vss是否必要，还是增加了设计复杂度？
 
 token是向range ctl获取的，粒度为chunk。range ctl上每个chunk维护有token计数器。
 
@@ -112,103 +211,3 @@ diskmd磁盘访问接口，支持libnvme驱动。
 需要管理物理内存，如hugepage和memory pool。
 
 NVMe/RDMA需要访问物理内存。
-
-\section{资源}
-
-从\hl{资源的生命周期模型}开始思考。资源包括：\hl{集群、节点、core、磁盘、pool、volume、snapshot}等，以及内部资源。
-
-ERD
-
-\subsection{Cluster}
-
-\subsection{Node}
-
-Node是Process、Core、Disk等资源的合集。利用Core的方式是个亮点。
-
-增删节点是重大事件
-
-\subsection{Disk}
-
-Disk导出，分配过程可以进行全局调度。
-
-调度器位于md ctl。md ctl负责管理chkid到disk id的映射关系。
-\todo{diskid类型}diskid采用16bit整数是否太小？
-
-diskmap.c，不宜放入bactl。bactl所有API都带diskid，针对单盘进行。
-
-怎么做到每个副本属于不同的节点的呢？
-
-如何管理diskmap的版本呢？
-
-\hl{数据分布的均匀性}: 节点和磁盘两种粒度
-
-tier and cache？
-
-负载均衡
-
-\subsection{Pool}
-
-\subsection{Volume}
-
-\begin{enumbox}
-\item TP
-\item Recovery
-\item Balance
-\item QoS
-\item ***
-\item EC
-\item Dedup
-\item Compress
-\item ***
-\item RC
-\end{enumbox}
-
-\subsection{Snapshot}
-
-如何共享底层对象？
-
-consistency group
-
-分析各种操作的复杂度，包括空间和时间。
-
-\hrulefill
-
-平安科技：可写快照
-
-与COW平列实现ROW？
-
-快照占据底层volume空间共享？
-
-COW的问题
-\begin{enumbox}
-\item 影响写性能
-\item Rollback慢
-\item clone卷慢，scan snap tree。snapshot也可执行flatten
-\end{enumbox}
-
-snap头包含什么指针？
-
-快照卷与物理卷什么对应关系，
-
-映射表的管理粒度，是chunk还是page？范围，是全局还是私有？
-
-COW一次读，两次写
-
-ROW一次读，一次写
-
-\hrulefill
-
-SSAN的snapshot实现。
-
-ROW，两层元数据？
-
-vol id发生变化，凡是依赖于vol id的都需要进行适配。
-
-\section{数据}
-
-\subsection{ETCD}
-
-\subsection{卷的元数据}
-
-两层元数据，etcd指向顶层对象。每个对象属于一个卷，
-因为不是一般的对象系统，\hl{在快照的情况下，无法直接共享}。
