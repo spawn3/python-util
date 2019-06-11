@@ -8,7 +8,7 @@
 
 卷的类型
 \begin{center}
-\includegraphics[width=11cm]{../imgs/volume-type.png}
+\includegraphics[width=10cm]{../imgs/volume-type.png}
 \end{center}
 
 \section{ROW}
@@ -39,15 +39,24 @@ ROW设计问题
 \subsection{create}
 
 \begin{center}
-\includegraphics[height=11cm]{../imgs/row-snapshot.png}
+\includegraphics[height=10cm]{../imgs/row-snapshot.png}
 \end{center}
 
 如果发生卷ID变化，上层应用需要重新打开卷，影响较大。
 
+用户通过命令行创建快照，卷的描述符应有快照方面的信息。
+
+创建快照是通过哪个leader执行的？
+
+从leader方面看，client端与rangectl都需要快照树的结构信息，怎么在多个节点之间进行同步？
+加入version，每个holder维护该属性，消息中也携带该属性，如果发现过期，则做相应处理。
+
+如果有多个client端，如何一一通知到呢？
+
 \subsection{delete}
 
 \begin{center}
-\includegraphics[height=11cm]{../imgs/snaptree.png}
+\includegraphics[height=10cm]{../imgs/snaptree.png}
 \end{center}
 
 快照包含有增量数据，除了叶子快照，不能直接删除。
@@ -69,11 +78,11 @@ ROW设计问题
 \end{enumbox}
 
 \begin{center}
-\includegraphics[width=11cm]{../imgs/snap-delete-leaf.png}
+\includegraphics[width=10cm]{../imgs/snap-delete-leaf.png}
 \end{center}
 
 \begin{center}
-\includegraphics[width=11cm]{../imgs/snap-delete-non-leaf.png}
+\includegraphics[width=10cm]{../imgs/snap-delete-non-leaf.png}
 \end{center}
 
 
@@ -94,11 +103,11 @@ ROW设计问题
 读取snapshot的内容。读取卷和快照是同一个过程。
 
 \begin{center}
-\includegraphics[width=11cm]{../imgs/clone-write.png}
+\includegraphics[width=10cm]{../imgs/clone-write.png}
 \end{center}
 
 \begin{center}
-\includegraphics[width=11cm]{../imgs/clone-read.png}
+\includegraphics[width=10cm]{../imgs/clone-read.png}
 \end{center}
 
 \subsection{flatten}
@@ -115,30 +124,56 @@ ROW设计问题
 
 \subsection{Volume Allocator}
 
+封装底层物理卷的访问接口。可以运行在任意backing store上，如file、LUN。
+
+特性：
+\begin{enumbox}
+\item 引入资源池
+\end{enumbox}
+
+\subsection{引入VolumeCtl}
+
+创建、删除等快照操作通过VolumeCtl进行。
+
+\hl{创建和删除快照操作是卷级操作}。如快照树结构发生变化，当如何？
+LICH中快照树的变化和访问都是通过卷控做得，所以没有一致性问题。
+suzaku中client端充当卷控角色，在多活的情况下，有什么影响？
+
+% 因为快照是只读的，是否可以简化实现？
+
 \subsection{快照树}
 
-相关信息持久化到ETCD上。
+一个卷的卷和所有快照构成单根树结构。相关信息持久化到ETCD上。包含指向快照元数据的\hl{chkidx列表}。
 
-一个卷的卷和所有快照构成单根树结构。
+% 写IO涉及\hl{当前快照}，读IO可能涉及多个快照。
+% 快照读与读IO一致，可能涉及多个快照。
 
-写IO涉及\hl{当前快照}，读IO可能涉及多个快照。
-
-快照读与读IO一致，可能涉及多个快照。
-
-IO的写和读都由client/target进行？在get token里返回物理地址。返回一个或多个token对象？
+% IO的写和读都由client/target进行？在get token里返回物理地址。返回一个或多个token对象？
 
 \subsection{单个快照}
 
-包括元数据和用户数据。元数据映射表在哪里维护？与\hl{chunk-副本元数据}一样维护？
-找get token里返回物理地址。client直接读写该地址。逻辑上连续，物理上未必连续。
+\begin{center}
+\includegraphics[width=10cm]{../imgs/snapshot-head.png}
+\end{center}
 
-每个range ctl也维护卷的所有快照的对应范围？按snap name进行索引？
+元数据映射表在哪里维护？与\hl{chunk-副本元数据}一样维护？
+% 找get token里返回物理地址。client直接读写该地址。逻辑上连续，物理上未必连续。
 
-当snaptree结构发生变化时，rangectl重新加载？
+% 每个range ctl也维护卷的所有快照的对应范围？按snap name进行索引？
+% 当snaptree结构发生变化时，rangectl重新加载？
+% 多活的场景下，会有什么问题吗？
 
-多活的场景下，会有什么问题吗？
+如何表示页的物理地址：
+\begin{center}
+\includegraphics[width=10cm]{../imgs/row-phy-page.png}
+\end{center}
 
-元数据格式
+\subsection{地址映射}
+
+加入v2p过程：
+\begin{center}
+\includegraphics[width=10cm]{../imgs/data-path.png}
+\end{center}
 
 \section{参考产品}
 

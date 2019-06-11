@@ -15,14 +15,15 @@ RAID分析作为架构驱动力
 \begin{enumbox}
 \item 单卷的水平扩展问题
 \item IO path上的数据转发问题
+\item 单卷大小的限制(支持大卷)
+\item chkinfo是动态大小的，副本数、EC配置
+\item ***
 \item allocate性能低，影响精简配置和COW性能
 \item 每个节点导出core、disk等资源，进行全局调度(均衡)
 \item 灵活的MM
 \item thread local影响CPU利用率
 \item ***
 \item 重新调整数据布局
-\item 单卷大小的限制(支持大卷)
-\item chkinfo是动态大小的，副本数、EC配置
 \item 底层chunk对象依然不是跨卷的
 \item ***
 \item COW: volume和snapshot共享对象
@@ -36,7 +37,32 @@ RAID分析作为架构驱动力
 \item IPv6
 \end{enumbox}
 
-\section{资源}
+\section{架构演进}
+
+\subsection{支持大卷}
+
+\subsection{单卷的水平扩展}
+
+\subsection{IO路径的数据转发}
+
+\subsection{全局负载均衡}
+
+\subsection{更多信息记录在ETCD上}
+
+更灵活，突破结构约束。
+
+\begin{enumbox}
+\item 卷的快照树
+\item xattr
+\end{enumbox}
+
+\subsection{支持EC}
+
+\section{数据模型}
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/cluster-virt.png}
+\end{center}
 
 从\hl{资源的生命周期模型}开始思考。资源包括：\hl{集群、节点、core、磁盘、pool、volume、snapshot}等，以及内部资源。
 
@@ -75,6 +101,26 @@ tier and cache？
 
 \subsection{Volume}
 
+\begin{center}
+\includegraphics[width=10cm]{../imgs/volume-addressspace.png}
+\end{center}
+
+vss包括4个range，range包括4个pa，pa包括固定数目的chunk。pa和chunk都是4M大小。
+\todo{vss是否必要}vss是否必要，还是增加了设计复杂度？
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/pagetable.jpeg}
+\end{center}
+
+采用两层元数据，第一层有一个PA对象，记录指向第二层PA对象；
+第二层的PA对象按需分配，记录指向卷地址空间chunk对象。由此可推算最大卷的大小。
+
+两层元数据，etcd指向顶层对象。每个对象属于一个卷，
+因为不是一般的对象系统，\hl{在快照的情况下，无法直接共享}。
+
+\hrulefill
+
+功能
 \begin{enumbox}
 \item TP
 \item Recovery
@@ -119,34 +165,19 @@ SSAN的snapshot实现。
 
 consistency group
 
-\section{数据}
-
-\subsection{ETCD}
-
-\subsection{卷的元数据}
-
-两层元数据，etcd指向顶层对象。每个对象属于一个卷，
-因为不是一般的对象系统，\hl{在快照的情况下，无法直接共享}。
-
-\begin{center}
-\includegraphics[width=11cm]{../imgs/volume-addressspace.png}
-\end{center}
-
-vss包括4个range，range包括4个pa，pa包括固定数目的chunk。pa和chunk都是4M大小。
-\todo{vss是否必要}vss是否必要，还是增加了设计复杂度？
-
-采用两层元数据，第一层有一个PA对象，记录指向第二层PA对象；
-第二层的PA对象按需分配，记录指向卷地址空间chunk对象。由此可推算最大卷的大小。
-
 \section{模块}
 
 分布式系统架构通常包括几个部分：client、mds、cds。分别对应什么？
 \begin{center}
-\includegraphics[width=11cm]{../imgs/modules.png}
+\includegraphics[width=10cm]{../imgs/modules.png}
 \end{center}
 
 target到bactl，有两条路径，视是否通过range ctl而定。如果不通过range ctl(rangectl bypass)，数据流可直达后端存储，
 实现控制流和数据流分流的目的。同时降低了转发成本。
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/message-flow.png}
+\end{center}
 
 问题集：
 \begin{enumbox}
@@ -176,7 +207,7 @@ range ctl和mds都在hash ring上。都采用了hash机制来定位目标节点�
 所以\hl{有两个hash ring：range ctl和mds}。两个ring都通过mds master来维护。
 ring的节点结构是什么？node and core？
 \begin{center}
-\includegraphics[width=11cm]{../imgs/chunk-location.png}
+\includegraphics[width=10cm]{../imgs/chunk-location.png}
 \end{center}
 
 partition是range ctl和mdctl共用模块。range ctl目前归属frctl。
