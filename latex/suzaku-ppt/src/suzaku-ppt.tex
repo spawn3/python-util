@@ -33,6 +33,8 @@
 \usepackage{libertine}
 \usepackage{graphicx}
 \usepackage{framed}
+\usepackage{pifont}
+\usepackage[bottom]{footmisc}
 
 \usepackage{makeidx}
 \makeindex
@@ -52,10 +54,10 @@
     \end{frame}
 }
 
-\newenvironment{myeasylist}{
+\newenvironment{myeasylist}[1]{
     \Activate
     \begin{tcolorbox}
-    \begin{easylist}[itemize]
+    \begin{easylist}[#1]
 } {
     \end{easylist}
     \end{tcolorbox}
@@ -89,21 +91,21 @@
 
 \begin{frame}[fragile]
     \frametitle{FusionStor的架构特点}
-    \begin{myeasylist}
-        & 全用户态
+    \begin{myeasylist}{enumerate}
         & 元数据（非DHT)
-        & 编程模型：协程
+        & 全用户态
         & core绑定 (PMD: polling mode driven)
         & Hugepage-based的内存管理
         & 直接访问裸盘(libaio/libnvme + KV)
         & 异步通信(TCP/RDMA)
         & 协议：iSCSI/iSER/NVMf
+        & 编程模型：协程
     \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
     \frametitle{从FusionStor到Suzaku}
-    \begin{myeasylist}
+    \begin{myeasylist}{enumerate}
         & 支持大卷
         & 单卷负载均衡
         & IO路径上的数据转发
@@ -144,17 +146,13 @@
         \end{column}
     \end{columns}
 
-    \Activate
-    \begin{tcolorbox}
-        \begin{easylist}[itemize]
-            & Client
-            & FrCtl (Target - VolumeCtl/RangeCtl)
-            & MdCtl （无持久化)
-            & BaCtl
-            & ETCD
-        \end{easylist}
-    \end{tcolorbox}
-    \Deactivate
+    \begin{myeasylist}{itemize}
+        & Client
+        & FrCtl (Target - VolumeCtl/RangeCtl)
+        & MdCtl （无持久化)
+        & BaCtl
+        & ETCD
+    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -194,8 +192,7 @@
 
 \begin{frame}[fragile]
     \frametitle{快照操作}
-    \Activate
-    \begin{easylist}[itemize]
+    \begin{myeasylist}{itemize}
         & create
         & delete
         & revert to
@@ -204,8 +201,7 @@
         & clone
         & flatten
         & protect/unprotect
-    \end{easylist}
-    \Deactivate
+    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -254,14 +250,10 @@
 
 \begin{frame}[fragile]
     \frametitle{引入VolumeCtl}
-    \Activate
-    \begin{tcolorbox}
-        \begin{easylist}[itemize]
-            & 处理快照的创建、删除等操作
-            & 如何与IO路径进行交互？
-        \end{easylist}
-    \end{tcolorbox}
-    \Deactivate
+    \begin{myeasylist}{itemize}
+        & 处理快照的创建、删除等操作
+        & 如何与IO路径进行交互？
+    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -319,14 +311,10 @@
         \includegraphics[width=0.6\textwidth]{../imgs/queuing.jpeg}
     \end{center}
 
-    \Activate
-    \begin{tcolorbox}
-        \begin{easylist}[itemize]
-            & 流出量和流入量趋于平衡
-            & 流入量 ~ 调度能力 ~ 处理能力
-        \end{easylist}
-    \end{tcolorbox}
-    \Deactivate
+    \begin{myeasylist}{itemize}
+        & 流出量和流入量趋于平衡\footnote{排队论}
+        & 流入量 \ding{226} 调度能力 \ding{226} 处理能力
+    \end{myeasylist}
 \end{frame}
 
 \end{document}
