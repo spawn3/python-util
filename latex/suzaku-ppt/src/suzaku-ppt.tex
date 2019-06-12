@@ -1,0 +1,332 @@
+% -*- coding: UTF-8 -*-
+
+\documentclass[UTF8,8pt,xcolor=dvipsnames]{beamer}
+
+\usepackage{xeCJK}
+\usepackage[utf8]{inputenc}
+
+\usepackage{hyperref}
+% \hypersetup{pdftex,colorlinks=true,allcolors=blue}
+\usepackage{hypcap}
+
+\usepackage{color}
+\usepackage{xcolor}
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\usepackage{blindtext}
+\usepackage{enumitem}
+\usepackage[ampersand]{easylist}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{fancybox}
+
+\usepackage{tcolorbox}
+% \usetikzlibrary{patterns}
+% \tcbuselibrary{skins}
+\tcbset{colback=yellow!5!white,colframe=yellow!75!black,boxrule=0.1mm}
+
+\usepackage{indentfirst}
+
+\usepackage{verbatim}
+\usepackage{libertine}
+\usepackage{graphicx}
+\usepackage{framed}
+
+\usepackage{makeidx}
+\makeindex
+
+\setlist{noitemsep}
+%\usetheme{Warsaw}
+%\usetheme{Szeged}
+%\usetheme{Berkeley}
+\usetheme{Hannover}
+\usecolortheme{seahorse}
+
+\AtBeginSection[]
+{
+    \begin{frame}
+        \frametitle{目录}
+        \tableofcontents[currentsection]
+    \end{frame}
+}
+
+\newenvironment{myeasylist}{
+    \Activate
+    \begin{tcolorbox}
+    \begin{easylist}[itemize]
+} {
+    \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
+}
+
+
+%% ----------------- MAIN -------------------
+
+\title{SUZAKU架构}
+\subtitle{}
+\author{@DGJ}
+\institute{北京大道云行科技有限公司}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+% \tableofcontents
+
+\section{架构}
+
+\subsection{演进}
+
+\begin{frame}[fragile]
+    \frametitle{存储虚拟化}
+    \begin{center}
+    \includegraphics[width=0.9\textwidth]{../imgs/cluster-virt.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{FusionStor的架构特点}
+    \begin{myeasylist}
+        & 全用户态
+        & 元数据（非DHT)
+        & 编程模型：协程
+        & core绑定 (PMD: polling mode driven)
+        & Hugepage-based的内存管理
+        & 直接访问裸盘(libaio/libnvme + KV)
+        & 异步通信(TCP/RDMA)
+        & 协议：iSCSI/iSER/NVMf
+    \end{myeasylist}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{从FusionStor到Suzaku}
+    \begin{myeasylist}
+        & 支持大卷
+        & 单卷负载均衡
+        & IO路径上的数据转发
+        & 全局负载均衡（disk and core）
+        & 元数据服务器MdCtl
+            && 卷的元数据
+            && chunk的副本信息
+            && ROW快照的v2p映射
+        & 更多信息记录在ETCD上
+            && FS namespace
+            && xattr
+            && snapshot tree
+    \end{myeasylist}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Universal Flash Planform}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../imgs/universal-flash.png}
+    \end{center}
+\end{frame}
+
+\subsection{组件}
+
+\begin{frame}[fragile]
+    \frametitle{组件分解}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \includegraphics[width=0.9\textwidth]{../imgs/modules.png}
+            \end{center}
+        \end{column}
+
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \includegraphics[width=0.9\textwidth]{../imgs/message-flow.png}
+            \end{center}
+        \end{column}
+    \end{columns}
+
+    \Activate
+    \begin{tcolorbox}
+        \begin{easylist}[itemize]
+            & Client
+            & FrCtl (Target - VolumeCtl/RangeCtl)
+            & MdCtl （无持久化)
+            & BaCtl
+            & ETCD
+        \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{卷的地址空间}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../imgs/volume-addressspace.png}
+    \end{center}
+
+    \Activate
+    \begin{tcolorbox}[title=分段管理]
+        \begin{easylist}[itemize]
+            & 一个卷包含若干range
+            & 一个range包含4个Persistence Array(4M)
+            & 一个Persistence Array包含若干chunk(4M)
+        \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
+\end{frame}
+
+\begin{frame}
+    \frametitle{卷的元数据}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/pagetable.jpeg}
+    \end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{IO路径}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../imgs/data-path.png}
+    \end{center}
+\end{frame}
+
+\section{快照}
+
+\subsection{分析}
+
+\begin{frame}[fragile]
+    \frametitle{快照操作}
+    \Activate
+    \begin{easylist}[itemize]
+        & create
+        & delete
+        & revert to
+        & list
+        & read
+        & clone
+        & flatten
+        & protect/unprotect
+    \end{easylist}
+    \Deactivate
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{日志系统}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../imgs/log-structured.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{COW}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/cow-snapshot.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{ROW}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/row-snapshot.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{COW or ROW}
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{../imgs/question-mark.jpg}
+    \end{center}
+\end{frame}
+
+\subsection{实现}
+
+\begin{frame}[fragile]
+    \frametitle{引入新的卷格式}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/volume-type.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{从逻辑地址到物理地址}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/row-head.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{引入VolumeCtl}
+    \Activate
+    \begin{tcolorbox}
+        \begin{easylist}[itemize]
+            & 处理快照的创建、删除等操作
+            & 如何与IO路径进行交互？
+        \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{快照树}
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{../imgs/snaptree.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{删除操作}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \includegraphics[width=1.0\textwidth]{../imgs/snap-delete-leaf.png}
+            \end{center}
+        \end{column}
+
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \includegraphics[width=1.0\textwidth]{../imgs/snap-delete-non-leaf.png}
+            \end{center}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{CLONE卷}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../imgs/clone-write.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{CLONE卷}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../imgs/clone-read.png}
+    \end{center}
+\end{frame}
+
+\section{一致性}
+
+\begin{frame}[fragile]
+    \frametitle{一致性分割}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/consistency-splice.png}
+    \end{center}
+\end{frame}
+
+\section{性能}
+
+\begin{frame}[fragile]
+    \frametitle{平衡过程}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/queuing.jpeg}
+    \end{center}
+
+    \Activate
+    \begin{tcolorbox}
+        \begin{easylist}[itemize]
+            & 流出量和流入量趋于平衡
+            & 流入量 ~ 调度能力 ~ 处理能力
+        \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
+\end{frame}
+
+\end{document}
