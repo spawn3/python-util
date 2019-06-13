@@ -191,6 +191,13 @@
 \subsection{分析}
 
 \begin{frame}[fragile]
+    \frametitle{快照树}
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{../imgs/snaptree.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
     \frametitle{快照操作}
     \begin{myeasylist}{itemize}
         & create
@@ -239,6 +246,10 @@
     \begin{center}
         \includegraphics[width=0.6\textwidth]{../imgs/volume-type.png}
     \end{center}
+    \begin{myeasylist}{itemize}
+        & 如何支持比4K更小的IO，如512B？
+        & 没有快照时，IO路径如何？
+    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -257,14 +268,24 @@
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{快照树}
+    \frametitle{创建快照}
     \begin{center}
-        \includegraphics[width=0.4\textwidth]{../imgs/snaptree.png}
+        \includegraphics[width=0.6\textwidth]{../imgs/row-create.png}
     \end{center}
+
+    \Activate
+    \begin{tcolorbox}[title=Consistency]
+        \begin{easylist}[itemize]
+            & version
+            & distributed lock
+            & others ...
+        \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{删除操作}
+    \frametitle{删除快照}
     \begin{columns}
         \begin{column}{0.5\textwidth}
             \begin{center}
@@ -312,7 +333,7 @@
     \end{center}
 
     \begin{myeasylist}{itemize}
-        & 流出量和流入量趋于平衡\footnote{排队论}
+        & 流出量和流入量趋于平衡
         & 流入量 \ding{226} 调度能力 \ding{226} 处理能力
     \end{myeasylist}
 \end{frame}
