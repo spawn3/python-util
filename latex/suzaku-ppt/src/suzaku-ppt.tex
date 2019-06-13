@@ -36,6 +36,11 @@
 \usepackage{pifont}
 \usepackage[bottom]{footmisc}
 
+\usepackage[normalem]{ulem}
+
+\newcommand{\hl}{\bgroup\markoverwith
+  {\textcolor{yellow}{\rule[-.5ex]{2pt}{2.5ex}}}\ULon}
+
 \usepackage{makeidx}
 \makeindex
 
@@ -85,7 +90,7 @@
 \begin{frame}[fragile]
     \frametitle{存储虚拟化}
     \begin{center}
-    \includegraphics[width=0.9\textwidth]{../imgs/cluster-virt.png}
+    \includegraphics[width=0.8\textwidth]{../imgs/cluster-virt.png}
     \end{center}
 \end{frame}
 
@@ -124,7 +129,7 @@
 \begin{frame}[fragile]
     \frametitle{Universal Flash Planform}
     \begin{center}
-        \includegraphics[width=0.9\textwidth]{../imgs/universal-flash.png}
+        \includegraphics[width=0.6\textwidth]{../imgs/universal-flash.png}
     \end{center}
 \end{frame}
 
@@ -198,7 +203,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{快照操作}
+    \frametitle{快照操作：复杂度分析}
     \begin{myeasylist}{itemize}
         & create
         & delete
@@ -212,9 +217,9 @@
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{日志系统}
+    \frametitle{评价指标}
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{../imgs/log-structured.png}
+        \includegraphics[width=0.8\textwidth]{../imgs/row-indexes.png}
     \end{center}
 \end{frame}
 
@@ -233,6 +238,13 @@
 \end{frame}
 
 \begin{frame}[fragile]
+    \frametitle{日志系统}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../imgs/log-structured.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
     \frametitle{COW or ROW}
     \begin{center}
         \includegraphics[width=0.4\textwidth]{../imgs/question-mark.jpg}
@@ -244,26 +256,49 @@
 \begin{frame}[fragile]
     \frametitle{引入新的卷格式}
     \begin{center}
-        \includegraphics[width=0.6\textwidth]{../imgs/volume-type.png}
+        \includegraphics[width=0.4\textwidth]{../imgs/volume-type.png}
     \end{center}
     \begin{myeasylist}{itemize}
+        & 在哪一层实现ROW？ (RAW卷之上或之下)
+        & 虚拟卷和物理卷的关系（1:1, 1: m)
         & 如何支持比4K更小的IO，如512B？
         & 没有快照时，IO路径如何？
+        & CHUNK内append模式，避免随机写浪费空间
+        & 底层空间allocator，负责分配和释放CHUNK，以及策略
+        & ***
+        & 卷ID保持不变
     \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
     \frametitle{从逻辑地址到物理地址}
-    \begin{center}
-        \includegraphics[width=0.6\textwidth]{../imgs/row-head.png}
-    \end{center}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \includegraphics[width=0.9\textwidth]{../imgs/row-head.png}
+            \end{center}
+        \end{column}
+
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \includegraphics[width=0.9\textwidth]{../imgs/data-replay.png}
+            \end{center}
+        \end{column}
+    \end{columns}
+
+    \begin{myeasylist}{itemize}
+        & 每个快照都有快照头，卷可以看作是一个特殊快照(可写、当前)
+        & 快照头包含两层元数据
+        & 全量索引，一跳即完成V2P映射
+        & 逻辑上连续的页，物理上未必连续
+    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
     \frametitle{引入VolumeCtl}
     \begin{myeasylist}{itemize}
         & 处理快照的创建、删除等操作
-        & 如何与IO路径进行交互？
+        & 如何与IO路径进行协作？
     \end{myeasylist}
 \end{frame}
 
@@ -279,9 +314,24 @@
             & version
             & distributed lock
             & others ...
+            & \hl{consistency group}, for RAC
         \end{easylist}
     \end{tcolorbox}
     \Deactivate
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Crash Consistency}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../imgs/crash-consistency.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Application Consistency}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../imgs/application-consistency.png}
+    \end{center}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -313,6 +363,23 @@
     \begin{center}
         \includegraphics[width=0.8\textwidth]{../imgs/clone-read.png}
     \end{center}
+\end{frame}
+
+\subsection{参考}
+
+\begin{frame}[fragile]
+    \frametitle{参考产品}
+    \begin{myeasylist}{itemize}
+            & 阿里云ECS
+            & 华为FusionStorage
+            & DELL SC Series
+            & VMWare
+            % & NetApp WALFS
+            & SSAN
+            & Open Vstorage
+            & QEMU qcow2
+            & SPDK
+    \end{myeasylist}
 \end{frame}
 
 \section{一致性}
