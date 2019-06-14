@@ -69,6 +69,13 @@
     \Deactivate
 }
 
+\newenvironment{myslide}[1]{
+    \begin{frame}[fragile]
+    \frametitle{#1}
+} {
+    \end{frame}
+}
+
 
 %% ----------------- MAIN -------------------
 
@@ -134,6 +141,13 @@
 \end{frame}
 
 \subsection{组件}
+
+\begin{frame}[fragile]
+    \frametitle{操作系统}
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{../imgs/operating-system.jpeg}
+    \end{center}
+\end{frame}
 
 \begin{frame}[fragile]
     \frametitle{组件分解}
@@ -259,13 +273,13 @@
         \includegraphics[width=0.4\textwidth]{../imgs/volume-type.png}
     \end{center}
     \begin{myeasylist}{itemize}
+        & 元数据的粒度：chunk or page
         & 在哪一层实现ROW？ (RAW卷之上或之下)
         & 虚拟卷和物理卷的关系（1:1, 1: m)
         & 如何支持比4K更小的IO，如512B？
         & 没有快照时，IO路径如何？
         & CHUNK内append模式，避免随机写浪费空间
         & 底层空间allocator，负责分配和释放CHUNK，以及策略
-        & ***
         & 卷ID保持不变
     \end{myeasylist}
 \end{frame}
@@ -273,13 +287,13 @@
 \begin{frame}[fragile]
     \frametitle{从逻辑地址到物理地址}
     \begin{columns}
-        \begin{column}{0.5\textwidth}
+        \begin{column}{0.4\textwidth}
             \begin{center}
                 \includegraphics[width=0.9\textwidth]{../imgs/row-head.png}
             \end{center}
         \end{column}
 
-        \begin{column}{0.5\textwidth}
+        \begin{column}{0.4\textwidth}
             \begin{center}
                 \includegraphics[width=0.9\textwidth]{../imgs/data-replay.png}
             \end{center}
@@ -291,6 +305,9 @@
         & 快照头包含两层元数据
         & 全量索引，一跳即完成V2P映射
         & 逻辑上连续的页，物理上未必连续
+        & V2P过程分为两步：
+            && 选择正确的快照头
+            && 根据快照头进行定位
     \end{myeasylist}
 \end{frame}
 
@@ -308,16 +325,32 @@
         \includegraphics[width=0.6\textwidth]{../imgs/row-create.png}
     \end{center}
 
-    \Activate
-    \begin{tcolorbox}[title=Consistency]
-        \begin{easylist}[itemize]
-            & version
-            & distributed lock
-            & others ...
-            & \hl{consistency group}, for RAC
-        \end{easylist}
-    \end{tcolorbox}
-    \Deactivate
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \Activate
+            \begin{tcolorbox}[title=场景]
+                \begin{easylist}[itemize]
+                        & 跨Range的IO
+                        & 相关IO
+                \end{easylist}
+            \end{tcolorbox}
+            \Deactivate
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \Activate
+            \begin{tcolorbox}[title=RangeCtl看到同一快照树结构]
+                \begin{easylist}[itemize]
+                        & version
+                        & publish-subscribe
+                        & distributed lock
+                        & others ...
+                        & \hl{consistency group}, for RAC
+                \end{easylist}
+            \end{tcolorbox}
+            \Deactivate
+        \end{column}
+    \end{columns}
+
 \end{frame}
 
 \begin{frame}[fragile]
@@ -389,6 +422,32 @@
     \begin{center}
         \includegraphics[width=0.6\textwidth]{../imgs/consistency-splice.png}
     \end{center}
+
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \Activate
+            \begin{tcolorbox}[title=规定]
+                \begin{easylist}[itemize]
+                    & 更新一致性
+                    & 读取一致性
+                    & 副本一致性
+                    & EC一致性
+                \end{easylist}
+            \end{tcolorbox}
+            \Deactivate
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \Activate
+            \begin{tcolorbox}[title=实现]
+                \begin{easylist}[itemize]
+                    & Leader
+                    & Version
+                    & Journal
+                \end{easylist}
+            \end{tcolorbox}
+            \Deactivate
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \section{性能}
