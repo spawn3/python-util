@@ -140,14 +140,14 @@
     \end{center}
 \end{frame}
 
-\subsection{组件}
-
 \begin{frame}[fragile]
     \frametitle{操作系统}
     \begin{center}
-        \includegraphics[width=0.4\textwidth]{../imgs/operating-system.jpeg}
+        \includegraphics[width=0.5\textwidth]{../imgs/operating-system.jpeg}
     \end{center}
 \end{frame}
+
+\subsection{组件}
 
 \begin{frame}[fragile]
     \frametitle{组件分解}
@@ -186,6 +186,7 @@
             & 一个卷包含若干range
             & 一个range包含4个Persistence Array(4M)
             & 一个Persistence Array包含若干chunk(4M)
+            & 估算卷的最大大小：4M/128 x 4M/128 x 4M = 4PB
         \end{easylist}
     \end{tcolorbox}
     \Deactivate
@@ -212,13 +213,15 @@
 \begin{frame}[fragile]
     \frametitle{快照树}
     \begin{center}
-        \includegraphics[width=0.4\textwidth]{../imgs/snaptree.png}
+        \includegraphics[width=0.6\textwidth]{../imgs/tree-data-structure.jpg}
     \end{center}
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{快照操作：复杂度分析}
-    \begin{myeasylist}{itemize}
+    \frametitle{操作复杂度分析}
+    \Activate
+    \begin{tcolorbox}[title=快照操作]
+    \begin{easylist}[itemize]
         & create
         & delete
         & revert to
@@ -227,7 +230,18 @@
         & clone
         & flatten
         & protect/unprotect
-    \end{myeasylist}
+    \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
+
+    \Activate
+    \begin{tcolorbox}[title=IO操作 -- 快照和克隆改变了IO路径]
+    \begin{easylist}[itemize]
+        & write
+        & read
+    \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
 \end{frame}
 
 \begin{frame}[fragile]
@@ -281,6 +295,20 @@
         & CHUNK内append模式，避免随机写浪费空间
         & 底层空间allocator，负责分配和释放CHUNK，以及策略
         & 卷ID保持不变
+    \end{myeasylist}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{ROW卷的数据布局}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../imgs/row-layout.png}
+    \end{center}
+
+    \begin{myeasylist}{itemize}
+        & 一个快照头可以拥有多个L1 chunk，以支持扩展
+        & 跟踪L2 chunk和RAW chunk的ownership关系
+            && 发生COW的L2 chunk即为私有
+            && 发生write的RAW chunk即为私有
     \end{myeasylist}
 \end{frame}
 
@@ -382,6 +410,14 @@
             \end{center}
         \end{column}
     \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Revert to}
+    \begin{myeasylist}{itemize}
+        & copy目标快照头，创建新的卷
+        & 异步回收原卷的快照头及其私有数据
+    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
