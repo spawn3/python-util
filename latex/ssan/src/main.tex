@@ -1,10 +1,11 @@
 % -*- coding: UTF-8 -*-
-% hello.tex
 
 \documentclass[UTF8,oneside]{ctexbook}
 
 % \usepackage{xeCJK}
 \usepackage[utf8]{inputenc}
+
+\usepackage[nottoc,numbib]{tocbibind}
 
 % load paralist before enumitem
 \usepackage{paralist}
@@ -143,40 +144,46 @@
 %\include{test/test}
 %\include{test/perf}
 
-\part{SSAN}
+\part{备忘录}
 
-\include{ssan/develop}
-\include{ssan/deploy}
+\include{memo/think}
+\include{memo/work}
+\include{memo/life}
 
-\include{ssan/context}
-\include{ssan/functional}
-\include{ssan/disk}
+% \part{SSAN}
+
+% \include{ssan/develop}
+% \include{ssan/deploy}
+
+% \include{ssan/context}
+% \include{ssan/functional}
+% \include{ssan/disk}
   %\include{ssan/volume}
-  \include{ssan/snapshot}
-\include{ssan/info}
-\include{ssan/concurrency}
-\include{ssan/faq}
+%  \include{ssan/snapshot}
+% \include{ssan/info}
+% \include{ssan/concurrency}
+% \include{ssan/faq}
 
-\include{ssan/ssd}
-\include{ssan/nvme}
-\include{ssan/rdma}
-\include{ssan/iscsi}
+% \include{ssan/ssd}
+% \include{ssan/nvme}
+% \include{ssan/rdma}
+% \include{ssan/iscsi}
 
 % perspective
-\include{ssan/qos}
-\include{ssan/bcache}
-\include{ssan/optimize}
+% \include{ssan/qos}
+% \include{ssan/bcache}
+% \include{ssan/optimize}
 
 % 评估
-\include{ssan/asos}
-\include{ssan/reliability}
-\include{ssan/perf}
+% \include{ssan/asos}
+% \include{ssan/reliability}
+% \include{ssan/perf}
 
 % \include{ssan/hardware}
 % \include{ssan/etcd}
 
 % operational view
-\include{ssan/bug}
+% \include{ssan/bug}
 
 % \include{ssan/controller}
 % \include{ssan/schedule}
@@ -236,12 +243,6 @@
 
 \include{flow}
 
-\part{备忘录}
-
-\include{memo/think}
-\include{memo/life}
-\include{memo/work}
-
 \part{航海日志}
 
 \include{history/2012}
@@ -262,8 +263,23 @@
 \include{history/2019/03}
 \include{history/2019/04}
 \include{history/2019/05}
-%\include{history/2019/06}
+\include{history/2019/06}
 %\include{history/2019/07}
 %\include{history/2019/08}
+
+Instead of WYSIWYG editors, typesetting systems like \TeX{} or \LaTeX{} \cite{lamport94} can be used.
+
+\part{参考文献}
+
+\begin{thebibliography}{9}
+
+    \bibitem{lamport94}
+        Leslie Lamport,
+        \textit{\LaTeX: a document preparation system},
+        Addison Wesley, Massachusetts,
+        2nd edition,
+        1994.
+
+\end{thebibliography}
 
 \end{document}
