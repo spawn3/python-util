@@ -1,5 +1,13 @@
 \chapter{快照}
 
+预留空间
+
+快照计划
+
+超配
+
+场景分析
+
 优先选择ROW方案，COW有难以克服的问题。
 
 \section{定义}
@@ -116,21 +124,6 @@ ROW设计问题
 
 \section{实现}
 
-\subsection{虚拟卷和物理卷的关系}
-
-一种表示法：导出不变的虚拟卷，虚拟卷可以包含多个物理卷，一个快照对应一个物理卷。
-
-另一种表示法：用一个物理卷包含虚拟卷及其快照。
-
-\subsection{Volume Allocator}
-
-封装底层物理卷的访问接口。可以运行在任意backing store上，如file、LUN。
-
-特性：
-\begin{enumbox}
-\item 引入资源池
-\end{enumbox}
-
 \subsection{引入VolumeCtl}
 
 创建、删除等快照操作通过VolumeCtl进行。
@@ -167,6 +160,27 @@ suzaku中client端充当卷控角色，在多活的情况下，有什么影响�
 \begin{center}
 \includegraphics[width=10cm]{../imgs/row-phy-page.png}
 \end{center}
+
+\subsection{虚拟卷和物理卷的关系}
+
+一种表示法：导出不变的虚拟卷，虚拟卷可以包含多个物理卷，一个快照对应一个物理卷。
+
+另一种表示法：用一个物理卷包含虚拟卷及其快照。
+
+\subsection{Volume Allocator}
+
+封装底层物理卷的访问接口。可以运行在任意backing store上，如file、LUN。
+
+特性：
+\begin{enumbox}
+\item 引入资源池
+\end{enumbox}
+
+优化碎片化的措施：
+\begin{enumbox}
+\item 事前
+\item 事后
+\end{enumbox}
 
 \subsection{地址映射}
 
