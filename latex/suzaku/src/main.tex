@@ -47,6 +47,22 @@
     \end{tcolorbox}
 }
 
+\usepackage[ampersand]{easylist}
+
+\tcbset{colback=yellow!5!white,colframe=yellow!75!black,boxrule=0.1mm}
+
+\newenvironment{myeasylist}[1]{
+    \Activate
+    \begin{tcolorbox}
+    \begin{easylist}[#1]
+
+} {
+    \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
+}
+
+
 % table
 \setlength{\arrayrulewidth}{1pt}
 \setlength{\tabcolsep}{16pt}
@@ -138,6 +154,8 @@
 \include{ssan/perf}
 \include{ssan/thin}
 \include{ssan/snapshot}
+\include{ssan/impl}
+\include{ssan/third}
 % \include{ssan/qos}
 
 \part{项目}
