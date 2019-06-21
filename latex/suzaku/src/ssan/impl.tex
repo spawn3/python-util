@@ -6,13 +6,14 @@
 
 \section{内存}
 
+从初始化顺序上来看，分为hugepage初始化之前和之后。初始化后才能用hugepage相关接口。
+
 提供什么接口，三种生命周期范围、持久性：
 \begin{easylist}[itemize]
-& 常驻
-& session
-& IO
+    & 常驻
+    & session
+    & IO
 \end{easylist}
-
 
 使用场景
 \begin{easylist}[itemize]
@@ -95,3 +96,18 @@ malloc的内存，不容易找到物理内存。
 用1G的hugepage更容易管理。
 
 GFM的机制是什么？barrier去解决RMW、chunk恢复等问题？
+
+\section{Disk}
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/etcd-suzaku-instance.png}
+\end{center}
+
+通过独立线程scan到各个disk，放入slot中。并注册到etcd。
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/diskid-slot.png}
+\end{center}
+
+全局唯一的diskid放在etcd上。根据diskid查找到slot idx。根据slot idx索引到disk。
+即可执行IO操作。
