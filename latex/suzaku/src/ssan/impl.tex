@@ -1,45 +1,89 @@
 \chapter{实现}
 
+\section{一致性}
+
+GFM的机制是什么？barrier去解决RMW、chunk恢复等问题？
+
 \section{Schedule}
 
+\begin{center}
+\includegraphics[width=10cm]{../imgs/core-t.png}
+\end{center}
+
 不能支持嵌套task，用pre yield变量来控制。
+
+单个节点多个进程core的分配策略
+
+协程有种种用法，如单次加载的wait-post模式。
+
+协程的stack是在堆上，注意其大小，防止出现溢出现象。
+
+\begin{myeasylist}{itemize}
+& cpu上运行的是哪个进程？
+& polling core不能有slow操作。\hl{如何定位slow操作？}
+\end{myeasylist}
+
+命令序列
+\begin{myeasylist}{itemize}
+& top - 1
+& strace
+\end{myeasylist}
+
+\section{variable}
+
+每个core线程的重要数据结构的指针数组。根据TLS的\_thread\_id\_进行CRUD。
+
+\hl{为什么不存在core\_t上}？只需要获取线程对应的core\_t即可。
 
 \section{内存}
 
 从初始化顺序上来看，分为hugepage初始化之前和之后。初始化后才能用hugepage相关接口。
+hugepage供两种线程使用，一般线程和core线程。
+所以分为多种区域，一个公共部分和每个polling core对应的部分。
+
+在初始化hugepage之后，所有内存分配尽量走hugepage的接口。
 
 提供什么接口，三种生命周期范围、持久性：
-\begin{easylist}[itemize]
+\begin{myeasylist}{itemize}
     & 常驻
     & session
     & IO
-\end{easylist}
+\end{myeasylist}
 
 使用场景
-\begin{easylist}[itemize]
-    & core private memory
+\begin{myeasylist}{itemize}
     & sche\_task
-    & RDMA
+    & core private memory
     & buffer\_t
     && libnvme
     & little object
-    & ring
-\end{easylist}
+    && ring
+    & RDMA
+    & NVMf
+\end{myeasylist}
+
+怎么抽象一般内存和hugepage-based内存？
+
+每个对象内嵌一个buddy对象管理hugepage的分配、释放。
+另外，从core的MR里，利用buddy算法分配连续内存，用于ring等小对象。
+
+用面向对象的方式处理，每个core对应一个MR对象。public的也是如此。
 
 采用buddy算法管理连续内存分配
 
 动态化
 
-用面向对象的方式处理，每个core对应一个MR对象。public的也是如此。
+\begin{center}
+    \includegraphics[width=10cm]{../imgs/hugepage.png}
+\end{center}
 
-每个对象内嵌一个buddy对象管理hugepage的分配、释放。
-另外，从core的MR里，利用buddy算法分配连续内存，用于ring等小对象。
+抽象出head，core和public重用代码。第一选择head，第二执行head的操作。
+
+如何使用超过2M的内存？如htab的array。
 
 禁止在一个core内malloc，由另外一个core进行free。
 
-怎么抽象一般内存和hugepage-based内存？
-
-抽象出head，core和public重用代码。第一选择head，第二执行head的操作。
+frctl、mdctl、bactl如果用同一的逻辑申请hugepage，会造成浪费？
 
 \subsection{buffer}
 
@@ -52,11 +96,15 @@
 
 buffer的每个seg都包含有虚拟地址和物理地址。
 
-\subsection{Memory Pool}
+多个seg的buffer如何管理，特别是进行IO的时候，底层结构需要连续的内存区域，甚至是\hl{物理连续的内存区域}。
+
+\subsection{Tiny Memory Pool}
 
 \begin{center}
     \includegraphics[width=10cm]{../imgs/memory-pool.png}
 \end{center}
+
+tiny mem公共内存区域分配的内存，由core线程去free，导致的问题。
 
 直接从hugepage申请内存，从hugepage申请一个hugepage，用于小对象。pool管理多个size的小对象队列。
 根据要malloc的size，定位到队列。
@@ -66,7 +114,7 @@ free时按指针查找属于哪个hugepage。每个hugepge对应起始地址和�
 
 hugepage层只需要提供分配单个hugepage的接口，一个队列可以由一个或多个hugepage构成。
 
-或者，memory pool按4k进行组织，同样采用buddy算法。在其上实现ring等。
+% 或者，memory pool按4k进行组织，同样采用buddy算法。在其上实现ring等。
 
 \hl{每layer都要动态化，包括增和减}。
 
@@ -76,17 +124,13 @@ NVMe为什么需要物理地址？
 
 direct io需要512对齐。
 
-\subsection{RDMA}
-
-每个连接$1024*512$内存。
-
 \subsection{IO}
 
 \begin{center}
 \includegraphics[width=10cm]{../imgs/io-align.png}
 \end{center}
 
-首尾页对齐
+首尾页对齐 
 
 buffer\_t包含一个seg时，方便处理。如果有多个seg，是否需要分配连续的大块内存。
 
@@ -94,8 +138,6 @@ buffer\_t包含一个seg时，方便处理。如果有多个seg，是否需要�
 malloc的内存，不容易找到物理内存。
 2M的hugepage虽然能获取虚拟地址连续的4M地址空间，但底层物理内存未必连续。
 用1G的hugepage更容易管理。
-
-GFM的机制是什么？barrier去解决RMW、chunk恢复等问题？
 
 \section{Disk}
 
@@ -111,3 +153,111 @@ GFM的机制是什么？barrier去解决RMW、chunk恢复等问题？
 
 全局唯一的diskid放在etcd上。根据diskid查找到slot idx。根据slot idx索引到disk。
 即可执行IO操作。
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/disk-layout.png}
+\end{center}
+
+IO的offset是chunk内偏移，需要转化为文件内偏移。
+
+磁盘有2M的头部，用于保存相关元数据。
+
+\section{Network}
+
+corerpc采用TCP或RDMA。
+
+从TCP到RDMA，两者可以共存。编程模型上有同有异。问题
+\begin{myeasylist}{itemize}
+& 如何进行连接管理
+& IB用什么建立连接，也是IP地址和port
+& core与core之间两两建立连接
+& 如何整合进epoll体系
+& 两个core之间单连接还是双连接
+& 管理网和存储网
+& 如何同时支持TCP和RDMA
+& 如何支持多个设备
+& 支持两种模式：polling和event
+& rpc/net/sock的分层逻辑
+& NVMf采用了自己的RDMA方式
+\end{myeasylist}
+
+\subsection{TCP}
+
+\subsection{RDMA}
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/ibv-devices.png}
+\end{center}
+
+% \http://donggj:taiji123Jing@gitlab.taocloud.com/qwq/suzaku.git
+
+\begin{myeasylist}{itemize}
+& ibstat
+& /usr/sbin/cma\_roce\_mode
+& nvme discover -t rdma -a 192.168.201.31 -s 10060
+& nvme connect -t rdma -a 192.168.201.31 -s 10060 -n <subnqn>
+& nvme disconnect -n <subnqn>
+\end{myeasylist}
+
+主线程管理连接，加入core线程，用于rpc和polling。每个core对每个devic维护一个CQ。
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/rdma-object.png}
+\end{center}
+
+规则
+\begin{myeasylist}{itemize}
+& 在connect request阶段分配连接相关资源，包括qp、memory、post recv等，并注册到cm\_id上
+& receives must be posted before sends
+& comp\_channel
+& 双线程结构：event and comp channel
+& 外部线程监听，连接加入corerpc
+\end{myeasylist}
+
+把event channel加入epoll即可。在事件处理程序中，通过rdma\_get\_cm\_event来整合进epoll体系。
+进一步通过event type调度到不同的event handler里。
+
+\hrulefill
+
+每个core创建event channel，listen不同端口。运行polling过程。数据连接提交给polling core处理。
+
+在刚建立连接时，分配连接相关资源，如qp，mem等，由\hl{cm\_id->context}跟踪特定连接信息。
+每个连接$1024*512$内存。
+
+从\hl{commit和poll两个方向}去理解RDMA的工作原理。commit不需独立线程。
+
+以写流程为例。写从client直达bactl。
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/rdma-mapping.png}
+\end{center}
+
+\hrulefill
+
+ibverbs连接问题：libsuzaku动态或静态连接libibverbs，都发生问题，甚至连最普通的函数返回结果都是错的，如ibv\_get\_device\_list。
+把libsuzaku做出静态库，就可以了。为什么呢？
+
+排查问题的过程，一波三折。开始怀疑是代码问题，后来定位到libibverbs的调用边界。怎么会怀疑到libsuzaku是静态库或是动态库呢？
+
+把suzaka\_ls单独拿出来，调用最简单的API，都是成问题的。偶然性地想到链接到静态库的可能性。
+
+\section{NVMf}
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/nvme-list.png}
+\end{center}
+
+NVMf卷attr，只能被该协议访问。
+
+no handler found for RDMA transport
+
+\begin{myeasylist}{itemize}
+    & modprobe nvme\_rdma
+    & modprobe nvme\_fabrics
+    & ***
+    & ERROR: RDMA listen 0.0.0.0 
+    & ERROR: link static libibverbs
+    & ***
+    & use github nvme-client
+    & ERROR: mlnx mln\_compat
+\end{myeasylist}

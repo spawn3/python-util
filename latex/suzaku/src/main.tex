@@ -62,6 +62,13 @@
     \Deactivate
 }
 
+\newcommand{\mygraphics}[1]
+{
+    \begin{center}
+        \includegraphics[width=10cm]{#1}
+    \end{center}
+}
+
 
 % table
 \setlength{\arrayrulewidth}{1pt}
@@ -149,6 +156,7 @@
 
 \part{架构}
 
+\include{ssan/problem}
 \include{ssan/arch}
 \include{ssan/consistency}
 \include{ssan/perf}
@@ -157,6 +165,8 @@
 \include{ssan/impl}
 \include{ssan/third}
 % \include{ssan/qos}
+\include{ssan/code}
+\include{ssan/tool}
 
 \part{项目}
 

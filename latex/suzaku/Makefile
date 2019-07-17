@@ -1,6 +1,9 @@
 all:
 	cd src && xelatex main.tex && mv -f main.pdf ../suzaku.pdf
 
+q:
+	vim src/ssan/problem.tex
+
 r: arch
 
 arch:

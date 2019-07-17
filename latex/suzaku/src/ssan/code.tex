@@ -28,3 +28,25 @@ MM
 \item coroutine stack
 \item 小对象
 \end{enumbox}
+
+\section{Reading Code}
+
+RDMA从poll开始，深度优先的遍历策略。收到消息后，按消息类型派遣到不同的handler去处理。
+
+调试代码，要跟踪backtrace，要跟踪消息流向，即消息的生命周期，要比对时间线。
+\begin{myeasylist}{itemize}
+& module
+& assert
+& log
+&& message flow
+&& timeline
+&& backtrace
+\end{myeasylist}
+
+\hl{按时间线trace消息流向}是强有力的跟踪法。
+
+\section{RDMA}
+
+\mygraphics{../imgs/rdma-recv.png}
+
+head->len是整个消息体的长度，等于wc->byte\_len。
