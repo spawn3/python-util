@@ -1,0 +1,32 @@
+\chapter{Tools}
+
+\section{debug}
+
+trace msgid来跟踪消息流。
+
+\section{cmake}
+
+\begin{center}
+\includegraphics[width=10cm]{../imgs/cmake-link-static.png}
+\end{center}
+
+生成静态库
+\begin{myeasylist}{itemize}
+& SHARED  -> STATIC
+& LIBRARY -> ARCHIVE
+\end{myeasylist}
+
+\section{gdb}
+
+\begin{myeasylist}{itemize}
+& ~/.gdbinit
+& info registers
+& info sharedlibrary
+& gdb -p
+\end{myeasylist}
+
+gdb -p发现了mbuffer\_writefile进入死循环，原因是count==0。
+
+猜想是重入了一个锁。
+
+\section{wireshark}

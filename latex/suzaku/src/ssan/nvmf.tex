@@ -1,0 +1,71 @@
+\chapter{NVMf}
+
+\section{Getting started}
+
+\subsection{RDMA}
+
+\subsection{NVMf}
+
+NVMf的initiator的安装
+\begin{myeasylist}{itemize}
+& CentOS 7.6
+& IB Driver
+& client
+&& nvme-cli (nvme\_rdma, nvme\_fabrics)
+&& spdk/perf
+&& multipath
+& info
+&& /sys/class/nvme/
+\end{myeasylist}
+
+\subsection{Code Reading}
+
+\begin{myeasylist}{itemize}
+& nvmf
+& transport (rdma)
+& request
+& subsystem
+& session
+& volume
+& suzaku\_io
+\end{myeasylist}
+
+
+\section{概念}
+
+NVMf的RDMA所以一个一个处理，是因为重用req？
+
+如何标识一个卷？在分布式系统中，卷的标识应独立于节点。
+
+subsystem和ns如何映射到分布式环境下？nqn也不因为在节点之间漂移而变化？
+
+subsystem是节点内的概念吗？不是，需要有全局标识。多个host可以通过不同节点连接同一subsystem。
+
+采用\hl{网络协议栈的分层架构模型}去理解NVMf，以及代码阅读的经验谈。
+
+NVMf的RDMA实现性能如何？
+
+nvmf上每个core上启动一个subsystem，每个subsystem包含若干session，session包含connections。
+cq是connection级别的。
+
+poll线程不能太多？
+
+nvme-cli为什么能列出PCI NVme和NVMf挂载的设备？这两种设备有着相同特征。
+
+NVMf：从RDMA transfer看起，怎么建立连接，怎么send and poll。 
+每个core对应一个subsystem，每个subsystem包含若干session、每个session包含若干连接。连接关联到transport。
+
+在core map里维护卷到core的映射。
+
+discovery机制：
+
+\subsection{nvmf-session-connect}
+
+\mygraphicsh{../imgs/nvmf/nvmf-session-connect.png}
+
+只有一个tgt的情况，建立两个session，每个session包含1个admin连接和2个io连接。
+
+如果有多个tgt，可以横向扩展。
+
+单卷的性能，既受前端网络的影响(listen了所有的前端网络)，又受tgtctl数量的影响。
+

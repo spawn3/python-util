@@ -1,0 +1,73 @@
+\chapter{备忘录}
+
+\hl{此处作为缓冲区，记录每日问题，可以一周一整理}。
+
+\subsection{问题列表}
+
+\mygraphics{../imgs/test-qperf.png}
+
+测试环境：
+\begin{myeasylist}{itemize}
+& hardware
+& driver
+& library
+& config
+\end{myeasylist}
+
+checklist
+\begin{myeasylist}{itemize}
+& hardware
+&& check network: ip a
+&& check network: \hl{/etc/init.d/opensmd start}
+&& lstopo: ib非对称布局
+&& check hugepage: cat /proc/meminfo
+& balance
+&& NUMA: memory, ib, disk
+&& data balance
+&& load balance
+& perf -q <depth> 不能等于1。
+& check log: backtrace on/off
+& centos 7.2上没有nvme rdma内核模块，7.6才有。
+& 官方驱动安装时须指定--with-nvmf选项。
+& 网络是否可ping通
+\end{myeasylist}
+
+问题列表
+\begin{myeasylist}{itemize}
+& \hl{RDMA连接timeout} RDMA连接时间长，如果集群节点数多了，会构成问题，采用单个线程处理所有连接请求导致的。
+& 大io的nvme落盘
+& RDMA本地ipc机制
+& all to all
+& 影响性能的关键参数
+& 参考资料、注意事项
+\end{myeasylist}
+
+TODO
+\begin{myeasylist}{itemize}
+& 提取出target(iSCSI/iSER/NVMf)与fss的接口层。
+& 统一硬件、操作系统、驱动
+& new cq poll接口
+& *** DONE
+& etcd短连接
+& 优化NUMA资源分布
+& 按目标节点聚合提交
+& ring方式的跨core通信
+\end{myeasylist}
+
+优化项
+\begin{myeasylist}{itemize}
+& Client
+&& systemctl stop irqbalance
+&& mlnx\_affinity start
+& ===
+& cpupower minitor
+& ===
+& O3
+& TCP -> RDMA
+& aio -> libnvme
+& performance\_analysis
+& SUZAKU\_DEBUG
+& chunk\_replica\_write
+\end{myeasylist}
+
+

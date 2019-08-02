@@ -1,0 +1,811 @@
+\chapter{2019}
+
+\section{07}
+
+\subsection{01}
+
+aio\_thread选项的作用：如果开启，由独立aio thread polling完成事件。
+如果禁用，由所在polling thread处理完成事件。
+
+aio和NVMe是平行选项，需要同时支持。在添加磁盘时指定driver类型。aio内部才有aio\_thread选项。
+可以看作一个决策树，有的分叉是and关系，有的是xor的关系。
+
+\hl{variable机制}：每个core关联有一个数组，里面存放相关指针。访问的时候，先找到core，然后访问该数组。
+用TLS管理有性能问题。
+
+单卷对应一个core，frctl中该core的调度能力决定了一个卷的上线。
+这点可能解释了RDMA、NVMe、多核配置都不能提高单卷性能的根本原因。
+
+core的调度能力与什么有关？
+
+switch-case可以用callback提高性能。
+
+\subsection{02}
+
+get token时间长，预填充后就会降到0？
+
+lich里aio polling在独立线程内完成，suzaku移入
+
+tcp和rdma性能一样，说明scheduler本身有问题
+
+\hl{analysis的工作原理}: 每个core一个ana对象，另有一个default ana对象。
+每个ana对象包含一个队列，用于存放新的事件。周期性地merge新事件到hash表里。
+hash表的key是事件名, value是事件发生频次和总时长。
+用到了double buffer技术。dump出的是hash表内容。
+
+analysis对性能影响大，有没有更好的测量方式？
+
+观察top中polling core的状态，包括user/sys/idle等，sys和idle数值较大，均说明有问题。
+
+iostat中await代表latency，需要特别注意。
+
+pstack能打印出进程中的线程调用栈。
+
+perf top指定线程，可以观察到该线程的调用。
+如何获取polling线程的tid？可以从日志里获取。
+
+polling thread切忌不能有slow op，包括syscall、sleep、io等。
+
+\begin{myeasylist}{itemize}
+& inline
+& O3
+& mutex
+& spinlock
+& gettime
+& log 
+& analysis
+& variable
+& hash
+& malloc
+& atomic int
+& lockless ring
+& 汇编
+\end{myeasylist}
+
+单core内存消耗：
+\begin{myeasylist}{itemize}
+& 单节点连接数估算：节点数乘以core数的平方。
+& task的stack大小是512K
+\end{myeasylist}
+
+\subsection{05}
+
+BUG: discover无法重入，nvmf\_nvme.c
+
+问题
+\begin{myeasylist}{itemize}
+& etcd短连接，突发请求？
+& 如何看到卷与core的映射关系？
+& nvmf每个core监听一个port (subsystem/session/ns?)
+& nvmf每连接一个cq
+& post send的spin lock
+\end{myeasylist}
+
+dmesg
+
+pstack
+
+\subsection{06}
+
+nvme perf
+
+fio需要关闭irqbalance。
+
+单节点模式运行
+
+不填充直接读测试，会发生get token。
+
+\begin{myeasylist}{itemize}
+& get token
+& connection model
+& 多进程
+\end{myeasylist}
+
+heartbeat lost，同时观察到task堆积现象。
+
+rpc table scan
+
+管理网和存储网分离
+
+vol lock
+
+如何诊断网络问题？
+
+用backtrace跟踪，发现ENOSPC等问题。trace技术极为有用，应深入。
+
+\subsection{09}
+
+\mygraphics{../imgs/perf-tool.png}
+
+配置spdk的perf测试工具
+\begin{myeasylist}{itemize}
+& echo 10240 > /proc/sys/vm/nr\_hugepages
+& cat /proc/meminfo
+& ls -lh /dev/hugepages
+& ***
+& ./configure --with-rdma
+& (spdk/examples/nvme/perf/perf)
+& ./perf -q 64 -s 4096 -w randwrite -t 60 -r 'trtype:RDMA adrfam:IPv4 traddr:192.168.201.31 trsvcid:10060' -c 0xf
+& 注意 -c 0xf的作用，一个卷时不能指定0xf
+\end{myeasylist}
+
+latency是最为重要的性能指标，看看华为任正非的说法，都是围绕时延进行的。
+
+为什么要先优化读性能？
+
+libnvme太危险了，注意其处理绝对地址的方式。在rdma send和poll之间并没有发生什么，但读nvme破坏了内存。
+外面也看不到任何迹象，这是内伤。所以，排除问题时，对可疑之处要一路追踪到底。
+
+先解决单核扩展性，再解决分布式问题。
+
+任务在哪里？
+
+亓武强的工作
+\begin{myeasylist}{itemize}
+& 做了什么，单机8卷读从82万到了117w，本地只有3块nvme盘
+& 如何解读ibqueryerrors的输出
+& 去掉aio
+\end{myeasylist}
+
+volume open and close，跨core访问？
+
+bactl内存不足，因为上面运行过perf，/dev/hugepages/spdk占据没有释放。可以手动删除。
+
+单核多卷，latency会升高，iops变化小。
+
+\hrulefill
+
+消息里携带时间戳，计算每一步的延时。只适用于单机环境，\hl{无法用于分布式环境}。
+
+不同返回点，在io路径上。
+
+空的rpc，与get token和io rpc进行对比，对比get token和io rpc，不同的比例组合。
+部分get token没有走rpc？
+
+task count比较大，yield后等待返回。新的负载无法进入。与队列深度有关。
+
+task count是一个重要指标，等待返回的任务数。
+
+怀疑交换机的驱动？
+
+rdma-core
+\begin{myeasylist}{itemize}
+& cmake -DCMAKE\_BUILD\_TYPE=Rel -DNO\_COMPAT\_SYMS=1 ..
+& VERBOSE=1 make
+& ***
+& /etc/libibverbs.d
+& ln -s /etc/libibverbs.d /usr/local/etc/libibverbs.d
+& /etc/ld.so.conf.d/suzaku.conf
+& ldconfig
+\end{myeasylist}
+
+两次split，浪费了很多cpu指令。
+
+40G的卷只有一个range，所以get token没有走rpc。
+
+\subsection{10}
+
+\hl{回到基准测试}。
+
+spin lock: post send，需要改rdma-core实现。怎么发现是spin lock的问题呢？
+\begin{myeasylist}{itemize}
+& perf top
+& pstack！
+\end{myeasylist}
+
+NUMA的影响，对内存、NIC？
+
+\hrulefill
+
+get token的必要性，能否去掉，用别的机制去掉：每个chunk都有owner？结合lease机制。
+
+range rpc放到mds上？三权分立了。
+
+重要项目
+\begin{myeasylist}{itemize}
+& kernel
+& gcc
+& dpdk/spdk
+& rdma-core
+\end{myeasylist}
+
+工具链，包括使用最新的gcc，都是重要的事情。cmake/gcc/ld等。
+
+三个perf客户端压测三个target。
+
+\subsection{11}
+
+qperf结果支持RDMA本地latency大于远程的假设。
+
+\begin{myeasylist}{itemize}
+& \url{https://www.rdmamojo.com/}
+& \url{http://man7.org/linux/man-pages/man3/ibv\_create\_cq\_ex.3.html}
+\end{myeasylist}
+
+\subsection{12}
+
+\mygraphics{../imgs/perf-tools.png}
+
+重视工具，道法术器，落实到器上。
+\begin{myeasylist}{itemize}
+& perf
+& iproute2
+& valgrind
+& vTune
+& 好好理解linux的trace框架和工具
+& cpu的事件计数器？
+& hwloc
+& lstopo
+& lspci
+& \url{http://www.brendangregg.com/blog/2015-07-08/choosing-a-linux-tracer.html}
+& \url{https://jvns.ca/blog/2017/07/05/linux-tracing-systems/}
+\end{myeasylist}
+
+\mygraphics{../imgs/test-result-node52.png}
+
+通信
+\mygraphics{../imgs/ipc.png}
+
+trace机制
+
+\subsection{13}
+
+\hl{怎么更深刻地理解专业知识体系？学习的升级有四种方法}。
+
+抽象出\hl{transport接口}，包括tcp、rdma、ring等实现。以统一通信接口。包括连接管理、send和poll等。
+
+SPDK构建于POSIX和Env接口之上，DPDK是Env之一种。
+
+\hrulefill
+
+大大小小的微机，构成了计算机系统。\hl{他们之间是怎么通信的呢}？
+
+计算、通信、存储是核心功能。\hl{伟大的计算原理}上提到六个维度。另外有共识、设计和评估。
+系统、信息、控制这老三论是理论基础。
+
+cpu的真正工作以及汇编语言的真正挑战在于在内存中定位这些所需的指令和数据。
+汇编语言的诀窍在于\hl{对内存寻址的深刻理解}。
+
+寄存器和内存。寄存器是cpu内部的命名的特定存储位置。L1,L2 cache是cpu芯片的内部结构，对应用透明。
+
+\hl{寄存器能做很多工作}，但最重要的一项也许就是存放内存中某些重要位置的地址。
+比如在syscall中，可以用来传递参数。
+
+设备可看作微机，具有独立的\hl{处理器、寄存器和内存}。设备甚至可以访问主机内存。
+
+firmware是指令，供驱动使用。上电后加载到内存中。所有的io都是通过内存完成的。
+磁盘、PCI设备都具有嵌入式芯片。设备越来越强大，加入了更多智能元素。
+
+\hl{分清硬件和软件的边界}。哪些是硬件提供的，哪些是软件提供的。硬件如何驱动软件？
+
+每段程序都有一个起始地址。在main之前和之后，也做了一些工作。
+
+怎么看一个程序的汇编代码？gdb是一种方式。汇编指令与机器码几乎存在一对一的关系，加入了助记符。
+c语言是务必要深度掌握的。装载到内存中的当然是机器指令，格式如何？最终表示为二进制的形式。
+这里执行了几次转换。\hl{从c->汇编->机器}，每种表示形式要做到等价。
+
+库的形式，符号，重定向等等。
+
+寄存器可以看作命名的存储位置，数目有限、约定俗成。
+
+\subsection{15}
+
+网络配置：
+\begin{myeasylist}{itemize}
+& 两个管理网
+&& 用/etc/hosts
+&& 非IO rpc
+&& etcd
+& 两个前端
+& 两个后端
+\end{myeasylist}
+
+IB网络，包括专用交换机和IB卡，IB卡属于PCIe设备。
+
+LID和GID？
+
+IB网络上可以运行TCP吗？
+
+56G的交换机，按其带宽，4k最大iops是150w。怎么利用多交换机，网络
+本地rpc和远程rpc有无不同？性能哪个更好？
+
+\hrulefill
+
+三节点、三客户端大约250w(没有落盘)，task数目多，延迟高。perf top出现sche\_task\_new。
+
+会不会是all to all问题？什么是all to all问题呢？
+
+几个问题：
+\begin{myeasylist}{itemize}
+& 本地IPC
+& all to all
+& test方法
+&& qperf
+&& ib\_write\_lat etc ( + taskset )
+\end{myeasylist}
+
+\subsection{16}
+
+mellanox的张辉来公司交流。
+\begin{myeasylist}{itemize}
+& 统一用官方驱动
+& 本地通信采用共享内存
+& DC type
+& send/recv用UD
+& MTU 256-4K
+& new hardware
+&& blue field
+& tool
+&& iblinkinfo
+\end{myeasylist}
+
+\hrulefill
+
+队列深度对latency影响很大，随着队列深度的增加，iops会增加，latency也会增加。
+
+perf测试中，-c影响最大latency。lcore对应主机cpu。比如mask 0x3f00，代表运行在8、9、10、11、12、13等cpu。
+
+\subsection{17}
+
+\hrulefill
+
+跨core调用。
+
+跨core free (malloc、free尽量位于同一作用域，参考read实现)
+
+\subsection{18}
+
+\mygraphics{../imgs/lstopo.png}
+
+从单核看，每个core thread有cpu/本地内存、NIC？
+
+\mygraphics{../imgs/numa.png}
+
+\hrulefill
+
+观察指标
+\begin{myeasylist}{itemize}
+& 均衡性
+& 局部性
+& 拥塞
+& 流水线效率
+\end{myeasylist}
+
+均衡性是架构设计的第一原则。均衡性体现在多个层面，均衡性：
+\begin{myeasylist}{itemize}
+& client
+& 数据分布
+& lstopo 、NUMA
+& controller (frctl, range/md，bactl)
+& 线性扩展
+& tool
+&& perf中每卷的iops
+&& core stat: iops
+&& xwait
+\end{myeasylist}
+
+改target discovery逻辑，按hostname来过滤。配合perf使用。
+
+\subsection{19}
+
+\mygraphics{../imgs/arch-principle.png}
+
+core的使用，采用单进程架构，controller可分为几类
+\begin{myeasylist}{itemize}
+& transport polling(include TCP/RDMA)
+& NVMf volume controller
+& range/md ctl
+& bactl
+& scheduler
+& ring buffer
+\end{myeasylist}
+
+\hl{core的数量、role，以及调度的fairness，需要能够很容易trace到}。
+\hl{services over cores}的配置，应足够灵活。
+
+如何维护core的hash ring？从etcd上扫描，然后内存排序，排序规则是core优先的。
+可以看成二维数组，row为core hash，列为节点。
+
+采用register方式注册core到etcd上，\hl{每个core有role属性}，如属于md core set，ioctl core set。
+在全局进行core的调度使用。
+
+如何定位chkid对应的range ctl？如何定位chkid对应的元数据？range ctl可以管理多卷的range信息？
+
+引入mdctl，mdctl可以看作一kv存储。但mdctl是否必须用一独立进程？还是整体采用单进程架构？
+
+\mygraphics{../imgs/part-location.png}
+
+\hrulefill
+
+按core组织资源，包括NIC等。connect core时只返回与core绑定的地址。在设备不足的情况下，可以借用。
+即设备也要有numa node属性。充分利用机器的拓扑结构。
+
+两个节点上core的连接，可以选择用于建立连接的网络设备。
+
+区分前端和后端网络？每个网络用两个NIC？配合交换机去理解。
+
+31,33作为客户端，connect 3 pro具有较高性能？
+
+NIC在NUMA中的位置对性能影响很大。
+
+\hrulefill
+
+性能优化中，\hl{建立模型}至关重要！
+
+多路径，一个卷在每个节点上建立几条路径？
+如果每个节点只是导出一条路径，则每条路径需要承担50w的IOPS，是否可行？
+是否需要在core级别进行扩展？
+
+在io路径上，尽量不创建新的task。
+
+核分组方案，如何确定配比？如何评估？frctl/range/bactl的配比：4/1/2？
+上游要大于等于下游。
+
+分核后，core之间的通信量增加？
+
+tiny memory采用malloc和hugepage的差异有多大？
+
+\hrulefill
+
+端口链路带宽是独享。后端网络和前端网络的换算关系，read的情况是1：1，写的时候有放大现象。
+
+\hl{echo 20480 > /proc/sys/vm/nr\_hugepages}，执行非常慢。较小的数值可以。
+
+\hl{51，重启后正常, why? 51多次出现自动重启的现象？} 重插ib卡后性能提升，重启是原因？
+memory在NUMA节点之间不对称造成的。
+
+\subsection{20}
+
+利用nvmf的redirect特性调节多路径的path？
+
+专核专用能改善cpu的指令执行效率吗？
+
+一旦达到\hl{饱和点}，增加队列深度只会增加latency，对iops无改善。
+\hl{控制qd，即可控制latency}。寻找到饱和点之前。
+
+研究volume和frctl core的配比关系。4/4比4/8性能高。前面的数字是frctl的核数，后面的数字是卷数。
+降低队列深度可以控制latency，但iops上不去。怎么理解这种现象？
+
+\hl{在task内部无法统计时间差值}，因为用的内部时钟，还没有得到更新。
+
+建立性能评估模型！
+
+\subsection{22}
+
+\hl{软件管道方法学、伟大的计算原理、计算机体系结构基础}都是好书，在模型的基础上，进行性能的分析和优化。
+另外，须留意响应式编程方面的知识，测试方面留意混沌工程。
+
+排队论：分析调度器的性质，队列深度、平均响应时间、完成吞吐量等。
+在一个观察周期内，测量\hl{task的总时间和服务时间，完成任务数}几个指标就行。
+
+排队论基本假设
+\begin{myeasylist}{itemize}
+& 流量平衡假设
+& 服务器独立假设
+\end{myeasylist}
+
+gettimeofday开销过大，干扰测试结果。
+
+coroutinue有两类退出点，return and yield。
+
+\subsection{23}
+
+体系结构：指令集是软硬件的分界线。\hl{指令流水线}是理解的基础。为了流水线的高效执行，
+引入\hl{cache、分支预测、乱序执行、超标量}等技术。
+
+卸载官方驱动后，31，33上ib0处在DOWN状态，在32上重启opensmd服务后，切换为UP。
+\hl{整个网络内必须有至少一个opensmd服务}？
+
+官方驱动可以包含内部模块nvme\_rdma, nvme\_fabrics，在安装时加上-with-nvmf选项。
+然后就可以用nvme cli的命令了。
+
+multipath -v3可以显示debuginfo，multipath的工作原理是什么？\hl{如何发现多路径设备}？
+\begin{myeasylist}{itemize}
+& yum install -y device-mapper device-mapper-devel device-mapper-multipath
+& modprobe dm-multipath
+& modprobe dm-round-robin
+& /etc/multipath.conf
+& systemctl start multipathd
+\end{myeasylist}
+
+设备的wwid用于标识同一设备？
+
+\subsection{24}
+
+\begin{myeasylist}{itemize}
+& \url{https://mymellanox.force.com/mellanoxcommunity/s/article/howto-configure-nvme-over-fabrics-with-multipath}
+& \url{https://nvmstack.com/use-cases/nvmf-nvme-over-fabric-multipath/}
+& \url{https://www.ssdfans.com/blog/2017/08/03/ssd%e6%80%a7%e8%83%bd%e6%b5%8b%e8%af%95%e4%b9%8b%e7%a0%96/}
+& \url{https://www.yoinsights.com/linux-multipath-concepts-and-configuration/}
+\end{myeasylist}
+
+如何评估单卷的性能上限？并行架构意味着什么？
+
+单卷性能不是多卷的简单叠加，无法用multipath方法。因multipath是kernel模块，成为了新的瓶颈点。
+
+ucloud用vhost模式进行测试的。
+
+用spdk perf进行测试，单卷多核？引入多层分配器有代价。
+
+\hl{BUG: nvmf单target无法连接，报reset错误，产生core}。
+
+nvmf的discovery和connect操作分别做了什么？connect连接的是subsystem？connect后，其上的ns都可见？
+
+\subsection{25}
+
+vhost，\hl{client和tgt融合部署}，通过共享内存进行通信。
+
+\hrulefill
+
+tgtctl和frctl的关系：tgtctl管理与client端的连接，是\hl{master/work的关系}，提交命令到队列后yield。
+\begin{myeasylist}{itemize}
+& 应尽量offload tgtctl的负载
+& frctl可扩展
+& 读写操作的buf都由tgtctl来维护？
+& 一次读操作，buffer应由哪个core来malloc(tgtctl, frctl)？
+& tgtctl和frctl必须在一个NUMA节点上。
+& poll后尽早dispatch request到frctl
+\end{myeasylist}
+
+如何测定各service的处理速率？按软件管道架构，中间节点的分配速率和下游节点的处理速率有必要区分吗？
+中间节点都是分配器节点，叶子节点才是处理速率？
+
+\hl{CPU pipeline与软件管道架构}放在一起理解，从微观和宏观两个维度加深理解。
+
+swapcontext, yield 10模拟swapcontext
+
+优化buffer\_t，减少malloc。
+
+\hrulefill
+
+\hl{spdk nvmf}
+
+nvme1n1，第一个1是subsystem编号，第二个1是该subsystem内的ns编号。
+
+一个ns能加入两个subsystem吗？目前看是不能。
+
+subsystem add listener后，才能connect。
+
+connect的是subsystem，一旦连接后，则可以看到该subsystem下所有ns。
+如何通过host与ns建立多个session/controller？访问ns，意味着什么？
+
+The SPDK NVMe-oF target library does not strictly dictate threading model, 
+but poll groups do all of their polling and I/O processing on the thread they are created on. Given that,
+it almost always makes sense to \hl{create one poll group per thread} used in the application.
+New qpairs created in response to spdk\_nvmf\_tgt\_accept() can be handed out round-robin to the poll groups.
+This is how the SPDK NVMe-oF target application currently functions.
+
+More advanced algorithms for distributing qpairs to poll groups are possible.
+For instance, a NUMA-aware algorithm would be an improvement over basic round-robin,
+where NUMA-aware means assigning qpairs to poll groups running on CPU cores that are on the same NUMA node as \hl{the network adapter and storage device}.
+Load-aware algorithms also may have benefits.
+
+struct spdk\_nvmf\_poll\_group: An abstraction for a collection of network connections that can be polled as a unit.
+This is an SPDK-defined concept that does not appear in the NVMe-oF specification.
+Often, network transports have facilities to check for incoming data on groups of connections more efficiently than checking each one individually (e.g. epoll),
+so poll groups provide a generic abstraction for that. This will be referred to throughout this guide as a poll group.
+
+struct spdk\_nvmf\_qpair: An NVMe-oF queue pair, as defined by the NVMe-oF specification.
+These map 1:1 to network connections. This will be referred to throughout this guide as a qpair.
+
+通过多个节点访问一个ns是什么意思？
+
+分布式环境中，一个节点一个target，多个节点多个target，一个target包含多个subsystem，
+不同target的subsystem采用不同的NQN。所以\hl{NQN需要包含节点标识}?
+
+多路径使用了nvme\_fabrics内核模块，效率不高。有无用户态的host端实现？
+
+accept是全局的，生成的qpair被调度到poll group上。poll group里的poller规定了所在thread的职责。
+连接与ns无关。
+
+SPDK里卷无法扩展到多核？
+
+\hl{查看spdk/perf，nvme-cli的源码，加深对host-target之间通信的理解}。
+
+一块NVMe盘如何对应到subsystem和ns。把一块NVMe盘看作一个subsystem，controller何在？
+
+一个节点上多块NVMe盘对应多个subsystem，一个ns可以attach到多个subsystem吗？貌似不可以。
+
+controller怎么访问ns是由request决定的，并无独立的ns控制器。一个controller可以访问一个或多个ns。
+
+两种使用场景：driver和target，有很多共同点。
+
+\hl{从OS的观点看}，如何组织资源？如何定义资源之上的指令系统？
+\begin{myeasylist}{itemize}
+& 如何组织设备？
+& 如何定义支持的命令集？如何定义约束？
+& 如何映射到thread上？
+& 如何映射到cpu上？
+\end{myeasylist}
+
+基本操作
+\begin{myeasylist}{itemize}
+& Discovery
+& Connect
+& Poll/Fetch
+& Process/Handle
+&& Submit
+&& Complete
+\end{myeasylist}
+
+\mygraphics{../imgs/spdk/pg-create.png}
+
+拿到request之后，由controller进行处理。对ns的访问，以及一致性控制，由app去保障。
+tgtctl拿到request之后，交付给frctl去处理(controller)，frctl/rangectl/bactl可以看作完整的控制器逻辑。
+共同构成spdk的controller逻辑。这是对接分布式存储的不同处。
+
+\hl{tgtctl是前后端的分界线}。frctl的分配器（包括etcd、io命令和管理命令？)
+
+\hl{nvme、nvmf规范以及spdk}，更多规定了单盘、单节点的行为逻辑。不要受spec所限，要从本质上思考问题。
+
+一次消息包含消息头和数据buffer。
+
+thread到core的映射最好用coremask方法，services over cores采用register方法。各服务即可独立又可共享cpu。
+
+\begin{myeasylist}{itemize}
+& 单卷测试要用大卷
+& client与ib运行在同一NUMA节点上
+& tgt不再采用task方式，而是采用ring方式与frctl通信
+& tgtctl瘦身 (能否去掉scheduler？)
+& coremask
+& crossfree (遵循\hl{哪里分配，哪里释放}的原则)
+& memcpy
+& 消息聚合
+& ring buffer：direct submit
+& buffer内置若干seg，减少malloc (merge时须copy)
+& va\_list用于stack上数据，离开作用域后失效
+\end{myeasylist}
+
+rdma和ring导致cpu pipeline效率低，spin lock和ring的cross core性质。
+
+\subsection{26}
+
+一块NVMe盘如何对应到subsystem和ns。把一块NVMe盘看作一个subsystem，controller何在？
+
+一个节点上多块NVMe盘对应多个subsystem，一个ns可以attach到多个subsystem吗？貌似不可以。
+
+controller怎么访问ns是由request决定的，并无独立的ns控制器。一个controller可以访问一个或多个ns。
+
+两种使用场景：driver和target，有很多共同点。
+
+\hl{从OS的观点看}，如何组织资源？如何定义资源之上的指令系统？
+\begin{myeasylist}{itemize}
+& 如何组织设备？
+& 如何定义支持的命令集？如何定义约束？
+& 如何映射到thread上？
+& 如何映射到cpu上？
+\end{myeasylist}
+
+基本操作
+\begin{myeasylist}{itemize}
+& Discovery
+& Connect
+& Poll/Fetch
+& Process/Handle
+&& Submit
+&& Complete
+\end{myeasylist}
+
+\mygraphics{../imgs/spdk/pg-create.png}
+
+拿到request之后，由controller进行处理。对ns的访问，以及一致性控制，由app去保障。
+tgtctl拿到request之后，交付给frctl去处理(controller)，frctl/rangectl/bactl可以看作完整的控制器逻辑。
+共同构成spdk的controller逻辑。这是对接分布式存储的不同处。
+
+\hl{tgtctl是前后端的分界线}。frctl的分配器（包括etcd、io命令和管理命令？)
+
+\hl{nvme、nvmf规范以及spdk}，更多规定了单盘、单节点的行为逻辑。不要受spec所限，要从本质上思考问题。
+
+一次消息包含消息头和数据buffer。
+
+thread到core的映射最好用coremask方法，services over cores采用register方法。各服务即可独立又可共享cpu。
+
+\begin{myeasylist}{itemize}
+& 单卷测试要用大卷
+& client与ib运行在同一NUMA节点上
+& tgt不再采用task方式，而是采用ring方式与frctl通信
+& tgtctl瘦身 (能否去掉scheduler？)
+& coremask
+& crossfree (遵循\hl{哪里分配，哪里释放}的原则)
+& memcpy
+& 消息聚合
+& ring buffer：direct submit
+& buffer内置若干seg，减少malloc (merge时须copy)
+& va\_list用于stack上数据，离开作用域后失效
+\end{myeasylist}
+
+rdma和ring导致cpu pipeline效率低，spin lock和ring的cross core性质。
+
+\subsection{27}
+
+每个core listen一个随机的固定port，别的core怎么获取该信息，进而建立连接呢？参考corenet mapping的connect core。
+选择\hl{与core在同一NUMA节点}的地址，如果没有，则借用别的网络设备。
+
+通过\hl{net\_rpc\_coreinfo}获取core的网络地址。
+
+core监听的是所有地址？nvmf监听的是除了后端地址的其它地址？
+\hl{在只有一个ib卡的情况下，该策略无法选出前端网络}。
+
+硬件方面的影响：
+\begin{myeasylist}{itemize}
+& 三台服务器的NUMA都是非对称布局
+& disk延迟较大，且不统一
+& 网络和交换机是50Gb的，且版本过旧
+& 内存32G+32G，较小
+& 24核，较小
+\end{myeasylist}
+
+性能优化项
+\begin{myeasylist}{itemize}
+& 数据分布均匀吗？
+& 通过多个tgt导出一个卷(把一个ns加入多个tgt里/对应subsystem)
+\end{myeasylist}
+
+RMDA
+\begin{myeasylist}{itemize}
+& subsystem上所有conn共用一cq？
+& use SRQ
+\end{myeasylist}
+
+开发模式：\hl{集中优势兵力、各个击破}。一阶段聚焦一点。集中火力
+
+开发计划：
+\begin{myeasylist}{itemize}
+& 稳一稳，先完成recovery等可靠性GFM、一致性相关特性。
+& 代码重构  test
+& 跟进spdk项目
+& 快照往后放
+\end{myeasylist}
+
+Q3、Q4要完成目标？
+
+每个人的使命、目标？
+
+道法术器，工具层面：trace, perf？
+
+pcie 4.0 bandwidth
+
+ww测试
+\begin{myeasylist}{itemize}
+& SERVER (on node51)
+&& DIR: node51:~/ww/suzaku/build/
+&& // 调整polling\_core等参数： 10|20
+&& config: ./suzaku\_nvme.conf
+&& // 调整卷的个数
+&& time sh ./init\_nvme.sh
+& CLIENT (on node32)
+&& echo 10240 > /proc/sys/vm/nr\_hugepages
+&& cd gj/spdk/examples/nvme/perf
+&& ./perf -q 64 -s 4096 -w randread -t 60 -r 'trtype:RDMA adrfam:IPv4 traddr:192.168.201.51 trsvcid:10060' -c 0xf000
+\end{myeasylist}
+
+\subsection{30}
+
+SSD是否达到稳态性能？
+
+\hrulefill
+
+优化主要基于平衡性和局部性原理，充分提高物理资源的利用率。
+
+平衡性是架构设计和可扩展性的第一原则，包括数据分布、负载分布和控制器分布的平衡性。
+
+从资源的角度看，资源包括cpu、内存、磁盘和网络。因为NUMA节点内的访问延迟要低于节点之间的访问延迟，
+所以按cpu拓扑结构组织内存、网络设备和磁盘，做到就近访问。
+
+以单卷为例，首先连接到控制器上。由该控制器分发任务到后端工作线程上，即节点内多路径并行处理。
+要实现高性能，既要优化前端控制器的分发速率，又要优化后端控制器的处理速率。
+
+多卷是单卷的扩展，为达到线性扩展的目的，需要识别并消除整个路径上的性能瓶颈点。
+
+pcie总线带宽
+
+\begin{myeasylist}{itemize}
+& 操作系统： centos 7.6
+& 服务器：三台（64GB内存，4块56Gbps ib卡，5块memblaze P5 SSD）
+& 客户端：三台（64GB内存，2块56Gbps ib卡）
+& 测试工具：spdk/perf
+\end{myeasylist}
+
+\subsection{31}
+
+\hl{lspci -vvv}查看设备详细信息。

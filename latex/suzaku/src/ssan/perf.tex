@@ -1,30 +1,44 @@
 \chapter{性能}
 
-\section{怎么分析单卷性能}
+\section{设计原则}
+
+\begin{myeasylist}{itemize}
+& 平衡性
+& 局部性
+& 并行性
+\end{myeasylist}
 
 \begin{myeasylist}{itemize}
 & log
 & O3
+& inline
 & likely
 & IO FUNC
 & HUGEPAGE
 & SPDK
 & get token
+& ring
 \end{myeasylist}
 
-\section{CPU}
+\section{怎么分析单卷性能}
 
-\section{内存}
+\mygraphicsh{../imgs/io-path.png}
+
+\section{资源}
+
+\subsection{CPU}
+
+\subsection{内存}
 
 hugepage
 
-\section{磁盘}
+\subsection{磁盘}
 
 \subsection{驱动}
 
 libnvme
 
-\section{网络}
+\subsection{网络}
 
 \subsection{协议}
 

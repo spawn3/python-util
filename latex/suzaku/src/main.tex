@@ -62,10 +62,17 @@
     \Deactivate
 }
 
-\newcommand{\mygraphics}[1]
+\newcommand{\mygraphics}[1] 
 {
     \begin{center}
         \includegraphics[width=10cm]{#1}
+    \end{center}
+}
+
+\newcommand{\mygraphicsh}[1]
+{
+    \begin{center}
+        \includegraphics[height=10cm]{#1}
     \end{center}
 }
 
@@ -154,24 +161,30 @@
 
 \listoftodos[Notes]
 
+\part{备忘录}
+
+\include{history/main}
+\include{history/2019/07}
+\include{history/2019/08}
+
 \part{架构}
 
-\include{ssan/problem}
 \include{ssan/arch}
 \include{ssan/consistency}
 \include{ssan/perf}
 \include{ssan/thin}
+\include{ssan/nvmf}
 \include{ssan/snapshot}
-\include{ssan/impl}
-\include{ssan/third}
 % \include{ssan/qos}
-\include{ssan/code}
 \include{ssan/tool}
+\include{ssan/code}
+\include{ssan/impl}
 
 \part{项目}
 
 \include{ssan/pm}
 \include{ssan/test}
 \include{ssan/misc}
+\include{ssan/third}
 
 \end{document}
