@@ -1,7 +1,8 @@
 all:
 	cd src && xelatex main.tex && mv -f main.pdf ../suzaku.pdf
 
-r: r8
+# export M=8 && make r
+r: r$(M)
 
 r1:
 	vim src/history/2019/01.tex

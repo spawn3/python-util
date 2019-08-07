@@ -5,3 +5,59 @@
 dmidecode可以查询服务器型号
 
 \subsection{02}
+
+理解target，各种各样的target。host-target之间的transport和protocol是区分的关键。
+\hl{类比TCP协议栈}去理解各种新的网络技术。
+
+tgtctl是target和storage的交接点，体现在文件\hl{nvmf\_suzaku\_io}里。
+
+spdk的NVMf导出bdev。如何对接分布式存储？
+
+把libnvme用git管理起来\todo{git-libnvme}。
+
+尝试用一台vm把suzaku跑起来。看看具体要求和配置是什么？
+
+完善关键流程，补上漏洞。采用\hl{用系统来工作}的理念，完善过程。
+
+test是什么状态？应该怎么做？
+
+hazard相关文档。
+
+排兵布阵，上知天文下知地理。
+
+NVMe中buffer的表示，sge？
+
+\subsection{06}
+
+通过ipmi控制服务器。
+
+一块nvme盘加不上，不知为什么？51，52，53上都是如此。51重新插拔盘解决，52、53拔掉电源，重启解决。
+
+实则性能不如8.1版，为什么？观察到disk延迟高，对disk单独进行性能测试，剔除慢盘。
+用4盘测试，性能达到600w+，但latency double了。
+
+测量每块盘的平均队列深度和延时。为什么disk的latency突然变大了呢？
+\begin{myeasylist}{itemize}
+& 没有读过的盘，非稳态性能？
+& bactl有问题？
+& remote first后，iops显著下降，latency显著升高，磁盘压力小
+& \hl{把单卷大小改为80G之后，性能提升上去了}。
+\end{myeasylist}
+
+mds\_rpc\_paget，并发高，导致rangectl的内存耗尽？
+
+加入节点，rehash，等待lease timeout，io会中断。
+
+三个client不要同时启动，而是错开几秒钟。
+
+rdma 在提交和完成之间，可能会占用大量内存，导致内存耗尽。怎么解决？
+内存不足时使用后备内存，以处理峰值情况。或者core内存管理动态化。
+
+\hl{拆分为两个库，都需要用静态库}，不能用so。
+
+\subsection{07}
+
+\subsection{08}
+
+\subsection{09}
+

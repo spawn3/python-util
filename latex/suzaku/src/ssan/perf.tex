@@ -1,5 +1,7 @@
 \chapter{性能}
 
+从宏观到微观
+
 \section{设计原则}
 
 \begin{myeasylist}{itemize}
@@ -8,12 +10,14 @@
 & 并行性
 \end{myeasylist}
 
+优化项
 \begin{myeasylist}{itemize}
 & log
 & O3
+& IO FUNC
 & inline
 & likely
-& IO FUNC
+& cacheline
 & HUGEPAGE
 & SPDK
 & get token
@@ -34,13 +38,9 @@ hugepage
 
 \subsection{磁盘}
 
-\subsection{驱动}
-
 libnvme
 
 \subsection{网络}
-
-\subsection{协议}
 
 \begin{enumbox}
 \item TCP

@@ -496,8 +496,9 @@ coroutinue有两类退出点，return and yield。
 卸载官方驱动后，31，33上ib0处在DOWN状态，在32上重启opensmd服务后，切换为UP。
 \hl{整个网络内必须有至少一个opensmd服务}？
 
-官方驱动可以包含内部模块nvme\_rdma, nvme\_fabrics，在安装时加上-with-nvmf选项。
-然后就可以用nvme cli的命令了。
+官方驱动可以包含内部模块nvme\_rdma, nvme\_fabrics，在安装时加上-with-nvmf选项。然后就可以用nvme cli的命令了。
+
+不用官方驱动，但又依赖于opensmd服务，\hl{单独安装opensmd}。
 
 multipath -v3可以显示debuginfo，multipath的工作原理是什么？\hl{如何发现多路径设备}？
 \begin{myeasylist}{itemize}

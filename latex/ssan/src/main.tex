@@ -119,9 +119,40 @@
 \newcommandx{\thiswillnotshow}[2][1=]{\todo[disable,#1]{#2}}
 %
 
+\usepackage[simplified]{pgf-umlcd}
+
+\usepackage{dirtytalk}
+\usepackage{csquotes}
+
 \usepackage[ampersand]{easylist}
 
-\usepackage[simplified]{pgf-umlcd}
+\tcbset{colback=yellow!5!white,colframe=yellow!75!black,boxrule=0.1mm}
+
+\newenvironment{myeasylist}[1]{
+    \Activate
+    \begin{tcolorbox}
+    \begin{easylist}[#1]
+
+} {
+    \end{easylist}
+    \end{tcolorbox}
+    \Deactivate
+}
+
+\newcommand{\mygraphics}[1] 
+{
+    \begin{center}
+        \includegraphics[width=10cm]{#1}
+    \end{center}
+}
+
+\newcommand{\mygraphicsh}[1]
+{
+    \begin{center}
+        \includegraphics[height=10cm]{#1}
+    \end{center}
+}
+
 
 \title{SSAN文档}
 \author{董冠军}
@@ -151,6 +182,7 @@
 \include{memo/think}
 \include{memo/work}
 \include{memo/life}
+\include{memo/tool}
 
 % \part{SSAN}
 
