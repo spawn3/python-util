@@ -1,20 +1,18 @@
 \chapter{Tools}
 
-\section{hazard}
+\section{Deployment}
 
-\mygraphics{../imgs/tool/hazard-1.jpeg}
-\mygraphics{../imgs/tool/hazard-2.jpeg}
-\mygraphics{../imgs/tool/hazard-3.jpeg}
+\subsection{ntpdate}
 
-\section{debug}
+\mygraphics{../imgs/tool/ntp-date.png}
 
-trace msgid来跟踪消息流。
+\subsection{ansible}
 
-\section{cmake}
+\section{Development}
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/cmake-link-static.png}
-\end{center}
+\subsection{cmake}
+
+\mygraphics{../imgs/tool/cmake-link-static.png}
 
 生成静态库
 \begin{myeasylist}{itemize}
@@ -22,7 +20,7 @@ trace msgid来跟踪消息流。
 & LIBRARY -> ARCHIVE
 \end{myeasylist}
 
-\section{gdb}
+\subsection{gdb}
 
 \begin{myeasylist}{itemize}
 & ~/.gdbinit
@@ -35,4 +33,24 @@ gdb -p发现了mbuffer\_writefile进入死循环，原因是count==0。
 
 猜想是重入了一个锁。
 
-\section{wireshark}
+\subsection{debug}
+
+trace msgid来跟踪消息流。
+
+\subsection{wireshark}
+
+\subsection{SoftRoce}
+
+spdk/scripts/setup.sh
+
+\section{Test}
+
+\subsection{fio}
+
+\subsection{spdk/perf}
+
+\subsection{hazard}
+
+\mygraphics{../imgs/tool/hazard-1.jpeg}
+\mygraphics{../imgs/tool/hazard-2.jpeg}
+\mygraphics{../imgs/tool/hazard-3.jpeg}

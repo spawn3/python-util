@@ -1,5 +1,9 @@
 \chapter{架构}
 
+\section{功能图}
+
+\mygraphics{../imgs/suzaku/suzaku-function.png}
+
 \section{RAID分析}
 
 RAID分析作为架构驱动力
@@ -10,6 +14,16 @@ RAID分析作为架构驱动力
 \item 数据资产是战略资源
 \item 全闪是大势所趋
 \end{enumbox}
+
+\subsection{D}
+
+\begin{enumbox}
+\item ETCD
+\item SPDK(Driver/Target)
+\item KV
+\end{enumbox}
+
+\section{架构演进}
 
 新设计解决了什么老问题？
 \begin{enumbox}
@@ -37,17 +51,6 @@ RAID分析作为架构驱动力
 \item IPv6
 \end{enumbox}
 
-\subsection{D}
-
-\begin{enumbox}
-\item ETCD
-\item Target
-\item Driver
-\item KV
-\end{enumbox}
-
-\section{架构演进}
-
 \subsection{支持大卷}
 
 \subsection{单卷的水平扩展}
@@ -67,11 +70,91 @@ RAID分析作为架构驱动力
 
 \subsection{支持EC}
 
-\section{数据模型}
+\section{模块}
+
+分布式系统架构通常包括几个部分：client、mds、cds。分别对应什么？
+\begin{center}
+\includegraphics[width=10cm]{../imgs/modules.png}
+\end{center}
+
+target到bactl，有两条路径，视是否通过range ctl而定。如果不通过range ctl(rangectl bypass)，数据流可直达后端存储，
+实现控制流和数据流分流的目的。同时降低了转发成本。
 
 \begin{center}
-\includegraphics[width=10cm]{../imgs/cluster-virt.png}
+\includegraphics[width=10cm]{../imgs/message-flow.png}
 \end{center}
+
+问题集：
+\begin{enumbox}
+\item 为什么range ctl和mds是分离的进程？
+\item vss是否必要？
+\item ***
+\item io路径是什么？
+\item 副本一致性是如何实现的？
+\item IO和Recovery之间如何同步？
+\end{enumbox}
+
+\subsection{TgtCtl}
+
+\subsection{FRCTL}
+
+target如何与分布式卷相连？
+
+\subsection{RangeCtl}
+
+token是向range ctl获取的，粒度为chunk。range ctl上每个chunk维护有token计数器。
+
+token里包含了每个副本的位置信息，这是向mds请求得到的。
+
+client并不与mds直接通信。分离fr和mds为两个进程，一是可以指定不同的core；二，便于debug。
+
+\begin{center}
+\includegraphics{../imgs/token.png}
+\end{center}
+
+range ctl和mds都在hash ring上。都采用了hash机制来定位目标节点。
+所以\hl{有两个hash ring：range ctl和mds}。两个ring都通过mds master来维护。
+ring的节点结构是什么？node and core？
+\begin{center}
+\includegraphics[width=10cm]{../imgs/chunk-location.png}
+\end{center}
+
+partition是range ctl和mdctl共用模块。range ctl目前归属frctl。
+
+lease机制目前没用，如果需要把range ctl放置到session所在的位置(一个volume的所有range都在一个节点上？)，
+可以选用lease机制，而不用dht机制。怎么理解session？
+
+一旦ring结构发生变化，会有什么影响？SSAN通过epoch来管理ring结构的变化。
+
+ring上节点负载均匀性如何？
+
+ring lock有什么用？在mds master上维护状态，处理ring发生变更的情况。
+是否可通过引入epoch实现同样的功能？
+
+GFM？解决全局同一视图的问题。
+
+如何识别和处理stale消息？
+
+\subsection{MDCTL}
+
+hash ring上有一个节点充当master角色。如何选主，如何保持其唯一性？
+通过etcd lock实现。
+
+\subsection{BACTL}
+
+\mygraphics{../imgs/suzaku/disk-connect.png}
+
+diskid是全局的，在etcd上有目录。
+
+diskmd磁盘访问接口，支持libnvme驱动。
+
+需要管理物理内存，如hugepage和memory pool。
+
+NVMe/RDMA需要访问物理内存地址(v2p)。
+
+\section{数据模型}
+
+\mygraphics{../imgs/cluster-virt.png}
 
 从\hl{资源的生命周期模型}开始思考。资源包括：\hl{集群、节点、core、磁盘、pool、volume、snapshot}等，以及内部资源。
 
@@ -171,81 +254,3 @@ ROW，两层元数据？
 SSAN的snapshot实现。
 
 consistency group
-
-\section{模块}
-
-分布式系统架构通常包括几个部分：client、mds、cds。分别对应什么？
-\begin{center}
-\includegraphics[width=10cm]{../imgs/modules.png}
-\end{center}
-
-target到bactl，有两条路径，视是否通过range ctl而定。如果不通过range ctl(rangectl bypass)，数据流可直达后端存储，
-实现控制流和数据流分流的目的。同时降低了转发成本。
-
-\begin{center}
-\includegraphics[width=10cm]{../imgs/message-flow.png}
-\end{center}
-
-问题集：
-\begin{enumbox}
-\item 为什么range ctl和mds是分离的进程？
-\item vss是否必要？
-\item ***
-\item io路径是什么？
-\item 副本一致性是如何实现的？
-\item IO和Recovery之间如何同步？
-\end{enumbox}
-
-\subsection{FRCTL}
-
-target如何与分布式卷相连？
-
-token是向range ctl获取的，粒度为chunk。range ctl上每个chunk维护有token计数器。
-
-token里包含了每个副本的位置信息，这是向mds请求得到的。
-
-client并不与mds直接通信。分离fr和mds为两个进程，一是可以指定不同的core；二，便于debug。
-
-\begin{center}
-\includegraphics{../imgs/token.png}
-\end{center}
-
-range ctl和mds都在hash ring上。都采用了hash机制来定位目标节点。
-所以\hl{有两个hash ring：range ctl和mds}。两个ring都通过mds master来维护。
-ring的节点结构是什么？node and core？
-\begin{center}
-\includegraphics[width=10cm]{../imgs/chunk-location.png}
-\end{center}
-
-partition是range ctl和mdctl共用模块。range ctl目前归属frctl。
-
-lease机制目前没用，如果需要把range ctl放置到session所在的位置(一个volume的所有range都在一个节点上？)，
-可以选用lease机制，而不用dht机制。怎么理解session？
-
-一旦ring结构发生变化，会有什么影响？SSAN通过epoch来管理ring结构的变化。
-
-ring上节点负载均匀性如何？
-
-ring lock有什么用？在mds master上维护状态，处理ring发生变更的情况。
-是否可通过引入epoch实现同样的功能？
-
-GFM？解决全局同一视图的问题。
-
-如何识别和处理stale消息？
-
-\subsection{MDCTL}
-
-hash ring上有一个节点充当master角色。如何选主，如何保持其唯一性？
-通过etcd lock实现。
-
-\subsection{BACTL}
-
-diskid是全局的，在etcd上有目录。
-
-\subsection{Driver}
-
-diskmd磁盘访问接口，支持libnvme驱动。
-
-需要管理物理内存，如hugepage和memory pool。
-
-NVMe/RDMA需要访问物理内存。

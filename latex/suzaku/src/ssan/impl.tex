@@ -1,14 +1,26 @@
 \chapter{实现}
 
-\section{一致性}
+\section{ETCD}
 
-GFM的机制是什么？barrier去解决RMW、chunk恢复等问题？
+\subsection{Pool}
+
+\mygraphics{../imgs/etcd/etcd-pool.png}
+
+\subsection{Metadata}
+
+\mygraphics{../imgs/etcd/etcd-metadata.png}
+
+\subsection{Coreid and Diskid}
+
+\mygraphics{../imgs/etcd/etcd-instance.png}
+
+\subsection{Network}
+
+\mygraphics{../imgs/etcd/etcd-network.png}
 
 \section{Schedule}
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/core-t.png}
-\end{center}
+\mygraphics{../imgs/core-t.png}
 
 不能支持嵌套task，用pre yield变量来控制。
 
@@ -37,6 +49,32 @@ GFM的机制是什么？barrier去解决RMW、chunk恢复等问题？
 
 \section{内存}
 
+\subsection{需求分析}
+
+需求
+\begin{myeasylist}{itemize}
+& 接口简单
+& 两层allocator
+& 多线程(TLS)
+& 不同core可以配置不同数量的内存，甚至动态化
+& 内存池多实例
+\end{myeasylist}
+
+抽象出公共接口，可以在\hl{hugepage和malloc两种模式}之间进行切换，以方便测试。
+\begin{myeasylist}{itemize}
+& 分配2M的页对齐的内存
+& 分配小块内存
+\end{myeasylist}
+
+两层内存分配器，第一层分配2M大小的文件，第二个分配任意大小的小内存。
+tiny allocator是不对齐的。buffer所用allocator按页对齐。
+
+区分\hl{有状态和无状态的代码}。在无状态代码之上构建有状态的代码。
+
+malloc模式下，无对应phyaddr，故不能直接用于NVMe等场景，需要v2p过程。
+
+\subsection{Hugepage}
+
 从初始化顺序上来看，分为hugepage初始化之前和之后。初始化后才能用hugepage相关接口。
 hugepage供两种线程使用，一般线程和core线程。
 所以分为多种区域，一个公共部分和每个polling core对应的部分。
@@ -52,7 +90,7 @@ hugepage供两种线程使用，一般线程和core线程。
 
 使用场景
 \begin{myeasylist}{itemize}
-    & sche\_task
+    & \hl{sche\_task}
     & core private memory
     & buffer\_t
     && libnvme
@@ -73,9 +111,7 @@ hugepage供两种线程使用，一般线程和core线程。
 
 动态化
 
-\begin{center}
-    \includegraphics[width=10cm]{../imgs/hugepage.png}
-\end{center}
+\mygraphics{../imgs/hugepage.png}
 
 抽象出head，core和public重用代码。第一选择head，第二执行head的操作。
 
@@ -87,9 +123,7 @@ frctl、mdctl、bactl如果用同一的逻辑申请hugepage，会造成浪费？
 
 \subsection{buffer}
 
-\begin{center}
-    \includegraphics[width=10cm]{../imgs/buffer-t.png}
-\end{center}
+\mygraphics{../imgs/buffer-t.png}
 
 每个内存区域的\hl{第一个hugepage用来保存该区域的元数据信息}，可供分配的是后面的hugepages。
 在元数据信息中加上buddy，可用来支持buddy算法。
@@ -100,9 +134,7 @@ buffer的每个seg都包含有虚拟地址和物理地址。
 
 \subsection{Tiny Memory Pool}
 
-\begin{center}
-    \includegraphics[width=10cm]{../imgs/memory-pool.png}
-\end{center}
+\mygraphics{../imgs/memory-pool.png}
 
 tiny mem公共内存区域分配的内存，由core线程去free，导致的问题。
 
@@ -126,9 +158,7 @@ direct io需要512对齐。
 
 \subsection{IO}
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/io-align.png}
-\end{center}
+\mygraphics{../imgs/io-align.png}
 
 首尾页对齐 
 
@@ -141,22 +171,16 @@ malloc的内存，不容易找到物理内存。
 
 \section{Disk}
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/etcd-suzaku-instance.png}
-\end{center}
+% \mygraphics{../imgs/etcd-suzaku-instance.png}
 
 通过独立线程scan到各个disk，放入slot中。并注册到etcd。
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/diskid-slot.png}
-\end{center}
+\mygraphics{../imgs/bactl/diskid-slot.png}
 
 全局唯一的diskid放在etcd上。根据diskid查找到slot idx。根据slot idx索引到disk。
 即可执行IO操作。
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/disk-layout.png}
-\end{center}
+\mygraphics{../imgs/bactl/disk-layout.png}
 
 IO的offset是chunk内偏移，需要转化为文件内偏移。
 
@@ -185,9 +209,7 @@ corerpc采用TCP或RDMA。
 
 \subsection{RDMA}
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/ibv-devices.png}
-\end{center}
+\mygraphics{../imgs/ibv-devices.png}
 
 % \http://donggj:taiji123Jing@gitlab.taocloud.com/qwq/suzaku.git
 
@@ -201,9 +223,7 @@ corerpc采用TCP或RDMA。
 
 主线程管理连接，加入core线程，用于rpc和polling。每个core对每个devic维护一个CQ。
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/rdma-object.png}
-\end{center}
+\mygraphics{../imgs/rdma-object.png}
 
 规则
 \begin{myeasylist}{itemize}
@@ -228,36 +248,19 @@ corerpc采用TCP或RDMA。
 
 以写流程为例。写从client直达bactl。
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/rdma-mapping.png}
-\end{center}
+\mygraphics{../imgs/rdma-mapping.png}
 
 \hrulefill
 
 ibverbs连接问题：libsuzaku动态或静态连接libibverbs，都发生问题，甚至连最普通的函数返回结果都是错的，如ibv\_get\_device\_list。
 把libsuzaku做出静态库，就可以了。为什么呢？
 
-排查问题的过程，一波三折。开始怀疑是代码问题，后来定位到libibverbs的调用边界。怎么会怀疑到libsuzaku是静态库或是动态库呢？
+排查问题的过程，一波三折。开始怀疑是代码问题，后来定位到libibverbs的调用边界。怎么会怀疑到\hl{libsuzaku是静态库或是动态库}呢？
 
 把suzaka\_ls单独拿出来，调用最简单的API，都是成问题的。偶然性地想到链接到静态库的可能性。
 
-\section{NVMf}
+\subsection{RPC}
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/nvme-list.png}
-\end{center}
+\section{Partition}
 
-NVMf卷attr，只能被该协议访问。
-
-no handler found for RDMA transport
-
-\begin{myeasylist}{itemize}
-    & modprobe nvme\_rdma
-    & modprobe nvme\_fabrics
-    & ***
-    & ERROR: RDMA listen 0.0.0.0 
-    & ERROR: link static libibverbs
-    & ***
-    & use github nvme-client
-    & ERROR: mlnx mln\_compat
-\end{myeasylist}
+\mygraphics{../imgs/partition/partition-update.png}

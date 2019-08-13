@@ -1,0 +1,57 @@
+\chapter{iSCSI}
+
+\section{Getting Started}
+
+iscsiadm
+
+setenforce 0
+
+\section{Concepts}
+
+Target/LUN: target和lun的discovery机制
+
+Session/Connection
+
+每个suzaku卷对应一个target，每个target只有一个lun？
+
+discovery的target与volume数和tgtctl的core数有关，是两者的乘积。
+
+target的port？多路径？
+
+VAAI
+
+与NVMf规范的相关性
+
+\section{Code}
+
+与suzaku相关的关键文件
+\begin{myeasylist}{itemize}
+& target.c
+& volume.c
+& efs\_io.c
+\end{myeasylist}
+
+\section{Key Processes}
+
+\subsection{Discovery}
+
+\mygraphics{../imgs/iscsi/iscsi-discovery.png}
+
+\subsection{Connect}
+
+\mygraphics{../imgs/iscsi/iscsi-connect.png}
+
+\section{iSER -- iSCSI over RDMA}
+
+iSER利用了部分iet代码，特别是对接后端存储的部分。
+
+参考\hl{iser\_cmds/iser\_scsi\_cmd\_iosubmit}函数。
+
+\section{Reference}
+
+RFC
+\begin{myeasylist}{itemize}
+& rfc 3720
+& rfc 3721
+& rfc 7143
+\end{myeasylist}

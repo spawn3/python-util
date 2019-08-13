@@ -57,7 +57,28 @@ rdma 在提交和完成之间，可能会占用大量内存，导致内存耗尽
 
 \subsection{07}
 
+运行起来\hl{softroce}，更容易构建测试环境。
+
+setenforce 0
+
 \subsection{08}
+
+core配比
+
+超线程？
+
+中断平衡，用万兆以太网卡。
+
+login后，配置设备队列深度和调度算法。
 
 \subsection{09}
 
+\subsection{12}
+
+找到了分析内存泄漏的新方法: trace方法。然后用python脚本分析，即可发现哪里分配了，而没有释放。
+
+用两个版本来解决一致性问题：epoch、clock。epoch用来标记故障，clock用来跟踪对象修订号。
+明确此两个版本的维护和规则。
+
+看各个ctl的rpc功能，即可理解各个ctl的职责，包括：frctl, rangectl, mdctl, bactl等。
+\hl{tgtctl只是解析前端请求，然后派遣给frctl去执行}。

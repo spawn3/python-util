@@ -2,7 +2,28 @@
 
 \section{Getting started}
 
+默认NVMf不监听后端网络，即suzaku.conf里配置的网络，所以至少需要一个不同的前端网络。
+
+\subsection{nvme-cli}
+
+\mygraphics{../imgs/nvme-list.png}
+
 \subsection{RDMA}
+
+NVMf卷attr，只能被该协议访问。
+
+no handler found for RDMA transport
+
+\begin{myeasylist}{itemize}
+    & modprobe nvme\_rdma
+    & modprobe nvme\_fabrics
+    & ***
+    & ERROR: RDMA listen 0.0.0.0 
+    & ERROR: link static libibverbs
+    & ***
+    & use github nvme-client
+    & ERROR: mlnx mln\_compat
+\end{myeasylist}
 
 \subsection{NVMf}
 
@@ -18,20 +39,7 @@ NVMf的initiator的安装
 && /sys/class/nvme/
 \end{myeasylist}
 
-\subsection{Code Reading}
-
-\begin{myeasylist}{itemize}
-& nvmf
-& transport (rdma)
-& request
-& subsystem
-& session
-& volume
-& suzaku\_io
-\end{myeasylist}
-
-
-\section{概念}
+\section{Concepts}
 
 NVMf的RDMA所以一个一个处理，是因为重用req？
 
@@ -59,6 +67,18 @@ NVMf：从RDMA transfer看起，怎么建立连接，怎么send and poll。
 
 discovery机制：
 
+\section{Code Reading}
+
+\begin{myeasylist}{itemize}
+& nvmf
+& transport (rdma)
+& request
+& subsystem
+& session
+& volume
+& suzaku\_io
+\end{myeasylist}
+
 \subsection{nvmf-session-connect}
 
 \mygraphicsh{../imgs/nvmf/nvmf-session-connect.png}
@@ -68,4 +88,3 @@ discovery机制：
 如果有多个tgt，可以横向扩展。
 
 单卷的性能，既受前端网络的影响(listen了所有的前端网络)，又受tgtctl数量的影响。
-

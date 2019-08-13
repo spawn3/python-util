@@ -216,3 +216,31 @@ egrep 'start_recovery|iops' ssan.log
 
 重点是提升下游节点的处理能力和中间节点的调度能力。
 以修复为例，下游处理能力对应恢复性能，调度能力对应main线程的调度能力。
+
+\section{suazku一致性方案}
+
+epoch down set
+
+GFM
+
+\subsection{一致性的判断条件}
+
+clock全等(skip dirty==1)。如果不等，则选取最大的，覆盖其余。
+
+\subsection{IO流程}
+
+\mygraphics{../imgs/rangectl/rep-sessid.png}
+
+\mygraphics{../imgs/rangectl/io-token.png}
+
+降级模式，只有降级模式下才需要序列化clock？
+
+\subsection{恢复过程}
+
+恢复是独立于core线程的外部线程，卷怎么映射到各个恢复线程上？
+
+open并scan卷。
+
+\subsection{故障检测机制}
+
+查询rangectl以确定是否需要恢复？
