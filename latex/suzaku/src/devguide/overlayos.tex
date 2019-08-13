@@ -1,24 +1,8 @@
-\chapter{实现}
+\chapter{Overlay OS}
 
-\section{ETCD}
+\section{core}
 
-\subsection{Pool}
-
-\mygraphics{../imgs/etcd/etcd-pool.png}
-
-\subsection{Metadata}
-
-\mygraphics{../imgs/etcd/etcd-metadata.png}
-
-\subsection{Coreid and Diskid}
-
-\mygraphics{../imgs/etcd/etcd-instance.png}
-
-\subsection{Network}
-
-\mygraphics{../imgs/etcd/etcd-network.png}
-
-\section{Schedule}
+\subsection{scheduler}
 
 \mygraphics{../imgs/core-t.png}
 
@@ -41,7 +25,7 @@
 & strace
 \end{myeasylist}
 
-\section{variable}
+\subsection{TLS}
 
 每个core线程的重要数据结构的指针数组。根据TLS的\_thread\_id\_进行CRUD。
 
@@ -260,7 +244,3 @@ ibverbs连接问题：libsuzaku动态或静态连接libibverbs，都发生问题
 把suzaka\_ls单独拿出来，调用最简单的API，都是成问题的。偶然性地想到链接到静态库的可能性。
 
 \subsection{RPC}
-
-\section{Partition}
-
-\mygraphics{../imgs/partition/partition-update.png}
