@@ -47,7 +47,7 @@ ROW设计问题
 \subsection{create}
 
 \begin{center}
-\includegraphics[height=10cm]{../imgs/row-snapshot.png}
+\includegraphics[height=10cm]{../imgs/snapshot/row-snapshot.png}
 \end{center}
 
 如果发生卷ID变化，上层应用需要重新打开卷，影响较大。
@@ -64,7 +64,7 @@ ROW设计问题
 \subsection{delete}
 
 \begin{center}
-\includegraphics[height=10cm]{../imgs/snaptree.png}
+\includegraphics[height=10cm]{../imgs/snapshot/snaptree.png}
 \end{center}
 
 快照包含有增量数据，除了叶子快照，不能直接删除。
@@ -86,11 +86,11 @@ ROW设计问题
 \end{enumbox}
 
 \begin{center}
-\includegraphics[width=10cm]{../imgs/snap-delete-leaf.png}
+\includegraphics[width=10cm]{../imgs/snapshot/snap-delete-leaf.png}
 \end{center}
 
 \begin{center}
-\includegraphics[width=10cm]{../imgs/snap-delete-non-leaf.png}
+\includegraphics[width=10cm]{../imgs/snapshot/snap-delete-non-leaf.png}
 \end{center}
 
 
@@ -111,11 +111,11 @@ ROW设计问题
 读取snapshot的内容。读取卷和快照是同一个过程。
 
 \begin{center}
-\includegraphics[width=10cm]{../imgs/clone-write.png}
+\includegraphics[width=10cm]{../imgs/snapshot/clone-write.png}
 \end{center}
 
 \begin{center}
-\includegraphics[width=10cm]{../imgs/clone-read.png}
+\includegraphics[width=10cm]{../imgs/snapshot/clone-read.png}
 \end{center}
 
 \subsection{flatten}
@@ -146,7 +146,7 @@ suzaku中client端充当卷控角色，在多活的情况下，有什么影响�
 \subsection{单个快照}
 
 \begin{center}
-\includegraphics[width=10cm]{../imgs/snapshot-head.png}
+\includegraphics[width=10cm]{../imgs/snapshot/snapshot-head.png}
 \end{center}
 
 元数据映射表在哪里维护？与\hl{chunk-副本元数据}一样维护？
@@ -158,7 +158,7 @@ suzaku中client端充当卷控角色，在多活的情况下，有什么影响�
 
 如何表示页的物理地址：
 \begin{center}
-\includegraphics[width=10cm]{../imgs/row-phy-page.png}
+\includegraphics[width=10cm]{../imgs/snapshot/row-phy-page.png}
 \end{center}
 
 \subsection{虚拟卷和物理卷的关系}

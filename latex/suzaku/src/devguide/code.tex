@@ -1,20 +1,40 @@
 \chapter{Code}
 
-集中兵力，各个击破
+\section{Principles}
 
-管理和技术，管理，不仅是运营管理，还有技术管理
+\begin{myeasylist}{itemize}
+& 可重用性
+& 可测试性
+& 多重安全机制
+\end{myeasylist}
 
-可重用性
+\section{进程结构}
 
-可测试性
+目前每个服务器节点启动\hl{两个进程：ioctl和mdctl}。
+ioctl包括tgtctl/frctl/rangectl/bactl等控制器。mdctl包括mdctl控制器。
 
-\section{Reading Code}
+\subsection{控制器结构}
+
+\mygraphics{../imgs/arch/transport.png}
 
 RDMA从poll开始，深度优先的遍历策略。收到消息后，按消息类型派遣到不同的handler去处理。
 
-\begin{enumbox}
-\item 每个组件有rpc，导出接口
-\end{enumbox}
+tgtctl是target与suzaku的界面，\hl{target逻辑运行在tgtctl上，支持多种target：iSCSI/iSER/NVMf}。
+
+每种controller都监听网络，外部可以与之通信。tgtctl与frctl之间通过ringbuffer进行单向通信。
+
+\mygraphics{../imgs/arch/ctl-dep.png}
+
+按服务去理解，各个服务支持什么rpc
+\begin{myeasylist}{itemize}
+& tgtctl (\hl{frctl/volume/target.c})
+& frctl (frctl/volume/volume.c)
+& rangectl (frctl/controller/range.h)
+& mdctl (mdctl/mds\_rpc.h)
+& bactl (bactl/cds\_rpc.h)
+\end{myeasylist}
+
+\section{代码规范}
 
 结构
 \begin{enumbox}

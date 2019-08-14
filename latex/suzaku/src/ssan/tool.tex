@@ -18,6 +18,7 @@
 \begin{myeasylist}{itemize}
 & SHARED  -> STATIC
 & LIBRARY -> ARCHIVE
+& \hl{cmake -Diser=ON ..}
 \end{myeasylist}
 
 \subsection{gdb}
@@ -37,6 +38,13 @@ gdb -p发现了mbuffer\_writefile进入死循环，原因是count==0。
 
 trace msgid来跟踪消息流。
 
+\subsection{perf}
+
+\begin{myeasylist}{itemize}
+& perf top
+& perf stat
+\end{myeasylist}
+
 \subsection{wireshark}
 
 \subsection{SoftRoce}
@@ -45,9 +53,15 @@ spdk/scripts/setup.sh
 
 \section{Test}
 
-\subsection{fio}
-
 \subsection{spdk/perf}
+
+./configure --with-rdma
+
+\subsection{nvme-cli}
+
+./mlnxofedinstall --with-nvmf
+
+\subsection{fio}
 
 \subsection{hazard}
 

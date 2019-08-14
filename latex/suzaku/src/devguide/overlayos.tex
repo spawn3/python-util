@@ -4,7 +4,7 @@
 
 \subsection{scheduler}
 
-\mygraphics{../imgs/core-t.png}
+\mygraphics{../imgs/oos/core-t.png}
 
 不能支持嵌套task，用pre yield变量来控制。
 
@@ -95,7 +95,7 @@ hugepage供两种线程使用，一般线程和core线程。
 
 动态化
 
-\mygraphics{../imgs/hugepage.png}
+\mygraphics{../imgs/oos/hugepage.png}
 
 抽象出head，core和public重用代码。第一选择head，第二执行head的操作。
 
@@ -107,7 +107,7 @@ frctl、mdctl、bactl如果用同一的逻辑申请hugepage，会造成浪费？
 
 \subsection{buffer}
 
-\mygraphics{../imgs/buffer-t.png}
+\mygraphics{../imgs/oos/buffer-t.png}
 
 每个内存区域的\hl{第一个hugepage用来保存该区域的元数据信息}，可供分配的是后面的hugepages。
 在元数据信息中加上buddy，可用来支持buddy算法。
@@ -118,7 +118,7 @@ buffer的每个seg都包含有虚拟地址和物理地址。
 
 \subsection{Tiny Memory Pool}
 
-\mygraphics{../imgs/memory-pool.png}
+\mygraphics{../imgs/oos/memory-pool.png}
 
 tiny mem公共内存区域分配的内存，由core线程去free，导致的问题。
 
@@ -242,5 +242,9 @@ ibverbs连接问题：libsuzaku动态或静态连接libibverbs，都发生问题
 排查问题的过程，一波三折。开始怀疑是代码问题，后来定位到libibverbs的调用边界。怎么会怀疑到\hl{libsuzaku是静态库或是动态库}呢？
 
 把suzaka\_ls单独拿出来，调用最简单的API，都是成问题的。偶然性地想到链接到静态库的可能性。
+
+\mygraphics{../imgs/rdma-recv.png}
+
+head->len是整个消息体的长度，等于wc->byte\_len。
 
 \subsection{RPC}

@@ -74,7 +74,7 @@ RAID分析作为架构驱动力
 
 分布式系统架构通常包括几个部分：client、mds、cds。分别对应什么？
 \begin{center}
-\includegraphics[width=10cm]{../imgs/modules.png}
+\includegraphics[width=10cm]{../imgs/arch/modules.png}
 \end{center}
 
 target到bactl，有两条路径，视是否通过range ctl而定。如果不通过range ctl(rangectl bypass)，数据流可直达后端存储，
@@ -199,7 +199,7 @@ vss包括4个range，range包括4个pa，pa包括固定数目的chunk。pa和chu
 \todo{vss是否必要}vss是否必要，还是增加了设计复杂度？
 
 \begin{center}
-\includegraphics[width=10cm]{../imgs/pagetable.jpeg}
+\includegraphics[width=10cm]{../imgs/oos/pagetable.jpeg}
 \end{center}
 
 采用两层元数据，第一层有一个PA对象，记录指向第二层PA对象；

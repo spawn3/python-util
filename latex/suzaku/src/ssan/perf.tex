@@ -4,6 +4,8 @@
 
 \section{设计原则}
 
+\mygraphicsh{../imgs/arch/perf-options.png}
+
 \begin{myeasylist}{itemize}
 & 平衡性
 & 局部性
@@ -17,11 +19,14 @@
 & IO FUNC
 & inline
 & likely
-& cacheline
 & HUGEPAGE
-& SPDK
+& cacheline
+& irq
+& unlock ring
 & get token
-& ring
+& SPDK
+&& driver
+&& target
 \end{myeasylist}
 
 \section{怎么分析单卷性能}
