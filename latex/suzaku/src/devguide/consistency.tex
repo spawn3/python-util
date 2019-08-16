@@ -241,7 +241,11 @@ clock全等(skip dirty==1)。如果不等，则选取最大的，覆盖其余。
 
 \subsection{如何选出权威副本}
 
+\mygraphics{../imgs/rangectl/ABA.png}
+
 ceph用up\_thru，也可以反方向标记stale，只是代价较高。
+
+如何识别在B期间是否有更新操作？
 
 \subsection{恢复过程}
 
@@ -249,3 +253,56 @@ ceph用up\_thru，也可以反方向标记stale，只是代价较高。
 
 open并scan卷。
 
+\subsection{多点写}
+
+\mygraphics{../imgs/rangectl/multipoint-write.png}
+
+先分析单点写，再扩展到多点写的情况。
+
+本质问题是什么？
+
+这种现象并不是多点写特有的，在最简单的情况下，单点写入，如果\hl{频繁断开initiator和target之间的网络}，也有可能发生数据破坏的现象。
+\hl{新的session已有一个或多个io写入，又收到了stale session发来的io}，如果不拒绝的话，就会破坏数据。
+
+leader最多只有一个，而session可以有一个或多个，无法分辨哪个是stale的？
+session3要替代session2，而session 1要长期共存。所以不能简单地通过response进行分辨。
+
+新session与旧session存在两种关系：
+\begin{myeasylist}{itemize}
+& 替代
+& 共存
+\end{myeasylist}
+
+end-to-end的验证机制。
+
+再次开启新session，session id会变吗？如何区分新旧session发出的io，包括flying io message？
+session version的语义是代表了一个卷的连接结构的变化。epoch代表了集群级故障信息的变化。
+
+tgt收到ESTALE时，drop it。依赖于上层app的timeout \hl{retry机制}。
+tgt周期性地poll该值，主动更新，可以减少ESTALE。
+
+在bactl上维护每个chunk看到的最新session version，规则：
+\begin{myeasylist}{itemize}
+& io.sversion < chunk.sversion, return ESTALE
+& io.sversion > chunk.sversion, let chunk.sversion = io.sversion
+\end{myeasylist}
+
+稳定运行时，两者相等。有新session生成时，且已到达过bactl，所有持有较小sversion的io都会被标记为ESTALE。
+
+怎么区分正常session和过期session，两者都可能小于当前最大session version。
+
+新session会影响到所有已存在的session，包括正常工作的和发生故障的，如何降低该影响？
+
+在此基础上，epoch和clock机制如何发挥作用？若一session退出，导致clock不连续
+
+与redirect的关系？
+
+NVMf的error handling机制如何？
+
+\hrulefill
+
+\mygraphics{../imgs/kb/raft-stale-leader.png}
+
+RAFT的term跟踪的是leader的变化历史，消息是leader发出的。io携带term，可以识别stale leader。
+
+sversion跟踪的是session的变化历史。

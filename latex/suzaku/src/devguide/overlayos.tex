@@ -140,19 +140,6 @@ NVMe为什么需要物理地址？
 
 direct io需要512对齐。
 
-\subsection{IO}
-
-\mygraphics{../imgs/io-align.png}
-
-首尾页对齐 
-
-buffer\_t包含一个seg时，方便处理。如果有多个seg，是否需要分配连续的大块内存。
-
-\hl{SPDK的大IO问题}：NVMe需要物理内存，并且一次io物理内存是连续的。
-malloc的内存，不容易找到物理内存。
-2M的hugepage虽然能获取虚拟地址连续的4M地址空间，但底层物理内存未必连续。
-用1G的hugepage更容易管理。
-
 \section{Disk}
 
 % \mygraphics{../imgs/etcd-suzaku-instance.png}
@@ -169,6 +156,35 @@ malloc的内存，不容易找到物理内存。
 IO的offset是chunk内偏移，需要转化为文件内偏移。
 
 磁盘有2M的头部，用于保存相关元数据。
+
+\subsection{RMW}
+
+\mygraphics{../imgs/io-align.png}
+
+首尾页对齐 
+
+buffer\_t包含一个seg时，方便处理。如果有多个seg，是否需要分配连续的大块内存。
+
+\hl{SPDK的大IO问题}：NVMe需要物理内存，并且一次io物理内存是连续的。
+malloc的内存，不容易找到物理内存。
+2M的hugepage虽然能获取虚拟地址连续的4M地址空间，但底层物理内存未必连续。
+用1G的hugepage更容易管理。
+
+\subsection{rlock}
+
+\mygraphics{../imgs/oos/rlock-create.png}
+
+\mygraphics{../imgs/oos/key-range-lock.png}
+
+多页锁、或区间锁。RMW需要用到，包括元数据和数据更新。
+
+对大io是否不够高效？
+
+是否浪费大量内存？
+
+\mygraphics{../imgs/oos/aio-write.png}
+
+aio为何不需要RMW？
 
 \section{Network}
 
@@ -188,6 +204,14 @@ corerpc采用TCP或RDMA。
 & rpc/net/sock的分层逻辑
 & NVMf采用了自己的RDMA方式
 \end{myeasylist}
+
+\subsection{典型配置}
+
+\mygraphics{../imgs/arch/multipath-deployment.jpeg}
+
+每个节点两个NUMA，每个NUMA导出一个tgtctl，\hl{每个节点可以看作一个双控架构的盘阵}。
+
+该配置下，一个卷通过一个节点可以导出4条路径。
 
 \subsection{TCP}
 

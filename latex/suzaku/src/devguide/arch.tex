@@ -1,27 +1,37 @@
 \chapter{架构}
 
+\section{架构特点}
+
+\begin{myeasylist}{itemize}
+& 节点内双控架构
+& 全局负载均衡
+& 控制路径和数据路径分离
+& 全用户态，用了spdk的libnvme和nvmf
+& kernel bypass
+\end{myeasylist}
+
 \section{功能图}
 
 \mygraphics{../imgs/suzaku/suzaku-function.png}
 
-\section{RAID分析}
+% \section{RAID分析}
 
-RAID分析作为架构驱动力
+% RAID分析作为架构驱动力
 
-假设和信念
-\begin{enumbox}
-\item 云是新常态
-\item 数据资产是战略资源
-\item 全闪是大势所趋
-\end{enumbox}
+% 假设和信念
+% \begin{enumbox}
+% \item 云是新常态
+% \item 数据资产是战略资源
+% \item 全闪是大势所趋
+% \end{enumbox}
 
-\subsection{D}
+% \subsection{D}
 
-\begin{enumbox}
-\item ETCD
-\item SPDK(Driver/Target)
-\item KV
-\end{enumbox}
+% \begin{enumbox}
+% \item ETCD
+% \item SPDK(Driver/Target)
+% \item KV
+% \end{enumbox}
 
 \section{架构演进}
 
@@ -254,3 +264,116 @@ ROW，两层元数据？
 SSAN的snapshot实现。
 
 consistency group
+
+\section{ID}
+
+\subsection{NID}
+
+参考nodeid.c。
+
+\subsection{CoreID and DiskID}
+
+coreid内置nid，diskid通过d2n\_nid函数映射到nid。都需要两次映射进行定位。
+
+\hl{core和disk都是归属于node的资源}，导出进行全局调度，why不用同一种形式？
+
+考虑支持\hl{服务器之间的disk漂移特性}。
+
+\subsection{ChunkID}
+
+\mygraphics{../imgs/arch/volume-meta.png}
+
+卷有两层元数据，由此可以算出卷的最大大小。支持精简配置。
+
+\section{ETCD}
+
+\subsection{etcd idx}
+
+更新etcd的KV是个cas过程，避免并发冲突。
+
+\subsection{Pool}
+
+\mygraphics{../imgs/etcd/etcd-pool.png}
+
+\subsection{Metadata}
+
+\mygraphics{../imgs/etcd/etcd-metadata.png}
+
+\subsection{Coreid and Diskid}
+
+\mygraphics{../imgs/etcd/etcd-instance.png}
+
+两个hash ring：rangectl and mdctl。
+
+\subsection{Network}
+
+\mygraphics{../imgs/etcd/etcd-network.png}
+
+\section{MDS}
+
+\subsection{Leader Election}
+
+\subsection{Cluster Map}
+
+\mygraphics{../imgs/partition/mds-master.png}
+
+\mygraphics{../imgs/partition/partition-update.png}
+
+mds master维护两个hash ring信息，如有变化更新到etcd上，slave定期poll该信息。
+
+\section{RangeCtl}
+
+\subsection{如何定位RangeCtl的位置？}
+
+lich里用到了广播机制和第一副本作为卷控的约定。
+
+\subsection{md-chunk-load}
+
+如何定位一个chunk的chkinfo信息？
+
+\mygraphics{../imgs/partition/md-chunk-load.png}
+
+\section{IO}
+
+\subsection{Allocate}
+
+diskmap
+
+\subsection{Write}
+
+\subsection{Read}
+
+\section{Recover}
+
+\mygraphics{../imgs/rangectl/chunk-get-token.png}
+
+io内恢复
+
+\mygraphics{../imgs/rangectl/recovery-file.png}
+
+外部线程触发恢复，\hl{io、恢复、平衡都是rangectl协作}进行。
+
+需求
+\begin{myeasylist}{itemize}
+& 可以实时获取恢复进度
+& 可以设定恢复QoS
+& 可以设定卷的恢复优先级
+& 可以start/stop/restart pool的恢复任务
+\end{myeasylist}
+
+\hrulefill
+
+HOWTO
+
+\mygraphics{../imgs/task/recovery-thread-structure.png}
+
+启动恢复的主线程
+
+有故障时，唤醒影响所及的pool恢复线程。disk故障可以定向修复，也可以先同节点故障。
+
+每个存储池有存储池的主线程，负责pool内所有卷的修复。
+分为scan和recover多阶段，可以组织成pipeline的结构。
+
+scan出所有的chkid，给对应的rangectl发送请求，可以在一次请求中发送多个chkid。
+
+\section{Balance}
