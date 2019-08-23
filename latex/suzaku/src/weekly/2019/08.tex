@@ -1,0 +1,30 @@
+\chapter{2019}
+
+\section{08}
+
+\newpage
+
+\subsection{0819}
+
+\mygraphics{../imgs/weekly/weekly-20190819.png}
+
+\subsubsection{概要}
+
+\begin{myeasylist}{itemize}
+& 冻结长城测试版本rc2，继续进行全面测试（故障+性能）
+& 下周转向可靠性机制的开发工作
+\end{myeasylist}
+
+\subsubsection{详情}
+
+\begin{myeasylist}{itemize}
+& \hl{银河麒麟不支持ib驱动}
+& 故障测试增加拔网测试，发现了若干问题，已修正，还在继续验证中
+& tgtctl不用task，对性能有一定提升，但测试过程中发现52节点有关bactl负载过高，原因还在分析中
+&& \hl{fio client cpu已耗尽，三节点iops 300w左右}，中断在cpu上分布情况与fio的压测卷数和num jobs设定有关
+&& tgtctl不是瓶颈后，压力传导到bactl？
+& \hl{除了性能、可靠性之前，产品化还有大量工作要做}，比如：
+&& 资源管理（节点、磁盘、pool、volume等的增删改查操作）
+&& 支持扩展性（scale out加节点、scale up）
+&& 支持工具（分析数据平衡性、各组件的性能等等，以提升诊断问题的效率）
+\end{myeasylist}

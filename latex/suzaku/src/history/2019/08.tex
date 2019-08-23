@@ -82,3 +82,103 @@ login后，配置设备队列深度和调度算法。
 
 看各个ctl的rpc功能，即可理解各个ctl的职责，包括：frctl, rangectl, mdctl, bactl等。
 \hl{tgtctl只是解析前端请求，然后派遣给frctl去执行}。
+
+\subsection{19}
+
+识别不到nvme，掉电后可以重新识别，是memblaze的bug？
+
+128k以上的io，libnvme写入不成功，内部按128k做了拆分，为什么？
+
+hazard在本地有ib的情况下，报错，与ifconfig有关？ifconfig 2> /dev/null后也不行，为什么？
+转而用vm测试。\hl{整个过程需要管理起来}。
+
+tgtctl去task改造后性能有一定提升，如何表达sche\_sleep等错误处理逻辑呢？
+
+dm8如何使用导出的盘？需要启用RDMA，否则性能不够好。
+性能优化还能做什么？fio client irq影响大。
+
+取法乎上，高标准是正确选择。
+
+排查一致性问题效率太低。
+
+单节点上一个卷可以导出4条路径，配置成多路径后，性能无法达到聚合性能，大约20w左右。
+所以，linux的multipath无法产品化。
+
+目前target以\hl{iSCSI/iSER}为主，NVMf还不够成熟，用户态的NVMf initiator？
+
+\subsection{20}
+
+读华为文档，对标华为，学一家就可。
+
+AIO的盘符会变化，需要记录到磁盘元数据上。
+
+\subsection{21}
+
+银河麒麟不支持ib。所以需要\hl{前端iSCSI、后端RDMA}。
+
+\subsection{22}
+
+client scale out，server scale up。
+
+client的cpu耗尽。中断分布均匀性与num jobs有关。
+
+blktrace研究fio的行为。
+
+iet的默认配置参数，有无影响性能的？如r2t。
+
+卷，从18卷到24卷，每个client压测8个卷，在tgt ring的情况下iops 120w。
+两节点时，影响较小。三节点时，其中两节点性能下降一半左右。why？
+观察到mem ring scan，则52上bactl压力较大。
+
+再次回到六个卷，52上bactl依然压力大。
+
+\hl{单个bactl线程上的counter特别大}，普通比另外两个节点上的大很多。
+
+采用tgt ring版才会出现影响较大的情况，难道是tgtctl不再是瓶颈后，
+压力传导到bactl，数据不均衡所致？
+
+200G的卷，切换成80G的卷试试，是否大卷跨range修改引发的问题。
+
+开发判断数据分布平衡性的工具，如不平衡，执行再平衡操作。
+
+\hrulefill
+
+\hl{资源管理，产品化方面有很大工作量}。
+
+CRUD操作
+
+scale out：add node
+
+scale up：add disk
+
+删除disk、node、纳入recovery和balance任务。
+
+pool操作
+
+volume操作
+\begin{myeasylist}{itemize}
+& rm
+\end{myeasylist}
+
+\subsection{23}
+
+bactl通过cds\_rpc提供服务。
+
+diskid是全局资源，注册在etcd上。副本位置即按diskid指定。
+
+0.config的0是disk slot里的索引，由diskid找到该idx，并进而定位到对应的disk。
+disk->device是可变的，需要时刻保持正确无误。
+
+diskid可以转化为对应的nid(对应bactl coremask)，chkid hash到对应的bactl coreid上。
+diskid保存在diskinfo元数据区。bactl再访问对应的disk，由此可见，bactl与disk之间是多对多的关系，
+不是让一个bactl负责整块disk，单块disk是并发访问的。有性能问题吗？最佳访问模式是什么？
+
+diskid (global) -> disk slot (local) -> disk，通过mapping实现了disk slot的zero-based。
+\hl{这层mapping限制了disk总数和diskid取值范围}。
+
+为什么会观察到某个bactl负载过高的现象呢？
+
+有独立线程周期性scan /opt/suzaku/data/ioctl/config目录下的disk配置文件，可以发现新的盘。
+\hl{无diskinfo的新盘如何处理}？ scan阶段找不到对应diskinfo信息，按new disk处理？
+
+Redis里存放了什么信息？

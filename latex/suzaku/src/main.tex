@@ -49,7 +49,7 @@
 
 \usepackage[ampersand]{easylist}
 
-\tcbset{colback=yellow!5!white,colframe=yellow!75!black,boxrule=0.1mm}
+\tcbset{colback=red!5!white,colframe=blue!75!black,boxrule=0.1mm}
 
 \newenvironment{myeasylist}[1]{
     \Activate
@@ -72,7 +72,7 @@
 \newcommand{\mygraphicsh}[1]
 {
     \begin{center}
-        \includegraphics[height=10cm]{#1}
+        \includegraphics[height=11cm]{#1}
     \end{center}
 }
 
@@ -161,21 +161,15 @@
 
 \listoftodos[Notes]
 
-%\part{项目}
-
-%\include{ssan/pm}
-%\include{ssan/test}
-%\include{ssan/misc}
-%\include{ssan/third}
-
 \part{开发者指南}
 
-%\include{devguide/getting-started}
+\include{devguide/getting-started}
 
 \include{devguide/arch}
-%\include{devguide/overlayos}
-%\include{devguide/consistency}
+\include{devguide/overlayos}
+\include{devguide/consistency}
 \include{devguide/perf}
+\include{devguide/functional}
 %\include{devguide/thin}
 
 % \include{ssan/qos}
@@ -185,25 +179,36 @@
 % \include{devguide/rr}
 % \include{devguide/code}
 
-% \part{用户指南}
+\part{用户指南}
 
 % \include{ssan/config}
 % \include{ssan/iscsi}
 % \include{ssan/nvmf}
 
-%\part{知识库}
+\part{项目}
+
+%\include{ssan/pm}
+%\include{ssan/test}
+%\include{ssan/misc}
+%\include{ssan/third}
+
+\part{知识库}
 
 %\include{ssan/learning}
 %\include{ssan/tool}
 %\include{linux/linux}
 %\include{linux/version}
-% \include{linux/lease}
+%\include{linux/lease}
 
-% \part{备忘录}
+\part{周报}
 
-%\include{history/main}
-%\include{history/2019/07}
-%\include{history/2019/08}
-% \include{history/2019/09}
+\include{weekly/2019/08}
+
+\part{备忘录}
+
+\include{history/main}
+\include{history/2019/07}
+\include{history/2019/08}
+%\include{history/2019/09}
 
 \end{document}

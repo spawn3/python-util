@@ -1,8 +1,15 @@
 \chapter{架构}
 
-\section{架构特点}
+\section{系统架构}
+
+\mygraphics{../imgs/arch/system-arch.png}
+
+\mygraphics{../imgs/suzaku/suzaku-function.png}
+
+\section{架构优势}
 
 \begin{myeasylist}{itemize}
+& 独立的元数据服务
 & 节点内双控架构
 & 全局负载均衡
 & 控制路径和数据路径分离
@@ -10,11 +17,33 @@
 & kernel bypass
 \end{myeasylist}
 
-\section{功能图}
+\section{Reactive Manifesto}
 
-\mygraphics{../imgs/suzaku/suzaku-function.png}
+\mygraphics{../imgs/arch/reactive-traits.png}
 
-% \section{RAID分析}
+作为实现方法，怎么理解message-driven。
+
+如何突破传统架构的束缚，就成为摆在华为存储团队面前最大的挑战。为此，在OceanStor Dorado V6项目开始之际，
+华为存储团队就确定了攻克方向：\hl{将Scale-Up和Scale-Out进行融合，设计出一种兼具两者优势的全新架构}，
+这个目标激发了团队成员巨大动力。
+
+\subsection{Responsive}
+
+\subsection{Resilient}
+
+有无单点故障？
+
+\subsection{Elastic}
+
+scale up, scale out
+
+节点内多控架构，可以扩展到更多core上。
+
+集群扩容，阵列有扩控等操作。
+
+单卷大小和性能
+
+\section{RAID分析}
 
 % RAID分析作为架构驱动力
 
@@ -25,7 +54,9 @@
 % \item 全闪是大势所趋
 % \end{enumbox}
 
-% \subsection{D}
+\subsection{依赖性}
+
+\mygraphics{../imgs/arch/feature-deps.png}
 
 % \begin{enumbox}
 % \item ETCD
