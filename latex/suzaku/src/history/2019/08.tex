@@ -182,3 +182,83 @@ diskid (global) -> disk slot (local) -> disk，通过mapping实现了disk slot�
 \hl{无diskinfo的新盘如何处理}？ scan阶段找不到对应diskinfo信息，按new disk处理？
 
 Redis里存放了什么信息？
+
+\subsection{24}
+
+把suzaku作为一个整体来考虑其产品化的进度。
+
+哪些是全闪特有的设计考虑？
+
+恢复性能：要考虑原chunk和目标chunk的并行度。如一个磁盘故障的情况下，目标节点是否优先选择原来的节点？
+并行度极大地影响性能。
+
+单节点单盘能运行系统吗？
+
+阵列产品中，控制器是个重量级的概念，通过控制器导出lun。
+从控制器的角度来看陈列和分布式架构。suzaku的每个节点导出的\hl{tgtctl可以看作控制器}。
+
+rangectl hash ring采用静态hash如何？
+
+core连接数会不会成为扩展的瓶颈？
+
+iscsi的恢复机制，阻塞io不返还，initiator如何处理？
+
+python/c的边界，什么时候用python，什么时候用c？
+
+命令行工具的输出，是否采用json格式？
+
+多点写：盘阵采用共享内存，不涉及该问题，分布式系统采用该问题？
+
+\subsection{27}
+
+注意\hl{cmake里相关特性开关，以及suzaku.yml的配置选项}。
+
+load disk时，如果clusterid没有变化，如果disk uuid发生变化，则load失败。
+如果clusterid发生变化，则作为new disk加入。
+
+单节点单磁盘可以启动，两个网络，solomode，副本数为1。\hl{通过同一节点login iscsi，似乎有问题}。volume\_read1 timeout。
+通过另一节点则可以。
+
+iSCSI采用ring wait的同步方式，iSER采用异步方式与frctl通信。
+
+\hl{强化docker/simpletest test}，把单元测试也集成进去。
+
+如何互查volid和name？
+
+统一的任务处理框架？
+
+采用\hl{ssan.work的mq和线程池}框架？
+
+zk可以作为mq使用？
+
+为什么节点内磁盘漂移，修正后，数据vdbench校验不对？
+
+\subsection{28}
+
+DM8如何利用多卷？
+
+iSCSI/iSER是不是适合cpu的混合模式？每个tgtctl能力有限，用更多的tgtctl。
+
+iSER直接返回，也只有28w iops？why？与r2t有关？
+
+与spc-1相比，spc-1是混合读写模式。用到48个卷，iops跑到80w+，disk已充分利用。
+disk大小不相等，如果相等，则可以有更好表现。
+
+宏杉600w+，是混合读写模式。其硬件配置如何？
+
+fio client的中断处理？
+
+数据存放位置：
+\begin{myeasylist}{itemize}
+& etcd
+& /opt/suzaku/data/ioctl
+& /dev/shm/suzaku
+\end{myeasylist}
+
+\hl{代码才最重要，要坚持写代码}，在清晰思路下写代码。
+所以至少需要在两个层面上思考，\hl{一是产品化，二是代码实现}。
+
+管理丧失了焦点和主线。deadline
+
+场景思维，用户思维，\hl{用起来怎么样}？不能陷入技术思维。
+这是amazon的那个不变的一。用户是产品的使用者，客户是埋单的人。

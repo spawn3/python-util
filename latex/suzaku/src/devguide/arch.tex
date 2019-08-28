@@ -185,6 +185,8 @@ hash ring上有一个节点充当master角色。如何选主，如何保持其�
 
 \mygraphics{../imgs/suzaku/disk-connect.png}
 
+redis的数据模型？
+
 diskid是全局的，在etcd上有目录。
 
 diskmd磁盘访问接口，支持libnvme驱动。
@@ -386,10 +388,15 @@ io内恢复
 
 需求
 \begin{myeasylist}{itemize}
-& 可以实时获取恢复进度
-& 可以设定恢复QoS
-& 可以设定卷的恢复优先级
+& 每个pool扫描属于本pool的卷，一个卷由一个节点负责
+& 节点故障和磁盘故障的scan阶段不同，恢复阶段相同
 & 可以start/stop/restart pool的恢复任务
+& 可以实时获取恢复进度
+& 可以设定卷的恢复优先级
+& 可以设定恢复QoS
+& 按rangectl分组
+& 批量发送
+& 修复失败加入fail list，后头再处理
 \end{myeasylist}
 
 \hrulefill
@@ -406,5 +413,7 @@ HOWTO
 分为scan和recover多阶段，可以组织成pipeline的结构。
 
 scan出所有的chkid，给对应的rangectl发送请求，可以在一次请求中发送多个chkid。
+
+每个rangectl维护一个队列。
 
 \section{Balance}

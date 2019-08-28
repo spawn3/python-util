@@ -121,7 +121,7 @@
 \usepackage[simplified]{pgf-umlcd}
 
 \title{LICH架构文档}
-\author{董冠军}
+\author{DGJ}
 \date{\today}
 
 \begin{document}
@@ -131,17 +131,17 @@
 
 \listoftodos[Notes]
 
-\part{项目管理}
+%\part{项目管理}
 
-\include{todo/cmnet}
-\include{todo/todo}
-\include{todo/problem}
+%\include{todo/cmnet}
+%\include{todo/todo}
+%\include{todo/problem}
 
-\part{测试}
+%\part{测试}
 
-\include{test/checklist}
-\include{test/test}
-\include{test/perf}
+%\include{test/checklist}
+%\include{test/test}
+%\include{test/perf}
 
 \part{FusionStor}
 
@@ -154,14 +154,15 @@
 
 \include{fusionstor/context}
 \include{fusionstor/functional}
-\include{fusionstor/disk}
-  %\include{fusionstor/volume}
-  \include{fusionstor/snapshot}
 \include{fusionstor/info}
 \include{fusionstor/concurrency}
 \include{fusionstor/develop}
 \include{fusionstor/deploy}
 \include{fusionstor/faq}
+
+\include{fusionstor/disk}
+%\include{fusionstor/volume}
+\include{fusionstor/snapshot}
 
 \include{fusionstor/ssd}
 \include{fusionstor/nvme}
@@ -187,32 +188,32 @@
 % \include{fusionstor/controller}
 % \include{fusionstor/schedule}
 
-\part{LichMaster}
+%\part{LichMaster}
 
-\include{lich_master/readme}
-\include{lich_master/snapshot}
-\include{lich_master/lsv}
+%\include{lich_master/readme}
+%\include{lich_master/snapshot}
+%\include{lich_master/lsv}
 
-\part{生态系统}
+%\part{生态系统}
 
-\include{other/snmp}
-\include{other/lvm}
-\include{other/tgt}
-\include{other/ceph}
-\include{other/nutanix}
+%\include{other/snmp}
+%\include{other/lvm}
+%\include{other/tgt}
+%\include{other/ceph}
+%\include{other/nutanix}
 %\include{sheepdog}
 %\include{openvstorage}
 %\include{VSAN}
 
-\part{PBL}
+%\part{PBL}
 
-\include{ask/todo}
-\include{ask/os}
-\include{ask/lich}
+%\include{ask/todo}
+%\include{ask/os}
+%\include{ask/lich}
 
 \part{理论基础}
 
-\include{basic/learning}
+% \include{basic/learning}
 
 % basic
 \include{tool}
@@ -242,21 +243,21 @@
 
 \include{flow}
 
-\part{航海日志}
+%\part{航海日志}
 
-\include{history/2012}
+%\include{history/2012}
 
-\include{history/2016}
+%\include{history/2016}
 
-\include{history/2017}
+%\include{history/2017}
 
-\include{history/2018}
-\include{history/2018/08}
-\include{history/2018/09}
-\include{history/2018/10}
-\include{history/2018/11}
-\include{history/2018/12}
+%\include{history/2018}
+%\include{history/2018/08}
+%\include{history/2018/09}
+%\include{history/2018/10}
+%\include{history/2018/11}
+%\include{history/2018/12}
 
-\include{history/2019/01}
+%\include{history/2019/01}
 
 \end{document}
