@@ -300,6 +300,8 @@ consistency group
 
 \section{ID}
 
+\subsection{Pool ID}
+
 \subsection{NID}
 
 参考nodeid.c。
@@ -312,11 +314,13 @@ coreid内置nid，diskid通过d2n\_nid函数映射到nid。都需要两次映射
 
 考虑支持\hl{服务器之间的disk漂移特性}。
 
-\subsection{ChunkID}
+\subsection{Volume ID}
 
 \mygraphics{../imgs/arch/volume-meta.png}
 
 卷有两层元数据，由此可以算出卷的最大大小。支持精简配置。
+
+\subsection{Chunk ID}
 
 \section{ETCD}
 
@@ -354,7 +358,11 @@ coreid内置nid，diskid通过d2n\_nid函数映射到nid。都需要两次映射
 
 mds master维护两个hash ring信息，如有变化更新到etcd上，slave定期poll该信息。
 
-\section{RangeCtl}
+\subsection{Disk Map}
+
+disk scanner
+
+\section{Range Ctl}
 
 \subsection{如何定位RangeCtl的位置？}
 

@@ -235,8 +235,6 @@ zk可以作为mq使用？
 
 \subsection{28}
 
-DM8如何利用多卷？
-
 iSCSI/iSER是不是适合cpu的混合模式？每个tgtctl能力有限，用更多的tgtctl。
 
 iSER直接返回，也只有28w iops？why？与r2t有关？
@@ -255,10 +253,24 @@ fio client的中断处理？
 & /dev/shm/suzaku
 \end{myeasylist}
 
-\hl{代码才最重要，要坚持写代码}，在清晰思路下写代码。
-所以至少需要在两个层面上思考，\hl{一是产品化，二是代码实现}。
+\subsection{29}
 
-管理丧失了焦点和主线。deadline
+DM8如何利用多卷？
 
-场景思维，用户思维，\hl{用起来怎么样}？不能陷入技术思维。
-这是amazon的那个不变的一。用户是产品的使用者，客户是埋单的人。
+dm8的数据文件只能放在一块盘上，怎么提升单卷性能？raid、lvm、multipath？
+
+即使是asm，也是如此，数据文件只能放在单卷上。
+
+实际不行用nvmf。
+
+\hl{opensmd没有启动，导致RDMA无法连接，网络就不通}。
+NVMf的检查清单
+\begin{myeasylist}{itemize}
+& 网络是否通：opensmd
+& server短是否监听了相关port
+& mlnx安装时是否开启了--with-nvmf选项
+& nvme-cli 是否开启了--with-rdma选项
+\end{myeasylist}
+
+\subsection{30}
+

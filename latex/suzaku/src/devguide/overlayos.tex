@@ -149,7 +149,11 @@ direct io需要512对齐。
 \mygraphics{../imgs/bactl/diskid-slot.png}
 
 全局唯一的diskid放在etcd上。根据diskid查找到slot idx。根据slot idx索引到disk。
-即可执行IO操作。
+即可执行IO操作。 slot idx是局部编号，0-based，与磁盘配置文件相关。diskid是稀疏的。
+
+disk\_t是polling core相关数据结构，用于io。\_\_disk\_t是全局数据结构，用于控制。
+
+为什么diskid不采用coreid一样的编号机制？那样diskid将与nid绑定，不能在节点之间漂移。
 
 \mygraphics{../imgs/bactl/disk-layout.png}
 

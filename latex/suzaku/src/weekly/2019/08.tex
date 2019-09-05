@@ -28,3 +28,44 @@
 && 支持扩展性（scale out加节点、scale up）
 && 支持工具（分析数据平衡性、各组件的性能等等，以提升诊断问题的效率）
 \end{myeasylist}
+
+\subsection{0826}
+
+\subsubsection{团队管理思路}
+
+\begin{myeasylist}{itemize}
+& 基本理念：PDCA循环
+& 明确目标(短/中/长期)和里程碑节点
+& 团队分工协作，先予后取，为美好结果而奋斗
+& 细化时间管理粒度，排除干扰，保持专注，提高工作效能
+\end{myeasylist}
+
+\subsubsection{概要}
+
+\begin{myeasylist}{itemize}
+& 确定长城测试方案
+& 切实推进suzaku开发进度，\hl{把握好里程碑节点(Q3的目标)}
+\end{myeasylist}
+
+\subsubsection{长城测试项目详情}
+
+\begin{myeasylist}{itemize}
+& DM8的数据文件只能用单卷，目前\hl{suzaku通过iSER导出的单卷性能，tpcc测试tpm 26w，期望能达到50w+}。
+& 融合部署方案不可行，benchmark工具、DB、存储都很耗CPU。
+& 如何提升单卷性能？LVM/multipath/NVMf?
+& \hl{测试方法是否能发挥我们系统的优势}？数据量、并发度、整个路径瓶颈何在？
+& 验证RoCE
+\end{myeasylist}
+
+\subsubsection{suzaku开发进度详情}
+
+\begin{myeasylist}{itemize}
+& 支持添加节点操作
+& 一致性协议完成设计，开始编码，deadline？
+& 统一后台任务处理方式，队列，异步，包括：恢复、平衡、GC等
+& Recovery开始编码，deadline？
+\end{myeasylist}
+
+\subsubsection{附图}
+
+\mygraphics{../imgs/weekly/weekly-20190826.png}
