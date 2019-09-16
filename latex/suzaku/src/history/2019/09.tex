@@ -1,0 +1,121 @@
+\section{09}
+
+\subsection{02}
+
+开始recovery模块的开发。通过一两天搞定编码。逐步迭代。
+scan阶段要做到不重不漏。
+
+如何回收chunk？不重不漏的原则，redo要安全。
+
+先mark，再删除redis，再回收bitmap。需要同步alloc和delete两种操作。
+在存在mark的情况下，对应的磁盘空间不能被reuse。
+
+统一后台任务处理框架已基本搭建好。\hl{明天可完成删除卷的工作}。
+
+测试方面：磁盘漫游。nvme需要先切换回kernel态，需要先还给kernel？
+
+用ramdisk测试dm8，性能如何？
+
+采用oracle作横向对比？能得出什么结论？存储-DB-测试工具三个层面，瓶颈何在？
+
+最重要的是什么？
+
+\subsection{03}
+
+\subsection{04}
+
+mellanox的1012支持ib、以太模式切换，6012不支持。现在发现1012也不支持，license问题？
+
+\hl{如何从ib切换到以太}，交换机和网卡，配置HOWTO手册。
+
+明日用rc2分支发版，测试手册里要说明已知条件和问题，同时指明如何配置。
+
+\subsection{05}
+
+\subsection{06}
+
+\subsection{07}
+
+新来的盘，导致没通过hazard一致性测试。如何验证盘本身的可靠性？还是driver和disk之间的兼容问题。
+
+\subsection{08}
+
+\subsection{09}
+
+长城测试进展：
+\begin{myeasylist}{itemize}
+& 硬件：
+&& 一个交换机能切换到RoCE
+&& 飞腾上安装CentOS 7.5?
+& suzaku rc2：周五hazard测试发现不一致现象，经反复定位，换回原来的nvme盘，可以稳定运行
+& Oracle性能对比测试？
+\end{myeasylist}
+
+估算内存使用量的方法
+
+\hrulefill
+
+平衡：多趟scan，第一趟得到卷的所有chunk的副本在disk上的分布情况。
+第二趟依次从最满的disk往最空的disk上迁移副本，直到各disk的used或利用率的差值小于等于预定值。
+
+一个chunk可以移动的条件：
+\begin{myeasylist}{itemize}
+& 该副本位于大于disk平均利用率的disk上
+& 满足故障域规则
+\end{myeasylist}
+
+需要考虑range的平衡性吗？交叉选取chunk？
+
+这样，即可以满足卷上数据的平衡性，又可以满足disk利用率的平衡性。
+
+\subsection{11}
+
+平衡和恢复机制
+\begin{myeasylist}{itemize}
+& job manager
+& range\_chunk\_move
+& cds\_gc
+\end{myeasylist}
+
+gc支持sync和async两种模式。
+
+如何在各节点之间分配任务？
+\begin{myeasylist}{itemize}
+& 获取pool内nodelist
+& 按nid升序排列，依次获取编号0、1等
+& 获取pool内所有卷列表
+& \hl{每个节点选取属于自己的那部分数据}进行处理
+\end{myeasylist}
+
+if 节点列表发生变化
+
+if 磁盘列表发生变化
+
+if pool发生变化
+
+if 卷列表发生变化
+
+少数大卷的情况，如何尽量均衡负载？
+
+平衡和恢复有何不同？
+
+\subsection{12}
+
+分工并明确责任到人，做好\hl{制度设计}。
+
+分工是相对的划分，不是一成不变的，有主次之分。
+
+开展团队学习活动。
+
+\hl{计算机体系结构精髓}是本好书。
+
+coremask的HOWTO，哪些配置是不合法的？
+
+两个网卡配了同一ip地址
+
+\subsection{16}
+
+whitepaper和性能之巅的培训ppt。
+
+
+

@@ -1,0 +1,79 @@
+\section{09}
+
+\subsection{0902}
+
+\subsubsection{概要}
+
+\begin{myeasylist}{itemize}
+& 切实推进suzaku开发进度，\hl{把握好里程碑节点(Q3目标)}
+& 发布rc2分支，用于长城测试和紫光云测试
+\end{myeasylist}
+
+\subsubsection{suzaku项目详情}
+
+\begin{myeasylist}{itemize}
+& \hl{质量和效率是两大主题}
+& 支持删除卷操作
+& 后台任务调度框架：支持rmvol、start recovery、stop recovery
+& 支持节点内磁盘漂移
+&& suzaku\_disk dump的\hl{前置条件是nvme盘处在非kernel模式}，否则结果未知，产生破坏性后果
+& 修正bitmap rebuild过程导致的数据破坏，变量的换算关系：$bitmapindex = offset / pagesize$
+& GFM机制的实现涉及面广，验证困难，何时收敛存在不确定性 %(小步迭代，及时验证)
+\end{myeasylist}
+
+\subsubsection{长城测试项目详情}
+
+\begin{myeasylist}{itemize}
+& 公司内的交换机RoCE支持情况
+&& \hl{M 1012通过交换机官方文档中的命令行可以切换，目前只有一台支持}
+& 掉盘现象: restart or 掉电
+& 飞腾安装Centos 7.5？
+& 性能？
+&& 对比DM8和oracle
+\end{myeasylist}
+
+\subsubsection{附图}
+
+\mygraphics{../imgs/weekly/weekly-20190902.png}
+
+\mygraphics{../imgs/weekly/TODO.png}
+
+\mygraphics{../imgs/weekly/S.jpg}
+
+\mygraphics{../imgs/weekly/PDCA.png}
+
+\subsection{0909}
+
+\subsubsection{概要}
+
+\begin{myeasylist}{itemize}
+& \hl{质量和效率是两大主题}
+& 明确下一阶段的工作职责，\hl{每人建好自己的根据地，同时加强团队学习}，达到分工共创的目的
+& 固化优化日常工作流程，减少精力和时间的浪费
+& 切实推进suzaku开发进度，\hl{把握好里程碑节点(Q3目标)}
+& 紫光云测试进行中
+\end{myeasylist}
+
+\subsubsection{suzaku项目详情}
+
+\begin{myeasylist}{itemize}
+& 后台任务调度框架：支持start balance、同步GC
+& GFM在实现chunk状态机、mds策略，预计下周能收敛
+& 多点写方案还需改进
+\end{myeasylist}
+
+\subsubsection{长城测试项目详情}
+
+\begin{myeasylist}{itemize}
+& 飞腾安装Centos 7.5，验证RoCE v2通过
+& 所需硬件(服务器、交换机、网卡)没有到位，磁盘故障还在诊断中
+& 性能？
+&& 对比DM8和oracle
+&& Oracle测试性能是达梦的一半，TPM 35w，压力传导不到存储，why？
+\end{myeasylist}
+
+\subsubsection{附图}
+
+\mygraphics{../imgs/weekly/weekly-20190909.png}
+
+\mygraphics{../imgs/weekly/MAP.png}
