@@ -381,6 +381,20 @@
 \end{frame}
 
 \begin{frame}[fragile]
+    \frametitle{怎么分析单卷性能?}
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{../imgs/io-path.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{多控架构}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/multipath-deployment.jpeg}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
     \frametitle{0806}
     \begin{center}
         \includegraphics[width=0.8\textwidth]{../imgs/step3-0806.png}
@@ -397,17 +411,27 @@
 \subsection{结论}
 
 \begin{frame}[fragile]
-    \frametitle{几点结论}
+    \frametitle{启示}
     \begin{myeasylist}{itemize}
-        & Test Tool
         & 架构对性能有巨大影响
+            && 平衡
+            && 局部性
+            && 并行
+            && 流水线
+        & 工欲善其事必先利其器
+            && trace (系统的可追踪性)
+            && perf
+            && Test Tool
+        & 理论
     \end{myeasylist}
 \end{frame}
 
+\section{其它}
+
 \begin{frame}[fragile]
-    \frametitle{PDCA循环}
+    \frametitle{工具}
     \begin{center}
-        \includegraphics[width=0.6\textwidth]{../imgs/PDCA.png}
+        \includegraphics[width=0.6\textwidth]{../imgs/tool.png}
     \end{center}
 \end{frame}
 
@@ -423,7 +447,12 @@
     \end{myeasylist}
 \end{frame}
 
-\section{其它}
+\begin{frame}[fragile]
+    \frametitle{PDCA循环}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/PDCA.png}
+    \end{center}
+\end{frame}
 
 %\begin{frame}[fragile]
 %    \frametitle{一致性分割}
