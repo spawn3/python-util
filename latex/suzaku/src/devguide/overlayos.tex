@@ -1,4 +1,4 @@
-\chapter{Overlay OS}
+\chapter{存储OS}
 
 \section{core}
 
@@ -221,7 +221,7 @@ corerpc采用TCP或RDMA。
 
 \subsection{RDMA}
 
-\mygraphics{../imgs/ibv-devices.png}
+\mygraphics{../imgs/rdma/ibv-devices.png}
 
 % \http://donggj:taiji123Jing@gitlab.taocloud.com/qwq/suzaku.git
 
@@ -235,7 +235,7 @@ corerpc采用TCP或RDMA。
 
 主线程管理连接，加入core线程，用于rpc和polling。每个core对每个devic维护一个CQ。
 
-\mygraphics{../imgs/rdma-object.png}
+\mygraphics{../imgs/rdma/rdma-object.png}
 
 规则
 \begin{myeasylist}{itemize}
@@ -260,7 +260,7 @@ corerpc采用TCP或RDMA。
 
 以写流程为例。写从client直达bactl。
 
-\mygraphics{../imgs/rdma-mapping.png}
+\mygraphics{../imgs/rdma/rdma-mapping.png}
 
 \hrulefill
 
@@ -271,7 +271,7 @@ ibverbs连接问题：libsuzaku动态或静态连接libibverbs，都发生问题
 
 把suzaka\_ls单独拿出来，调用最简单的API，都是成问题的。偶然性地想到链接到静态库的可能性。
 
-\mygraphics{../imgs/rdma-recv.png}
+\mygraphics{../imgs/rdma/rdma-recv.png}
 
 head->len是整个消息体的长度，等于wc->byte\_len。
 

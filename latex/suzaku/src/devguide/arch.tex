@@ -24,7 +24,29 @@
 
 提供标准的iSCSI、iSER、NVMf target，可用于各种场景下的块存储服务。
 
+\subsubsection{iSCSI/iSER}
+
+\mygraphics{../imgs/target/iscsi-structure.png}
+
 \subsubsection{NVMe over Fabrics}
+
+\mygraphics{../imgs/target/nvmf.png}
+
+\mygraphics{../imgs/target/nvmf-target.png}
+
+NVMf的贡献在于提供除PCIe外访问NVM的另一个途径-Fabrics，并且将fabrics链路在latency上增加的overhead维持在10us以内。
+
+提供fabrics途径后，可以在其他节点直接访问NVMe设备，
+那么最基本的应用就是替代传统的iSCSI，在闪存系统中导出NVMe。
+
+现在支持NVMf运行在RDMA transport(IB or RoCE v2)之上。
+
+分为host端和target端，host端采用工具nvme-cli，target端采用SPDK的NVMf target，
+完成协议解析后，对接到后端suzaku存储系统。
+
+一个卷可以通过任一NVMf target进行挂载，赋予全局唯一标识NQN。
+
+% redirect
 
 \subsection{分布式架构}
 
@@ -76,9 +98,9 @@ suzaku采用ETCD选举master节点，选出的master节点负责分配磁盘空�
 
 \subsection{元数据服务}
 
-\mygraphics{../imgs/dir-metadata.png}
+\mygraphics{../imgs/arch/dir-metadata.png}
 
-\mygraphics{../imgs/vol-metadata.png}
+\mygraphics{../imgs/arch/vol-metadata.png}
 
 系统内置元数据服务，元数据分为几个部分：
 \begin{myeasylist}{itemize}
