@@ -170,6 +170,93 @@ CPU指令集架构：存储系统也可抽象成指令集，指令集的设计�
 
 开启snapshot？
 
+mdctl提供的是kv接口(raw slice)，内部则采用pa接口。key是chkid，v是chkinfo。
+volume slice、range slice由mdctl内部管理，上层应用查询和更新的是raw slice的元数据。
+
+memblaze实现的是nvme v1.3，libnvme实现的是v1.2，有没有兼容性问题？
+每个关键组件都要进行全面评估。
+
+git: 已push到remote，如何回到到某个commit
+\begin{myeasylist}{itemize}
+& git reset
+& git push --force origin rc2:rc2
+& git revert
+\end{myeasylist}
+
+target实现为何改的面目全非，而不是用plugin的方式？
+
+当前的几个重要任务：
+\begin{myeasylist}{itemize}
+& GFM
+& Recovery and balance
+& Restful API
+& snapshot
+& others
+&& nvme driver (采用最新spdk？)
+&& 把spdk/dpdk纳入深度学习计划
+\end{myeasylist}
+
+\hrulefill
+
+\hl{spdk本质上是一个单机软件}，提供了端到端的组件：target、driver、以及对应linux kernel的块存储层次。
+
+spdk没有副本、分布式等，主要是如何单进程环境的主要任务。
+
+单卷是靠单核提供服务的，每个core是同样的，不像suzaku一样为了完成一个io，可以调动多核资源。
+
+先看其driver。driver是对NVMe协议标准的实现，非常基础。driver之上，bdev、blobfs等，增强易用性。
+
+\hl{提取-保存范式}适用于任何io设备。
+
+看其thread抽象，thread采用polling模式，采用QPair方式。可以lockless。
+内存也是分核预留的，binding thread到cpu core，因为局部性，cache的效用显著。
+
+这是event-driven的进一步演化。\hl{epoll wait支持两种模式：硬件中断和PMD}，但因为要陷入kernel，不是最好做法。
+进一步的做法就是DMA，kernel bypass。不再由kernel维护QPair，而是在用户空间维护。\hl{设备可以读写主机内存缓冲区}。
+
+访问一个nvme设备有两种方式：一、kernel driver；二、spdk driver。spdk driver通过pci号进行访问。
+通过专用io指令、或\hl{mmio进行存取}。往一块内存区域写数据，就相当于向设备控制器发送了指令。
+指令遵循NVMe规范。注意：这里出现了controller。controller广泛出现在盘阵、OS等技术领域。
+设备控制器对内存区域包含的指令进行解码、执行。所以、设备控制器可以看作是另外一个处理器。
+\hl{io过程看作主机处理器与设备处理器直接协作的过程}。两者通过bus进行通信。跑满总线带宽是最理想的结果。
+
+访问线程与pci设备的映射关系是多对多。多个线程访问同一NVMe disk，不会降低性能？
+
+\begin{myeasylist}{itemize}
+& user space (kernel bypass)
+& zero copy
+& polling mode
+& async
+& lockless
+& highly parallel
+\end{myeasylist}
+
+所谓polling，主要指完成队列。
+
+bus和switch结构的同异。
+
+suzaku block应封装在bdev后面，作为一bdev实现而对接到spdk？
+
+应分层来看suzaku block。target - libsuzaku/suzaku，突出target与suzaku的边界。
+\hl{suzaku藏于bdev之后？nvmf等target可拿来直接用？}
+
 \subsection{19}
+
+发挥优势，优势是什么？健康、优势、专注、关系、目标。
+
+\hrulefill
+
+ringlock，主要用途即在于检测ring是否发生了变化。
+
+在partition里维护ring map信息，同步更新。每个rangectl持有的本地信息，
+与最新信息的版本不一致时，发生ESTALE。此时尝试刷新本地信息，直至成功。
+
+两个版本比较
+
+\hl{从数据模型开始}，怎么分片、怎么复制。怎么表达树状结构？怎么保证复制之间的一致性。
+
+自然地划分range。
+
+卷的元数据，引入中间层，增加扩展性。再切换到flat view，转化为KV DB。
 
 \subsection{20}
