@@ -259,4 +259,141 @@ ringlock，主要用途即在于检测ring是否发生了变化。
 
 卷的元数据，引入中间层，增加扩展性。再切换到flat view，转化为KV DB。
 
+\hrulefill
+
+target是软件定义的虚拟实体，可以通过tgtctl导出。
+
+login是login target，login成功后，该target下的所有lun都可见，可以连接。discovery和connect不同。
+
+client group，允许哪些client访问一个target，需要另一层mapping。
+
+\hl{client - target - lun(volume)}，构成两层映射关系。
+
+现在的实现，target-lun是一对一映射，即一个lun构成一个target，此为默认行为，不需单独定义。
+一个lun只能属于一个target，target与lun之间是一对多的映射关系。
+
+会话和连接信息集中存放到mds上。mds充当etcd的agent角色。
+
+huayun实现target直接attach到core，suzaku则突出了tgtctl as controller的角色。
+tgtctl是initiator与存储服务的交互界面。
+
+\hrulefill
+
+多点写
+
+target级别维护epoch，叫target epoch。NOP是initiator与target之间的心跳(1s)，心跳超时(5s)后会连接其他target。
+
+每个活动连接维护ttl
+
+该信息可以得到\hl{一个卷的所有活动连接}，可用于删除卷时的前置条件检查。
+
 \subsection{20}
+
+好好理解message-driven的意思，在不同的上下文去理解。SEDA、reactive programming、stream等都是message based。
+
+响应式架构，reactor反应堆。这是reactive提出的主要方法。
+
+\hrulefill
+
+cmd与ioctl进程看到的coremask不同，\hl{cmd的coremask=1。同时daemon=0}。ioctl的core array是稀疏的。指向实际的物理core。
+根据这些条件，初始化了不同的结构。其中的一项是task sche。
+
+外部线程要执行corerpc，必须借道core。core未必绑定到cpu。最小依赖是什么？
+
+同样的corehash，未必指向物理core。
+
+\hl{sche与别的poller是什么关系，如何协作}？
+
+\subsection{25}
+
+write接口在rlock打开的情况下，经过了4k的RMW对齐。read则没有对齐操作，io会下发下去。
+
+spdk的write、writev接口有区别？libnvme也是用的write接口。
+\hl{spdk的write接口对nvme v1.3不兼容}？见于memblaze。
+
+libnvme上次遇到的问题也是没有处理好virt addr和phy addr的对应关系。
+一定要同步变动。
+
+\hrulefill
+
+工具
+
+./identify可以查看NVMe disk的协议版本。
+
+nvme的lba format设为4096，因为有512的read io，出现cpl is error的现象。
+
+\hrulefill
+
+有什么方法可以提升suzaku的iSER性能？以什么接口呈现？封装在bdev之后，就可以直接用spdk的各种target了吧。
+
+host端如何配置，怎么才能做到全用户态，包括host端。
+
+\hl{spdk内部会按128k拆分大io}，xfer size。
+
+\hrulefill
+
+TODO
+
+kernel soft lockup，no hugepage，发生\hl{在集群重启的时候，没有卸载iSER连接}。
+此时一直尝试连接，为什么会导致以上现象呢？
+
+插入新盘导致io error，ioctl重启时，无法分配内存。
+
+dd if=/dev/sdd of=/dev/null bs=5k count=1 seek=3584 iflag=direct
+
+读只需要512对齐即可，direct重要，否则看到不同大小的io。
+
+dd if=/dev/zero of=/dev/sdd bs=5k count=1 seek=3584 oflag=direct
+
+\hl{写并非必须4k对齐, 甚至不要求512对齐？}。
+
+spdk对io的规则是什么？
+\begin{myeasylist}{itemize}
+& off
+& size
+& buffer
+& 多个iov，每个iov的规则？
+\end{myeasylist}
+
+\hl{拥抱spdk，逐渐弃用libnvme}，虽然简单，但已无更新，spdk本身提供的更多，可以择优利用。
+
+\subsection{26}
+
+spdk很好玩，深入进去。
+
+scaling 一块nvme disk通过多队列来支持多线程访问，每个线程通过一个qpair操作disk。这是core上的扩展性。
+
+hazard的测试方法：hazard运行在vm centos 6x里，挂载host的盘。
+host是centos 7x系列，作为iSCSI initiator，挂载suzaku的卷。
+
+hazard用c2，只跑disk raw。排除xfs和ext4的干扰。
+
+\hrulefill
+
+工具
+
+hwloc下的lstopo，检查NUMA下资源分布情况，特别是内存。
+
+\hl{ntpdate 5.79.108.34} 同步时钟
+
+\hl{hwclock --systohc} 同步系统时间到硬件，防止重启后丢失。
+
+timedatectl查看时间
+
+改写spdk的setup.sh脚本，由suzaku设置nr\_hugepages等变量。
+
+新旧盘的区别，新盘会触发soft lockup。
+
+IRQ disabled的，以及dmesg出出现的消息，两种盘看上去是一致的。
+
+\subsection{27}
+
+spdk分上中下三层，实现端到端的io路径。
+
+dpdk完成底层环境的抽象。
+
+ci已能跑通，原因是什么？
+
+\subsection{29}
+
+

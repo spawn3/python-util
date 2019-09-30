@@ -77,3 +77,125 @@
 \mygraphics{../imgs/weekly/weekly-20190909.png}
 
 \mygraphics{../imgs/weekly/MAP.png}
+
+\subsection{0916}
+
+\subsubsection{概要}
+
+\begin{myeasylist}{itemize}
+& \hl{质量和效率是两大主题}
+& 明确分工、职责，根据地建设
+& 固化优化日常工作流程，改善质量，减少浪费
+& 具体任务定义和进度/质量控制, 推进suzaku开发进度，\hl{把握好里程碑节点(Q3目标)}
+\end{myeasylist}
+
+\subsubsection{suzaku项目详情}
+
+\begin{myeasylist}{itemize}
+& 后台任务调度：recovery/balance/gc框架已有，继续改进
+& GFM在实现chunk状态机、mds策略，何时收敛？
+& 多点写方案v2已出，本周完成etcd based版，进行方案验证
+& \hl{CI系统}已上线运行，持续强化
+& 技术白皮书
+\end{myeasylist}
+
+\subsubsection{紫光云项目详情}
+
+\begin{myeasylist}{itemize}
+& 因为SATA SSA，所以必须用aio driver，用bactl直接提供aio服务，比用外部工作线程性能有数倍提升
+\end{myeasylist}
+
+\subsubsection{长城测试项目详情}
+
+\begin{myeasylist}{itemize}
+& 暂停oracle、dm8性能对比测试，以后再安排攻关
+& 预期服务器周五下午到
+& 盘的一致性问题原因待定
+&& 盘支持的NVMe协议v1.3，而驱动是v1.2
+&& test spdk最新nvme driver
+\end{myeasylist}
+
+\subsubsection{附图}
+
+\mygraphics{../imgs/weekly/weekly-20190916.png}
+
+\subsection{0923}
+
+\subsubsection{概要}
+
+\begin{myeasylist}{itemize}
+    & Q3总结
+    & Q4计划
+\end{myeasylist}
+
+\subsubsection{suzaku项目详情}
+
+\begin{myeasylist}{itemize}
+& 技术白皮书还显单薄、抽象，须进一步细化
+& \hl{CI系统}已上线运行，持续强化，加强测试自动化工作
+& GFM有延期，后续应当注意从测试到交付之间\hl{完整生命周期}的管理
+    && 可以安排早期测试了
+    && 优先副本机制，EC放入下一阶段处理
+    && 暂时没实现降级模式
+& 多点写有延期，优先紫光云性能方案（iSCSI/SATA SSD)
+& 适配python3
+& 恢复、平衡加入在各节点分布任务的算法
+    && 还没有进度展示
+    && 还没有与GFM机制对接
+& 工程设计原则
+    && 多方案设计：plan A/B，或上中下三策，交叉验证
+    && 设计之初，实现之时，充分考虑代码的\hl{可维护性，可测试性}
+    && 最小可行性产品(MVP)，小步快走，迭代改善
+& 新需求
+    && 快照先实现COW，支持线性快照，不支持tree型快照树
+    && 后端增加性能计数器
+    && 考虑增强系统可追踪性和可视化能力，以利于优化性能和诊断问题的效率
+\end{myeasylist}
+
+\subsubsection{紫光云项目详情}
+
+\begin{myeasylist}{itemize}
+& \hl{性能与客户预期有差距}: 读7w+，现在大概4.5w。须定位瓶颈所在。
+& 因为SATA SSA，所以必须用aio driver，用bactl直接提供aio服务，比用外部工作线程性能有数倍提升
+& iSCSI/SATA SSD下的性能优化方案
+    && multipath不适合客户使用场景
+    && QEMU版本低，不支持vhost
+    && 剩下的方案就是优化iSCSI本身，包括客户端offload卡，采用dpdk等
+    && 对比spdk的iscsi tgt？
+\end{myeasylist}
+
+\subsubsection{长城测试项目详情}
+
+\begin{myeasylist}{itemize}
+& 硬件
+    && 网卡已定，没到位
+    && 盘的一致性问题原因待定
+        &&& 采用spdk，新盘hazard diskfs测试下，xfs依然有问题
+        &&& 新盘在测试过程中，会出现soft lockup kernel message
+        &&& 下一步对比ext4和xfs
+& 软件
+        && lighting有bug，不支持用no大于32的cpu core，已修正
+\end{myeasylist}
+
+\subsubsection{管理}
+
+\begin{myeasylist}{itemize}
+& \hl{培养团队使命感、目标感，激励与贡献相一致}
+& PDCA工作理念，明确工作目标，优化工作方法
+    && \hl{质量和效率是两大主题}
+    && 明确分工、责任，根据地建设
+    && 固化优化日常工作流程，改善质量，减少浪费
+    && 及时总结，做好记录工作
+& 建立原则和标准
+    && 设计原则
+    && 编码标准
+& 目标及关键任务：具体任务定义和进度/质量控制, 推进suzaku开发进度，\hl{把握好里程碑节点}
+    && 会议
+    && Design Review
+    && Code Review
+    && 难点攻关
+\end{myeasylist}
+
+\subsubsection{附件}
+
+% \mygraphics{../imgs/weekly/weekly-20190916.png}
