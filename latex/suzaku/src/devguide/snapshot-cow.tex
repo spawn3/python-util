@@ -1,0 +1,138 @@
+\chapter{COW}
+
+\mygraphics{../imgs/snapshot/snapshot-cow.png}
+
+以volume为主体，如此看来，cow是写入快照，cow(-1)是读取快照。
+关键是要能根据chkid构造快照上对应的chkid。\hl{参考get token或recovery过程}。
+
+先实现线性快照。
+\begin{myeasylist}{itemize}
+    & 快照与物理卷的关系
+    & 如何管理卷的快照结构
+    & 对任一snapshot而言，有无映射表、元数据头
+\end{myeasylist}
+
+两个节点之间如果没有写入，没有发生COFW过程，则上游快照对应slice为空。
+
+\section{属性}
+
+卷和快照增加以下属性：
+\begin{myeasylist}{itemize}
+    & snap\_version
+    & snap\_parent
+    & snap\_rollback
+\end{myeasylist}
+
+slice增加以下属性：
+\begin{myeasylist}{itemize}
+    & snap\_version
+\end{myeasylist}
+
+Math Mode: $1+1$
+
+判定条件：
+\begin{myeasylist}{itemize}
+    & 是否需要COW: op == write && volume.snap\_version != slice.snap\_version
+    & 是否处在rollback状态：volume.snap\_version != volume.snap\_rollback
+\end{myeasylist}
+
+\section{操作}
+
+\subsection{create}
+
+类似2pc过程，在所有rangectl上加锁，成功后，广播新的快照结构信息。
+在此期间，io被堵塞。
+
+每个rangectl上维护一lock table，lock table的key是卷的volid。
+
+frctl open volume时，获取当前snap version。如此，client和rangectl都持有snap version，可以用于版本比较。
+如果client的snap version较低，则重新加载。如果rangectl的版本较低，也需要重新加载。
+
+\begin{myeasylist}{itemize}
+    & 记录任务标记
+    & 创建快照对应的物理卷，并持久化卷的快照信息到etcd上
+    & 在所有rangectl上，对该卷加锁
+    & 广播snaptree到所有rangectl
+    & 标记任务完成
+    & unlock
+    & 清除任务标记
+\end{myeasylist}
+
+io携带有snap epoch，如不匹配，则按规则处理。
+
+特殊情况：
+\begin{myeasylist}{itemize}
+    & 创建第一个快照，是否生成root snapshot
+\end{myeasylist}
+
+异常情况：
+\begin{myeasylist}{itemize}
+\end{myeasylist}
+
+\subsection{list}
+
+组织成tree的形式。etcd上有一个卷的最新快照信息。
+
+\subsection{read}
+
+读卷与读snapshot不同，读卷不涉及快照，因为卷具有完整数据，故不需回溯。这是COW快照的特点。
+
+读快照则向\hl{下游节点}进行追溯。分为两种情况：一是快照后没有写入；二是快照后有写入。
+
+分两种：读卷和读snapshot。读snapshot可能涉及读多个\hl{snapshot的递归过程}。
+
+已知chkid，即可对slice进行各项操作。
+
+\subsection{revert}
+
+进入revert状态时，\hl{发生COW过程的逆过程}。读目标快照的数据，写入卷。
+
+\hl{revert过程中，io可以继续}。对任一slice，如处在revert状态，则先revert后进行io。
+如在revert过程中的slice，需要优先触发COW(-1)。
+
+\subsection{delete}
+
+线性结构下，一快照的私有数据是其下游节点之间有写入的slice。
+
+向上归并：merge到父快照。
+
+特殊情况：
+\begin{myeasylist}{itemize}
+    & 删除第一个快照，没有父节点。可以采用标记删除。
+\end{myeasylist}
+
+\subsection{clone}
+
+clone卷使用方式与普通卷完全一样，支持所有普通卷的操作。
+
+clone卷记录其源快照。
+
+相关操作：
+\begin{myeasylist}{itemize}
+    & flat操作解除clone卷与其源快照的依赖关系，clone卷变成一个普通卷
+    & 如果一个快照存在基于该快照的clone卷，则不能删除该快照
+\end{myeasylist}
+
+\subsection{flat}
+
+同revert一样，实现为异步操作，集成到job management模块。
+
+\section{IO}
+
+\subsection{write}
+
+如需COW过程。读取卷上数据，写入其父快照。\hl{卷 -> 快照}
+
+相关操作：
+\begin{myeasylist}{itemize}
+    & 处在rollback状态时，先rollback后write
+\end{myeasylist}
+
+\subsection{read}
+
+先关掉token cache。
+
+相关操作：
+\begin{myeasylist}{itemize}
+    & 处在rollback状态时，先rollback后read
+\end{myeasylist}

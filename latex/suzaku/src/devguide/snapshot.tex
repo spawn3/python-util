@@ -1,126 +1,75 @@
 \chapter{快照}
 
-预留空间
-
-快照计划
-
-超配
-
-场景分析
-
-优先选择ROW方案，COW有难以克服的问题。
-
-\section{定义}
+\section{概述}
 
 快照，卷是可写快照、当前快照。下文中提及的快照是卷及其快照的统称。
 
+卷是当前快照，可写。卷和快照采用同一元数据结构。
+
+优先选择ROW方案，COW有难以克服的问题。
+
+\hl{从简到繁分阶段实现}，设计上要考虑每阶段要解决的主要问题，以及向下一阶段推进的难点所在。
+实现按最小功能集的原则进行。最小作用量原理，化整为零。先处理正常流程(normal case)，再处理故障情况(exception case)。
+\begin{myeasylist}{itemize}
+    & normal case
+        && non IO
+        && IO
+    & exception case
+        && fail-stop
+        && fail-recover
+        && mds 切换
+\end{myeasylist}
+
 卷的类型
-\begin{center}
-\includegraphics[width=10cm]{../imgs/volume-type.png}
-\end{center}
+\mygraphics{../imgs/volume-type.png}
 
-\section{ROW}
+\subsection{参与各方}
 
-想象有一日志系统(CDP)，快照就是日志系统里的时间点。
-当前卷的状态依赖于前面的日志记录。
+\mygraphics{../imgs/snapshot/snapshot-component.png}
 
-ROW与此类似，删除快照实现复杂，同时需要优化读性能。
+\hl{没有卷控带来什么影响}？存在卷控的情况下，只需要顺序执行即可。不存在卷控的情况下，转化为了分布式一致性问题。
+\begin{myeasylist}{itemize}
+    & snapshot structure info
+    & read snapshot
+\end{myeasylist}
 
-ROW设计问题
-\begin{enumbox}
-\item 链式快照和树状快照
-\item 平安需求：可写快照？
-\item ***
-\item 卷和快照的关系，是共存于一个物理卷、还是各自独立构成一个物理卷。若独立占有一个物理卷，则打快照后，会改变卷ID，凡是依赖于这个信息的地方都需要进行适配。
-\item 在哪一层实现ROW
-\item 索引的page cache
-\item 跨卷读，clone
-\item 读取需要合并多个快照上的数据块。建立全量索引及其cache可以加速这一过程。
-\item 快照头的映射表如何组织？是全索引，还是增量索引？
-\item ROW读快照和读卷是同一个过程？
-%\item COW里卷上有完整数据，快照有增量数据。
-%\item ROW第一次快照有全量数据，后续快照和卷无完整数据。ROW很自然地体现了增量过程。
-\end{enumbox}
+\subsection{各方如何就snaptree达成一致}
 
-\section{操作}
+\mygraphics{../imgs/snapshot/snapshot-2pc.png}
 
-\subsection{create}
+如何满足事务性是难点。
 
-\begin{center}
-\includegraphics[height=10cm]{../imgs/snapshot/row-snapshot.png}
-\end{center}
+没有卷控，则创建快照等全局操作可以通过mds master进行。读单个snapshot同读卷。
+由mds master维护一个卷的snapshot结构信息。
 
-如果发生卷ID变化，上层应用需要重新打开卷，影响较大。
+rangectl必须基于最新snaptree去处理各个操作。\hl{如何让rangectl看见最新snaptree是个难点}。
 
-用户通过命令行创建快照，卷的描述符应有快照方面的信息。
+如何定位snapshot映射到哪个tgtctl上？ 不需要！
 
-创建快照是通过哪个leader执行的？
+rangectl控制和数据分离?
 
-从leader方面看，client端与rangectl都需要快照树的结构信息，怎么在多个节点之间进行同步？
-加入version，每个holder维护该属性，消息中也携带该属性，如果发现过期，则做相应处理。
+每个rangectl都持有最新卷的快照结构信息。
 
-如果有多个client端，如何一一通知到呢？
+在mds master上，保证同一卷上只有一个快照操作。
 
-\subsection{delete}
+在etcd上记录task的状态机，标记其是否完成，重入时，根据该状态机进行必要处理。
 
-\begin{center}
-\includegraphics[height=10cm]{../imgs/snapshot/snaptree.png}
-\end{center}
+unlock之前，必须标记该task已完成。如果放在unlock之后，则如果unlock之后发生故障，重入时会触发undo。
+实际上各rangectl上已经unlock，并接受io了。
 
-快照包含有增量数据，除了叶子快照，不能直接删除。
-\begin{enumbox}
-\item 根节点，不可删除，只有当快照节点仅剩本节点，并且发生回滚时删除，卷回到无快照状态
-\item 快照中间节点
-\item 快照中间节点
-\item 快照叶子节点
-\item 快照中间节点
-\item 快照叶子节点
-\item 卷所在位置，随着回滚在各个快照上漂移。
-\end{enumbox}
+要保证在任何情况下，系统都是可以满足safety and liveness条件的。
 
-空间回收策略
-\begin{enumbox}
-\item 叶子节点删除，可以完全回收在该时刻之后分配的空间
-\item 中间节点，比如3，删除后其实还存在，当子节点删除后自动删除，因此在真正删除前并不能回收空间；
-\item \hl{同时，当1上没有其他子节点时，可以做向上合并}。
-\end{enumbox}
+lease = lock + timeout。timeout设为多少合适呢？不如采用undo机制。
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/snapshot/snap-delete-leaf.png}
-\end{center}
+广播机制是否可靠？如果有新节点加入会如何？
 
-\begin{center}
-\includegraphics[width=10cm]{../imgs/snapshot/snap-delete-non-leaf.png}
-\end{center}
+其它方案：把一个卷的snapshot操作看作io，不用lock？难实施，bactl建立在token连续的假设之下，快照操作并不经过bactl。
 
+\subsection{快照和物理卷的映射关系}
 
-\subsection{rollback}
+快照和物理卷是1：1的映射关系，一个快照对应一个物理卷。
 
-直接用目标快照的快照头替换卷的快照头。
-
-回收卷私有数据
-
-\subsection{list}
-
-快照树，隐藏或显示删除的快照。
-
-\subsection{read}
-
-\subsection{clone}
-
-读取snapshot的内容。读取卷和快照是同一个过程。
-
-\begin{center}
-\includegraphics[width=10cm]{../imgs/snapshot/clone-write.png}
-\end{center}
-
-\begin{center}
-\includegraphics[width=10cm]{../imgs/snapshot/clone-read.png}
-\end{center}
-
-\subsection{flatten}
-
-\subsection{protect/unprotect}
+\subsection{快照如何影响原卷性能}
 
 \section{实现}
 
@@ -189,6 +138,17 @@ suzaku中client端充当卷控角色，在多活的情况下，有什么影响�
 \includegraphics[width=10cm]{../imgs/data-path.png}
 \end{center}
 
+\section{TODO}
+
+\begin{myeasylist}{itemize}
+    & 限制快照数量
+    & 预留空间
+    & 超配
+    & 调整卷大小
+    & 删除卷
+    & 快照计划
+\end{myeasylist}
+
 \section{参考产品}
 
 \begin{enumbox}
@@ -203,3 +163,11 @@ suzaku中client端充当卷控角色，在多活的情况下，有什么影响�
 \item SPDK
 \item QEMU qcow2
 \end{enumbox}
+
+\subsection{SSAN}
+
+创建snapshot后，快照数据不变，新数据写入卷上，由此可推断SSAN采用了ROW机制，管理粒度是object，不是page-based。
+
+每个快照对应一个快照卷+一个leger卷。leger卷记录对应object的被引用情况。
+
+SSAN的每个卷采用一层元数据，即一个13MB的元数据对象，从而限制了卷的最大大小为4TB。
