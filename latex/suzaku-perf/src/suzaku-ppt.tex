@@ -25,7 +25,7 @@
 \usepackage{tcolorbox}
 % \usetikzlibrary{patterns}
 % \tcbuselibrary{skins}
-\tcbset{colback=yellow!5!white,colframe=yellow!75!black,boxrule=0.1mm}
+\tcbset{colback=yellow!2!white,colframe=green!75!black,boxrule=0.1mm}
 
 \usepackage{indentfirst}
 
@@ -120,8 +120,8 @@
     \begin{myeasylist}{enumerate}
         & 支持大卷
         & 单卷负载均衡
-        & IO路径上的数据转发
         & 全局负载均衡（disk and core）
+        & IO路径上的数据转发
         & 元数据服务器MdCtl
             && 卷的元数据
             && chunk的副本信息
@@ -137,9 +137,9 @@
     \frametitle{从FusionStor到Suzaku之二}
     \begin{myeasylist}{enumerate}
         & 多进程：frctl、rangectl、bactl、mdctl？
-        & get\_token
         & 网络连接模型 (all to all)
-        & etcd采用了短连接
+        & get\_token
+        % & etcd采用了短连接
     \end{myeasylist}
 \end{frame}
 
@@ -154,6 +154,13 @@
     \frametitle{操作系统}
     \begin{center}
         \includegraphics[width=0.5\textwidth]{../imgs/operating-system.jpeg}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{响应式设计}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/reactive.png}
     \end{center}
 \end{frame}
 
@@ -177,7 +184,9 @@
 
     \begin{myeasylist}{itemize}
         & Client
-        & FrCtl (Target - VolumeCtl/RangeCtl)
+        & Tgtctl (Network Protocol)
+        & FrCtl
+        & Rangectl
         & MdCtl （无持久化)
         & BaCtl
         & ETCD
@@ -194,7 +203,7 @@
     \begin{tcolorbox}[title=分段管理]
         \begin{easylist}[itemize]
             & 一个卷包含若干range
-            & 一个range包含4个Persistence Array(4M)
+            & \hl{一个range包含1个Persistence Array(4M)}(127.5GB)
             & 一个Persistence Array包含若干chunk(4M)
             & 估算卷的最大大小：4M/128 x 4M/128 x 4M = 4PB
         \end{easylist}
@@ -216,27 +225,60 @@
     \end{center}
 \end{frame}
 
-\section{性能}
+\section{配置}
 
 \begin{frame}[fragile]
-    % \frametitle{水利工程}
-    \begin{center}
-        \includegraphics[width=0.8\textwidth]{../imgs/dujiangyan.jpg}
-    \end{center}
+    \frametitle{配置}
+    \begin{myeasylist}{itemize}
+        & 硬件
+            && 计算 24 core
+            && 内存 2 x 32GB
+            && 存储 4 x NVMe SSD
+            && 网络 2 x 56Gbps IB
+        & 软件
+            && 架构
+            && 工程
+            && 配置
+    \end{myeasylist}
+
+    \begin{myeasylist}{itemize}
+        & performance = f(workload)
+    \end{myeasylist}
 \end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{测试环境}
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{../imgs/spdk-iscsi-target.png}
+    \end{center}
+    \begin{myeasylist}{itemize}
+        & CLIENT: 1/3
+            && VOLUME: 1/m
+            && TOOL: fio/spdk perf
+        & SERVER: 1/3
+            && Target (NVMf/iSCSI/iSER)
+            && NUMA/POLLING CORE
+            && MEMORY Allocator
+            && NVMe Driver
+            && IB Driver
+    \end{myeasylist}
+\end{frame}
+
+\section{演进}
 
 \subsection{起点}
 
 \begin{frame}[fragile]
     \frametitle{0610 起点}
     \begin{myeasylist}{itemize}
-        & 多进程
-        & get\_token
+        & 多进程(frctl/rangectl/mdctl/bactl)
+        & 无差别的polling core
         & 网络连接模型(all to all)
+        & 无卷控，控制路径和IO路径分离 get\_token
     \end{myeasylist}
 
     \begin{myeasylist}{itemize}
-        & 1/1配置，fio，6w iops，AIO/TCP，iSCSI
+        & 1/1配置，AIO/TCP，iSCSI，fio, 6w iops
     \end{myeasylist}
 \end{frame}
 
@@ -269,10 +311,11 @@
             \end{center}
         \end{column}
     \end{columns}
+
     \begin{myeasylist}{itemize}
         & 移除频次高的LOG
-        & O3
         & 关闭performance\_analysis特性
+        & O3
         & 分支预测
         & IO FUNC(io路径上的代码放入同一代码块，优化CPU cache)
     \end{myeasylist}
@@ -297,7 +340,7 @@
 \begin{frame}[fragile]
     \frametitle{0703 优化frctl}
     \begin{myeasylist}{itemize}
-        & variable管理(利用到TLS，放到core上
+        & variable管理(利用到TLS，放到core上)
         & gettime （精度不够，开启后影响大）
         & hugepage(tiny\_mem, task stack)
         & inline
@@ -309,13 +352,6 @@
     \begin{myeasylist}{itemize}
         & 通过perf top/stat分析热点函数
     \end{myeasylist}
-\end{frame}
-
-\begin{frame}[fragile]
-    \frametitle{单卷性能到此为止？}
-    \begin{center}
-        \includegraphics[width=0.8\textwidth]{../imgs/step2-1.png}
-    \end{center}
 \end{frame}
 
 \subsection{扩展}
@@ -404,7 +440,7 @@
 \begin{frame}[fragile]
     \frametitle{0806}
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{../imgs/step3-0806.png}
+        \includegraphics[width=0.4\textwidth]{../imgs/step3-0806.png}
     \end{center}
 \end{frame}
 
@@ -415,50 +451,125 @@
     \end{center}
 \end{frame}
 
-\subsection{结论}
+\subsection{小结}
 
 \begin{frame}[fragile]
-    \frametitle{启示}
+    \frametitle{小结}
     \begin{myeasylist}{itemize}
+        & 分析模型
         & 硬件
-        & 架构对性能有巨大影响
+        & 架构对性能影响巨大
             && 平衡
             && 局部性
             && 并行
             && 流水线
-        & 模型
-        & 工欲善其事必先利其器
+        & 工具
             && trace (系统的可追踪性)
             && perf
             && Test Tool
     \end{myeasylist}
 \end{frame}
 
+\begin{frame}[fragile]
+    \frametitle{TODO}
+    \begin{myeasylist}{itemize}
+        & 定位瓶颈
+            && 估算
+            && 增加性能统计，完善toolbox
+        & 可靠性
+            && token cache
+        & 单卷性能
+            && 多点写（单client端，多target)
+        & 扩展性
+            && scale up
+            && scale out
+        & 高级特性对性能的影响
+            && snapshot
+            && EC
+        & 优化是个动态过程
+            && 第五代智能存储系统
+    \end{myeasylist}
+
+    \begin{myeasylist}{itemize}
+        & 场景(向下适配新硬件，向上承接不同的应用场景)
+    \end{myeasylist}
+\end{frame}
+
 \section{其它}
+
+\subsection{模型}
+
+\begin{frame}[fragile]
+    \frametitle{分析模型}
+    \begin{center}
+        \includegraphics[width=0.3\textwidth]{../imgs/io-path.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{平衡}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \includegraphics[width=0.6\textwidth]{../imgs/queuing.jpeg}
+            \end{center}
+        \end{column}
+
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \includegraphics[width=0.4\textwidth]{../imgs/shui2.jpeg}
+            \end{center}
+        \end{column}
+    \end{columns}
+
+    \begin{myeasylist}{itemize}
+        & 输入和输出趋于平衡
+        & 评估组件的处理能力
+        % & 流入量 \ding{226} 调度能力 \ding{226} 处理能力
+    \end{myeasylist}
+\end{frame}
+
+\subsection{工具}
 
 \begin{frame}[fragile]
     \frametitle{工具}
     \begin{center}
         \includegraphics[width=0.6\textwidth]{../imgs/tool.png}
     \end{center}
-\end{frame}
-
-\begin{frame}[fragile]
-    \frametitle{平衡过程}
-    \begin{center}
-        \includegraphics[width=0.6\textwidth]{../imgs/queuing.jpeg}
-    \end{center}
-
     \begin{myeasylist}{itemize}
-        & 流出量和流入量趋于平衡
-        & 流入量 \ding{226} 调度能力 \ding{226} 处理能力
+        & perf
+        & trace
     \end{myeasylist}
 \end{frame}
 
+\subsection{参考}
+
 \begin{frame}[fragile]
-    \frametitle{PDCA循环}
+    \frametitle{参考资料}
+    \begin{myeasylist}{itemize}
+        & 计算机体系结构
+            && CPU性能公式
+            && 存储层级
+            && Amdahl's Law
+        & 操作系统
+            && kernel bypass
+        & 数据库系统
+        & 分布式系统
+    \end{myeasylist}
+
+    \begin{myeasylist}{itemize}
+        & Linux kernel
+        & DPDK
+        & SPDK
+    \end{myeasylist}
+\end{frame}
+
+\subsection{改善}
+
+\begin{frame}[fragile]
+    \frametitle{持续改善}
     \begin{center}
-        \includegraphics[width=0.6\textwidth]{../imgs/PDCA.png}
+        \includegraphics[width=0.5\textwidth]{../imgs/PDCA.png}
     \end{center}
 \end{frame}
 

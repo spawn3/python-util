@@ -18,6 +18,8 @@
 
 卷和快照增加以下属性：
 \begin{myeasylist}{itemize}
+    & vol\_format (normal, snapshot, clone)
+    & vol\_flag (protect)
     & snap\_version
     & snap\_parent
     & snap\_rollback
@@ -28,11 +30,9 @@ slice增加以下属性：
     & snap\_version
 \end{myeasylist}
 
-Math Mode: $1+1$
-
 判定条件：
 \begin{myeasylist}{itemize}
-    & 是否需要COW: op == write && volume.snap\_version != slice.snap\_version
+    & 是否需要COW: op == write \&\& volume.snap\_version != slice.snap\_version
     & 是否处在rollback状态：volume.snap\_version != volume.snap\_rollback
 \end{myeasylist}
 
@@ -69,6 +69,17 @@ io携带有snap epoch，如不匹配，则按规则处理。
 \begin{myeasylist}{itemize}
 \end{myeasylist}
 
+\subsection{delete}
+
+线性结构下，一快照的私有数据是其下游节点之间有写入的slice。
+
+向上归并：merge到父快照。
+
+特殊情况：
+\begin{myeasylist}{itemize}
+    & 删除第一个快照，没有父节点。可以采用标记删除。
+\end{myeasylist}
+
 \subsection{list}
 
 组织成tree的形式。etcd上有一个卷的最新快照信息。
@@ -90,17 +101,6 @@ io携带有snap epoch，如不匹配，则按规则处理。
 \hl{revert过程中，io可以继续}。对任一slice，如处在revert状态，则先revert后进行io。
 如在revert过程中的slice，需要优先触发COW(-1)。
 
-\subsection{delete}
-
-线性结构下，一快照的私有数据是其下游节点之间有写入的slice。
-
-向上归并：merge到父快照。
-
-特殊情况：
-\begin{myeasylist}{itemize}
-    & 删除第一个快照，没有父节点。可以采用标记删除。
-\end{myeasylist}
-
 \subsection{clone}
 
 clone卷使用方式与普通卷完全一样，支持所有普通卷的操作。
@@ -118,6 +118,8 @@ clone卷记录其源快照。
 同revert一样，实现为异步操作，集成到job management模块。
 
 \section{IO}
+
+快照影响卷的IO路径。
 
 \subsection{write}
 
