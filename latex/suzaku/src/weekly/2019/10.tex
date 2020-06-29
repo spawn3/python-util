@@ -10,6 +10,12 @@
 
 \subsubsection{suzaku产品详情}
 
+测试
+\begin{myeasylist}{itemize}
+& 增强基于gitlab+docker的CI系统
+\end{myeasylist}
+
+任务
 \begin{myeasylist}{itemize}
 & 完成任务
 && 支持python3
@@ -24,9 +30,8 @@
 && 链式COW snapshot(董冠军, \hl{力争10月份完成第一版})
 \end{myeasylist}
 
-测试
+计划
 \begin{myeasylist}{itemize}
-& 增强基于gitlab+docker的CI系统
 \end{myeasylist}
 
 \subsubsection{长城测试项目详情}
@@ -73,5 +78,120 @@
 \end{myeasylist}
 
 \subsubsection{附图}
+
+% \mygraphics{../imgs/weekly/weekly-20191007.png}
+
+\subsection{1014}
+
+\subsubsection{概要}
+
+\begin{myeasylist}{itemize}
+& 回到主线，集中精力执行Q4开发计划
+& 行百里者半九十，\hl{考虑到测试周期比较长，应在10月份收敛各项任务}，后续进入优化环节
+& 在保存安全性的基础上，尽量\hl{采用最简设计方案}，迭代完成
+\end{myeasylist}
+
+\subsubsection{suzaku产品详情}
+
+\begin{myeasylist}{itemize}
+& Resource Management
+&& 设计原则：管理系统无状态
+&& Restful API
+&& 性能计数、采用Prometheus？
+&& CHECKLIST(+网络QoS)
+& GFM完成最小修改版本
+&& epoch机制，\hl{hazard测试出现一致性问题(recover或mds切换导致？)}
+&& Target管理(redirect、VIP/ucarp)
+& JOB Management
+&& GFM驱动恢复?
+&& + rmvol
+&& + QoS
+& 多点写
+&& 新方案?
+& 链式COW snapshot(\hl{力争10月份完成第一版})
+&& 初步实现create/delete/revert/list/protect接口和命令行工具
+&& 下周实现clone卷操作
+&& 操作的事务性
+& TODO
+&& ETCD认证
+&& ETCD v3
+\end{myeasylist}
+
+测试
+\begin{myeasylist}{itemize}
+& 增强基于gitlab+docker的CI系统
+& 如何查看文件系统到磁盘LBA的映射
+\end{myeasylist}
+
+\subsubsection{长城测试项目详情}
+
+\subsubsection{紫光云项目详情}
+
+% \subsubsection{附图}
+
+% \mygraphics{../imgs/weekly/weekly-20191007.png}
+
+\subsection{1021}
+
+\subsubsection{概要}
+
+\begin{myeasylist}{itemize}
+& 回到主线，集中精力执行Q4开发计划
+& 行百里者半九十，\hl{考虑到测试周期比较长，应在10月份收敛各项任务}，后续进入优化环节
+& 在保存安全性的基础上，尽量\hl{采用最简设计方案}，迭代完成
+\end{myeasylist}
+
+\subsubsection{suzaku产品详情}
+
+\begin{myeasylist}{itemize}
+& Resource Management
+&& 设计原则：管理系统无状态
+&& Restful API，\hl{对接运维平台}
+&& 性能计数、采用Prometheus？
+&& CHECKLIST(+网络QoS)
+& GFM完成最小修改版本
+&& epoch机制，\hl{可必现，hazard测试出现一致性问题(recover或mds切换导致？)}
+&& 非epoch版本有EIO问题
+&& Target管理(redirect已完成、对比VIP/ucarp机制)
+& JOB Management
+&& GFM驱动恢复，\hl{尽早提交测试}
+&& rmvol
+&& + GC: 同步和异步
+&& + Balance
+&& + QoS
+& 多点写
+&& 新方案?
+& 链式COW snapshot(\hl{力争10月份完成第一版})
+&& 实现create/delete/revert/list/protect/clone接口和命令行工具
+&& + \hl{处理操作的事务性(并发控制和故障恢复)}
+&& + 下周收尾，提炼代码，做更全面的测试
+& TODO
+&& ETCD认证
+&& ETCD v3
+\end{myeasylist}
+
+测试
+\begin{myeasylist}{itemize}
+& 增强基于gitlab+docker的CI系统
+& 全docker测试环境不稳定？
+\end{myeasylist}
+
+设计
+\begin{myeasylist}{itemize}
+& 可维护性
+& 分圈：内核和外部，由内而外，先聚焦到缺之不可的内核特性
+\end{myeasylist}
+
+代码
+\begin{myeasylist}{itemize}
+& \hl{用decorator模式去解决重复代码问题}，有RPC、并发控制等
+& 异步Job管理要提炼通用模式：作业提交和完成
+\end{myeasylist}
+
+\subsubsection{长城测试项目详情}
+
+\subsubsection{紫光云项目详情}
+
+% \subsubsection{附图}
 
 % \mygraphics{../imgs/weekly/weekly-20191007.png}

@@ -287,14 +287,36 @@
         \includegraphics[width=0.4\textwidth]{../imgs/volume-type.png}
     \end{center}
     \begin{myeasylist}{itemize}
-        & 元数据的粒度：chunk or page
         & 在哪一层实现ROW？ (RAW卷之上或之下)
         & 虚拟卷和物理卷的关系（1:1, 1: m)
+        & 卷ID保持不变
+        & 元数据的粒度：chunk or page
         & 如何支持比4K更小的IO，如512B？
-        & 没有快照时，IO路径如何？
         & CHUNK内append模式，避免随机写浪费空间
         & 底层空间allocator，负责分配和释放CHUNK，以及策略
-        & 卷ID保持不变
+        & 没有快照时，IO路径如何？
+    \end{myeasylist}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{卷的虚拟ID}
+
+    \begin{myeasylist}{itemize}
+        & 创建快照后，卷ID会发生切换(指向增量卷)
+        & 通过引入不变的虚拟ID，来实现透明性
+    \end{myeasylist}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{ROW卷的数据布局}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/row/row-data-layout.png}
+    \end{center}
+
+    \begin{myeasylist}{itemize}
+        & bitmap记录每页数据所在位置，满足引用一致性条件
+        & 按range分段管理bitmap
+        & 采用事务机制
     \end{myeasylist}
 \end{frame}
 
@@ -342,8 +364,10 @@
 \begin{frame}[fragile]
     \frametitle{引入VolumeCtl}
     \begin{myeasylist}{itemize}
-        & 处理快照的创建、删除等操作
+        & 处理快照的创建、删除、revert等操作
         & 如何与IO路径进行协作？
+            && VolumeCtl位于每个rangectl上
+            && 采用2PL提交协议
     \end{myeasylist}
 \end{frame}
 
@@ -358,8 +382,7 @@
             \Activate
             \begin{tcolorbox}[title=场景]
                 \begin{easylist}[itemize]
-                        & 跨Range的IO
-                        & 相关IO
+                        & 跨Range IO
                 \end{easylist}
             \end{tcolorbox}
             \Deactivate
@@ -410,11 +433,19 @@
             \end{center}
         \end{column}
     \end{columns}
+    \begin{myeasylist}{itemize}
+        & 先实现为标记删除（叶子节点可直接删除，中间节点仅仅做删除标记）
+    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
     \frametitle{Revert to}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../imgs/revert.png}
+    \end{center}
+
     \begin{myeasylist}{itemize}
+        & 实现为快照树结构，revert操作后snap3依然有效
         & copy目标快照头，创建新的卷
         & 异步回收原卷的快照头及其私有数据
     \end{myeasylist}
@@ -425,6 +456,12 @@
     \begin{center}
         \includegraphics[width=0.8\textwidth]{../imgs/clone-write.png}
     \end{center}
+
+    \begin{myeasylist}{itemize}
+        & 透明性：clone卷使用上在与普通卷没有区别
+            && 支持多阶clone
+        & 通过分离操作，clone卷变成普通卷
+    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
