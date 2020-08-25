@@ -236,3 +236,36 @@ SSD盘的优势在于随机IO性能好，时延低，劣势在于需要进行磨
 同时可以通过QoS策略按需控制恢复过程占用的带宽资源。
 
 \subsection{线性扩展性}
+
+\section{Getting Started}
+
+跟踪io流，可以接触所有关键概念。
+
+\begin{myeasylist}[itemize]
+    & client如何连接到tgt？
+        && vip
+        && multipath
+        && auth
+    & controllers
+        && tgtctl
+        && frctl
+        && rangectl
+        && bactl
+        && mdctl
+        && polictl
+\end{myeasylist}
+
+
+target/lun，导出规则：target按hash规则分布到所有tgtctl上，所以一个target只能在一个tgtctl上导出，导致后果：
+\begin{myeasylist}[itemize]
+    & 无法multipath
+    & 性能瓶颈
+\end{myeasylist}
+
+tgtctl收到io请求后，即按RR方式转发给通NUMA上的frctl，由frctl完成io处理逻辑。
+
+数据和元数据解耦：元数据由rangectl负责，rangectl上缓存元数据信息。数据由bactl负责。
+
+token cache缓存在frctl上，如何得到cache一致性？
+
+每个bactl有到达所有disk的连接，bactl与disk是多对多关系。请求被放入disk的消息队列。

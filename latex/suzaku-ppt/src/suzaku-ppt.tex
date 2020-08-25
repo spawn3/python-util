@@ -123,12 +123,13 @@
         & IO路径上的数据转发
         & 全局负载均衡（disk and core）
         & 元数据服务器MdCtl
-            && 卷的元数据
-            && chunk的副本信息
+            && 卷的元数据(chunk的副本信息)
             && ROW快照的v2p映射
+        & KVDB
+            && 副本位置信息
         & 更多信息记录在ETCD上
-            && FS namespace
-            && xattr
+            && EFS ( +xattr )
+            && 卷的引导信息
             && snapshot tree
     \end{myeasylist}
 \end{frame}
@@ -167,10 +168,12 @@
 
     \begin{myeasylist}{itemize}
         & Client
-        & FrCtl (Target - VolumeCtl/RangeCtl)
-        & MdCtl （无持久化)
+        & TgtCtl
+        & FrCtl 
+        & RangeCtl(VolumeCtl)
         & BaCtl
-        & ETCD
+        & MdCtl
+        & PoliCtl
     \end{myeasylist}
 \end{frame}
 
@@ -184,8 +187,7 @@
     \begin{tcolorbox}[title=分段管理]
         \begin{easylist}[itemize]
             & 一个卷包含若干range
-            & 一个range包含4个Persistence Array(4M)
-            & 一个Persistence Array包含若干chunk(4M)
+            & 一个range包含1个Chunk(4M)
             & 估算卷的最大大小：4M/128 x 4M/128 x 4M = 4PB
         \end{easylist}
     \end{tcolorbox}
@@ -204,6 +206,50 @@
     \begin{center}
         \includegraphics[width=0.9\textwidth]{../imgs/data-path.png}
     \end{center}
+\end{frame}
+
+\section{OS}
+
+\subsection{CPU}
+
+\begin{frame}[fragile]
+    \frametitle{Event Framework}
+
+    \begin{myeasylist}{itemize}
+        & channel
+    \end{myeasylist}
+\end{frame}
+
+\subsection{Memory}
+
+\begin{frame}[fragile]
+    \frametitle{Event Framework}
+
+    \begin{myeasylist}{itemize}
+        & hugepages
+            && mem ring (ltgbuf\_t buddy-based)
+            && vclock
+            && spdk nvme driver
+        & malloc
+            && slab
+    \end{myeasylist}
+\end{frame}
+
+\subsection{Disk}
+
+\subsection{Network}
+
+\section{配置}
+
+\begin{frame}[fragile]
+    \frametitle{配置coremask}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/coremask.png}
+    \end{center}
+
+    \begin{myeasylist}{itemize}
+        & 根据测试结果进行增减
+    \end{myeasylist}
 \end{frame}
 
 \section{快照}
@@ -287,6 +333,7 @@
         \includegraphics[width=0.4\textwidth]{../imgs/volume-type.png}
     \end{center}
     \begin{myeasylist}{itemize}
+        & 创建卷时，指定RAW或ROW格式
         & 在哪一层实现ROW？ (RAW卷之上或之下)
         & 虚拟卷和物理卷的关系（1:1, 1: m)
         & 卷ID保持不变
@@ -301,9 +348,17 @@
 \begin{frame}[fragile]
     \frametitle{卷的虚拟ID}
 
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/row/row-changed-id.png}
+    \end{center}
+
     \begin{myeasylist}{itemize}
-        & 创建快照后，卷ID会发生切换(指向增量卷)
-        & 通过引入不变的虚拟ID，来实现透明性
+        & 创建快照后，生成新卷，定义为\hl{当前可写快照}
+        & 引入不变的虚拟ID以实现透明性
+        & \hl{rangectl上利用卷的快照树信息映射虚拟id到当前快照}
+        & 相关(use virtual volume id)
+            && EFS结构
+            && volume open
     \end{myeasylist}
 \end{frame}
 
@@ -317,6 +372,46 @@
         & bitmap记录每页数据所在位置，满足引用一致性条件
         & 按range分段管理bitmap
         & 采用事务机制
+    \end{myeasylist}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{管理range bitmap}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/row/row-bitmap.png}
+    \end{center}
+
+    \begin{myeasylist}{itemize}
+        & v2p过程区分real/user range size
+        & 每个range的bitmap cache按页组织 (array, flag跟踪dirty)
+        & range内chunk个数：127G/4M = 32512
+        & 每个4M slice需要2 bitmap pages，故所需bitmap page个数：65024
+    \end{myeasylist}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{ROW卷的allocate和IO}
+
+    \begin{myeasylist}{itemize}
+        & 所有io都通过bitmap定位
+        & 所以allocate也要填充bitmap
+        & 先写入数据，后更新bitmap，注意满足ACID条件
+        & 分页IO
+            && 页alignment (首页-中间页-尾页)
+            && RMW
+            && 按页读，按页写
+            && batch模式(最大连续段)
+    \end{myeasylist}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{创建快照后ROW卷的allocate和IO}
+
+    \begin{myeasylist}{itemize}
+        & 创建快照后，生成新卷，原卷变成只读快照，新卷复制元数据（COW，读的时候也要复制？）
+        & get token时传入io参数(返回一个或多个记录，可能引用到另外的slice)
+        & 碎片化
+        & 优化
     \end{myeasylist}
 \end{frame}
 
@@ -351,11 +446,11 @@
     \end{columns}
 
     \begin{myeasylist}{itemize}
+        & 逻辑上连续的页，物理上未必连续
+        & 全量索引，一跳即完成V2P映射
         & 每个快照都有快照头，卷可以看作是一个特殊快照(可写、当前)
         & 快照头包含两层元数据
-        & 全量索引，一跳即完成V2P映射
-        & 逻辑上连续的页，物理上未必连续
-        & V2P过程分为两步：
+        & \hl{V2P内置于get token过程}，分为两步：
             && 选择正确的快照头
             && 根据快照头进行定位
     \end{myeasylist}
@@ -471,6 +566,24 @@
     \end{center}
 \end{frame}
 
+\begin{frame}[fragile]
+    \frametitle{重点问题}
+    \begin{myeasylist}{itemize}
+        & ROW重点问题：
+        && ROW卷ID会发生变化，影响到efs和io
+        && 引入bitmap后，即相当于引入了一种卷格式
+        && bitmap更新的事务处理
+        && 支持多阶clone
+        && 支持一致性快照组
+        && 抽象快照卷相关接口，以支持多态行为
+        & 可重用的部分：
+        &&  快照树数据结构
+        &&  2PL提交协议
+        & 其它：
+        &&  COW如何实现快照树
+    \end{myeasylist}
+\end{frame}
+
 \subsection{参考}
 
 \begin{frame}[fragile]
@@ -523,6 +636,29 @@
     \end{columns}
 \end{frame}
 
+\begin{frame}[fragile]
+    \frametitle{一致性实现}
+
+    \begin{myeasylist}{itemize}
+        & 强一致性
+            && 各副本按相同顺序写入
+            && 成功提交的数据不丢失
+            && read last committed
+        & 异步修复
+            && mark dirty
+            && degrade mode
+    \end{myeasylist}
+
+    \begin{myeasylist}{itemize}
+        & Tgtctl的唯一性
+            && Session安全
+        & RangeCtl的唯一性
+            && Slice状态机
+        & 副本
+            && vclock保序
+    \end{myeasylist}
+\end{frame}
+
 \section{性能}
 
 \begin{frame}[fragile]
@@ -534,6 +670,29 @@
     \begin{myeasylist}{itemize}
         & 流出量和流入量趋于平衡
         & 流入量 \ding{226} 调度能力 \ding{226} 处理能力
+    \end{myeasylist}
+\end{frame}
+
+\section{FAQ}
+
+% \subsection{Session}
+
+\begin{frame}[fragile]
+    \frametitle{什么是session}
+
+    \begin{myeasylist}{itemize}
+        & 参考RFC 3720
+        & session管理不善，会导致数据一致性问题
+    \end{myeasylist}
+\end{frame}
+
+% \subsection{IO TOKEN}
+
+\begin{frame}[fragile]
+    \frametitle{什么是token}
+
+    \begin{myeasylist}{itemize}
+        & 实现io保序的机制
     \end{myeasylist}
 \end{frame}
 
