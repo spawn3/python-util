@@ -110,8 +110,8 @@
         & Hugepage-based的内存管理
         & 直接访问裸盘(libaio/libnvme + KV)
         & 异步通信(TCP/RDMA)
-        & 协议：iSCSI/iSER/NVMf
         & 编程模型：协程
+        & 协议：iSCSI/iSER/NVMf
     \end{myeasylist}
 \end{frame}
 
@@ -127,6 +127,7 @@
             && ROW快照的v2p映射
         & KVDB
             && 副本位置信息
+            && GC
         & 更多信息记录在ETCD上
             && EFS ( +xattr )
             && 卷的引导信息
@@ -169,7 +170,7 @@
     \begin{myeasylist}{itemize}
         & Client
         & TgtCtl
-        & FrCtl 
+        & FrCtl
         & RangeCtl(VolumeCtl)
         & BaCtl
         & MdCtl
@@ -213,31 +214,77 @@
 \subsection{CPU}
 
 \begin{frame}[fragile]
-    \frametitle{Event Framework}
+    \frametitle{CPU}
 
     \begin{myeasylist}{itemize}
-        & channel
+        & Services over cores
+        & ring buffer
+        & corerpc
     \end{myeasylist}
+
 \end{frame}
 
 \subsection{Memory}
 
 \begin{frame}[fragile]
-    \frametitle{Event Framework}
+    \frametitle{Memory Management}
 
     \begin{myeasylist}{itemize}
-        & hugepages
-            && mem ring (ltgbuf\_t buddy-based)
-            && vclock
+        & hugepage or malloc
+        & lifecycle
+    \end{myeasylist}
+
+    \begin{myeasylist}{itemize}
+        & hugepage
+            && mem ring (buddy algorithm, ltgbuf\_t，core私有)
+            && vclock (disk-based)
             && spdk nvme driver
         & malloc
-            && slab
+            && slab\_static\_alloc (常驻)
+            && slab\_stream\_alloc (生命周期短)
     \end{myeasylist}
+
 \end{frame}
 
 \subsection{Disk}
 
+\begin{frame}[fragile]
+    \frametitle{Disk Driver}
+
+    \begin{myeasylist}{itemize}
+        & 异步通信
+            && AIO
+            && SPDK NVMe Driver
+    \end{myeasylist}
+
+\end{frame}
+
 \subsection{Network}
+
+\begin{frame}[fragile]
+    \frametitle{Network}
+
+    \begin{myeasylist}{itemize}
+        & 异步通信
+            && TCP
+            && RDMA
+    \end{myeasylist}
+
+\end{frame}
+
+\subsection{Async}
+
+\begin{frame}[fragile]
+    \frametitle{异步编程}
+
+    \begin{myeasylist}{itemize}
+        & 异步
+            && NVMe Driver
+            && RDMA
+        & 响应式宣言
+    \end{myeasylist}
+
+\end{frame}
 
 \section{配置}
 
@@ -249,6 +296,7 @@
 
     \begin{myeasylist}{itemize}
         & 根据测试结果进行增减
+        & 自适应
     \end{myeasylist}
 \end{frame}
 
@@ -674,6 +722,22 @@
 \end{frame}
 
 \section{FAQ}
+
+\begin{frame}[fragile]
+    \frametitle{IOCTL}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/ioctl.png}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{MDCTL AND POLICTL}
+    \begin{center}
+       \includegraphics[width=0.5\textwidth]{../imgs/master.png}
+    \end{center}
+
+\end{frame}
 
 % \subsection{Session}
 
