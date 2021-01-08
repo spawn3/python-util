@@ -1,13 +1,5 @@
 all:
 
-exit:
-	as exit.s -o exit.o
-	ld exit.o -o exit
-
-max:
-	as maximum.s -o maximum.o
-	ld maximum.o -o maximum
-
-add:
-	as add.s -o add.o
-	ld add.o -o add
+hello:
+	nasm -f elf32 -o hello.o hello.s
+	ld -e _main -melf_i386 -o hello hello.o
