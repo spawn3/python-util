@@ -1,10 +1,11 @@
-.section .data
+SECTION .data
 
 EatMsg: db "Eat at Joe's!", 10
 EatLen: equ $-EatMsg
 
-.section .bss
-.section .text
+SECTION .bss
+
+SECTION .text
 
 global _start
 
