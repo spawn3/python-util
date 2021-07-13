@@ -81,8 +81,8 @@
 
 \title{SUZAKU架构}
 \subtitle{}
-\author{@DGJ}
-\institute{北京大道云行科技有限公司}
+% \author{@DGJ}
+% \institute{北京大道云行科技有限公司}
 \date{\today}
 
 \begin{document}
@@ -99,40 +99,6 @@
     \begin{center}
     \includegraphics[width=0.8\textwidth]{../imgs/cluster-virt.png}
     \end{center}
-\end{frame}
-
-\begin{frame}[fragile]
-    \frametitle{FusionStor的架构特点}
-    \begin{myeasylist}{enumerate}
-        & 元数据（非DHT)
-        & 全用户态
-        & core绑定 (PMD: polling mode driven)
-        & Hugepage-based的内存管理
-        & 直接访问裸盘(libaio/libnvme + KV)
-        & 异步通信(TCP/RDMA)
-        & 编程模型：协程
-        & 协议：iSCSI/iSER/NVMf
-    \end{myeasylist}
-\end{frame}
-
-\begin{frame}[fragile]
-    \frametitle{从FusionStor到Suzaku}
-    \begin{myeasylist}{enumerate}
-        & 支持大卷
-        & 单卷负载均衡
-        & IO路径上的数据转发
-        & 全局负载均衡（disk and core）
-        & 元数据服务器MdCtl
-            && 卷的元数据(chunk的副本信息)
-            && ROW快照的v2p映射
-        & KVDB
-            && 副本位置信息
-            && GC
-        & 更多信息记录在ETCD上
-            && EFS ( +xattr )
-            && 卷的引导信息
-            && snapshot tree
-    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -394,6 +360,18 @@
 \end{frame}
 
 \begin{frame}[fragile]
+    \frametitle{Container}
+
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../imgs/row/row_container.png}
+    \end{center}
+
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../imgs/row/row_snapshot_ls.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
     \frametitle{卷的虚拟ID}
 
     \begin{center}
@@ -407,6 +385,18 @@
         & 相关(use virtual volume id)
             && EFS结构
             && volume open
+    \end{myeasylist}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{RANGE的数据布局}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../imgs/row/range_data_layout.png}
+    \end{center}
+
+    \begin{myeasylist}{itemize}
+        & 段式管理
+        & \hl{addr = base + index * scale + displacement}
     \end{myeasylist}
 \end{frame}
 
@@ -460,20 +450,6 @@
         & get token时传入io参数(返回一个或多个记录，可能引用到另外的slice)
         & 碎片化
         & 优化
-    \end{myeasylist}
-\end{frame}
-
-\begin{frame}[fragile]
-    \frametitle{ROW卷的数据布局}
-    \begin{center}
-        \includegraphics[width=0.9\textwidth]{../imgs/row-layout.png}
-    \end{center}
-
-    \begin{myeasylist}{itemize}
-        & 一个快照头可以拥有多个L1 chunk，以支持扩展
-        & 跟踪L2 chunk和RAW chunk的ownership关系
-            && 发生COW的L2 chunk即为私有
-            && 发生write的RAW chunk即为私有
     \end{myeasylist}
 \end{frame}
 
@@ -601,8 +577,10 @@
     \end{center}
 
     \begin{myeasylist}{itemize}
+        & CLONE卷后形成一颗更大的树
         & 透明性：clone卷使用上在与普通卷没有区别
             && 支持多阶clone
+        & flatten会吧依赖的数据copy到本卷的root快照
         & 通过分离操作，clone卷变成普通卷
     \end{myeasylist}
 \end{frame}
@@ -612,6 +590,20 @@
     \begin{center}
         \includegraphics[width=0.8\textwidth]{../imgs/clone-read.png}
     \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{引用计数模型}
+
+    \begin{myeasylist}{itemize}
+        & write
+        & CLONE
+        & FLATTEN
+        & RMVOL/RMSNAP
+        & RELOCATION
+            && 如果存在(包括被删除还没有回收)，无需重定向
+            && 如果不存在，则重定位到\hl{所在大树的root快照}
+    \end{myeasylist}
 \end{frame}
 
 \begin{frame}[fragile]
