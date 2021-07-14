@@ -1,0 +1,17 @@
+globals:
+    factor: 4.0
+    partition: 4
+    money: 20000
+    stock: 1000
+
+guangda:
+    begin_price: 13
+    end_price: 30
+
+kanghong:
+    begin_price: 18
+    end_price: 30
+
+shangyao:
+    begin_price: 17
+    end_price: 30
